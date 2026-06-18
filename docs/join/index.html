@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Join a Domino Party game</title>
+  <style>
+    :root {
+      --cyan: #34E1FF; --pink: #FF3DAE; --bg1: #2a1d5e; --bg2: #0b0922;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #fff; padding: 28px;
+      background: radial-gradient(120% 80% at 50% 18%, #6a46c8 0%, var(--bg1) 45%, var(--bg2) 100%);
+    }
+    h1 { font-size: 1.7rem; margin: 0 0 6px; }
+    p { color: #cfc9e8; margin: 6px 0; }
+    .code {
+      font-size: 2.6rem; font-weight: 900; letter-spacing: 10px;
+      margin: 14px 0 6px; color: var(--cyan);
+      text-shadow: 0 0 16px rgba(52,225,255,.6);
+    }
+    .btn {
+      display: inline-block; width: 100%; max-width: 320px; margin: 8px 0;
+      padding: 15px 20px; border-radius: 14px; font-weight: 800; font-size: 1rem;
+      text-decoration: none; border: none; cursor: pointer;
+    }
+    .primary { background: linear-gradient(90deg, var(--cyan), #2aa8d8); color: #04222b; }
+    .store { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.25); }
+    .muted { color: #9a93c2; font-size: .85rem; margin-top: 18px; }
+  </style>
+</head>
+<body>
+  <h1>Domino Party</h1>
+  <p>You're invited to follow a game live!</p>
+  <div class="code" id="code">—</div>
+  <p>Game code</p>
+
+  <a class="btn primary" id="open" href="#">Open in the app</a>
+  <p class="muted">Don't have the app yet? Install it, then open this link again — or enter the code above.</p>
+  <a class="btn store" id="play" href="#">Get it on Google Play</a>
+  <a class="btn store" id="apple" href="#">Download on the App Store</a>
+
+  <p class="muted">Made by YHT</p>
+
+  <script>
+    var PLAY = "https://play.google.com/store/apps/details?id=com.yht.dominoparty";
+    var APPLE = "https://apps.apple.com/app/id000000000";
+
+    var params = new URLSearchParams(location.search);
+    var code = (params.get("code") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+    document.getElementById("code").textContent = code || "—";
+
+    var appLink = "dominoparty://watch?code=" + encodeURIComponent(code);
+    document.getElementById("open").href = appLink;
+    document.getElementById("play").href = PLAY;
+    document.getElementById("apple").href = APPLE;
+
+    // Try to open the app automatically; if it isn't installed nothing happens
+    // and the user stays on this page with the store buttons.
+    if (code) {
+      setTimeout(function () { window.location.href = appLink; }, 400);
+    }
+  </script>
+</body>
+</html>

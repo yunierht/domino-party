@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
+import * as Linking from 'expo-linking';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
@@ -46,6 +47,22 @@ function Router() {
 function AppShell() {
   const { theme, ready } = useTheme();
   const { loaded } = useGame();
+  const { openWatch } = useNav();
+
+  // Open a shared game when the app is launched/opened from a link
+  // (e.g. dominoparty://watch?code=KQ7M or a /join?code=KQ7M universal link).
+  const url = Linking.useURL();
+  const handledUrl = useRef<string | null>(null);
+  useEffect(() => {
+    if (!url || handledUrl.current === url) return;
+    handledUrl.current = url;
+    try {
+      const code = Linking.parse(url).queryParams?.code;
+      if (code) openWatch(String(code));
+    } catch {
+      // ignore malformed links
+    }
+  }, [url, openWatch]);
 
   if (!ready || !loaded) return <FullScreenLoader />;
 

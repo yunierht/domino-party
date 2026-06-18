@@ -18,7 +18,7 @@ export function WatchScreen() {
   const { theme, s } = useTheme();
   const { t } = useI18n();
   const { liveUid, displayName, setDisplayName, adoptGame } = useGame();
-  const { go } = useNav();
+  const { go, pendingWatchCode, clearWatchCode } = useNav();
   const c = theme.colors;
 
   const [code, setCode] = useState('');
@@ -68,9 +68,10 @@ export function WatchScreen() {
     setTimedOut(false);
   };
 
-  const start = () => {
-    const clean = code.toUpperCase().trim();
+  const start = (override?: string) => {
+    const clean = (override ?? code).toUpperCase().trim();
     if (clean.length < 4) return;
+    setCode(clean);
     activeCodeRef.current = clean;
     setStatus('connecting');
     clearReqTimer();
@@ -127,6 +128,16 @@ export function WatchScreen() {
       markRequested(false);
     }
   };
+
+  // Auto-join when the screen is opened from a shared link.
+  useEffect(() => {
+    if (pendingWatchCode) {
+      const cd = pendingWatchCode;
+      clearWatchCode();
+      start(cd);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingWatchCode]);
 
   if (!isFirebaseConfigured) {
     return (
@@ -186,7 +197,7 @@ export function WatchScreen() {
             maxLength={6}
             placeholder="ABCD"
             placeholderTextColor={c.textMuted}
-            onSubmitEditing={start}
+            onSubmitEditing={() => start()}
             style={{
               backgroundColor: c.surfaceAlt,
               borderRadius: theme.radius,
@@ -201,7 +212,7 @@ export function WatchScreen() {
               marginBottom: s(16),
             }}
           />
-          <Button label={t.watch} onPress={start} disabled={code.trim().length < 4} fullWidth />
+          <Button label={t.watch} onPress={() => start()} disabled={code.trim().length < 4} fullWidth />
 
           {status === 'connecting' && (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: s(16), gap: s(8) }}>

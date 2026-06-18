@@ -3,6 +3,7 @@
     "name": "Domino Party",
     "slug": "domino-party",
     "version": "1.0.0",
+    "scheme": "dominoparty",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -13,7 +14,7 @@
     },
     "android": {
       "package": "com.yht.dominoparty",
-      "versionCode": 1,
+      "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#18113A",
         "foregroundImage": "./assets/adaptive-foreground.png"
@@ -33,6 +34,12 @@
           "backgroundColor": "#0C0E12"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4ca6648b-ec5a-4b08-b425-519db3c4ebd7"
+      }
+    },
+    "owner": "yunierht"
   }
 }

@@ -9,3 +9,8 @@ export const STORE_LINKS = {
   // ⚠️ Update to your hosted privacy-policy URL (e.g. your GitHub Pages link).
   privacyPolicy: 'https://yunierht.github.io/domino-party/',
 };
+
+// Landing page that opens the app (if installed) or offers the store install,
+// carrying the game code. ⚠️ Host docs/join/ and update this base to match.
+export const joinUrl = (code: string) =>
+  `https://yunierht.github.io/domino-party/join/?code=${encodeURIComponent(code)}`;

@@ -12,6 +12,7 @@ import { RoundEditor } from '../components/RoundEditor';
 import { ScoreRing } from '../components/ScoreRing';
 import { AppDialog } from '../components/AppDialog';
 import { isFirebaseConfigured } from '../firebase/config';
+import { joinUrl } from '../config/links';
 import { Match, Round, Team, pointsToWin, teamTotal } from '../types';
 
 export function GameScreen() {
@@ -132,7 +133,10 @@ export function GameScreen() {
 
   const doNativeShare = () => {
     if (!match.shareCode) return;
-    Share.share({ message: t.shareMessage.replace('{code}', match.shareCode) }).catch(() => {});
+    const message = t.shareMessage
+      .replace('{link}', joinUrl(match.shareCode))
+      .replace('{code}', match.shareCode);
+    Share.share({ message }).catch(() => {});
   };
 
   return (
