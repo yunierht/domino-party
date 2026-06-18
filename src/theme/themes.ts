@@ -1,7 +1,11 @@
 // Visual themes. Each theme is a full palette + sizing scale so switching it
-// restyles the entire app. "grande" bumps the scale for older players.
+// restyles the entire app. Themes other than "modern" also paint a textured
+// background (see components/Background.tsx), recreated from reference images.
 
-export type ThemeName = 'modern' | 'cubano' | 'grande';
+export type ThemeName = 'dark' | 'cubano' | 'usa' | 'carbon';
+
+/** Which textured background a theme paints behind the app. */
+export type BackgroundKind = 'carbon' | 'cubano' | 'usa' | undefined;
 
 export interface Theme {
   name: ThemeName;
@@ -26,75 +30,106 @@ export interface Theme {
   radius: number;
   /** Multiplier applied to every font size and to control heights. */
   scale: number;
-  /** Optional serif feel for the vintage theme. */
+  /** Optional serif feel for some themes. */
   fontFamily?: string;
+  /** Textured background painted behind all screens. */
+  background?: BackgroundKind;
 }
 
-const modern: Theme = {
-  name: 'modern',
+// Plain solid dark theme (no textured background).
+const dark: Theme = {
+  name: 'dark',
   dark: true,
   colors: {
-    bg: '#0F1115',
-    surface: '#1A1E27',
-    surfaceAlt: '#232936',
-    primary: '#6C5CE7',
+    bg: '#0C0E12',
+    surface: '#161A22',
+    surfaceAlt: '#212733',
+    primary: '#5B8DEF',
     onPrimary: '#FFFFFF',
     text: '#F2F4F8',
     textMuted: '#8A93A6',
-    border: '#2C3340',
+    border: '#2A303C',
     success: '#22C55E',
     danger: '#EF4444',
-    gradient: ['#6C5CE7', '#00B4D8'],
-    teamA: '#6C5CE7',
-    teamB: '#00B4D8',
+    gradient: ['#5B8DEF', '#22D3EE'],
+    teamA: '#5B8DEF',
+    teamB: '#F472B6',
   },
-  radius: 18,
+  radius: 16,
   scale: 1,
 };
 
+// Image 2 — black carbon halftone.
+const carbon: Theme = {
+  name: 'carbon',
+  dark: true,
+  colors: {
+    bg: '#070709',
+    surface: '#14161B',
+    surfaceAlt: '#1D2026',
+    primary: '#22D3EE',
+    onPrimary: '#06121A',
+    text: '#F4F4F5',
+    textMuted: '#73737D',
+    border: '#26262C',
+    success: '#22C55E',
+    danger: '#FB7185',
+    gradient: ['#22D3EE', '#A78BFA'],
+    teamA: '#22D3EE',
+    teamB: '#A78BFA',
+  },
+  radius: 14,
+  scale: 1,
+  background: 'carbon',
+};
+
+// Image 3 — Cuban–American domino board (flag motif).
 const cubano: Theme = {
   name: 'cubano',
-  dark: false,
+  dark: true,
   colors: {
-    bg: '#F3E7C9',
-    surface: '#FBF3DD',
-    surfaceAlt: '#EFDEB3',
-    primary: '#B11E2B', // domino red
-    onPrimary: '#FFF8E7',
-    text: '#3A2417',
-    textMuted: '#8A6B4F',
-    border: '#D8B98A',
-    success: '#2E7D32',
-    danger: '#B11E2B',
-    gradient: ['#1E5AA8', '#B11E2B'], // Cuban blue -> red
-    teamA: '#1E5AA8',
-    teamB: '#B11E2B',
-  },
-  radius: 10,
-  scale: 1.02,
-  fontFamily: undefined,
-};
-
-const grande: Theme = {
-  name: 'grande',
-  dark: false,
-  colors: {
-    bg: '#FFFFFF',
-    surface: '#F4F6FA',
-    surfaceAlt: '#E8ECF3',
-    primary: '#0B61D1',
+    bg: '#0E1722',
+    surface: '#172230',
+    surfaceAlt: '#21303F',
+    primary: '#C2283B',
     onPrimary: '#FFFFFF',
-    text: '#101418',
-    textMuted: '#4A5663',
-    border: '#C2CCD9',
-    success: '#147A34',
-    danger: '#C81E1E',
-    gradient: ['#0B61D1', '#0B8FD1'],
-    teamA: '#0B61D1',
-    teamB: '#C81E1E',
+    text: '#F2F4F8',
+    textMuted: '#9FB0C0',
+    border: '#2A3A4A',
+    success: '#2E9E5B',
+    danger: '#C2283B',
+    gradient: ['#1E5AA8', '#C2283B'],
+    teamA: '#1E5AA8',
+    teamB: '#C2283B',
   },
-  radius: 16,
-  scale: 1.35, // big text & controls for readability
+  radius: 14,
+  scale: 1.05,
+  background: 'cubano',
 };
 
-export const THEMES: Record<ThemeName, Theme> = { modern, cubano, grande };
+// USA domino board (stars & stripes flag motif), sibling to cubano.
+const usa: Theme = {
+  name: 'usa',
+  dark: true,
+  colors: {
+    bg: '#0A0F1C',
+    surface: '#141B2C',
+    surfaceAlt: '#1E2740',
+    primary: '#B22234',
+    onPrimary: '#FFFFFF',
+    text: '#F2F4F8',
+    textMuted: '#9FB0C0',
+    border: '#2A3450',
+    success: '#2E9E5B',
+    danger: '#B22234',
+    gradient: ['#3C3B6E', '#B22234'],
+    teamA: '#3C5BA8',
+    teamB: '#B22234',
+  },
+  radius: 14,
+  scale: 1.05,
+  background: 'usa',
+};
+
+export const THEMES: Record<ThemeName, Theme> = { dark, cubano, usa, carbon };
+

@@ -1,11 +1,13 @@
-import React from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Pressable, ScrollView, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { useGame } from '../state/GameContext';
 import { useNav } from '../nav/NavContext';
-import { Button, Card, DominoTile } from '../components/ui';
+import { Button, Card } from '../components/ui';
+import { Logo } from '../components/Logo';
+import { Menu } from '../components/Menu';
 import { teamTotal } from '../types';
 
 export function HomeScreen() {
@@ -18,41 +20,41 @@ export function HomeScreen() {
   const activeMatch =
     currentMatch && !currentMatch.winnerTeamId ? currentMatch : null;
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [spin, setSpin] = useState(0); // bump to spin the logo
+
+  // Excited, looping heartbeat for the YHT monogram.
+  const beat = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(beat, { toValue: 1.28, duration: 120, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(beat, { toValue: 1, duration: 110, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+        Animated.timing(beat, { toValue: 1.18, duration: 95, useNativeDriver: true }),
+        Animated.timing(beat, { toValue: 1, duration: 130, useNativeDriver: true }),
+        Animated.delay(420),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [beat]);
+
   return (
     <ScrollView
       contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}
       showsVerticalScrollIndicator={false}
     >
-      {/* Hero */}
-      <LinearGradient
-        colors={c.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{
-          borderRadius: theme.radius + 6,
-          padding: s(24),
-          marginBottom: s(20),
-        }}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(10) }}>
-          <DominoTile size={s(34)} a={6} b={6} />
-          <DominoTile size={s(34)} a={5} b={2} />
-        </View>
-        <Text
-          style={{
-            color: c.onPrimary,
-            fontSize: s(34),
-            fontWeight: '900',
-            marginTop: s(16),
-            fontFamily: theme.fontFamily,
-          }}
-        >
-          {t.appName}
-        </Text>
-        <Text style={{ color: c.onPrimary, opacity: 0.9, fontSize: s(15), marginTop: s(4) }}>
-          {t.aboutText}
-        </Text>
-      </LinearGradient>
+      {/* Top bar with menu button */}
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: s(2) }}>
+        <Pressable onPress={() => setMenuOpen(true)} hitSlop={12} style={{ padding: s(6) }}>
+          <Feather name="menu" size={s(26)} color={c.text} />
+        </Pressable>
+      </View>
+
+      <Menu visible={menuOpen} onClose={() => setMenuOpen(false)} />
+
+      {/* Logo */}
+      <Logo spinTrigger={spin} />
 
       {/* Active match resume card */}
       {activeMatch ? (
@@ -121,8 +123,26 @@ export function HomeScreen() {
         variant="secondary"
         fullWidth
       />
-      <View style={{ height: s(12) }} />
-      <Button label={t.settings} onPress={() => go('settings')} variant="ghost" fullWidth />
+
+      {/* Personal signature (tap to spin the logo); YHT heartbeats */}
+      <Pressable onPress={() => setSpin((n) => n + 1)} style={{ marginTop: s(26) }} hitSlop={10}>
+        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: c.textMuted, fontSize: s(12), fontWeight: '600', letterSpacing: 0.5 }}>
+            Made by{' '}
+          </Text>
+          <Animated.Text
+            style={{
+              color: c.primary,
+              fontSize: s(12),
+              fontWeight: '900',
+              letterSpacing: 1,
+              transform: [{ scale: beat }],
+            }}
+          >
+            YHT
+          </Animated.Text>
+        </View>
+      </Pressable>
     </ScrollView>
   );
 }

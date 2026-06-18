@@ -14,11 +14,11 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [themeName, setThemeNameState] = useState<ThemeName>('modern');
+  const [themeName, setThemeNameState] = useState<ThemeName>('dark');
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    loadJSON<ThemeName>(KEYS.theme, 'modern').then((name) => {
+    loadJSON<ThemeName>(KEYS.theme, 'dark').then((name) => {
       if (THEMES[name]) setThemeNameState(name);
       setReady(true);
     });

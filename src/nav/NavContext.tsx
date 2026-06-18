@@ -6,7 +6,9 @@ export type ScreenName =
   | 'game'
   | 'history'
   | 'settings'
-  | 'watch';
+  | 'watch'
+  | 'howto'
+  | 'privacy';
 
 interface NavContextValue {
   screen: ScreenName;

@@ -64,12 +64,23 @@ service cloud.firestore {
         // (update the score, or hand control to someone else).
         resource.data.controllerId == request.auth.uid
         ||
-        // Anyone signed in may submit a take-over request, but only by
-        // touching pendingRequest (+ updatedAt), and only for themselves.
+        // Anyone signed in may submit/refresh their OWN take-over request,
+        // touching only pendingRequest (+ updatedAt).
         (
           request.resource.data.diff(resource.data)
             .affectedKeys().hasOnly(['pendingRequest', 'updatedAt'])
+          && request.resource.data.pendingRequest != null
           && request.resource.data.pendingRequest.uid == request.auth.uid
+        )
+        ||
+        // A requester may withdraw their OWN pending request (set it to null),
+        // e.g. when it times out with no response.
+        (
+          request.resource.data.diff(resource.data)
+            .affectedKeys().hasOnly(['pendingRequest', 'updatedAt'])
+          && request.resource.data.pendingRequest == null
+          && resource.data.pendingRequest != null
+          && resource.data.pendingRequest.uid == request.auth.uid
         )
       );
 

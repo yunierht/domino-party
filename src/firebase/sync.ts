@@ -21,6 +21,8 @@ export interface SharedGame {
   controllerName: string;
   /** A pending take-over request awaiting the controller's approval. */
   pendingRequest: ControlRequest | null;
+  /** False once the host stops broadcasting (undefined/true = live). */
+  live?: boolean;
   teams: [Team, Team];
   targetScore: number;
   rounds: Round[];
@@ -86,6 +88,7 @@ export async function createGame(match: Match, hostName: string): Promise<string
         controllerId: hostId,
         controllerName: hostName || 'Host',
         pendingRequest: null,
+        live: true,
         ...scorePayload(match),
       });
       return code;
@@ -134,6 +137,25 @@ export async function denyControl(code: string): Promise<void> {
   if (!fb) return;
   await ensureSignedIn();
   await updateDoc(doc(fb.db, COLLECTION, code), {
+    pendingRequest: null,
+    updatedAt: Date.now(),
+  });
+}
+
+/** Host flips the broadcast on/off (controller only). */
+export async function setGameLive(code: string, live: boolean): Promise<void> {
+  const fb = getFirebase();
+  if (!fb) return;
+  await ensureSignedIn();
+  await updateDoc(doc(fb.db, COLLECTION, code), { live, updatedAt: Date.now() });
+}
+
+/** A requester withdraws their own pending request (e.g. it timed out). */
+export async function cancelMyRequest(code: string): Promise<void> {
+  const fb = getFirebase();
+  if (!fb) return;
+  await ensureSignedIn();
+  await updateDoc(doc(fb.db, COLLECTION, code.toUpperCase().trim()), {
     pendingRequest: null,
     updatedAt: Date.now(),
   });

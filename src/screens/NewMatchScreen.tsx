@@ -49,11 +49,14 @@ export function NewMatchScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior="padding"
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
       <ScrollView
-        contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}
+        contentContainerStyle={{ padding: s(20), paddingBottom: s(120) }}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={false}
       >
         <Header title={t.setupMatch} />
 

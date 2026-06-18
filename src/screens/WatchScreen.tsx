@@ -7,7 +7,8 @@ import { useGame } from '../state/GameContext';
 import { useNav } from '../nav/NavContext';
 import { Button, Card } from '../components/ui';
 import { Header } from '../components/Header';
-import { SharedGame, requestControl, sharedToMatch, subscribeGame } from '../firebase/sync';
+import { ScoreRing } from '../components/ScoreRing';
+import { SharedGame, cancelMyRequest, requestControl, sharedToMatch, subscribeGame } from '../firebase/sync';
 import { isFirebaseConfigured } from '../firebase/config';
 import { Match, Team, pointsToWin, teamTotal } from '../types';
 
@@ -25,7 +26,9 @@ export function WatchScreen() {
   const [game, setGame] = useState<SharedGame | null>(null);
   const [requested, setRequested] = useState(false);
   const [denied, setDenied] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
   const unsubRef = useRef<null | (() => void)>(null);
+  const reqTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeCodeRef = useRef<string>('');
   // Refs mirror state so the snapshot callback never reads stale values.
   const requestedRef = useRef(false);
@@ -39,15 +42,30 @@ export function WatchScreen() {
     setRequested(v);
   };
 
-  useEffect(() => () => unsubRef.current?.(), []);
+  useEffect(
+    () => () => {
+      unsubRef.current?.();
+      if (reqTimer.current) clearTimeout(reqTimer.current);
+    },
+    [],
+  );
+
+  const clearReqTimer = () => {
+    if (reqTimer.current) {
+      clearTimeout(reqTimer.current);
+      reqTimer.current = null;
+    }
+  };
 
   const stop = () => {
     unsubRef.current?.();
     unsubRef.current = null;
+    clearReqTimer();
     setStatus('idle');
     setGame(null);
     markRequested(false);
     setDenied(false);
+    setTimedOut(false);
   };
 
   const start = () => {
@@ -55,8 +73,10 @@ export function WatchScreen() {
     if (clean.length < 4) return;
     activeCodeRef.current = clean;
     setStatus('connecting');
+    clearReqTimer();
     markRequested(false);
     setDenied(false);
+    setTimedOut(false);
     unsubRef.current?.();
     unsubRef.current = subscribeGame(
       clean,
@@ -69,6 +89,7 @@ export function WatchScreen() {
         const myUid = liveUidRef.current;
         // Approved to take over → adopt the game and jump into scoring.
         if (myUid && g.controllerId === myUid) {
+          clearReqTimer();
           unsubRef.current?.();
           unsubRef.current = null;
           adoptGame(g);
@@ -77,6 +98,7 @@ export function WatchScreen() {
         }
         // Detect denial of my pending request.
         if (requestedRef.current && (!g.pendingRequest || g.pendingRequest.uid !== myUid)) {
+          clearReqTimer();
           markRequested(false);
           setDenied(true);
         }
@@ -89,9 +111,18 @@ export function WatchScreen() {
 
   const onRequest = async () => {
     setDenied(false);
+    setTimedOut(false);
     markRequested(true);
     try {
       await requestControl(activeCodeRef.current, displayName);
+      // Auto-cancel if the controller doesn't respond within 30s.
+      clearReqTimer();
+      reqTimer.current = setTimeout(() => {
+        if (!requestedRef.current) return;
+        markRequested(false);
+        setTimedOut(true);
+        cancelMyRequest(activeCodeRef.current).catch(() => {});
+      }, 30000);
     } catch {
       markRequested(false);
     }
@@ -199,6 +230,7 @@ export function WatchScreen() {
           onRequest={onRequest}
           requested={requested}
           denied={denied}
+          timedOut={timedOut}
           canRequest={!!liveUid}
         />
       )}
@@ -212,6 +244,7 @@ function LiveBoard({
   onRequest,
   requested,
   denied,
+  timedOut,
   canRequest,
 }: {
   game: SharedGame;
@@ -219,6 +252,7 @@ function LiveBoard({
   onRequest: () => void;
   requested: boolean;
   denied: boolean;
+  timedOut: boolean;
   canRequest: boolean;
 }) {
   const { theme, s } = useTheme();
@@ -229,16 +263,31 @@ function LiveBoard({
   const totalA = teamTotal(match, teamA.id);
   const totalB = teamTotal(match, teamB.id);
   const finished = !!match.winnerTeamId;
+  const ended = game.live === false;
   const leadId = totalA === totalB ? null : totalA > totalB ? teamA.id : teamB.id;
+  // Pulse the leading team when they're within 25% of the target,
+  // beating faster as they close in on the win.
+  const leaderToWin = leadId ? pointsToWin(match, leadId) : Infinity;
+  const dangerThreshold = match.targetScore * 0.25;
+  const danger = !finished && leadId !== null && leaderToWin <= dangerThreshold;
+  const intensity = danger ? Math.min(1, Math.max(0, 1 - leaderToWin / dangerThreshold)) : 0;
 
   return (
     <View>
-      {/* LIVE banner */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: s(8), marginBottom: s(14) }}>
-        <View style={{ width: s(10), height: s(10), borderRadius: s(5), backgroundColor: c.danger }} />
-        <Text style={{ color: c.danger, fontWeight: '900', fontSize: s(14), letterSpacing: 1 }}>{t.live}</Text>
-        <Text style={{ color: c.textMuted, fontSize: s(13) }}>· {t.gameCode} {game.code}</Text>
-      </View>
+      {/* LIVE / ended banner */}
+      {ended ? (
+        <View style={{ alignItems: 'center', marginBottom: s(14) }}>
+          <Text style={{ color: c.textMuted, fontWeight: '800', fontSize: s(13), textAlign: 'center' }}>
+            {t.broadcastEnded}
+          </Text>
+        </View>
+      ) : (
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: s(8), marginBottom: s(14) }}>
+          <View style={{ width: s(10), height: s(10), borderRadius: s(5), backgroundColor: c.danger }} />
+          <Text style={{ color: c.danger, fontWeight: '900', fontSize: s(14), letterSpacing: 1 }}>{t.live}</Text>
+          <Text style={{ color: c.textMuted, fontSize: s(13) }}>· {t.gameCode} {game.code}</Text>
+        </View>
+      )}
 
       {/* Who is scoring + request-to-score */}
       <View
@@ -257,7 +306,7 @@ function LiveBoard({
         <Text style={{ flex: 1, color: c.text, fontSize: s(14), fontWeight: '700' }}>
           {t.currentlyScoring.replace('{name}', game.controllerName ?? '')}
         </Text>
-        {!finished && canRequest &&
+        {!finished && !ended && canRequest &&
           (requested ? (
             <Text style={{ color: c.textMuted, fontSize: s(12), fontStyle: 'italic' }}>{t.waitingApproval}</Text>
           ) : (
@@ -267,6 +316,11 @@ function LiveBoard({
       {denied && (
         <Text style={{ color: c.danger, fontSize: s(13), textAlign: 'center', marginTop: -s(8), marginBottom: s(14) }}>
           {t.requestDenied}
+        </Text>
+      )}
+      {timedOut && (
+        <Text style={{ color: c.textMuted, fontSize: s(13), textAlign: 'center', marginTop: -s(8), marginBottom: s(14) }}>
+          {t.requestTimedOut}
         </Text>
       )}
 
@@ -284,9 +338,9 @@ function LiveBoard({
         </LinearGradient>
       )}
 
-      <ReadOnlyTeam match={match} team={teamA} color={c.teamA} total={totalA} toWin={pointsToWin(match, teamA.id)} leading={leadId === teamA.id && !finished} isWinner={match.winnerTeamId === teamA.id} />
+      <ReadOnlyTeam match={match} team={teamA} color={c.teamA} total={totalA} toWin={pointsToWin(match, teamA.id)} leading={leadId === teamA.id && !finished} isWinner={match.winnerTeamId === teamA.id} pulse={danger && leadId === teamA.id} intensity={intensity} />
       <View style={{ height: s(14) }} />
-      <ReadOnlyTeam match={match} team={teamB} color={c.teamB} total={totalB} toWin={pointsToWin(match, teamB.id)} leading={leadId === teamB.id && !finished} isWinner={match.winnerTeamId === teamB.id} />
+      <ReadOnlyTeam match={match} team={teamB} color={c.teamB} total={totalB} toWin={pointsToWin(match, teamB.id)} leading={leadId === teamB.id && !finished} isWinner={match.winnerTeamId === teamB.id} pulse={danger && leadId === teamB.id} intensity={intensity} />
 
       <View style={{ marginTop: s(10) }}>
         <Text style={{ color: c.textMuted, fontSize: s(12), textAlign: 'center', marginVertical: s(12) }}>
@@ -306,6 +360,8 @@ function ReadOnlyTeam({
   toWin,
   leading,
   isWinner,
+  pulse,
+  intensity,
 }: {
   match: Match;
   team: Team;
@@ -314,6 +370,8 @@ function ReadOnlyTeam({
   toWin: number;
   leading: boolean;
   isWinner: boolean;
+  pulse: boolean;
+  intensity: number;
 }) {
   const { theme, s } = useTheme();
   const { t } = useI18n();
@@ -329,10 +387,23 @@ function ReadOnlyTeam({
         backgroundColor: c.surface,
         borderRadius: theme.radius + 4,
         padding: s(18),
-        borderWidth: 2,
-        borderColor: isWinner || leading ? color : theme.dark ? 'transparent' : c.border,
+        borderWidth: 1,
+        borderColor: isWinner || leading ? color : c.border,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowRadius: s(16),
+        shadowOffset: { width: 0, height: s(9) },
+        elevation: 12,
       }}
     >
+      <LinearGradient
+        colors={[theme.dark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.75)', 'rgba(255,255,255,0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(70) }}
+      />
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(8) }}>
@@ -347,22 +418,21 @@ function ReadOnlyTeam({
               {playerLine}
             </Text>
           )}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(8), marginTop: s(8) }}>
-            <View style={{ backgroundColor: c.surfaceAlt, borderRadius: 999, paddingHorizontal: s(12), paddingVertical: s(5) }}>
-              <Text style={{ color: c.textMuted, fontSize: s(13), fontWeight: '700' }}>
-                {toWin} {t.toWin}
-              </Text>
-            </View>
-            {leading && (
-              <Text style={{ color, fontSize: s(12), fontWeight: '800', textTransform: 'uppercase' }}>
-                ▲ {t.leading}
-              </Text>
-            )}
-          </View>
+          {leading && (
+            <Text style={{ color, fontSize: s(12), fontWeight: '800', textTransform: 'uppercase', marginTop: s(8) }}>
+              ▲ {t.leading}
+            </Text>
+          )}
         </View>
-        <Text style={{ color, fontSize: s(58), fontWeight: '900', lineHeight: s(62), marginLeft: s(8) }}>
-          {total}
-        </Text>
+        <ScoreRing
+          score={total}
+          target={match.targetScore}
+          color={color}
+          size={s(124)}
+          caption={String(toWin)}
+          pulse={pulse}
+          intensity={intensity}
+        />
       </View>
 
       {teamRounds.length > 0 && (

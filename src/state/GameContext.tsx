@@ -19,6 +19,7 @@ import {
   denyControl as denyControlSync,
   pushGame,
   requestControl as requestControlSync,
+  setGameLive,
   subscribeGame,
 } from '../firebase/sync';
 
@@ -77,7 +78,8 @@ type Action =
   | { type: 'DELETE_ROUND'; matchId: string; roundId: string }
   | { type: 'DELETE_MATCH'; matchId: string }
   | { type: 'SET_CURRENT'; matchId: string | null }
-  | { type: 'SET_SHARE_CODE'; matchId: string; shareCode: string };
+  | { type: 'SET_SHARE_CODE'; matchId: string; shareCode: string }
+  | { type: 'STOP_SHARING'; matchId: string };
 
 /** Recompute winner/finishedAt after rounds change. */
 function reconcile(match: Match): Match {
@@ -202,6 +204,14 @@ function reducer(state: GameState, action: Action): GameState {
         ),
       };
 
+    case 'STOP_SHARING':
+      return {
+        ...state,
+        matches: state.matches.map((m) =>
+          m.id === action.matchId ? { ...m, shareCode: undefined } : m,
+        ),
+      };
+
     default:
       return state;
   }
@@ -227,6 +237,8 @@ interface GameContextValue extends GameState {
   setCurrent: (matchId: string | null) => void;
   /** Start broadcasting a match live; resolves with its share code. */
   shareMatch: (matchId: string) => Promise<string>;
+  /** Stop broadcasting a shared match (the host turns "live" off). */
+  stopSharing: (matchId: string) => Promise<void>;
 
   // ---- Live control ----
   /** This device's anonymous uid (null until signed in / unconfigured). */
@@ -372,6 +384,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return code;
   };
 
+  const stopSharing = async (matchId: string): Promise<void> => {
+    const m = state.matches.find((x) => x.id === matchId);
+    if (!m?.shareCode) return;
+    try {
+      await setGameLive(m.shareCode, false);
+    } catch {
+      // best effort — still stop locally
+    }
+    dispatch({ type: 'STOP_SHARING', matchId });
+  };
+
   const requestControl = async () => {
     if (!shareCode) return;
     await requestControlSync(shareCode, state.displayName);
@@ -419,6 +442,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     deleteMatch: (matchId) => dispatch({ type: 'DELETE_MATCH', matchId }),
     setCurrent: (matchId) => dispatch({ type: 'SET_CURRENT', matchId }),
     shareMatch,
+    stopSharing,
     liveUid,
     liveMeta,
     liveReady,

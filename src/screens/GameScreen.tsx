@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { useGame } from '../state/GameContext';
@@ -8,6 +9,8 @@ import { useNav } from '../nav/NavContext';
 import { Button } from '../components/ui';
 import { Header } from '../components/Header';
 import { RoundEditor } from '../components/RoundEditor';
+import { ScoreRing } from '../components/ScoreRing';
+import { AppDialog } from '../components/AppDialog';
 import { isFirebaseConfigured } from '../firebase/config';
 import { Match, Round, Team, pointsToWin, teamTotal } from '../types';
 
@@ -22,6 +25,7 @@ export function GameScreen() {
     createMatch,
     setCurrent,
     shareMatch,
+    stopSharing,
     liveUid,
     liveMeta,
     liveReady,
@@ -40,29 +44,9 @@ export function GameScreen() {
   const [shareOpen, setShareOpen] = useState(false);
   const [sharing, setSharing] = useState(false);
 
-  // When I'm the controller and a take-over request arrives, prompt to approve.
-  const handledReq = useRef<string | null>(null);
-  useEffect(() => {
-    const req = liveMeta?.pendingRequest;
-    if (!req) {
-      handledReq.current = null;
-      return;
-    }
-    if (amController) {
-      const key = req.uid + req.at;
-      if (handledReq.current !== key) {
-        handledReq.current = key;
-        Alert.alert(
-          t.takeoverTitle,
-          t.takeoverBody.replace('{name}', req.name),
-          [
-            { text: t.deny, style: 'cancel', onPress: () => denyControl() },
-            { text: t.approve, onPress: () => approveControl() },
-          ],
-        );
-      }
-    }
-  }, [liveMeta?.pendingRequest, amController]);
+  // Show the themed take-over prompt whenever I'm the controller and a request
+  // is pending (clears itself once approved/denied updates the shared doc).
+  const pendingReq = amController ? liveMeta?.pendingRequest ?? null : null;
 
   if (!currentMatch) {
     return (
@@ -79,6 +63,15 @@ export function GameScreen() {
   const totalB = teamTotal(match, teamB.id);
   const finished = !!match.winnerTeamId;
   const leadId = totalA === totalB ? null : totalA > totalB ? teamA.id : teamB.id;
+
+  // When the leader gets within 25% of the target, the LEADING team's number
+  // beats with excitement — faster the closer they are to winning.
+  const leaderToWin = leadId ? pointsToWin(match, leadId) : Infinity;
+  const dangerThreshold = match.targetScore * 0.25;
+  const danger = !finished && leadId !== null && leaderToWin <= dangerThreshold;
+  const intensity = danger ? Math.min(1, Math.max(0, 1 - leaderToWin / dangerThreshold)) : 0;
+  const pulseA = danger && leadId === teamA.id;
+  const pulseB = danger && leadId === teamB.id;
   const isShared = !!match.shareCode;
   const myPending = liveMeta?.pendingRequest?.uid === liveUid;
 
@@ -169,15 +162,15 @@ export function GameScreen() {
                   <ActivityIndicator color={c.primary} />
                 ) : match.shareCode ? (
                   <>
-                    <View style={{ width: s(8), height: s(8), borderRadius: s(4), backgroundColor: c.danger }} />
+                    <Feather name="radio" size={s(16)} color={c.danger} />
                     <Text style={{ color: c.danger, fontWeight: '900', fontSize: s(12) }}>{t.live}</Text>
                   </>
                 ) : (
-                  <Text style={{ fontSize: s(20) }}>📡</Text>
+                  <Feather name="radio" size={s(20)} color={c.textMuted} />
                 )}
               </Pressable>
               <Pressable onPress={() => go('settings')} hitSlop={8} style={{ padding: s(4) }}>
-                <Text style={{ fontSize: s(22) }}>⚙️</Text>
+                <Feather name="settings" size={s(20)} color={c.textMuted} />
               </Pressable>
             </View>
           }
@@ -270,6 +263,8 @@ export function GameScreen() {
           isWinner={match.winnerTeamId === teamA.id}
           finished={finished}
           readOnly={!canEdit}
+          pulse={pulseA}
+          intensity={intensity}
           onAdd={() => openAddFor(teamA.id)}
           onEditRound={openEdit}
         />
@@ -284,6 +279,8 @@ export function GameScreen() {
           isWinner={match.winnerTeamId === teamB.id}
           finished={finished}
           readOnly={!canEdit}
+          pulse={pulseB}
+          intensity={intensity}
           onAdd={() => openAddFor(teamB.id)}
           onEditRound={openEdit}
         />
@@ -341,10 +338,32 @@ export function GameScreen() {
             </Text>
             <Button label={t.shareCodeAction} onPress={doNativeShare} fullWidth />
             <View style={{ height: s(10) }} />
+            <Button
+              label={t.stopBroadcasting}
+              variant="danger"
+              onPress={() => {
+                setShareOpen(false);
+                stopSharing(match.id);
+              }}
+              fullWidth
+            />
+            <View style={{ height: s(10) }} />
             <Button label={t.confirm} variant="ghost" onPress={() => setShareOpen(false)} fullWidth />
           </Pressable>
         </Pressable>
       </Modal>
+
+      {/* Take-over request prompt (themed) */}
+      <AppDialog
+        visible={!!pendingReq}
+        icon="user-check"
+        title={t.takeoverTitle}
+        message={pendingReq ? t.takeoverBody.replace('{name}', pendingReq.name) : ''}
+        actions={[
+          { label: t.approve, onPress: () => approveControl() },
+          { label: t.deny, variant: 'ghost', onPress: () => denyControl() },
+        ]}
+      />
     </View>
   );
 }
@@ -359,6 +378,8 @@ function TeamPanel({
   isWinner,
   finished,
   readOnly,
+  pulse,
+  intensity,
   onAdd,
   onEditRound,
 }: {
@@ -371,6 +392,8 @@ function TeamPanel({
   isWinner: boolean;
   finished: boolean;
   readOnly: boolean;
+  pulse: boolean;
+  intensity: number;
   onAdd: () => void;
   onEditRound: (r: Round) => void;
 }) {
@@ -392,11 +415,27 @@ function TeamPanel({
         backgroundColor: c.surface,
         borderRadius: theme.radius + 4,
         padding: s(18),
-        borderWidth: 2,
-        borderColor: isWinner || leading ? color : theme.dark ? 'transparent' : c.border,
-        opacity: pressed && !locked ? 0.92 : 1,
+        borderWidth: 1,
+        borderColor: isWinner || leading ? color : c.border,
+        overflow: 'hidden',
+        // Raised 3D look.
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowRadius: s(16),
+        shadowOffset: { width: 0, height: s(9) },
+        elevation: 12,
+        transform: [{ translateY: pressed && !locked ? s(2) : 0 }, { scale: pressed && !locked ? 0.995 : 1 }],
       })}
     >
+      {/* Glossy top sheen for depth */}
+      <LinearGradient
+        colors={[theme.dark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.75)', 'rgba(255,255,255,0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(70) }}
+      />
+
       {/* Top row: identity + big total */}
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={{ flex: 1 }}>
@@ -412,31 +451,23 @@ function TeamPanel({
               {playerLine}
             </Text>
           )}
-          {/* to-win + leading */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(8), marginTop: s(8) }}>
-            <View
-              style={{
-                backgroundColor: c.surfaceAlt,
-                borderRadius: 999,
-                paddingHorizontal: s(12),
-                paddingVertical: s(5),
-              }}
-            >
-              <Text style={{ color: c.textMuted, fontSize: s(13), fontWeight: '700' }}>
-                {toWin} {t.toWin}
-              </Text>
-            </View>
-            {leading && (
-              <Text style={{ color, fontSize: s(12), fontWeight: '800', textTransform: 'uppercase' }}>
-                ▲ {t.leading}
-              </Text>
-            )}
-          </View>
+          {/* leading badge */}
+          {leading && (
+            <Text style={{ color, fontSize: s(12), fontWeight: '800', textTransform: 'uppercase', marginTop: s(8) }}>
+              ▲ {t.leading}
+            </Text>
+          )}
         </View>
 
-        <Text style={{ color, fontSize: s(58), fontWeight: '900', lineHeight: s(62), marginLeft: s(8) }}>
-          {total}
-        </Text>
+        <ScoreRing
+          score={total}
+          target={match.targetScore}
+          color={color}
+          size={s(124)}
+          caption={String(toWin)}
+          pulse={pulse}
+          intensity={intensity}
+        />
       </View>
 
       {/* Divider */}
@@ -485,20 +516,29 @@ function TeamPanel({
         </View>
       )}
 
-      {/* Add hint */}
+      {/* Add-points button */}
       {!locked && (
         <View
           style={{
             marginTop: s(14),
-            borderRadius: theme.radius,
-            borderWidth: 1.5,
-            borderColor: color,
-            borderStyle: 'dashed',
-            paddingVertical: s(12),
+            borderRadius: 999,
+            backgroundColor: color,
+            paddingVertical: s(13),
+            flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'center',
+            gap: s(8),
+            shadowColor: color,
+            shadowOpacity: 0.45,
+            shadowRadius: s(10),
+            shadowOffset: { width: 0, height: s(4) },
+            elevation: 4,
           }}
         >
-          <Text style={{ color, fontSize: s(15), fontWeight: '800' }}>+ {t.tapToAdd}</Text>
+          <Feather name="plus-circle" size={s(20)} color="#fff" />
+          <Text style={{ color: '#fff', fontSize: s(16), fontWeight: '900', letterSpacing: 0.3 }}>
+            {t.addPoints}
+          </Text>
         </View>
       )}
     </Pressable>

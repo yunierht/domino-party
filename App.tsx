@@ -8,6 +8,7 @@ import { I18nProvider } from './src/i18n/I18nContext';
 import { GameProvider, useGame } from './src/state/GameContext';
 import { NavProvider, useNav } from './src/nav/NavContext';
 import { FullScreenLoader } from './src/components/ui';
+import { Background } from './src/components/Background';
 
 import { HomeScreen } from './src/screens/HomeScreen';
 import { NewMatchScreen } from './src/screens/NewMatchScreen';
@@ -15,6 +16,8 @@ import { GameScreen } from './src/screens/GameScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { WatchScreen } from './src/screens/WatchScreen';
+import { HowToScreen } from './src/screens/HowToScreen';
+import { PrivacyScreen } from './src/screens/PrivacyScreen';
 
 function Router() {
   const { screen } = useNav();
@@ -31,6 +34,10 @@ function Router() {
       return <SettingsScreen />;
     case 'watch':
       return <WatchScreen />;
+    case 'howto':
+      return <HowToScreen />;
+    case 'privacy':
+      return <PrivacyScreen />;
     default:
       return <HomeScreen />;
   }
@@ -45,6 +52,7 @@ function AppShell() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.bg }}>
       <StatusBar style={theme.dark ? 'light' : 'dark'} />
+      <Background theme={theme} />
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <Router />
       </SafeAreaView>

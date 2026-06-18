@@ -1,11 +1,12 @@
-import React from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { useGame } from '../state/GameContext';
 import { useNav } from '../nav/NavContext';
 import { Card } from '../components/ui';
 import { Header } from '../components/Header';
+import { AppDialog } from '../components/AppDialog';
 import { teamById, teamTotal } from '../types';
 
 export function HistoryScreen() {
@@ -15,16 +16,11 @@ export function HistoryScreen() {
   const { go } = useNav();
   const c = theme.colors;
 
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+
   const open = (id: string) => {
     setCurrent(id);
     go('game');
-  };
-
-  const confirmDelete = (id: string) => {
-    Alert.alert(t.deleteMatch, t.confirmDeleteMatch, [
-      { text: t.cancel, style: 'cancel' },
-      { text: t.delete, style: 'destructive', onPress: () => deleteMatch(id) },
-    ]);
   };
 
   return (
@@ -47,7 +43,7 @@ export function HistoryScreen() {
               { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' },
             );
             return (
-              <Pressable key={m.id} onPress={() => open(m.id)} onLongPress={() => confirmDelete(m.id)}>
+              <Pressable key={m.id} onPress={() => open(m.id)} onLongPress={() => setPendingDelete(m.id)}>
                 <Card>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: s(8) }}>
                     <Text
@@ -80,6 +76,26 @@ export function HistoryScreen() {
           </Text>
         </View>
       )}
+
+      <AppDialog
+        visible={!!pendingDelete}
+        icon="trash-2"
+        iconColor={c.danger}
+        title={t.deleteMatch}
+        message={t.confirmDeleteMatch}
+        actions={[
+          {
+            label: t.delete,
+            variant: 'danger',
+            onPress: () => {
+              if (pendingDelete) deleteMatch(pendingDelete);
+              setPendingDelete(null);
+            },
+          },
+          { label: t.cancel, variant: 'ghost', onPress: () => setPendingDelete(null) },
+        ]}
+        onRequestClose={() => setPendingDelete(null)}
+      />
     </ScrollView>
   );
 }

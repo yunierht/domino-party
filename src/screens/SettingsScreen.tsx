@@ -5,6 +5,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { Card, DominoTile } from '../components/ui';
 import { Header } from '../components/Header';
+import { Background } from '../components/Background';
 import { THEMES, ThemeName } from '../theme/themes';
 import { Lang } from '../i18n/strings';
 
@@ -14,9 +15,10 @@ export function SettingsScreen() {
   const c = theme.colors;
 
   const themeMeta: { name: ThemeName; title: string; desc: string }[] = [
-    { name: 'modern', title: t.themeModern, desc: t.themeModernDesc },
+    { name: 'dark', title: t.themeDark, desc: t.themeDarkDesc },
     { name: 'cubano', title: t.themeCubano, desc: t.themeCubanoDesc },
-    { name: 'grande', title: t.themeGrande, desc: t.themeGrandeDesc },
+    { name: 'usa', title: t.themeUsa, desc: t.themeUsaDesc },
+    { name: 'carbon', title: t.themeCarbon, desc: t.themeCarbonDesc },
   ];
 
   const langMeta: { code: Lang; label: string }[] = [
@@ -45,21 +47,37 @@ export function SettingsScreen() {
                 }}
               >
                 {/* Swatch preview */}
-                <LinearGradient
-                  colors={tdef.colors.gradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{
-                    width: s(54),
-                    height: s(54),
-                    borderRadius: tdef.radius,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: s(14),
-                  }}
-                >
-                  <DominoTile size={s(22)} a={6} b={4} />
-                </LinearGradient>
+                {tdef.background ? (
+                  <View
+                    style={{
+                      width: s(54),
+                      height: s(54),
+                      borderRadius: tdef.radius,
+                      overflow: 'hidden',
+                      marginRight: s(14),
+                      borderWidth: 1,
+                      borderColor: c.border,
+                    }}
+                  >
+                    <Background theme={tdef} width={s(54)} height={s(54)} />
+                  </View>
+                ) : (
+                  <LinearGradient
+                    colors={tdef.colors.gradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{
+                      width: s(54),
+                      height: s(54),
+                      borderRadius: tdef.radius,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: s(14),
+                    }}
+                  >
+                    <DominoTile size={s(22)} a={6} b={4} />
+                  </LinearGradient>
+                )}
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: c.text, fontSize: s(17), fontWeight: '800' }}>{m.title}</Text>
                   <Text style={{ color: c.textMuted, fontSize: s(13), marginTop: s(2) }}>{m.desc}</Text>

@@ -31,6 +31,7 @@ export interface Strings {
   noRoundsYet: string;
   addFirstRound: string;
   tapToAdd: string;
+  addPoints: string;
   winner: string;
   matchOver: string;
   rematch: string;
@@ -55,12 +56,14 @@ export interface Strings {
   longPressHint: string;
   // Settings
   appearance: string;
-  themeModern: string;
+  themeDark: string;
   themeCubano: string;
-  themeGrande: string;
-  themeModernDesc: string;
+  themeUsa: string;
+  themeCarbon: string;
+  themeDarkDesc: string;
   themeCubanoDesc: string;
-  themeGrandeDesc: string;
+  themeUsaDesc: string;
+  themeCarbonDesc: string;
   language: string;
   english: string;
   spanish: string;
@@ -83,6 +86,8 @@ export interface Strings {
   shareNotConfiguredBody: string;
   spectating: string;
   stopWatching: string;
+  stopBroadcasting: string;
+  broadcastEnded: string;
   shareError: string;
   // Control handoff
   youAreScoring: string;
@@ -95,15 +100,32 @@ export interface Strings {
   deny: string;
   waitingApproval: string;
   requestDenied: string;
+  requestTimedOut: string;
   yourName: string;
   syncing: string;
   youHaveControl: string;
+  // Invite & intro
+  inviteFriends: string;
+  inviteMessage: string;
+  howToPlay: string;
+  privacy: string;
+  introNext: string;
+  introStart: string;
+  introSkip: string;
+  howtoT1: string;
+  howtoB1: string;
+  howtoT2: string;
+  howtoB2: string;
+  howtoT3: string;
+  howtoB3: string;
+  howtoT4: string;
+  howtoB4: string;
   // Generic
   confirm: string;
 }
 
 const en: Strings = {
-  appName: 'Domino Score',
+  appName: 'Domino Party',
   newMatch: 'New Match',
   resumeMatch: 'Resume Match',
   history: 'History',
@@ -128,6 +150,7 @@ const en: Strings = {
   noRoundsYet: 'No rounds yet',
   addFirstRound: 'Add the first round to start scoring',
   tapToAdd: 'Tap to add points',
+  addPoints: 'Add Points',
   winner: 'Winner',
   matchOver: 'Match Over',
   rematch: 'Rematch (same teams)',
@@ -149,17 +172,35 @@ const en: Strings = {
   confirmDeleteMatch: 'Delete this match permanently?',
   longPressHint: 'Tip: long-press a match to delete it',
   appearance: 'Appearance',
-  themeModern: 'Modern',
-  themeCubano: 'Cuban Classic',
-  themeGrande: 'Grande',
-  themeModernDesc: 'Sleek dark interface with gradients',
-  themeCubanoDesc: 'Warm vintage domino-table style',
-  themeGrandeDesc: 'Extra-large text & buttons',
+  themeDark: 'Dark',
+  themeCubano: 'Cuban Board',
+  themeUsa: 'USA Board',
+  themeCarbon: 'Carbon',
+  themeDarkDesc: 'Clean solid dark interface',
+  themeCubanoDesc: 'Cuban–American domino board',
+  themeUsaDesc: 'Stars & stripes flag',
+  themeCarbonDesc: 'Black carbon halftone',
   language: 'Language',
   english: 'English',
   spanish: 'Español',
   about: 'About',
   aboutText: 'Track dominoes scores for two teams. First to the target score wins.',
+  inviteFriends: 'Invite Friends',
+  inviteMessage:
+    'Play Domino Party with me! Keep score for your domino games and follow them live.\n\nAndroid: {play}\niPhone: {apple}',
+  howToPlay: 'How to Play',
+  privacy: 'Privacy Policy',
+  introNext: 'Next',
+  introStart: "Let's play!",
+  introSkip: 'Skip',
+  howtoT1: 'Two Teams, Four Players',
+  howtoB1: 'Domino Party keeps score for two teams of two. Name the teams and players when you start a match.',
+  howtoT2: 'Tap to the Target',
+  howtoB2: 'Pick a target — 100, 150, or your own. Tap a team to add the points they won each hand; the ring fills and the first to the target wins.',
+  howtoT3: 'Play Together, Live',
+  howtoB3: 'Share a game code and friends follow every point in real time, each on their own phone.',
+  howtoT4: 'Pass the Pen',
+  howtoB4: 'A watcher can tap “Request to score” to take over — the current scorer just approves. Only one person scores at a time.',
   shareGame: 'Share Game',
   watchGame: 'Watch a Game',
   live: 'LIVE',
@@ -177,6 +218,8 @@ const en: Strings = {
     'Firebase has not been configured yet, so live following is disabled. Add your Firebase keys to enable it.',
   spectating: 'Watching live',
   stopWatching: 'Stop watching',
+  stopBroadcasting: 'Stop broadcasting',
+  broadcastEnded: 'The host ended the live broadcast.',
   shareError: 'Could not start sharing. Check your connection and try again.',
   youAreScoring: 'You are scoring',
   currentlyScoring: '{name} is scoring',
@@ -188,6 +231,7 @@ const en: Strings = {
   deny: 'Deny',
   waitingApproval: 'Waiting for approval…',
   requestDenied: 'Your request was denied.',
+  requestTimedOut: 'No response — request timed out. Try again.',
   yourName: 'Your name',
   syncing: 'Syncing…',
   youHaveControl: 'You now have control of scoring',
@@ -195,7 +239,7 @@ const en: Strings = {
 };
 
 const es: Strings = {
-  appName: 'Domino Score',
+  appName: 'Domino Party',
   newMatch: 'Nueva Partida',
   resumeMatch: 'Continuar Partida',
   history: 'Historial',
@@ -220,6 +264,7 @@ const es: Strings = {
   noRoundsYet: 'Aún no hay rondas',
   addFirstRound: 'Agrega la primera ronda para empezar',
   tapToAdd: 'Toca para sumar puntos',
+  addPoints: 'Sumar Puntos',
   winner: 'Ganador',
   matchOver: 'Partida Terminada',
   rematch: 'Revancha (mismos equipos)',
@@ -241,17 +286,35 @@ const es: Strings = {
   confirmDeleteMatch: '¿Eliminar esta partida permanentemente?',
   longPressHint: 'Consejo: mantén presionada una partida para eliminarla',
   appearance: 'Apariencia',
-  themeModern: 'Moderno',
-  themeCubano: 'Cubano Clásico',
-  themeGrande: 'Grande',
-  themeModernDesc: 'Interfaz oscura y elegante con degradados',
-  themeCubanoDesc: 'Estilo vintage de mesa de dominó',
-  themeGrandeDesc: 'Texto y botones extra grandes',
+  themeDark: 'Oscuro',
+  themeCubano: 'Mesa Cubana',
+  themeUsa: 'Mesa USA',
+  themeCarbon: 'Carbón',
+  themeDarkDesc: 'Interfaz oscura y sólida',
+  themeCubanoDesc: 'Mesa de dominó cubano-americana',
+  themeUsaDesc: 'Bandera de estrellas y franjas',
+  themeCarbonDesc: 'Semitono de carbón negro',
   language: 'Idioma',
   english: 'English',
   spanish: 'Español',
   about: 'Acerca de',
   aboutText: 'Lleva la cuenta del dominó para dos equipos. El primero en llegar al puntaje gana.',
+  inviteFriends: 'Invitar Amigos',
+  inviteMessage:
+    '¡Juega Domino Party conmigo! Lleva la cuenta de tus partidas de dominó y síguelas en vivo.\n\nAndroid: {play}\niPhone: {apple}',
+  howToPlay: 'Cómo Jugar',
+  privacy: 'Política de Privacidad',
+  introNext: 'Siguiente',
+  introStart: '¡A jugar!',
+  introSkip: 'Saltar',
+  howtoT1: 'Dos Equipos, Cuatro Jugadores',
+  howtoB1: 'Domino Party lleva la cuenta de dos equipos de dos. Nombra los equipos y jugadores al empezar.',
+  howtoT2: 'Toca hacia la Meta',
+  howtoB2: 'Elige un puntaje — 100, 150 o el tuyo. Toca un equipo para sumar los puntos de cada mano; el anillo se llena y el primero en llegar gana.',
+  howtoT3: 'Jueguen Juntos, En Vivo',
+  howtoB3: 'Comparte un código y tus amigos siguen cada punto en tiempo real, cada uno en su teléfono.',
+  howtoT4: 'Pasa el Control',
+  howtoB4: 'Un espectador puede tocar “Tomar control” para anotar — quien anota solo aprueba. Solo una persona anota a la vez.',
   shareGame: 'Compartir Partida',
   watchGame: 'Ver una Partida',
   live: 'EN VIVO',
@@ -269,6 +332,8 @@ const es: Strings = {
     'Firebase aún no está configurado, por lo que el seguimiento en vivo está deshabilitado. Agrega tus claves de Firebase para activarlo.',
   spectating: 'Viendo en vivo',
   stopWatching: 'Dejar de ver',
+  stopBroadcasting: 'Detener transmisión',
+  broadcastEnded: 'El anfitrión terminó la transmisión en vivo.',
   shareError: 'No se pudo iniciar el modo compartir. Revisa tu conexión e inténtalo de nuevo.',
   youAreScoring: 'Tú estás anotando',
   currentlyScoring: '{name} está anotando',
@@ -280,6 +345,7 @@ const es: Strings = {
   deny: 'Rechazar',
   waitingApproval: 'Esperando aprobación…',
   requestDenied: 'Tu solicitud fue rechazada.',
+  requestTimedOut: 'Sin respuesta — la solicitud expiró. Inténtalo de nuevo.',
   yourName: 'Tu nombre',
   syncing: 'Sincronizando…',
   youHaveControl: 'Ahora tienes el control de la anotación',
