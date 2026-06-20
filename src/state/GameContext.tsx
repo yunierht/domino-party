@@ -76,6 +76,7 @@ type Action =
       points: number;
     }
   | { type: 'DELETE_ROUND'; matchId: string; roundId: string }
+  | { type: 'SET_TARGET_SCORE'; matchId: string; targetScore: number }
   | { type: 'DELETE_MATCH'; matchId: string }
   | { type: 'SET_CURRENT'; matchId: string | null }
   | { type: 'SET_SHARE_CODE'; matchId: string; shareCode: string }
@@ -186,6 +187,13 @@ function reducer(state: GameState, action: Action): GameState {
         rounds: m.rounds.filter((r) => r.id !== action.roundId),
       }));
 
+    case 'SET_TARGET_SCORE':
+      // reconcile (inside mapMatch) recomputes the winner for the new target.
+      return mapMatch(state, action.matchId, (m) => ({
+        ...m,
+        targetScore: action.targetScore,
+      }));
+
     case 'DELETE_MATCH': {
       const matches = state.matches.filter((m) => m.id !== action.matchId);
       const currentMatchId =
@@ -233,6 +241,7 @@ interface GameContextValue extends GameState {
     points: number,
   ) => void;
   deleteRound: (matchId: string, roundId: string) => void;
+  setTargetScore: (matchId: string, targetScore: number) => void;
   deleteMatch: (matchId: string) => void;
   setCurrent: (matchId: string | null) => void;
   /** Start broadcasting a match live; resolves with its share code. */
@@ -439,6 +448,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'EDIT_ROUND', matchId, roundId, winnerTeamId, points }),
     deleteRound: (matchId, roundId) =>
       dispatch({ type: 'DELETE_ROUND', matchId, roundId }),
+    setTargetScore: (matchId, targetScore) =>
+      dispatch({ type: 'SET_TARGET_SCORE', matchId, targetScore }),
     deleteMatch: (matchId) => dispatch({ type: 'DELETE_MATCH', matchId }),
     setCurrent: (matchId) => dispatch({ type: 'SET_CURRENT', matchId }),
     shareMatch,

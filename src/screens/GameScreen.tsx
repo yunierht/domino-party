@@ -9,11 +9,13 @@ import { useNav } from '../nav/NavContext';
 import { Button } from '../components/ui';
 import { Header } from '../components/Header';
 import { RoundEditor } from '../components/RoundEditor';
+import { TargetEditor } from '../components/TargetEditor';
+import { Toast } from '../components/Toast';
 import { ScoreRing } from '../components/ScoreRing';
 import { AppDialog } from '../components/AppDialog';
 import { isFirebaseConfigured } from '../firebase/config';
 import { joinUrl } from '../config/links';
-import { Match, Round, Team, pointsToWin, teamTotal } from '../types';
+import { Match, Round, Team, computeWinner, pointsToWin, teamTotal } from '../types';
 
 export function GameScreen() {
   const { theme, s } = useTheme();
@@ -25,6 +27,7 @@ export function GameScreen() {
     deleteRound,
     createMatch,
     setCurrent,
+    setTargetScore,
     shareMatch,
     stopSharing,
     liveUid,
@@ -44,6 +47,8 @@ export function GameScreen() {
   const [addTeamId, setAddTeamId] = useState<string | undefined>(undefined);
   const [shareOpen, setShareOpen] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [targetOpen, setTargetOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   // Show the themed take-over prompt whenever I'm the controller and a request
   // is pending (clears itself once approved/denied updates the shared doc).
@@ -147,6 +152,7 @@ export function GameScreen() {
       >
         <Header
           title={`${t.targetScore}: ${match.targetScore}`}
+          onTitlePress={canEdit && !finished ? () => setTargetOpen(true) : undefined}
           right={
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(6) }}>
               <Pressable
@@ -316,6 +322,24 @@ export function GameScreen() {
         onSave={onSave}
         onDelete={onDelete}
       />
+
+      <TargetEditor
+        visible={targetOpen}
+        current={match.targetScore}
+        onClose={() => setTargetOpen(false)}
+        onSave={(v) => {
+          // Detect if the new target immediately ends the match.
+          const winnerId = !finished ? computeWinner({ ...match, targetScore: v }) : null;
+          setTargetScore(match.id, v);
+          setTargetOpen(false);
+          if (winnerId) {
+            const name = winnerId === teamA.id ? teamA.name : teamB.name;
+            setToast(t.matchEndedToast.replace('{team}', name).replace('{score}', String(v)));
+          }
+        }}
+      />
+
+      <Toast message={toast} onHide={() => setToast(null)} />
 
       {/* Share dialog */}
       <Modal visible={shareOpen} transparent animationType="fade" onRequestClose={() => setShareOpen(false)}>

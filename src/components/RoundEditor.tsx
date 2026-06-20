@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Modal, Pressable, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { Button } from './ui';
+import { NumberPad } from './NumberPad';
 import { Match, Round, teamById } from '../types';
 
 export function RoundEditor({
@@ -61,33 +54,21 @@ export function RoundEditor({
     winnerTeamId === match.teams[0].id ? c.teamA : c.teamB;
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable
         onPress={onClose}
-        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' }}
+        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', padding: s(20) }}
       >
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <Pressable
-            onPress={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: c.surface,
-              borderTopLeftRadius: theme.radius + 8,
-              borderTopRightRadius: theme.radius + 8,
-              padding: s(20),
-              paddingBottom: s(34),
-            }}
-          >
-            <View
-              style={{
-                alignSelf: 'center',
-                width: s(40),
-                height: s(5),
-                borderRadius: 3,
-                backgroundColor: c.border,
-                marginBottom: s(16),
-              }}
-            />
-
+        <Pressable
+          onPress={(e) => e.stopPropagation()}
+          style={{
+            width: '100%',
+            maxWidth: s(380),
+            backgroundColor: c.surface,
+            borderRadius: theme.radius + 8,
+            padding: s(20),
+          }}
+        >
             {/* Title */}
             <Text style={{ color: c.text, fontSize: s(20), fontWeight: '800', marginBottom: s(16) }}>
               {isEditing ? t.editRound : t.addRound}
@@ -153,28 +134,27 @@ export function RoundEditor({
             <Text style={{ color: c.textMuted, fontSize: s(13), fontWeight: '700', marginBottom: s(10) }}>
               {t.pointsEarned}
             </Text>
-            <TextInput
-              value={points}
-              onChangeText={setPoints}
-              keyboardType="number-pad"
-              placeholder="0"
-              placeholderTextColor={c.textMuted}
-              autoFocus
-              onSubmitEditing={() => valid && onSave(winnerTeamId, numeric)}
+            {/* Big value display (no OS keyboard — stays fully visible) */}
+            <View
               style={{
                 backgroundColor: c.surfaceAlt,
                 borderRadius: theme.radius,
-                height: s(64),
-                textAlign: 'center',
-                fontSize: s(32),
-                fontWeight: '900',
-                color: c.text,
+                height: s(70),
+                alignItems: 'center',
+                justifyContent: 'center',
                 borderWidth: 1,
-                borderColor: c.border,
-                marginBottom: s(20),
+                borderColor: lockTeam ? lockedColor : c.border,
+                marginBottom: s(14),
               }}
-            />
+            >
+              <Text style={{ color: points ? c.text : c.textMuted, fontSize: s(38), fontWeight: '900' }}>
+                {points || '0'}
+              </Text>
+            </View>
 
+            <NumberPad value={points} onChange={setPoints} />
+
+            <View style={{ height: s(6) }} />
             <Button
               label={t.save}
               onPress={() => valid && onSave(winnerTeamId, numeric)}
@@ -187,8 +167,7 @@ export function RoundEditor({
             ) : (
               <Button label={t.cancel} variant="ghost" onPress={onClose} fullWidth />
             )}
-          </Pressable>
-        </KeyboardAvoidingView>
+        </Pressable>
       </Pressable>
     </Modal>
   );

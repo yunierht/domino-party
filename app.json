@@ -2,7 +2,7 @@
   "expo": {
     "name": "Domino Party",
     "slug": "domino-party",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "scheme": "dominoparty",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
