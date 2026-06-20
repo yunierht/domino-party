@@ -14,7 +14,7 @@
     },
     "android": {
       "package": "com.yht.dominoparty",
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "backgroundColor": "#18113A",
         "foregroundImage": "./assets/adaptive-foreground.png"
