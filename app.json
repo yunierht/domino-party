@@ -14,7 +14,10 @@
     },
     "android": {
       "package": "com.yht.dominoparty",
-      "versionCode": 4,
+      "versionCode": 5,
+      "blockedPermissions": [
+        "android.permission.ACTIVITY_RECOGNITION"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#18113A",
         "foregroundImage": "./assets/adaptive-foreground.png"
