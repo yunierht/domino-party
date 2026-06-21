@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeContext';
@@ -43,6 +43,24 @@ export function ScoreRing({
   const pop = useRef(new Animated.Value(1)).current;
   const beat = useRef(new Animated.Value(1)).current;
   const firstRun = useRef(true);
+
+  // Roll the displayed number up/down to the new score.
+  const [shown, setShown] = useState(score);
+  const count = useRef(new Animated.Value(score)).current;
+  const prevScore = useRef(score);
+  useEffect(() => {
+    count.stopAnimation();
+    count.setValue(prevScore.current);
+    const id = count.addListener(({ value }) => setShown(Math.round(value)));
+    Animated.timing(count, {
+      toValue: score,
+      duration: 650,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start(() => setShown(score));
+    prevScore.current = score;
+    return () => count.removeListener(id);
+  }, [score, count]);
 
   useEffect(() => {
     Animated.timing(progress, {
@@ -114,7 +132,7 @@ export function ScoreRing({
       </Svg>
       <Animated.View style={{ alignItems: 'center', transform: [{ scale: pop }] }}>
         <Text style={{ color, fontSize: size * 0.33, fontWeight: '900', lineHeight: size * 0.36 }}>
-          {score}
+          {shown}
         </Text>
         {!!caption && (
           <Animated.Text

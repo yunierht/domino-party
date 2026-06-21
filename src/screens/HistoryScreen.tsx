@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { useGame } from '../state/GameContext';
@@ -12,11 +13,12 @@ import { teamById, teamTotal } from '../types';
 export function HistoryScreen() {
   const { theme, s } = useTheme();
   const { t, lang } = useI18n();
-  const { matches, setCurrent, deleteMatch } = useGame();
+  const { matches, setCurrent, deleteMatch, deleteAllMatches } = useGame();
   const { go } = useNav();
   const c = theme.colors;
 
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [clearAllOpen, setClearAllOpen] = useState(false);
 
   const open = (id: string) => {
     setCurrent(id);
@@ -25,7 +27,21 @@ export function HistoryScreen() {
 
   return (
     <ScrollView contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}>
-      <Header title={t.history} />
+      <Header
+        title={t.history}
+        right={
+          matches.length > 0 ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(4) }}>
+              <Pressable onPress={() => go('stats')} hitSlop={10} style={{ padding: s(6) }}>
+                <Feather name="bar-chart-2" size={s(22)} color={c.primary} />
+              </Pressable>
+              <Pressable onPress={() => setClearAllOpen(true)} hitSlop={10} style={{ padding: s(6) }}>
+                <Feather name="trash-2" size={s(20)} color={c.danger} />
+              </Pressable>
+            </View>
+          ) : undefined
+        }
+      />
 
       {matches.length === 0 ? (
         <Card style={{ alignItems: 'center', paddingVertical: s(30) }}>
@@ -95,6 +111,26 @@ export function HistoryScreen() {
           { label: t.cancel, variant: 'ghost', onPress: () => setPendingDelete(null) },
         ]}
         onRequestClose={() => setPendingDelete(null)}
+      />
+
+      <AppDialog
+        visible={clearAllOpen}
+        icon="trash-2"
+        iconColor={c.danger}
+        title={t.clearAllTitle}
+        message={t.clearAllBody}
+        actions={[
+          {
+            label: t.clearAll,
+            variant: 'danger',
+            onPress: () => {
+              deleteAllMatches();
+              setClearAllOpen(false);
+            },
+          },
+          { label: t.cancel, variant: 'ghost', onPress: () => setClearAllOpen(false) },
+        ]}
+        onRequestClose={() => setClearAllOpen(false)}
       />
     </ScrollView>
   );

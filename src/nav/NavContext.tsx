@@ -5,6 +5,7 @@ export type ScreenName =
   | 'newMatch'
   | 'game'
   | 'history'
+  | 'stats'
   | 'settings'
   | 'watch'
   | 'howto'

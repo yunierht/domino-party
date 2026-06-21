@@ -26,4 +26,6 @@ export const KEYS = {
   theme: 'dominoes:theme',
   lang: 'dominoes:lang',
   displayName: 'dominoes:displayName',
+  prefs: 'dominoes:prefs',
+  lastPlayDay: 'dominoes:lastPlayDay',
 } as const;

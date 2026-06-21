@@ -2,7 +2,7 @@
   "expo": {
     "name": "Domino Party",
     "slug": "domino-party",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "scheme": "dominoparty",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -33,7 +33,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#0C0E12"
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "extra": {
       "eas": {

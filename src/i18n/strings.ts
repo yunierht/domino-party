@@ -57,7 +57,22 @@ export interface Strings {
   deleteMatch: string;
   confirmDeleteMatch: string;
   longPressHint: string;
+  clearAll: string;
+  clearAllTitle: string;
+  clearAllBody: string;
+  newDayTitle: string;
+  newDayBody: string;
+  keepGames: string;
   // Settings
+  announcer: string;
+  announceWinnerTitle: string;
+  announceWinnerDesc: string;
+  voiceLabel: string;
+  voiceAnnouncer: string;
+  voiceHype: string;
+  voiceDeep: string;
+  voiceRobot: string;
+  previewVoice: string;
   appearance: string;
   themeDark: string;
   themeCubano: string;
@@ -123,6 +138,29 @@ export interface Strings {
   howtoB3: string;
   howtoT4: string;
   howtoB4: string;
+  // Sound
+  soundLabel: string;
+  soundEffectsTitle: string;
+  soundEffectsDesc: string;
+  // Match recap & stats
+  recapTitle: string;
+  momentum: string;
+  statDuration: string;
+  statBestRound: string;
+  statMargin: string;
+  skunk: string;
+  shareRecap: string;
+  recapShareMessage: string; // {winner}{ws}{ls}{loser}{rounds}{dur}
+  viewStats: string;
+  statsTitle: string;
+  rivalriesLabel: string;
+  leaderboardLabel: string;
+  noStats: string;
+  played: string;
+  streakLabel: string;
+  biggestWin: string;
+  pollonasLabel: string;
+  pollonasLegend: string;
   // Generic
   confirm: string;
 }
@@ -177,6 +215,21 @@ const en: Strings = {
   deleteMatch: 'Delete match',
   confirmDeleteMatch: 'Delete this match permanently?',
   longPressHint: 'Tip: long-press a match to delete it',
+  clearAll: 'Clear All',
+  clearAllTitle: 'Clear all history?',
+  clearAllBody: 'This permanently deletes every saved match. This can’t be undone.',
+  newDayTitle: 'New day',
+  newDayBody: 'It’s a new day. Clear previous games so today’s stats start fresh?',
+  keepGames: 'Keep games',
+  announcer: 'Winner Announcement',
+  announceWinnerTitle: 'Announce the winner',
+  announceWinnerDesc: 'Say the winning team out loud when a match ends.',
+  voiceLabel: 'Voice',
+  voiceAnnouncer: 'Announcer',
+  voiceHype: 'Hype',
+  voiceDeep: 'Deep',
+  voiceRobot: 'Robot',
+  previewVoice: 'Preview voice',
   appearance: 'Appearance',
   themeDark: 'Dark',
   themeCubano: 'Cuban Board',
@@ -241,6 +294,27 @@ const en: Strings = {
   yourName: 'Your name',
   syncing: 'Syncing…',
   youHaveControl: 'You now have control of scoring',
+  soundLabel: 'Sound',
+  soundEffectsTitle: 'Sound effects',
+  soundEffectsDesc: 'A soft click when scoring and a chime when a match is won.',
+  recapTitle: 'Match Recap',
+  momentum: 'Momentum',
+  statDuration: 'Duration',
+  statBestRound: 'Best round',
+  statMargin: 'Margin',
+  skunk: 'SKUNK',
+  shareRecap: 'Share result',
+  recapShareMessage: '🏆 {winner} won {ws}–{ls} over {loser}!\n{rounds} rounds · {dur}\nScored with Domino Party',
+  viewStats: 'Stats & Rivalries',
+  statsTitle: 'Stats & Rivalries',
+  rivalriesLabel: 'Rivalries',
+  leaderboardLabel: 'Leaderboard',
+  noStats: 'Finish a few matches and your stats and rivalries will show up here.',
+  played: 'Played',
+  streakLabel: 'Streak',
+  biggestWin: 'Biggest win',
+  pollonasLabel: 'Pollonas',
+  pollonasLegend: 'Green = won (rival on 0) · Red = lost (you on 0)',
   confirm: 'OK',
 };
 
@@ -294,6 +368,21 @@ const es: Strings = {
   deleteMatch: 'Eliminar partida',
   confirmDeleteMatch: '¿Eliminar esta partida permanentemente?',
   longPressHint: 'Consejo: mantén presionada una partida para eliminarla',
+  clearAll: 'Borrar Todo',
+  clearAllTitle: '¿Borrar todo el historial?',
+  clearAllBody: 'Esto elimina permanentemente todas las partidas guardadas. No se puede deshacer.',
+  newDayTitle: 'Nuevo día',
+  newDayBody: 'Es un nuevo día. ¿Borrar las partidas anteriores para que las estadísticas de hoy empiecen de cero?',
+  keepGames: 'Conservar',
+  announcer: 'Anuncio del Ganador',
+  announceWinnerTitle: 'Anunciar al ganador',
+  announceWinnerDesc: 'Dice en voz alta el equipo ganador cuando termina la partida.',
+  voiceLabel: 'Voz',
+  voiceAnnouncer: 'Locutor',
+  voiceHype: 'Animado',
+  voiceDeep: 'Grave',
+  voiceRobot: 'Robot',
+  previewVoice: 'Probar voz',
   appearance: 'Apariencia',
   themeDark: 'Oscuro',
   themeCubano: 'Mesa Cubana',
@@ -358,6 +447,27 @@ const es: Strings = {
   yourName: 'Tu nombre',
   syncing: 'Sincronizando…',
   youHaveControl: 'Ahora tienes el control de la anotación',
+  soundLabel: 'Sonido',
+  soundEffectsTitle: 'Efectos de sonido',
+  soundEffectsDesc: 'Un clic suave al anotar y un sonido al ganar la partida.',
+  recapTitle: 'Resumen de Partida',
+  momentum: 'Impulso',
+  statDuration: 'Duración',
+  statBestRound: 'Mejor ronda',
+  statMargin: 'Diferencia',
+  skunk: 'BLANQUEADA',
+  shareRecap: 'Compartir resultado',
+  recapShareMessage: '🏆 ¡{winner} ganó {ws}–{ls} a {loser}!\n{rounds} rondas · {dur}\nAnotado con Domino Party',
+  viewStats: 'Estadísticas y Rivalidades',
+  statsTitle: 'Estadísticas y Rivalidades',
+  rivalriesLabel: 'Rivalidades',
+  leaderboardLabel: 'Clasificación',
+  noStats: 'Termina algunas partidas y aquí aparecerán tus estadísticas y rivalidades.',
+  played: 'Jugadas',
+  streakLabel: 'Racha',
+  biggestWin: 'Mayor victoria',
+  pollonasLabel: 'Pollonas',
+  pollonasLegend: 'Verde = ganadas (rival en 0) · Rojo = perdidas (tú en 0)',
   confirm: 'OK',
 };
 

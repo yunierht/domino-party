@@ -7,7 +7,7 @@ import { useNav } from '../nav/NavContext';
 import { Button, Card, Field } from '../components/ui';
 import { Header } from '../components/Header';
 
-const PRESETS = [100, 150, 200];
+const PRESETS = [100, 150];
 
 export function NewMatchScreen() {
   const { theme, s } = useTheme();

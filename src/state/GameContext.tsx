@@ -78,6 +78,7 @@ type Action =
   | { type: 'DELETE_ROUND'; matchId: string; roundId: string }
   | { type: 'SET_TARGET_SCORE'; matchId: string; targetScore: number }
   | { type: 'DELETE_MATCH'; matchId: string }
+  | { type: 'DELETE_ALL_MATCHES' }
   | { type: 'SET_CURRENT'; matchId: string | null }
   | { type: 'SET_SHARE_CODE'; matchId: string; shareCode: string }
   | { type: 'STOP_SHARING'; matchId: string };
@@ -201,6 +202,9 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, matches, currentMatchId };
     }
 
+    case 'DELETE_ALL_MATCHES':
+      return { ...state, matches: [], currentMatchId: null };
+
     case 'SET_CURRENT':
       return { ...state, currentMatchId: action.matchId };
 
@@ -243,6 +247,7 @@ interface GameContextValue extends GameState {
   deleteRound: (matchId: string, roundId: string) => void;
   setTargetScore: (matchId: string, targetScore: number) => void;
   deleteMatch: (matchId: string) => void;
+  deleteAllMatches: () => void;
   setCurrent: (matchId: string | null) => void;
   /** Start broadcasting a match live; resolves with its share code. */
   shareMatch: (matchId: string) => Promise<string>;
@@ -451,6 +456,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setTargetScore: (matchId, targetScore) =>
       dispatch({ type: 'SET_TARGET_SCORE', matchId, targetScore }),
     deleteMatch: (matchId) => dispatch({ type: 'DELETE_MATCH', matchId }),
+    deleteAllMatches: () => dispatch({ type: 'DELETE_ALL_MATCHES' }),
     setCurrent: (matchId) => dispatch({ type: 'SET_CURRENT', matchId }),
     shareMatch,
     stopSharing,

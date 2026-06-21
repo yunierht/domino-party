@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Share, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Animated, Easing, Modal, Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { useGame } from '../state/GameContext';
@@ -12,6 +13,9 @@ import { RoundEditor } from '../components/RoundEditor';
 import { TargetEditor } from '../components/TargetEditor';
 import { Toast } from '../components/Toast';
 import { ScoreRing } from '../components/ScoreRing';
+import { usePrefs } from '../state/PrefsContext';
+import { speakWinner } from '../announce/voice';
+import { initSounds, playTap, playWin } from '../sound/sounds';
 import { AppDialog } from '../components/AppDialog';
 import { isFirebaseConfigured } from '../firebase/config';
 import { joinUrl } from '../config/links';
@@ -49,6 +53,28 @@ export function GameScreen() {
   const [sharing, setSharing] = useState(false);
   const [targetOpen, setTargetOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+
+  // Haptic + optional sound/voice the moment the match is won.
+  const { announceWinner, voice, sound } = usePrefs();
+  const wasFinished = useRef(!!currentMatch?.winnerTeamId);
+  useEffect(() => {
+    const m = currentMatch;
+    const fin = !!m?.winnerTeamId;
+    if (fin && !wasFinished.current && m) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      if (sound) playWin();
+      if (announceWinner) {
+        const wName = m.teams.find((tm) => tm.id === m.winnerTeamId)?.name ?? '';
+        speakWinner(wName, voice);
+      }
+    }
+    wasFinished.current = fin;
+  }, [currentMatch?.winnerTeamId]);
+
+  // Warm up the audio players when sound is enabled so the first tap is instant.
+  useEffect(() => {
+    if (sound) initSounds();
+  }, [sound]);
 
   // Show the themed take-over prompt whenever I'm the controller and a request
   // is pending (clears itself once approved/denied updates the shared doc).
@@ -96,7 +122,11 @@ export function GameScreen() {
 
   const onSave = (winnerTeamId: string, points: number) => {
     if (editing) editRound(match.id, editing.id, winnerTeamId, points);
-    else addRound(match.id, winnerTeamId, points);
+    else {
+      addRound(match.id, winnerTeamId, points);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      if (sound) playTap();
+    }
     setEditorOpen(false);
   };
   const onDelete = () => {
@@ -396,6 +426,8 @@ export function GameScreen() {
   );
 }
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 function TeamPanel({
   match,
   team,
@@ -430,6 +462,23 @@ function TeamPanel({
   const c = theme.colors;
   const locked = finished || readOnly;
   const playerLine = team.players.filter((p) => p.trim()).join(' & ');
+  const pressScale = useRef(new Animated.Value(1)).current;
+  const spring = (toValue: number, opts: object) =>
+    Animated.spring(pressScale, { toValue, useNativeDriver: true, ...opts }).start();
+
+  // The winning team's panel gives a single heartbeat (lub-dub) when it wins.
+  const winBeat = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (!isWinner) return;
+    const thump = (to: number, duration: number, easing: (v: number) => number) =>
+      Animated.timing(winBeat, { toValue: to, duration, easing, useNativeDriver: true });
+    Animated.sequence([
+      thump(1.06, 150, Easing.out(Easing.quad)), // lub
+      thump(1.0, 140, Easing.in(Easing.quad)),
+      thump(1.05, 150, Easing.out(Easing.quad)), // dub
+      thump(1.0, 180, Easing.in(Easing.quad)),
+    ]).start();
+  }, [isWinner, winBeat]);
 
   // This team's rounds, tagged with their global round number.
   const teamRounds = match.rounds
@@ -437,9 +486,11 @@ function TeamPanel({
     .filter((x) => x.r.winnerTeamId === team.id);
 
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={locked ? undefined : onAdd}
-      style={({ pressed }) => ({
+      onPressIn={locked ? undefined : () => spring(0.96, { speed: 50, bounciness: 0 })}
+      onPressOut={locked ? undefined : () => spring(1, { friction: 4, tension: 140 })}
+      style={{
         backgroundColor: c.surface,
         borderRadius: theme.radius + 4,
         padding: s(18),
@@ -452,8 +503,8 @@ function TeamPanel({
         shadowRadius: s(16),
         shadowOffset: { width: 0, height: s(9) },
         elevation: 12,
-        transform: [{ translateY: pressed && !locked ? s(2) : 0 }, { scale: pressed && !locked ? 0.995 : 1 }],
-      })}
+        transform: [{ scale: pressScale }, { scale: winBeat }],
+      }}
     >
       {/* Glossy top sheen for depth */}
       <LinearGradient
@@ -569,6 +620,6 @@ function TeamPanel({
           </Text>
         </View>
       )}
-    </Pressable>
+    </AnimatedPressable>
   );
 }

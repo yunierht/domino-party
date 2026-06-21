@@ -33,6 +33,7 @@ export function Menu({ visible, onClose }: { visible: boolean; onClose: () => vo
   };
 
   const items: { icon: keyof typeof Feather.glyphMap; label: string; run: () => void }[] = [
+    { icon: 'bar-chart-2', label: t.statsTitle, run: () => go('stats') },
     { icon: 'help-circle', label: t.howToPlay, run: () => go('howto') },
     { icon: 'share-2', label: t.inviteFriends, run: invite },
     { icon: 'settings', label: t.settings, run: () => go('settings') },

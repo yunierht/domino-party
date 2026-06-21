@@ -4,7 +4,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { Button } from './ui';
 
-const PRESETS = [100, 150, 200];
+const PRESETS = [100, 150];
 
 /** Bottom-sheet to change a match's target score mid-game. */
 export function TargetEditor({
