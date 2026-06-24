@@ -17,6 +17,7 @@ import { usePrefs } from '../state/PrefsContext';
 import { speakWinner } from '../announce/voice';
 import { initSounds, playTap, playWin } from '../sound/sounds';
 import { AppDialog } from '../components/AppDialog';
+import QRCode from 'react-native-qrcode-svg';
 import { isFirebaseConfigured } from '../firebase/config';
 import { joinUrl } from '../config/links';
 import { Match, Round, Team, computeWinner, pointsToWin, teamTotal } from '../types';
@@ -62,7 +63,8 @@ export function GameScreen() {
     const fin = !!m?.winnerTeamId;
     if (fin && !wasFinished.current && m) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-      if (sound) playWin();
+      // Only the active scorer hears SFX — followers of a shared game stay quiet.
+      if (sound && canEdit) playWin();
       if (announceWinner) {
         const wName = m.teams.find((tm) => tm.id === m.winnerTeamId)?.name ?? '';
         speakWinner(wName, voice);
@@ -125,7 +127,7 @@ export function GameScreen() {
     else {
       addRound(match.id, winnerTeamId, points);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-      if (sound) playTap();
+      if (sound && canEdit) playTap();
     }
     setEditorOpen(false);
   };
@@ -269,29 +271,6 @@ export function GameScreen() {
           </View>
         )}
 
-        {/* Winner banner */}
-        {finished && match.winnerTeamId && (
-          <LinearGradient
-            colors={c.gradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{
-              marginBottom: s(16),
-              borderRadius: theme.radius + 4,
-              padding: s(18),
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ fontSize: s(30) }}>🏆</Text>
-            <Text style={{ color: c.onPrimary, fontSize: s(13), fontWeight: '700', opacity: 0.9 }}>
-              {t.matchOver}
-            </Text>
-            <Text style={{ color: c.onPrimary, fontSize: s(24), fontWeight: '900', marginTop: s(2) }}>
-              {match.winnerTeamId === teamA.id ? teamA.name : teamB.name}
-            </Text>
-          </LinearGradient>
-        )}
-
         {/* Stacked, full-width team panels */}
         <TeamPanel
           match={match}
@@ -391,8 +370,13 @@ export function GameScreen() {
             <Text style={{ color: c.text, fontSize: s(54), fontWeight: '900', letterSpacing: s(6), marginVertical: s(10) }}>
               {match.shareCode}
             </Text>
+            {!!match.shareCode && (
+              <View style={{ backgroundColor: '#FFFFFF', padding: s(12), borderRadius: s(14), marginBottom: s(16) }}>
+                <QRCode value={joinUrl(match.shareCode)} size={s(168)} color="#0B0B0C" backgroundColor="#FFFFFF" />
+              </View>
+            )}
             <Text style={{ color: c.textMuted, fontSize: s(14), textAlign: 'center', marginBottom: s(20), lineHeight: s(20) }}>
-              {t.shareHint}
+              {t.scanToJoin}
             </Text>
             <Button label={t.shareCodeAction} onPress={doNativeShare} fullWidth />
             <View style={{ height: s(10) }} />

@@ -27,10 +27,10 @@ export function SettingsScreen() {
   ];
 
   const themeMeta: { name: ThemeName; title: string; desc: string }[] = [
+    { name: 'carbon', title: t.themeCarbon, desc: t.themeCarbonDesc },
     { name: 'dark', title: t.themeDark, desc: t.themeDarkDesc },
     { name: 'cubano', title: t.themeCubano, desc: t.themeCubanoDesc },
     { name: 'usa', title: t.themeUsa, desc: t.themeUsaDesc },
-    { name: 'carbon', title: t.themeCarbon, desc: t.themeCarbonDesc },
   ];
 
   const langMeta: { code: Lang; label: string }[] = [

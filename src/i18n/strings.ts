@@ -11,6 +11,7 @@ export interface Strings {
   settings: string;
   noActiveMatch: string;
   tapToStart: string;
+  demoLabel: string;
   // New match
   setupMatch: string;
   team: string;
@@ -95,6 +96,7 @@ export interface Strings {
   enterCode: string;
   watch: string;
   shareHint: string;
+  scanToJoin: string;
   shareCodeAction: string;
   shareMessage: string; // template with {code}
   gameNotFound: string;
@@ -173,6 +175,7 @@ const en: Strings = {
   settings: 'Settings',
   noActiveMatch: 'No match in progress',
   tapToStart: 'Start a new match to begin scoring',
+  demoLabel: 'Sample game',
   setupMatch: 'Set Up Match',
   team: 'Team',
   teamName: 'Team name',
@@ -267,6 +270,7 @@ const en: Strings = {
   enterCode: 'Enter game code',
   watch: 'Watch',
   shareHint: 'Others can follow this game live by entering this code in "Watch a Game".',
+  scanToJoin: 'Scan to follow live — or enter this code in "Watch a Game".',
   shareCodeAction: 'Share code',
   shareMessage: 'Follow my Domino Party game live!\n\nTap to join: {link}\n\n(Or open Domino Party → Watch a Game → enter code {code})',
   gameNotFound: 'No game found with that code. Double-check it.',
@@ -326,6 +330,7 @@ const es: Strings = {
   settings: 'Ajustes',
   noActiveMatch: 'No hay partida en curso',
   tapToStart: 'Inicia una nueva partida para anotar',
+  demoLabel: 'Partida de ejemplo',
   setupMatch: 'Configurar Partida',
   team: 'Equipo',
   teamName: 'Nombre del equipo',
@@ -420,6 +425,7 @@ const es: Strings = {
   enterCode: 'Ingresa el código',
   watch: 'Ver',
   shareHint: 'Otros pueden seguir esta partida en vivo ingresando este código en "Ver una Partida".',
+  scanToJoin: 'Escanea para seguir en vivo — o ingresa este código en "Ver una Partida".',
   shareCodeAction: 'Compartir código',
   shareMessage: '¡Sigue mi partida de Domino Party en vivo!\n\nToca para unirte: {link}\n\n(O abre Domino Party → Ver una Partida → ingresa el código {code})',
   gameNotFound: 'No se encontró una partida con ese código. Verifícalo.',

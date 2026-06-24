@@ -8,6 +8,8 @@ import { useNav } from '../nav/NavContext';
 import { Button, Card } from '../components/ui';
 import { Logo } from '../components/Logo';
 import { Menu } from '../components/Menu';
+import { FloatingTiles } from '../components/FloatingTiles';
+import { DemoMatch } from '../components/DemoMatch';
 import { teamTotal } from '../types';
 
 export function HomeScreen() {
@@ -40,10 +42,12 @@ export function HomeScreen() {
   }, [beat]);
 
   return (
-    <ScrollView
-      contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={{ flex: 1 }}>
+      <FloatingTiles />
+      <ScrollView
+        contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}
+        showsVerticalScrollIndicator={false}
+      >
       {/* Top bar with menu button */}
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: s(2) }}>
         <Pressable onPress={() => setMenuOpen(true)} hitSlop={12} style={{ padding: s(6) }}>
@@ -58,6 +62,7 @@ export function HomeScreen() {
 
       {/* Active match resume card */}
       {activeMatch ? (
+        <>
         <Pressable
           onPress={() => go('game')}
           style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1, marginBottom: s(16) })}
@@ -102,19 +107,13 @@ export function HomeScreen() {
             </Text>
           </Card>
         </Pressable>
+          <Button label={t.newMatch} onPress={() => go('newMatch')} fullWidth />
+          <View style={{ height: s(12) }} />
+        </>
       ) : (
-        <Card style={{ marginBottom: s(16), alignItems: 'center', paddingVertical: s(28) }}>
-          <Text style={{ color: c.text, fontSize: s(18), fontWeight: '700' }}>
-            {t.noActiveMatch}
-          </Text>
-          <Text style={{ color: c.textMuted, fontSize: s(14), marginTop: s(6), textAlign: 'center' }}>
-            {t.tapToStart}
-          </Text>
-        </Card>
+        <DemoMatch onNewMatch={() => go('newMatch')} />
       )}
 
-      <Button label={t.newMatch} onPress={() => go('newMatch')} fullWidth />
-      <View style={{ height: s(12) }} />
       <Button label={t.watchGame} onPress={() => go('watch')} variant="secondary" fullWidth />
       <View style={{ height: s(12) }} />
       <Button
@@ -143,7 +142,8 @@ export function HomeScreen() {
           </Animated.Text>
         </View>
       </Pressable>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 

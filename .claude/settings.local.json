@@ -9,7 +9,8 @@
       "PowerShell($src = \"C:\\\\Development\\\\Dominoes\\\\_scaffold\"; Get-ChildItem -Path $src -Force | ForEach-Object { Move-Item -Path $_.FullName -Destination \"C:\\\\Development\\\\Dominoes\\\\\" -Force }; Remove-Item -Path $src -Recurse -Force; Get-ChildItem -Path \"C:\\\\Development\\\\Dominoes\" -Force | Select-Object Name)",
       "WebSearch",
       "WebFetch(domain:expo.dev)",
-      "PowerShell(Set-Location \"C:\\\\Development\\\\Dominoes\"; \"=== branch ===\"; git branch --show-current; \"=== changed file count ===\"; \\(git status --porcelain | Measure-Object\\).Count; \"=== node_modules ignored? ===\"; git check-ignore node_modules; \"=== sample status ===\"; git status --short | Select-Object -First 25)"
+      "PowerShell(Set-Location \"C:\\\\Development\\\\Dominoes\"; \"=== branch ===\"; git branch --show-current; \"=== changed file count ===\"; \\(git status --porcelain | Measure-Object\\).Count; \"=== node_modules ignored? ===\"; git check-ignore node_modules; \"=== sample status ===\"; git status --short | Select-Object -First 25)",
+      "Bash(git push *)"
     ]
   }
 }
