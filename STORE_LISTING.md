@@ -44,7 +44,7 @@ Everyone (no objectionable content)
 Yunierht@yahoo.com
 
 ## Privacy policy URL
-https://yunierht.github.io/domino-party/
+https://dominoparty.com/privacy/
 
 ## Tags / keywords
 dominoes, domino, score, scoreboard, scorekeeper, points, Cuban dominoes

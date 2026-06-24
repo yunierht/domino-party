@@ -3,61 +3,431 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Domino Party — Privacy Policy</title>
+  <title>Domino Party — Dominoes Scorekeeper for Two Teams</title>
+  <meta name="description" content="The easiest way to keep score for dominoes. Big score rings, live game-following with a QR code, stats & rivalries, four themes — free, no ads, no account. English & Spanish." />
+  <meta name="theme-color" content="#070709" />
+  <link rel="canonical" href="https://dominoparty.com/" />
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Domino Party — Dominoes Scorekeeper" />
+  <meta property="og:description" content="Keep score, share the game live, and remember every rivalry. Free, no ads, no account." />
+  <meta property="og:url" content="https://dominoparty.com/" />
+  <meta property="og:image" content="https://dominoparty.com/img/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://dominoparty.com/img/og.png" />
+  <link rel="icon" type="image/png" href="img/icon.png" />
+  <link rel="apple-touch-icon" href="img/icon.png" />
   <style>
-    :root { color-scheme: light dark; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      max-width: 760px; margin: 0 auto; padding: 32px 20px 80px;
-      line-height: 1.6; color: #1a1a1a; background: #fff;
+    :root{
+      --bg:#070709; --bg2:#0b0d12; --surface:#14161b; --surface2:#1b1e25;
+      --border:#272b34; --text:#f5f6f8; --muted:#9096a1;
+      --cyan:#22D3EE; --purple:#A78BFA; --blue:#5B8DEF; --pink:#F472B6; --red:#D2515F;
+      --grad:linear-gradient(135deg,#22D3EE,#A78BFA);
+      --radius:18px; --maxw:1120px;
     }
-    @media (prefers-color-scheme: dark) {
-      body { color: #e6e6e6; background: #0e0e12; }
-      a { color: #8ab4ff; }
-      h1, h2 { color: #fff; }
+    *{box-sizing:border-box; margin:0; padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:var(--bg); color:var(--text); line-height:1.6; overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
     }
-    h1 { font-size: 1.9rem; margin-bottom: 4px; }
-    h2 { font-size: 1.25rem; margin-top: 2rem; }
-    .eff { color: #888; font-size: .95rem; margin-bottom: 1.5rem; }
-    code { background: rgba(127,127,127,.15); padding: 1px 5px; border-radius: 4px; }
+    a{color:inherit; text-decoration:none}
+    .wrap{max-width:var(--maxw); margin:0 auto; padding:0 22px}
+    .grad-text{background:var(--grad); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+    .eyebrow{display:inline-block; font-size:.8rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--cyan); margin-bottom:18px}
+
+    /* ambient background glows */
+    .glow{position:fixed; border-radius:50%; filter:blur(90px); opacity:.5; z-index:-1; pointer-events:none}
+    .glow.a{width:520px;height:520px; top:-160px; left:-120px; background:radial-gradient(circle,#1a6b8c,transparent 70%)}
+    .glow.b{width:560px;height:560px; top:280px; right:-180px; background:radial-gradient(circle,#5a3f9e,transparent 70%)}
+
+    /* header */
+    header.nav{position:sticky; top:0; z-index:50; transition:background .3s,border-color .3s, backdrop-filter .3s; border-bottom:1px solid transparent}
+    header.nav.scrolled{background:rgba(7,7,9,.72); backdrop-filter:blur(14px); border-bottom-color:var(--border)}
+    .nav-inner{display:flex; align-items:center; justify-content:space-between; height:68px}
+    .brand{display:flex; align-items:center; gap:11px}
+    .brand img{height:50px; width:auto; display:block}
+    .hero-logo{height:115px; width:auto; display:block; margin-bottom:22px; filter:drop-shadow(0 8px 24px rgba(0,0,0,.45))}
+    .nav-links{display:flex; align-items:center; gap:30px}
+    .nav-links a{color:var(--muted); font-weight:600; font-size:.95rem; transition:color .2s}
+    .nav-links a:hover{color:var(--text)}
+    .nav-right{display:flex; align-items:center; gap:14px; margin-left:auto}
+    .lang{display:flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; font-size:.8rem; font-weight:800}
+    .lang button{background:none; border:0; color:var(--muted); padding:7px 12px; cursor:pointer; transition:.2s}
+    .lang button.on{background:var(--grad); color:#04121a}
+    .btn{display:inline-flex; align-items:center; gap:9px; font-weight:800; border-radius:999px; padding:12px 20px; cursor:pointer; border:0; transition:transform .15s, box-shadow .2s; font-size:.95rem; white-space:nowrap}
+    .btn-grad{background:var(--grad); color:#04121a; box-shadow:0 8px 26px rgba(34,211,238,.28)}
+    .btn-grad:hover{transform:translateY(-2px); box-shadow:0 12px 32px rgba(34,211,238,.36)}
+    .btn-ghost{background:var(--surface); color:var(--text); border:1px solid var(--border)}
+    .btn-ghost:hover{border-color:var(--cyan); color:#fff}
+    .nav-links .menu-btn, .menu-btn{display:none}
+
+    /* hero */
+    .hero{padding:74px 0 70px}
+    .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:54px; align-items:center}
+    h1.hero-title{font-size:clamp(2.4rem,5.4vw,4rem); line-height:1.04; font-weight:900; letter-spacing:-.025em}
+    .hero p.lead{font-size:1.18rem; color:#c8ccd4; margin:22px 0 30px; max-width:540px}
+    .cta-row{display:flex; gap:14px; flex-wrap:wrap; align-items:center}
+    .store-badge{display:inline-flex; align-items:center; gap:11px; background:#111317; border:1px solid var(--border); border-radius:14px; padding:11px 18px; transition:.2s}
+    .store-badge:hover{border-color:#3a4150; transform:translateY(-2px)}
+    .store-badge svg{width:24px;height:24px; flex:none}
+    .store-badge .sb-sm{font-size:.66rem; color:var(--muted); line-height:1.1}
+    .store-badge .sb-lg{font-size:1.02rem; font-weight:800; line-height:1.15}
+    .store-badge.soon{opacity:.6}
+    .beta-note{margin-top:16px; font-size:.86rem; color:var(--muted)}
+    .beta-note b{color:var(--cyan)}
+
+    /* phone mockup */
+    .phone-wrap{display:flex; justify-content:center; position:relative}
+    .float-tile{position:absolute; opacity:.5; animation:bob 6s ease-in-out infinite}
+    .phone{position:relative; width:300px; border-radius:42px; background:linear-gradient(160deg,#1c1f27,#0c0e12); border:1px solid #2b2f39; padding:14px; box-shadow:0 40px 90px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.03) inset; transform:rotate(2.5deg)}
+    .screen{background:#070709; border-radius:30px; padding:20px 16px 22px; overflow:hidden}
+    .scr-head{display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:.78rem; font-weight:700; margin-bottom:16px}
+    .scr-head .live{display:flex;align-items:center;gap:6px; color:var(--red); font-weight:900}
+    .scr-head .live i{width:8px;height:8px;border-radius:50%; background:var(--red); display:inline-block; animation:pulse 1.6s infinite}
+    .team{background:#14161b; border:1px solid #23262e; border-radius:18px; padding:14px 15px; margin-bottom:12px; display:flex; align-items:center; gap:14px}
+    .team .info{flex:1; min-width:0}
+    .team .nm{font-weight:800; font-size:1.02rem}
+    .team .pl{color:var(--muted); font-size:.76rem; margin-top:2px}
+    .ring{width:74px;height:74px; flex:none; position:relative}
+    .ring svg{transform:rotate(-90deg)}
+    .ring .num{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center}
+    .ring .num b{font-size:1.5rem; font-weight:900; line-height:1}
+    .ring .num span{font-size:.6rem; color:var(--muted); font-weight:800}
+    .addbtn{margin-top:4px; border-radius:999px; padding:13px; text-align:center; font-weight:900; color:#04121a; background:var(--grad); font-size:.95rem; box-shadow:0 10px 24px -8px rgba(34,211,238,.5)}
+
+    /* sections */
+    section{padding:72px 0}
+    .sec-head{text-align:center; max-width:660px; margin:0 auto 50px}
+    .sec-head h2{font-size:clamp(1.9rem,3.8vw,2.7rem); font-weight:900; letter-spacing:-.02em}
+    .sec-head p{color:var(--muted); font-size:1.1rem; margin-top:14px}
+
+    .features{display:grid; grid-template-columns:repeat(3,1fr); gap:20px}
+    .card{background:linear-gradient(180deg,var(--surface),#101218); border:1px solid var(--border); border-radius:var(--radius); padding:26px; transition:transform .25s, border-color .25s}
+    .card:hover{transform:translateY(-5px); border-color:#3a4150}
+    .card .ico{width:48px;height:48px; border-radius:13px; display:flex; align-items:center; justify-content:center; margin-bottom:18px; background:rgba(34,211,238,.1); border:1px solid rgba(34,211,238,.22)}
+    .card .ico svg{width:24px;height:24px; stroke:var(--cyan)}
+    .card h3{font-size:1.18rem; font-weight:800; margin-bottom:9px}
+    .card p{color:var(--muted); font-size:.97rem}
+
+    /* live split */
+    .split{display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:center}
+    .split .pts li{display:flex; gap:13px; margin-bottom:20px; align-items:flex-start}
+    .split .pts .n{flex:none; width:32px;height:32px;border-radius:10px; background:var(--grad); color:#04121a; font-weight:900; display:flex;align-items:center;justify-content:center}
+    .split .pts h4{font-weight:800; font-size:1.05rem}
+    .split .pts p{color:var(--muted); font-size:.95rem}
+    .qr-card{background:linear-gradient(180deg,var(--surface),#0e1015); border:1px solid var(--border); border-radius:24px; padding:34px; text-align:center}
+    .qr-card .code{font-size:2.6rem; font-weight:900; letter-spacing:.32em; padding-left:.32em; background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent; margin:6px 0 22px}
+    .qr{width:172px;height:172px; margin:0 auto; background:#fff; border-radius:16px; padding:14px}
+    .qr svg{width:100%;height:100%}
+
+    /* themes */
+    .themes{display:grid; grid-template-columns:repeat(4,1fr); gap:18px}
+    .theme{border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; transition:transform .25s}
+    .theme:hover{transform:translateY(-5px)}
+    .theme .sw{height:120px; display:flex; align-items:flex-end; padding:14px}
+    .theme .swdot{display:flex; gap:7px}
+    .theme .swdot span{width:15px;height:15px;border-radius:50%; border:2px solid rgba(255,255,255,.25)}
+    .theme .lbl{padding:14px 16px; background:var(--surface); font-weight:800}
+    .theme .lbl small{display:block; color:var(--muted); font-weight:600; font-size:.8rem; margin-top:2px}
+
+    /* faq */
+    .faq{max-width:760px; margin:0 auto}
+    .qa{border:1px solid var(--border); border-radius:14px; margin-bottom:12px; background:var(--surface); overflow:hidden}
+    .qa summary{list-style:none; cursor:pointer; padding:20px 22px; font-weight:800; font-size:1.05rem; display:flex; justify-content:space-between; align-items:center; gap:14px}
+    .qa summary::-webkit-details-marker{display:none}
+    .qa summary .pm{color:var(--cyan); font-size:1.5rem; transition:transform .2s; flex:none}
+    .qa[open] summary .pm{transform:rotate(45deg)}
+    .qa .a{padding:0 22px 22px; color:var(--muted)}
+
+    /* cta band */
+    .cta-band{margin:30px auto 0; max-width:var(--maxw)}
+    .cta-inner{position:relative; border-radius:30px; overflow:hidden; padding:64px 30px; text-align:center; background:linear-gradient(135deg,#0e2a33,#241a3d); border:1px solid var(--border)}
+    .cta-inner h2{font-size:clamp(1.9rem,4vw,2.7rem); font-weight:900; letter-spacing:-.02em}
+    .cta-inner p{color:#c8ccd4; margin:14px 0 28px; font-size:1.1rem}
+
+    /* footer */
+    footer{border-top:1px solid var(--border); margin-top:80px; padding:40px 0 56px}
+    .foot{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px}
+    .foot .links{display:flex; gap:26px; flex-wrap:wrap}
+    .foot a{color:var(--muted); font-weight:600}
+    .foot a:hover{color:var(--cyan)}
+    .foot .copy{color:#5f636d; font-size:.88rem}
+    .foot .copy b{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+    /* reveal */
+    .reveal{opacity:0; transform:translateY(24px); transition:opacity .7s, transform .7s}
+    .reveal.in{opacity:1; transform:none}
+
+    @keyframes bob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-16px) rotate(4deg)}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+    @media(max-width:900px){
+      .hero-grid{grid-template-columns:1fr; gap:48px; text-align:center}
+      .hero p.lead{margin-left:auto;margin-right:auto}
+      .hero-logo{margin-left:auto;margin-right:auto; height:100px}
+      .cta-row{justify-content:center}
+      .features{grid-template-columns:1fr 1fr}
+      .split{grid-template-columns:1fr; gap:36px}
+      .themes{grid-template-columns:1fr 1fr}
+      .nav-links{display:none}
+    }
+    @media(max-width:560px){
+      .features{grid-template-columns:1fr}
+      .foot{flex-direction:column; text-align:center}
+      .phone{transform:none}
+    }
+    @media(prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
   </style>
 </head>
 <body>
-  <h1>Privacy Policy for Domino Party</h1>
-  <p class="eff"><strong>Effective date:</strong> June 17, 2026</p>
+  <div class="glow a"></div>
+  <div class="glow b"></div>
 
-  <p>Domino Party (“the App”, “we”, “us”) is a domino score-tracking app. This policy explains what information the App handles and how. By using the App you agree to this policy.</p>
-  <p>We keep things simple: <strong>the App has no user accounts, asks for no email or password, and shows no ads.</strong></p>
+  <!-- HEADER -->
+  <header class="nav" id="nav">
+    <div class="wrap nav-inner">
+      <nav class="nav-links">
+        <a href="#features" data-en="Features" data-es="Funciones"></a>
+        <a href="#live" data-en="Live play" data-es="En vivo"></a>
+        <a href="#themes" data-en="Themes" data-es="Temas"></a>
+        <a href="#faq" data-en="FAQ" data-es="Preguntas"></a>
+      </nav>
+      <div class="nav-right">
+        <div class="lang" role="group" aria-label="Language">
+          <button data-lang="en" class="on">EN</button>
+          <button data-lang="es">ES</button>
+        </div>
+        <a class="btn btn-grad" href="#download" data-en="Get the app" data-es="Descargar"></a>
+      </div>
+    </div>
+  </header>
 
-  <h2>1. Information we handle</h2>
-  <p><strong>a) Data stored only on your device.</strong> Your matches, teams, player names you type, scores, round history, settings (theme/language), and the display name you optionally enter are saved locally on your phone and are not sent to us unless you use live sharing. This data is removed if you delete the App.</p>
-  <p><strong>b) Data stored in the cloud when you share a game (optional).</strong> Only when you choose to share a game do we send that game’s information to our cloud database (Google Firebase / Cloud Firestore) so people with the game code can follow it live. This includes team names, player names, scores, rounds, a short game code, the display name you enter, and an anonymous identifier created for your device. Anyone who has the game code can view that shared game while it is active. Do not put sensitive personal information in team or player names if you plan to share a game.</p>
-  <p><strong>c) Anonymous authentication.</strong> To enable live sharing, the App uses Firebase Anonymous Authentication, which creates a random identifier for your device. It is not linked to your name, email, phone number, or any personal account.</p>
-  <p><strong>What we do NOT collect:</strong> we do not collect your name (beyond text you type), email, phone number, contacts, photos, precise location, or advertising identifiers. The App contains no third-party advertising.</p>
+  <a id="top"></a>
 
-  <h2>2. How we use the information</h2>
-  <p>To run the App’s features (keeping score on your device) and to power live game-following when you choose to share a game. We do not sell your information or use it for advertising.</p>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="reveal">
+        <img src="img/logo.png" alt="Domino Party" class="hero-logo" />
+        <span class="eyebrow" data-en="Free • No ads • No sign-up" data-es="Gratis • Sin anuncios • Sin registro"></span>
+        <h1 class="hero-title"><span data-en="Keep score." data-es="Lleva la cuenta."></span><br><span class="grad-text" data-en="Share the game." data-es="Comparte el juego."></span></h1>
+        <p class="lead" data-en="Domino Party is the easiest way to score dominoes for two teams — with big score rings, live game-following by QR, and stats that remember every rivalry." data-es="Domino Party es la forma más fácil de anotar el dominó para dos equipos — con anillos de puntuación, seguimiento en vivo por QR y estadísticas que recuerdan cada rivalidad."></p>
+        <div class="cta-row" id="download">
+          <a class="store-badge" href="https://play.google.com/store/apps/details?id=com.yht.dominoparty" target="_blank" rel="noopener">
+            <svg viewBox="0 0 512 512" fill="none"><path d="M48 59v394c0 8 9 13 16 9l219-206L64 50c-7-4-16 0-16 9z" fill="#22D3EE"/><path d="M283 256l72-68 116 68c12 7 12 25 0 32l-116 68-72-100z" fill="#A78BFA"/><path d="M64 50l219 206 72-68L80 41c-6-4-16-1-16 9z" fill="#5B8DEF" opacity=".85"/><path d="M64 462l219-206 72 68L80 471c-6 4-16 1-16-9z" fill="#F472B6" opacity=".85"/></svg>
+            <span><span class="sb-sm" data-en="Get it on" data-es="Disponible en">Get it on</span><span class="sb-lg">Google Play</span></span>
+          </a>
+          <span class="store-badge soon">
+            <svg viewBox="0 0 384 512" fill="#f5f6f8"><path d="M318.7 268c-.3-37 16.4-65 50.1-85.6-18.9-27-47.4-41.9-85-44.8-35.6-2.8-74.5 20.9-88.7 20.9-15 0-49.4-19.9-76.4-19.9C61.2 139.2 0 184.4 0 276.1c0 27.1 5 55.1 14.9 84 13.3 38 61.3 131.3 111.4 129.8 26.2-.6 44.7-18.6 78.8-18.6 33.1 0 50.2 18.6 76.4 18.6 50.5-.7 93.9-85.5 106.6-123.6-67.8-32-69.4-93.8-69.4-95.7zM262.8 89.8c27-32 24.5-61.1 23.7-71.6-23.8 1.4-51.3 16.2-67 34.5-17.3 19.6-27.5 43.9-25.3 71.1 25.7 2 49.1-11.2 68.6-34z"/></svg>
+            <span><span class="sb-sm" data-en="Coming soon" data-es="Próximamente">Coming soon</span><span class="sb-lg">App Store</span></span>
+          </span>
+        </div>
+        <p class="beta-note" data-en="🎉 In beta now — launching soon on Google Play and iPhone." data-es="🎉 En beta ahora — pronto en Google Play y iPhone."></p>
+      </div>
 
-  <h2>3. Service providers</h2>
-  <p>Cloud features are provided by <strong>Google Firebase</strong> (Authentication and Cloud Firestore). Data sent for live sharing is processed and stored on Google’s servers. See Google’s Privacy Policy: <a href="https://policies.google.com/privacy">https://policies.google.com/privacy</a></p>
+      <!-- phone mockup -->
+      <div class="phone-wrap reveal">
+        <svg class="float-tile" style="top:-10px;left:4%" width="58" height="58" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#14161b" stroke="#2b2f39"/><line x1="6" y1="16" x2="26" y2="16" stroke="#2b2f39"/><circle cx="11" cy="10" r="1.8" fill="#22D3EE"/><circle cx="21" cy="10" r="1.8" fill="#22D3EE"/><circle cx="16" cy="22" r="1.8" fill="#A78BFA"/></svg>
+        <svg class="float-tile" style="bottom:8px;right:2%; animation-delay:1.5s" width="50" height="50" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#14161b" stroke="#2b2f39"/><line x1="6" y1="16" x2="26" y2="16" stroke="#2b2f39"/><circle cx="16" cy="10" r="1.8" fill="#F472B6"/><circle cx="11" cy="22" r="1.8" fill="#5B8DEF"/><circle cx="21" cy="22" r="1.8" fill="#5B8DEF"/></svg>
+        <div class="phone">
+          <div class="screen">
+            <div class="scr-head"><span>Target: 150</span><span class="live"><i></i>LIVE</span></div>
+            <div class="team">
+              <div class="info"><div class="nm">Los Tigres</div><div class="pl">Ana &amp; Beto</div></div>
+              <div class="ring">
+                <svg width="74" height="74"><circle cx="37" cy="37" r="31" stroke="#23262e" stroke-width="6" fill="none"/><circle cx="37" cy="37" r="31" stroke="#22D3EE" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="195" stroke-dashoffset="39"/></svg>
+                <div class="num"><b style="color:#22D3EE">120</b><span>30</span></div>
+              </div>
+            </div>
+            <div class="team">
+              <div class="info"><div class="nm">Las Estrellas</div><div class="pl">Cdi &amp; Dani</div></div>
+              <div class="ring">
+                <svg width="74" height="74"><circle cx="37" cy="37" r="31" stroke="#23262e" stroke-width="6" fill="none"/><circle cx="37" cy="37" r="31" stroke="#A78BFA" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="195" stroke-dashoffset="72"/></svg>
+                <div class="num"><b style="color:#A78BFA">95</b><span>55</span></div>
+              </div>
+            </div>
+            <div class="addbtn" data-en="＋ Add Points" data-es="＋ Sumar Puntos"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <h2>4. Data retention and deletion</h2>
-  <p><strong>On-device data:</strong> remove it any time by deleting the App. <strong>Shared game data:</strong> shared game records may remain in our database after a game ends. To request deletion, contact us at the email below and we will remove it.</p>
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <h2 data-en="Everything you need to keep score" data-es="Todo para llevar la cuenta"></h2>
+        <p data-en="Built for the classic game of two teams of two — fast, beautiful, and alive." data-es="Hecho para el juego clásico de dos equipos de dos — rápido, bonito y con vida."></p>
+      </div>
+      <div class="features">
+        <div class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <h3 data-en="Score in a tap" data-es="Anota con un toque"></h3>
+          <p data-en="Tap a team to add the points they won each hand. Big rings fill toward your target — 100, 150, or your own." data-es="Toca un equipo para sumar los puntos de cada mano. Los anillos se llenan hacia tu meta — 100, 150 o la tuya."></p>
+        </div>
+        <div class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 21v.01M17 21h.01M21 17v.01"/></svg></div>
+          <h3 data-en="Play together, live" data-es="Jueguen juntos, en vivo"></h3>
+          <p data-en="Share a game code or QR — friends follow every point in real time on their own phones. Pass the pen to let someone else score." data-es="Comparte un código o QR — tus amigos siguen cada punto en tiempo real. Pasa el control para que otro anote."></p>
+        </div>
+        <div class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 20h18"/><rect x="5" y="11" width="3.5" height="6"/><rect x="10.2" y="7" width="3.5" height="10"/><rect x="15.5" y="13" width="3.5" height="4"/></svg></div>
+          <h3 data-en="Stats &amp; rivalries" data-es="Estadísticas y rivalidades"></h3>
+          <p data-en="Head-to-head records, win streaks, and Pollonas (shutouts) — your domino nights, remembered." data-es="Historial entre equipos, rachas y Pollonas (blanqueadas) — tus noches de dominó, recordadas."></p>
+        </div>
+        <div class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="12" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="13" r="2.5"/><path d="M12 22a9 9 0 1 1 0-18 4 4 0 0 0 0 8 3 3 0 0 0 0 6"/></svg></div>
+          <h3 data-en="Four tables to play on" data-es="Cuatro mesas para jugar"></h3>
+          <p data-en="Dark, Cuban, USA, and Carbon — pick the look that fits your table, with tilt-parallax backgrounds." data-es="Oscuro, Cubano, USA y Carbón — elige el estilo de tu mesa, con fondos que reaccionan al movimiento."></p>
+        </div>
+        <div class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 5h12M9 3v2M5 5c0 6 3 9 7 9M11 17c4 0 6-3 6-6"/><path d="M13 21l4-9 4 9M14.5 18h5"/></svg></div>
+          <h3 data-en="Alive &amp; bilingual" data-es="Con vida y bilingüe"></h3>
+          <p data-en="Count-up scores, a winner's heartbeat, sound and haptics — fully in English and Spanish." data-es="Marcadores animados, latido del ganador, sonido y vibración — totalmente en inglés y español."></p>
+        </div>
+        <div class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+          <h3 data-en="Yours, privately" data-es="Tuyo, en privado"></h3>
+          <p data-en="No account, no ads. Everything stays on your phone unless you choose to share a game." data-es="Sin cuenta ni anuncios. Todo se queda en tu teléfono salvo que compartas una partida."></p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <h2>5. Security</h2>
-  <p>We use Google Firebase’s security infrastructure and access rules to protect data. No method of transmission or storage is 100% secure, but we take reasonable measures to safeguard your information.</p>
+  <!-- LIVE -->
+  <section id="live" style="background:linear-gradient(180deg,transparent,#0a0c10,transparent)">
+    <div class="wrap split">
+      <div class="reveal">
+        <span class="eyebrow" data-en="Live game-following" data-es="Seguimiento en vivo"></span>
+        <h2 style="font-size:clamp(1.8rem,3.6vw,2.5rem);font-weight:900;letter-spacing:-.02em" data-en="Everyone watches. One person scores." data-es="Todos miran. Una persona anota."></h2>
+        <ul class="pts" style="margin-top:26px; list-style:none">
+          <li><span class="n">1</span><div><h4 data-en="Share a code or QR" data-es="Comparte un código o QR"></h4><p data-en="Start broadcasting and a 4-letter code and QR appear. Friends scan or type it to follow." data-es="Empieza a transmitir y aparece un código de 4 letras y un QR. Tus amigos lo escanean o lo escriben para seguir."></p></div></li>
+          <li><span class="n">2</span><div><h4 data-en="Follow every point, live" data-es="Sigue cada punto, en vivo"></h4><p data-en="The scoreboard updates in real time on every phone — rings fill, the leader's number beats near the win." data-es="El marcador se actualiza en tiempo real en cada teléfono — los anillos se llenan y el líder late cerca de la victoria."></p></div></li>
+          <li><span class="n">3</span><div><h4 data-en="Pass the pen" data-es="Pasa el control"></h4><p data-en="A watcher can request to take over scoring — the current scorer just approves. Only one scores at a time." data-es="Un espectador puede pedir tomar el control — quien anota solo aprueba. Solo uno anota a la vez."></p></div></li>
+        </ul>
+      </div>
+      <div class="qr-card reveal">
+        <div style="color:var(--muted);font-weight:800;letter-spacing:.1em;font-size:.78rem;text-transform:uppercase" data-en="Game code" data-es="Código de partida"></div>
+        <div class="code">KQ7M</div>
+        <div class="qr">
+          <svg viewBox="0 0 100 100" shape-rendering="crispEdges" fill="#070709"><rect width="100" height="100" fill="#fff"/><path d="M10 10h25v25h-25zM15 15h15v15h-15zM65 10h25v25h-25zM70 15h15v15h-15zM10 65h25v25h-25zM15 70h15v15h-15z"/><rect x="40" y="10" width="6" height="6"/><rect x="52" y="16" width="6" height="6"/><rect x="40" y="28" width="6" height="6"/><rect x="46" y="40" width="6" height="6"/><rect x="10" y="46" width="6" height="6"/><rect x="22" y="46" width="6" height="6"/><rect x="34" y="46" width="6" height="6"/><rect x="58" y="46" width="6" height="6"/><rect x="70" y="46" width="6" height="6"/><rect x="88" y="46" width="6" height="6"/><rect x="46" y="58" width="6" height="6"/><rect x="64" y="64" width="6" height="6"/><rect x="76" y="70" width="6" height="6"/><rect x="88" y="64" width="6" height="6"/><rect x="46" y="76" width="6" height="6"/><rect x="58" y="82" width="6" height="6"/><rect x="64" y="88" width="6" height="6"/><rect x="82" y="82" width="6" height="6"/><rect x="40" y="64" width="6" height="6"/><rect x="40" y="88" width="6" height="6"/></svg>
+        </div>
+        <p style="color:var(--muted);font-size:.9rem;margin-top:18px" data-en="Scan to follow the game live" data-es="Escanea para seguir la partida en vivo"></p>
+      </div>
+    </div>
+  </section>
 
-  <h2>6. Children’s privacy</h2>
-  <p>The App is intended for a general audience and is not directed to children under 13 (or the equivalent minimum age in your country). We do not knowingly collect personal information from children. If you believe a child has provided personal information, contact us and we will delete it.</p>
+  <!-- THEMES -->
+  <section id="themes">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <h2 data-en="Choose your table" data-es="Elige tu mesa"></h2>
+        <p data-en="Four hand-crafted looks. Switch any time in Settings." data-es="Cuatro estilos hechos a mano. Cámbialo cuando quieras en Ajustes."></p>
+      </div>
+      <div class="themes">
+        <div class="theme reveal">
+          <div class="sw" style="background:radial-gradient(120% 120% at 20% 30%,#1c2230,#070709)"><div class="swdot"><span style="background:#22D3EE"></span><span style="background:#A78BFA"></span></div></div>
+          <div class="lbl">Carbon<small data-en="Black carbon halftone · default" data-es="Semitono de carbón · predeterminado"></small></div>
+        </div>
+        <div class="theme reveal">
+          <div class="sw" style="background:linear-gradient(135deg,#5B8DEF,#22D3EE)"><div class="swdot"><span style="background:#5B8DEF"></span><span style="background:#F472B6"></span></div></div>
+          <div class="lbl">Dark<small data-en="Clean solid dark" data-es="Oscuro y sólido"></small></div>
+        </div>
+        <div class="theme reveal">
+          <div class="sw" style="background:linear-gradient(135deg,#1E5AA8,#D2515F)"><div class="swdot"><span style="background:#2E69B8"></span><span style="background:#D2515F"></span></div></div>
+          <div class="lbl" data-en="Cuban Board" data-es="Mesa Cubana"><small data-en="Cuban–American flag motif" data-es="Motivo de bandera cubano-americana"></small></div>
+        </div>
+        <div class="theme reveal">
+          <div class="sw" style="background:linear-gradient(135deg,#3D4C96,#CB4F5B)"><div class="swdot"><span style="background:#4A66B5"></span><span style="background:#CB4F5B"></span></div></div>
+          <div class="lbl" data-en="USA Board" data-es="Mesa USA"><small data-en="Stars &amp; stripes" data-es="Estrellas y franjas"></small></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <h2>7. Your rights</h2>
-  <p>Depending on where you live, you may have rights to access, correct, or delete your information. Because the App does not require an account, most data is under your direct control on your device. For shared-game or anonymous data, contact us to make a request.</p>
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="sec-head reveal"><h2 data-en="Questions" data-es="Preguntas"></h2></div>
+      <div class="faq">
+        <details class="qa reveal"><summary><span data-en="Is it free?" data-es="¿Es gratis?"></span><span class="pm">+</span></summary><div class="a" data-en="Yes — completely free, with no ads and no account to create." data-es="Sí — completamente gratis, sin anuncios y sin cuentas que crear."></div></details>
+        <details class="qa reveal"><summary><span data-en="How does live sharing work?" data-es="¿Cómo funciona el modo en vivo?"></span><span class="pm">+</span></summary><div class="a" data-en="Share a 4-letter code or a QR. Anyone who enters it follows your game live on their phone. Only one person scores at a time; others can request to take over." data-es="Comparte un código de 4 letras o un QR. Quien lo ingrese sigue tu partida en vivo en su teléfono. Solo una persona anota a la vez; los demás pueden pedir el control."></div></details>
+        <details class="qa reveal"><summary><span data-en="Do I need an internet connection?" data-es="¿Necesito conexión a internet?"></span><span class="pm">+</span></summary><div class="a" data-en="No for scoring — it works fully offline. You only need a connection to share or follow a game live." data-es="No para anotar — funciona sin conexión. Solo necesitas internet para compartir o seguir una partida en vivo."></div></details>
+        <details class="qa reveal"><summary><span data-en="What about my data?" data-es="¿Y mis datos?"></span><span class="pm">+</span></summary><div class="a" data-en="Your scores stay on your device. We don't collect personal information. Read the full Privacy Policy for details." data-es="Tus puntuaciones se quedan en tu dispositivo. No recopilamos información personal. Lee la Política de Privacidad para más detalles."></div></details>
+      </div>
+    </div>
+  </section>
 
-  <h2>8. Changes to this policy</h2>
-  <p>We may update this policy from time to time. We will revise the “Effective date” above and, for significant changes, provide notice in the App or store listing.</p>
+  <!-- CTA -->
+  <section style="padding-top:10px">
+    <div class="wrap cta-band">
+      <div class="cta-inner reveal">
+        <h2 data-en="Ready to play?" data-es="¿Listo para jugar?"></h2>
+        <p data-en="Grab the app and keep score for your next domino night." data-es="Descarga la app y lleva la cuenta de tu próxima noche de dominó."></p>
+        <div class="cta-row" style="justify-content:center">
+          <a class="store-badge" href="https://play.google.com/store/apps/details?id=com.yht.dominoparty" target="_blank" rel="noopener">
+            <svg viewBox="0 0 512 512" fill="none"><path d="M48 59v394c0 8 9 13 16 9l219-206L64 50c-7-4-16 0-16 9z" fill="#22D3EE"/><path d="M283 256l72-68 116 68c12 7 12 25 0 32l-116 68-72-100z" fill="#A78BFA"/><path d="M64 50l219 206 72-68L80 41c-6-4-16-1-16 9z" fill="#5B8DEF" opacity=".85"/><path d="M64 462l219-206 72 68L80 471c-6 4-16 1-16-9z" fill="#F472B6" opacity=".85"/></svg>
+            <span><span class="sb-sm" data-en="Get it on" data-es="Disponible en">Get it on</span><span class="sb-lg">Google Play</span></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <h2>9. Contact</h2>
-  <p>If you have questions about this policy or your data, contact:</p>
-  <p><strong><a href="mailto:Yunierht@yahoo.com">Yunierht@yahoo.com</a></strong><br />Developer: YHT</p>
+  <!-- FOOTER -->
+  <footer>
+    <div class="wrap foot">
+      <a href="#top" class="brand">
+        <img src="img/logo.png" alt="Domino Party" />
+      </a>
+      <div class="links">
+        <a href="#features" data-en="Features" data-es="Funciones"></a>
+        <a href="/privacy/" data-en="Privacy" data-es="Privacidad"></a>
+        <a href="mailto:Yunierht@yahoo.com" data-en="Contact" data-es="Contacto"></a>
+      </div>
+      <div class="copy">© <span id="yr"></span> Domino Party · <span data-en="Made by" data-es="Hecho por"></span> <b>YHT</b></div>
+    </div>
+  </footer>
+
+  <script>
+    // ---- bilingual ----
+    function setLang(lang){
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-en]').forEach(function(el){
+        var v = el.getAttribute('data-' + lang);
+        if(v !== null) el.textContent = v;
+      });
+      document.querySelectorAll('.lang button').forEach(function(b){
+        b.classList.toggle('on', b.dataset.lang === lang);
+      });
+      try{ localStorage.setItem('dp_lang', lang); }catch(e){}
+    }
+    document.querySelectorAll('.lang button').forEach(function(b){
+      b.addEventListener('click', function(){ setLang(b.dataset.lang); });
+    });
+    (function(){
+      var saved = null;
+      try{ saved = localStorage.getItem('dp_lang'); }catch(e){}
+      var lang = saved || ((navigator.language||'en').toLowerCase().indexOf('es')===0 ? 'es' : 'en');
+      setLang(lang);
+    })();
+
+    // ---- header on scroll ----
+    var nav = document.getElementById('nav');
+    var onScroll = function(){ nav.classList.toggle('scrolled', window.scrollY > 12); };
+    onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
+
+    // ---- scroll reveal ----
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, {threshold:.12});
+    document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+
+    // ---- year ----
+    document.getElementById('yr').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>

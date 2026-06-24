@@ -4,66 +4,96 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Join a Domino Party game</title>
+  <meta name="description" content="Follow a Domino Party game live — open the app or install it, carrying your game code." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070709'/%3E%3Crect x='8' y='5' width='16' height='22' rx='3' fill='%2314161b' stroke='%23262a32'/%3E%3Cline x1='8' y1='16' x2='24' y2='16' stroke='%23262a32'/%3E%3Ccircle cx='16' cy='10.5' r='1.8' fill='%2322D3EE'/%3E%3Ccircle cx='12.5' cy='21.5' r='1.8' fill='%23A78BFA'/%3E%3Ccircle cx='19.5' cy='21.5' r='1.8' fill='%23A78BFA'/%3E%3C/svg%3E" />
   <style>
-    :root {
-      --cyan: #34E1FF; --pink: #FF3DAE; --bg1: #2a1d5e; --bg2: #0b0922;
+    :root{
+      --bg:#070709; --surface:#14161b; --border:#272b34; --text:#f5f6f8; --muted:#9096a1;
+      --cyan:#22D3EE; --purple:#A78BFA; --grad:linear-gradient(135deg,#22D3EE,#A78BFA);
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; text-align: center;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: #fff; padding: 28px;
-      background: radial-gradient(120% 80% at 50% 18%, #6a46c8 0%, var(--bg1) 45%, var(--bg2) 100%);
+    *{box-sizing:border-box; margin:0; padding:0}
+    body{
+      min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      color:var(--text); padding:28px; background:var(--bg); position:relative; overflow:hidden;
     }
-    h1 { font-size: 1.7rem; margin: 0 0 6px; }
-    p { color: #cfc9e8; margin: 6px 0; }
-    .code {
-      font-size: 2.6rem; font-weight: 900; letter-spacing: 10px;
-      margin: 14px 0 6px; color: var(--cyan);
-      text-shadow: 0 0 16px rgba(52,225,255,.6);
-    }
-    .btn {
-      display: inline-block; width: 100%; max-width: 320px; margin: 8px 0;
-      padding: 15px 20px; border-radius: 14px; font-weight: 800; font-size: 1rem;
-      text-decoration: none; border: none; cursor: pointer;
-    }
-    .primary { background: linear-gradient(90deg, var(--cyan), #2aa8d8); color: #04222b; }
-    .store { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.25); }
-    .muted { color: #9a93c2; font-size: .85rem; margin-top: 18px; }
+    .glow{position:fixed; border-radius:50%; filter:blur(90px); opacity:.45; z-index:-1}
+    .glow.a{width:460px;height:460px; top:-140px; left:-120px; background:radial-gradient(circle,#1a6b8c,transparent 70%)}
+    .glow.b{width:460px;height:460px; bottom:-160px; right:-120px; background:radial-gradient(circle,#5a3f9e,transparent 70%)}
+    .lang{position:absolute; top:18px; right:18px; display:flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; font-size:.78rem; font-weight:800}
+    .lang button{background:none;border:0;color:var(--muted);padding:6px 11px;cursor:pointer}
+    .lang button.on{background:var(--grad); color:#04121a}
+    .tile{width:54px;height:54px; margin-bottom:18px}
+    h1{font-size:1.6rem; font-weight:900; margin-bottom:6px}
+    p{color:#cdd1d9; margin:6px 0}
+    .label{color:var(--muted); font-size:.78rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; margin-top:18px}
+    .code{font-size:3rem; font-weight:900; letter-spacing:.3em; padding-left:.3em; margin:6px 0 18px; background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .btn{display:flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:330px; margin:8px auto; padding:15px 20px; border-radius:14px; font-weight:800; font-size:1rem; text-decoration:none; cursor:pointer; transition:transform .15s,border-color .2s}
+    .primary{background:var(--grad); color:#04121a; box-shadow:0 10px 28px -8px rgba(34,211,238,.5)}
+    .primary:hover{transform:translateY(-2px)}
+    .store{background:var(--surface); color:#fff; border:1px solid var(--border)}
+    .store:hover{border-color:var(--cyan)}
+    .store.soon{opacity:.55; pointer-events:none}
+    .store svg{width:20px;height:20px}
+    .muted{color:var(--muted); font-size:.85rem; margin-top:16px; max-width:330px}
+    footer{margin-top:26px}
+    footer a{color:var(--muted); text-decoration:none; font-size:.85rem}
+    footer a:hover{color:var(--cyan)}
+    footer b{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   </style>
 </head>
 <body>
-  <h1>Domino Party</h1>
-  <p>You're invited to follow a game live!</p>
+  <div class="glow a"></div>
+  <div class="glow b"></div>
+
+  <div class="lang" role="group" aria-label="Language">
+    <button data-lang="en" class="on">EN</button>
+    <button data-lang="es">ES</button>
+  </div>
+
+  <img src="../img/logo.png" alt="Domino Party" style="width:230px; max-width:74%; margin-bottom:10px; filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))" />
+  <p data-en="You're invited to follow a game live!" data-es="¡Estás invitado a seguir una partida en vivo!"></p>
+
+  <div class="label" data-en="Game code" data-es="Código de partida"></div>
   <div class="code" id="code">—</div>
-  <p>Game code</p>
 
-  <a class="btn primary" id="open" href="#">Open in the app</a>
-  <p class="muted">Don't have the app yet? Install it, then open this link again — or enter the code above.</p>
-  <a class="btn store" id="play" href="#">Get it on Google Play</a>
-  <a class="btn store" id="apple" href="#">Download on the App Store</a>
+  <a class="btn primary" id="open" href="#" data-en="Open in the app" data-es="Abrir en la app"></a>
+  <p class="muted" data-en="Don't have the app yet? Install it, then open this link again — or enter the code in the app." data-es="¿Aún no tienes la app? Instálala y abre este enlace de nuevo — o ingresa el código en la app."></p>
 
-  <p class="muted">Made by YHT</p>
+  <a class="btn store" id="play" href="#">
+    <svg viewBox="0 0 512 512" fill="none"><path d="M48 59v394c0 8 9 13 16 9l219-206L64 50c-7-4-16 0-16 9z" fill="#22D3EE"/><path d="M283 256l72-68 116 68c12 7 12 25 0 32l-116 68-72-100z" fill="#A78BFA"/><path d="M64 50l219 206 72-68L80 41c-6-4-16-1-16 9z" fill="#5B8DEF" opacity=".85"/><path d="M64 462l219-206 72 68L80 471c-6 4-16 1-16-9z" fill="#F472B6" opacity=".85"/></svg>
+    <span data-en="Get it on Google Play" data-es="Descargar en Google Play"></span>
+  </a>
+  <a class="btn store soon" id="apple" href="#">
+    <svg viewBox="0 0 384 512" fill="#f5f6f8"><path d="M318.7 268c-.3-37 16.4-65 50.1-85.6-18.9-27-47.4-41.9-85-44.8-35.6-2.8-74.5 20.9-88.7 20.9-15 0-49.4-19.9-76.4-19.9C61.2 139.2 0 184.4 0 276.1c0 27.1 5 55.1 14.9 84 13.3 38 61.3 131.3 111.4 129.8 26.2-.6 44.7-18.6 78.8-18.6 33.1 0 50.2 18.6 76.4 18.6 50.5-.7 93.9-85.5 106.6-123.6-67.8-32-69.4-93.8-69.4-95.7zM262.8 89.8c27-32 24.5-61.1 23.7-71.6-23.8 1.4-51.3 16.2-67 34.5-17.3 19.6-27.5 43.9-25.3 71.1 25.7 2 49.1-11.2 68.6-34z"/></svg>
+    <span data-en="App Store — coming soon" data-es="App Store — próximamente"></span>
+  </a>
+
+  <footer><a href="/">dominoparty.com · <span data-en="Made by" data-es="Hecho por"></span> <b>YHT</b></a></footer>
 
   <script>
     var PLAY = "https://play.google.com/store/apps/details?id=com.yht.dominoparty";
-    var APPLE = "https://apps.apple.com/app/id000000000";
-
     var params = new URLSearchParams(location.search);
     var code = (params.get("code") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
     document.getElementById("code").textContent = code || "—";
-
     var appLink = "dominoparty://watch?code=" + encodeURIComponent(code);
     document.getElementById("open").href = appLink;
     document.getElementById("play").href = PLAY;
-    document.getElementById("apple").href = APPLE;
 
-    // Try to open the app automatically; if it isn't installed nothing happens
-    // and the user stays on this page with the store buttons.
-    if (code) {
-      setTimeout(function () { window.location.href = appLink; }, 400);
+    function setLang(lang){
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-en]').forEach(function(el){
+        var v = el.getAttribute('data-' + lang); if(v!==null) el.textContent = v;
+      });
+      document.querySelectorAll('.lang button').forEach(function(b){ b.classList.toggle('on', b.dataset.lang===lang); });
+      try{ localStorage.setItem('dp_lang', lang); }catch(e){}
     }
+    document.querySelectorAll('.lang button').forEach(function(b){ b.addEventListener('click', function(){ setLang(b.dataset.lang); }); });
+    var saved=null; try{ saved=localStorage.getItem('dp_lang'); }catch(e){}
+    setLang(saved || ((navigator.language||'en').toLowerCase().indexOf('es')===0 ? 'es':'en'));
+
+    // Try to open the app automatically; if not installed, the page stays.
+    if (code) { setTimeout(function(){ window.location.href = appLink; }, 400); }
   </script>
 </body>
 </html>
