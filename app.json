@@ -14,7 +14,7 @@
     },
     "android": {
       "package": "com.yht.dominoparty",
-      "versionCode": 5,
+      "versionCode": 6,
       "blockedPermissions": [
         "android.permission.ACTIVITY_RECOGNITION"
       ],
