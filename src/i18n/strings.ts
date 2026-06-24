@@ -19,6 +19,7 @@ export interface Strings {
   player1: string;
   player2: string;
   targetScore: string;
+  target: string;
   changeTarget: string;
   changeTargetHint: string;
   matchEndedToast: string;
@@ -182,6 +183,7 @@ const en: Strings = {
   player1: 'Player 1',
   player2: 'Player 2',
   targetScore: 'Target Score',
+  target: 'Target',
   changeTarget: 'Change Target Score',
   changeTargetHint: 'Set a new score to win. If a team has already reached it, the match ends now.',
   matchEndedToast: '{team} reached {score} — match over! 🏆',
@@ -337,6 +339,7 @@ const es: Strings = {
   player1: 'Jugador 1',
   player2: 'Jugador 2',
   targetScore: 'Puntos para ganar',
+  target: 'Meta',
   changeTarget: 'Cambiar Puntaje Meta',
   changeTargetHint: 'Establece un nuevo puntaje para ganar. Si un equipo ya lo alcanzó, la partida termina ahora.',
   matchEndedToast: '¡{team} llegó a {score} — fin de la partida! 🏆',

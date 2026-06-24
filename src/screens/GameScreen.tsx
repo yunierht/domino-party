@@ -183,19 +183,18 @@ export function GameScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Header
-          title={`${t.targetScore}: ${match.targetScore}`}
+          title={`${t.target}: ${match.targetScore}`}
           onTitlePress={canEdit && !finished ? () => setTargetOpen(true) : undefined}
           right={
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(6) }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(10) }}>
               <Pressable
                 onPress={onSharePress}
-                hitSlop={8}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
                   gap: s(5),
-                  paddingHorizontal: s(10),
-                  paddingVertical: s(7),
+                  paddingHorizontal: s(11),
+                  paddingVertical: s(10),
                   borderRadius: 999,
                   backgroundColor: match.shareCode ? c.surfaceAlt : 'transparent',
                 }}
@@ -204,15 +203,18 @@ export function GameScreen() {
                   <ActivityIndicator color={c.primary} />
                 ) : match.shareCode ? (
                   <>
-                    <Feather name="radio" size={s(16)} color={c.danger} />
-                    <Text style={{ color: c.danger, fontWeight: '900', fontSize: s(12) }}>{t.live}</Text>
+                    <Feather name="radio" size={s(20)} color={c.danger} />
+                    <Text style={{ color: c.danger, fontWeight: '900', fontSize: s(13) }}>{t.live}</Text>
                   </>
                 ) : (
-                  <Feather name="radio" size={s(20)} color={c.textMuted} />
+                  <Feather name="radio" size={s(24)} color={c.textMuted} />
                 )}
               </Pressable>
-              <Pressable onPress={() => go('settings')} hitSlop={8} style={{ padding: s(4) }}>
-                <Feather name="settings" size={s(20)} color={c.textMuted} />
+              <Pressable onPress={() => go('stats')} style={{ padding: s(10) }}>
+                <Feather name="bar-chart-2" size={s(24)} color={c.textMuted} />
+              </Pressable>
+              <Pressable onPress={() => go('settings')} style={{ padding: s(10) }}>
+                <Feather name="settings" size={s(24)} color={c.textMuted} />
               </Pressable>
             </View>
           }
