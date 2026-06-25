@@ -2,7 +2,7 @@
   "expo": {
     "name": "Domino Party",
     "slug": "domino-party",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "scheme": "dominoparty",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,7 +14,7 @@
     },
     "android": {
       "package": "com.yht.dominoparty",
-      "versionCode": 6,
+      "versionCode": 7,
       "blockedPermissions": [
         "android.permission.ACTIVITY_RECOGNITION"
       ],

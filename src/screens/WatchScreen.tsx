@@ -30,8 +30,12 @@ export function WatchScreen() {
   const unsubRef = useRef<null | (() => void)>(null);
   const reqTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeCodeRef = useRef<string>('');
+  // Subscription generation: incremented on every start()/stop() so stale
+  // snapshot callbacks and auto-follow timers can detect they're superseded.
+  const subGenRef = useRef(0);
   // Refs mirror state so the snapshot callback never reads stale values.
   const requestedRef = useRef(false);
+  const autoFollowedRef = useRef(false);
   const liveUidRef = useRef(liveUid);
   useEffect(() => {
     liveUidRef.current = liveUid;
@@ -58,6 +62,7 @@ export function WatchScreen() {
   };
 
   const stop = () => {
+    subGenRef.current++; // invalidate any pending callbacks / timers
     unsubRef.current?.();
     unsubRef.current = null;
     clearReqTimer();
@@ -71,6 +76,7 @@ export function WatchScreen() {
   const start = (override?: string) => {
     const clean = (override ?? code).toUpperCase().trim();
     if (clean.length < 4) return;
+    const myGen = ++subGenRef.current; // each call gets a unique generation
     setCode(clean);
     activeCodeRef.current = clean;
     setStatus('connecting');
@@ -78,10 +84,13 @@ export function WatchScreen() {
     markRequested(false);
     setDenied(false);
     setTimedOut(false);
+    autoFollowedRef.current = false;
     unsubRef.current?.();
     unsubRef.current = subscribeGame(
       clean,
       (g) => {
+        // Ignore if a newer start() or stop() has already taken over.
+        if (subGenRef.current !== myGen) return;
         if (!g) {
           setStatus('notfound');
           setGame(null);
@@ -105,8 +114,18 @@ export function WatchScreen() {
         }
         setGame(g);
         setStatus('live');
+        // Auto-follow when the host starts a new game after this one ends.
+        if (g.nextCode && g.winnerTeamId && !autoFollowedRef.current) {
+          autoFollowedRef.current = true;
+          setTimeout(() => {
+            // Only follow if this subscription is still the active one.
+            if (subGenRef.current === myGen) start(g.nextCode!);
+          }, 800);
+        }
       },
-      () => setStatus('error'),
+      () => {
+        if (subGenRef.current === myGen) setStatus('error');
+      },
     );
   };
 
@@ -242,7 +261,6 @@ export function WatchScreen() {
           requested={requested}
           denied={denied}
           timedOut={timedOut}
-          canRequest={!!liveUid}
         />
       )}
     </ScrollView>
@@ -256,7 +274,6 @@ function LiveBoard({
   requested,
   denied,
   timedOut,
-  canRequest,
 }: {
   game: SharedGame;
   onStop: () => void;
@@ -264,7 +281,6 @@ function LiveBoard({
   requested: boolean;
   denied: boolean;
   timedOut: boolean;
-  canRequest: boolean;
 }) {
   const { theme, s } = useTheme();
   const { t } = useI18n();
@@ -317,7 +333,7 @@ function LiveBoard({
         <Text style={{ flex: 1, color: c.text, fontSize: s(14), fontWeight: '700' }}>
           {t.currentlyScoring.replace('{name}', game.controllerName ?? '')}
         </Text>
-        {!finished && !ended && canRequest &&
+        {!ended &&
           (requested ? (
             <Text style={{ color: c.textMuted, fontSize: s(12), fontStyle: 'italic' }}>{t.waitingApproval}</Text>
           ) : (
@@ -335,18 +351,14 @@ function LiveBoard({
         </Text>
       )}
 
-      {finished && match.winnerTeamId && (
-        <LinearGradient
-          colors={c.gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ marginBottom: s(16), borderRadius: theme.radius + 4, padding: s(18), alignItems: 'center' }}
-        >
-          <Text style={{ fontSize: s(30) }}>🏆</Text>
-          <Text style={{ color: c.onPrimary, fontSize: s(24), fontWeight: '900', marginTop: s(2) }}>
-            {match.winnerTeamId === teamA.id ? teamA.name : teamB.name}
+
+      {game.nextCode && finished && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: s(8), marginBottom: s(14), backgroundColor: c.surfaceAlt, borderRadius: theme.radius, padding: s(12), borderWidth: 1, borderColor: c.border }}>
+          <ActivityIndicator size="small" color={c.primary} />
+          <Text style={{ color: c.textMuted, fontSize: s(13), fontWeight: '700' }}>
+            {t.nextGameFollowing}
           </Text>
-        </LinearGradient>
+        </View>
       )}
 
       <ReadOnlyTeam match={match} team={teamA} color={c.teamA} total={totalA} toWin={pointsToWin(match, teamA.id)} leading={leadId === teamA.id && !finished} isWinner={match.winnerTeamId === teamA.id} pulse={danger && leadId === teamA.id} intensity={intensity} />

@@ -44,7 +44,7 @@ export function GameScreen() {
     approveControl,
     denyControl,
   } = useGame();
-  const { go, back } = useNav();
+  const { go, back, openWatch } = useNav();
   const c = theme.colors;
 
   const [editorOpen, setEditorOpen] = useState(false);
@@ -77,6 +77,17 @@ export function GameScreen() {
   useEffect(() => {
     if (sound) initSounds();
   }, [sound]);
+
+  // When this device loses controller role while broadcasting (someone took over),
+  // switch to WatchScreen so the auto-follow mechanism keeps them synced.
+  const wasController = useRef(amController);
+  useEffect(() => {
+    const was = wasController.current;
+    wasController.current = amController;
+    if (was && !amController && currentMatch?.shareCode) {
+      openWatch(currentMatch.shareCode);
+    }
+  }, [amController]);
 
   // Show the themed take-over prompt whenever I'm the controller and a request
   // is pending (clears itself once approved/denied updates the shared doc).

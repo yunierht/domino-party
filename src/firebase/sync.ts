@@ -23,6 +23,8 @@ export interface SharedGame {
   pendingRequest: ControlRequest | null;
   /** False once the host stops broadcasting (undefined/true = live). */
   live?: boolean;
+  /** Set when the host starts a new game — spectators auto-follow this code. */
+  nextCode?: string;
   teams: [Team, Team];
   targetScore: number;
   rounds: Round[];
@@ -148,6 +150,14 @@ export async function setGameLive(code: string, live: boolean): Promise<void> {
   if (!fb) return;
   await ensureSignedIn();
   await updateDoc(doc(fb.db, COLLECTION, code), { live, updatedAt: Date.now() });
+}
+
+/** Point a finished shared game to the next game so spectators auto-follow. */
+export async function setNextGame(oldCode: string, nextCode: string): Promise<void> {
+  const fb = getFirebase();
+  if (!fb) return;
+  await ensureSignedIn();
+  await updateDoc(doc(fb.db, COLLECTION, oldCode), { nextCode, updatedAt: Date.now() });
 }
 
 /** A requester withdraws their own pending request (e.g. it timed out). */

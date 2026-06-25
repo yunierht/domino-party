@@ -20,6 +20,7 @@ import {
   pushGame,
   requestControl as requestControlSync,
   setGameLive,
+  setNextGame,
   subscribeGame,
 } from '../firebase/sync';
 
@@ -290,6 +291,8 @@ const initial: GameState = {
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initial);
   const hydrated = useRef(false);
+  // undefined = not yet initialized; null = no match; string = match id
+  const prevMatchIdRef = useRef<string | null | undefined>(undefined);
 
   const [liveUid, setLiveUid] = useState<string | null>(null);
   const [liveMeta, setLiveMeta] = useState<LiveMeta | null>(null);
@@ -389,12 +392,37 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
   }, [currentMatch, amController]);
 
+  // Auto-broadcast when the host starts a new match while already broadcasting.
+  // This keeps spectators connected without the host needing to re-tap Broadcast.
+  useEffect(() => {
+    if (!state.loaded) return;
+    const prev = prevMatchIdRef.current;
+    prevMatchIdRef.current = state.currentMatchId;
+    // Skip initial hydration — only react to runtime changes.
+    if (prev === undefined) return;
+    if (!state.currentMatchId || state.currentMatchId === prev) return;
+    const newMatch = state.matches.find((m) => m.id === state.currentMatchId);
+    if (!newMatch || newMatch.shareCode) return;
+    // If any previous finished match is still broadcasting, auto-share this one.
+    const wasSharing = state.matches.some(
+      (m) => m.id !== state.currentMatchId && !!m.shareCode && !!m.winnerTeamId,
+    );
+    if (!wasSharing || !isFirebaseConfigured) return;
+    shareMatch(state.currentMatchId).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.currentMatchId, state.loaded]);
+
   const shareMatch = async (matchId: string): Promise<string> => {
     const m = state.matches.find((x) => x.id === matchId);
     if (!m) throw new Error('Match not found');
     if (m.shareCode) return m.shareCode;
     const code = await createGame(m, state.displayName);
     dispatch({ type: 'SET_SHARE_CODE', matchId, shareCode: code });
+    // Point any previously shared finished games to this new code so spectators auto-follow.
+    const prevCodes = state.matches
+      .filter((x) => x.id !== matchId && x.shareCode && x.winnerTeamId)
+      .map((x) => x.shareCode!);
+    prevCodes.forEach((prev) => setNextGame(prev, code).catch(() => {}));
     return code;
   };
 

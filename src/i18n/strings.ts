@@ -109,6 +109,7 @@ export interface Strings {
   stopWatching: string;
   stopBroadcasting: string;
   broadcastEnded: string;
+  nextGameFollowing: string;
   shareError: string;
   // Control handoff
   youAreScoring: string;
@@ -285,6 +286,7 @@ const en: Strings = {
   stopWatching: 'Stop watching',
   stopBroadcasting: 'Stop broadcasting',
   broadcastEnded: 'The host ended the live broadcast.',
+  nextGameFollowing: 'Host started a new game — following...',
   shareError: 'Could not start sharing. Check your connection and try again.',
   youAreScoring: 'You are scoring',
   currentlyScoring: '{name} is scoring',
@@ -441,6 +443,7 @@ const es: Strings = {
   stopWatching: 'Dejar de ver',
   stopBroadcasting: 'Detener transmisión',
   broadcastEnded: 'El anfitrión terminó la transmisión en vivo.',
+  nextGameFollowing: 'El anfitrión empezó una nueva partida — conectando...',
   shareError: 'No se pudo iniciar el modo compartir. Revisa tu conexión e inténtalo de nuevo.',
   youAreScoring: 'Tú estás anotando',
   currentlyScoring: '{name} está anotando',
