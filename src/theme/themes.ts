@@ -36,24 +36,24 @@ export interface Theme {
   background?: BackgroundKind;
 }
 
-// Plain solid dark theme (no textured background).
+// Plain graphite theme (no textured background).
 const dark: Theme = {
   name: 'dark',
   dark: true,
   colors: {
-    bg: '#0C0E12',
-    surface: '#161A22',
-    surfaceAlt: '#212733',
-    primary: '#5B8DEF',
-    onPrimary: '#FFFFFF',
-    text: '#F2F4F8',
-    textMuted: '#8A93A6',
-    border: '#2A303C',
-    success: '#22C55E',
-    danger: '#EF4444',
-    gradient: ['#5B8DEF', '#22D3EE'],
-    teamA: '#5B8DEF',
-    teamB: '#F472B6',
+    bg: '#070809',
+    surface: '#111316',
+    surfaceAlt: '#1B1E22',
+    primary: '#D6A642',
+    onPrimary: '#241608',
+    text: '#F4EFE2',
+    textMuted: '#9A968C',
+    border: '#34363A',
+    success: '#83B86F',
+    danger: '#A6463C',
+    gradient: ['#D6A642', '#8C5A20'],
+    teamA: '#D6A642',
+    teamB: '#A6463C',
   },
   radius: 16,
   scale: 1,
@@ -64,19 +64,19 @@ const carbon: Theme = {
   name: 'carbon',
   dark: true,
   colors: {
-    bg: '#070709',
-    surface: '#14161B',
-    surfaceAlt: '#1D2026',
-    primary: '#22D3EE',
-    onPrimary: '#06121A',
-    text: '#F4F4F5',
-    textMuted: '#73737D',
-    border: '#26262C',
-    success: '#22C55E',
-    danger: '#FB7185',
-    gradient: ['#22D3EE', '#A78BFA'],
-    teamA: '#22D3EE',
-    teamB: '#A78BFA',
+    bg: '#050607',
+    surface: '#101215',
+    surfaceAlt: '#1A1D21',
+    primary: '#D7A63D',
+    onPrimary: '#241608',
+    text: '#F3EDE0',
+    textMuted: '#9B978E',
+    border: '#33363B',
+    success: '#82B86D',
+    danger: '#AA463B',
+    gradient: ['#E3B757', '#8B581F'],
+    teamA: '#D7A63D',
+    teamB: '#AA463B',
   },
   radius: 14,
   scale: 1,
@@ -132,4 +132,3 @@ const usa: Theme = {
 };
 
 export const THEMES: Record<ThemeName, Theme> = { dark, cubano, usa, carbon };
-

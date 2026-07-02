@@ -1,8 +1,8 @@
-# Privacy Policy for Domino Party
+# Privacy Policy for Domino Social Club
 
 **Effective date:** June 17, 2026
 
-Domino Party ("the App", "we", "us") is a domino score‑tracking app. This policy
+Domino Social Club ("the App", "we", "us") is a domino score‑tracking app. This policy
 explains what information the App handles and how. By using the App you agree to
 this policy.
 

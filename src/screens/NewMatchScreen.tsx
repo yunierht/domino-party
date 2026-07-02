@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { useGame } from '../state/GameContext';
@@ -166,7 +167,25 @@ function TeamCard({
   const { s } = useTheme();
   const { t } = useI18n();
   return (
-    <Card>
+    <Card style={{ borderColor: accent }}>
+      <LinearGradient
+        colors={[accent, 'rgba(0,0,0,0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(3), opacity: 0.9 }}
+      />
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: s(5),
+          left: s(10),
+          right: s(10),
+          height: 1,
+          backgroundColor: 'rgba(255,255,255,0.13)',
+        }}
+      />
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: s(12) }}>
         <View
           style={{
@@ -175,6 +194,10 @@ function TeamCard({
             borderRadius: s(6),
             backgroundColor: accent,
             marginRight: s(8),
+            shadowColor: accent,
+            shadowOpacity: 0.55,
+            shadowRadius: s(5),
+            shadowOffset: { width: 0, height: s(2) },
           }}
         />
         <Text style={{ color: accent, fontSize: s(16), fontWeight: '800' }}>{title}</Text>
@@ -213,16 +236,37 @@ function Chip({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: selected ? c.primary : c.surfaceAlt,
-        borderWidth: 1,
-        borderColor: selected ? c.primary : c.border,
+        borderWidth: 1.5,
+        borderColor: selected ? '#F6D37B' : c.border,
         opacity: pressed ? 0.8 : 1,
+        overflow: 'hidden',
+        shadowColor: selected ? c.primary : '#000',
+        shadowOpacity: selected ? 0.34 : 0.26,
+        shadowRadius: s(10),
+        shadowOffset: { width: 0, height: pressed ? s(2) : s(5) },
+        elevation: selected ? 7 : 4,
+        transform: [{ translateY: pressed ? s(1) : 0 }],
       })}
     >
+      <LinearGradient
+        colors={
+          selected
+            ? ['rgba(255,255,255,0.42)', 'rgba(255,255,255,0.04)', 'rgba(0,0,0,0.20)']
+            : ['rgba(255,255,255,0.10)', 'rgba(255,255,255,0)', 'rgba(0,0,0,0.20)']
+        }
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
       <Text
         style={{
           color: selected ? c.onPrimary : c.text,
           fontSize: s(16),
-          fontWeight: '700',
+          fontWeight: '900',
+          textShadowColor: 'rgba(0,0,0,0.35)',
+          textShadowOffset: { width: 0, height: 1 },
+          textShadowRadius: 1,
         }}
       >
         {label}

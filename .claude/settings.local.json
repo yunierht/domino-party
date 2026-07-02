@@ -10,7 +10,17 @@
       "WebSearch",
       "WebFetch(domain:expo.dev)",
       "PowerShell(Set-Location \"C:\\\\Development\\\\Dominoes\"; \"=== branch ===\"; git branch --show-current; \"=== changed file count ===\"; \\(git status --porcelain | Measure-Object\\).Count; \"=== node_modules ignored? ===\"; git check-ignore node_modules; \"=== sample status ===\"; git status --short | Select-Object -First 25)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; cd \"C:\\\\Development\\\\Dominoes\"; npx eas build --platform android --profile production --non-interactive 2>&1 | Select-Object -First 30)",
+      "Bash(npx eas *)",
+      "PowerShell(dotnet build C:\\\\Development\\\\Trading\\\\app\\\\server --nologo -v q)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\('Path','Machine'\\) + ';' + [System.Environment]::GetEnvironmentVariable\\('Path','User'\\); Set-Location C:\\\\Development\\\\Trading\\\\app\\\\client; npx ng build)",
+      "PowerShell(git -C C:\\\\Development\\\\Trading status --short)",
+      "PowerShell(git -C C:\\\\Development\\\\Trading add -A)",
+      "PowerShell(git -C C:\\\\Development\\\\Trading log --oneline -1)",
+      "PowerShell(git -C C:\\\\Development\\\\Trading log --oneline -2)"
     ]
   }
 }

@@ -80,6 +80,10 @@ export function Background({
           <Pattern id="halftone" width="13" height="13" patternUnits="userSpaceOnUse">
             <Circle cx="6.5" cy="6.5" r="2.3" fill="#30353F" />
           </Pattern>
+          <RadialGradient id="carbonGoldGlow" cx="0.76" cy="0.12" r="0.82">
+            <Stop offset="0" stopColor="#D7A63D" stopOpacity="0.12" />
+            <Stop offset="1" stopColor="#D7A63D" stopOpacity="0" />
+          </RadialGradient>
         </Defs>
         <Rect width={w} height={h} fill="#08090C" />
         <Rect width={w} height={h} fill="url(#halftone)" opacity="0.9" />
@@ -88,6 +92,7 @@ export function Background({
             <Polygon key={i} points={hexPts(hx.x, hx.y, hx.r)} fill="none" stroke="#363C49" strokeWidth="2.5" />
           ))}
         </G>
+        <Rect width={w} height={h} fill="url(#carbonGoldGlow)" />
       </Bg>
     );
   }

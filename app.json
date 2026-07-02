@@ -1,40 +1,43 @@
 {
   "expo": {
-    "name": "Domino Party",
-    "slug": "domino-party",
+    "name": "Domino Social Club",
+    "slug": "domino-social-club",
     "version": "1.0.4",
-    "scheme": "dominoparty",
+    "scheme": "dominosocialclub",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/social-club-icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yht.dominoparty",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.yht.dominoparty",
-      "versionCode": 7,
+      "versionCode": 8,
       "blockedPermissions": [
         "android.permission.ACTIVITY_RECOGNITION"
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#18113A",
-        "foregroundImage": "./assets/adaptive-foreground.png"
+        "backgroundColor": "#08090C",
+        "foregroundImage": "./assets/social-club-adaptive-foreground.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/social-club-favicon.png"
     },
     "plugins": [
       [
         "expo-splash-screen",
         {
-          "image": "./assets/logo.png",
+          "image": "./assets/social-club-splash.png",
           "imageWidth": 240,
           "resizeMode": "contain",
-          "backgroundColor": "#0C0E12"
+          "backgroundColor": "#08090C"
         }
       ],
       "expo-audio"

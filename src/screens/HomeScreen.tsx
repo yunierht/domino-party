@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, ScrollView, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { useGame } from '../state/GameContext';
@@ -8,9 +9,19 @@ import { useNav } from '../nav/NavContext';
 import { Button, Card } from '../components/ui';
 import { Logo } from '../components/Logo';
 import { Menu } from '../components/Menu';
-import { FloatingTiles } from '../components/FloatingTiles';
 import { DemoMatch } from '../components/DemoMatch';
-import { teamTotal } from '../types';
+import { ScoreRing } from '../components/ScoreRing';
+import { Match, Team } from '../types';
+
+const HOME_SCORE_SCRIPT: { team: 0 | 1; ratio: number }[] = [
+  { team: 0, ratio: 0.17 },
+  { team: 1, ratio: 0.27 },
+  { team: 0, ratio: 0.33 },
+  { team: 1, ratio: 0.2 },
+  { team: 0, ratio: 0.3 },
+  { team: 1, ratio: 0.23 },
+  { team: 0, ratio: 0.23 },
+];
 
 export function HomeScreen() {
   const { theme, s } = useTheme();
@@ -43,7 +54,6 @@ export function HomeScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <FloatingTiles />
       <ScrollView
         contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}
         showsVerticalScrollIndicator={false}
@@ -67,7 +77,25 @@ export function HomeScreen() {
           onPress={() => go('game')}
           style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1, marginBottom: s(16) })}
         >
-          <Card>
+          <Card style={{ borderColor: c.primary }}>
+            <LinearGradient
+              colors={[c.primary, 'rgba(0,0,0,0)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              pointerEvents="none"
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(3), opacity: 0.9 }}
+            />
+            <View
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                top: s(5),
+                left: s(10),
+                right: s(10),
+                height: 1,
+                backgroundColor: 'rgba(255,255,255,0.13)',
+              }}
+            />
             <Text
               style={{
                 color: c.textMuted,
@@ -79,29 +107,7 @@ export function HomeScreen() {
             >
               {t.resumeMatch}
             </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginTop: s(10),
-              }}
-            >
-              <MatchSide
-                name={activeMatch.teams[0].name}
-                score={teamTotal(activeMatch, activeMatch.teams[0].id)}
-                color={c.teamA}
-              />
-              <Text style={{ color: c.textMuted, fontWeight: '800', fontSize: s(16) }}>
-                {t.vs}
-              </Text>
-              <MatchSide
-                name={activeMatch.teams[1].name}
-                score={teamTotal(activeMatch, activeMatch.teams[1].id)}
-                color={c.teamB}
-                alignRight
-              />
-            </View>
+            <LoopingHomeScoreboard match={activeMatch} />
             <Text style={{ color: c.textMuted, fontSize: s(13), marginTop: s(10) }}>
               {t.targetScore}: {activeMatch.targetScore}
             </Text>
@@ -147,27 +153,145 @@ export function HomeScreen() {
   );
 }
 
-function MatchSide({
-  name,
+function LoopingHomeScoreboard({ match }: { match: Match }) {
+  const { theme, s } = useTheme();
+  const { t } = useI18n();
+  const c = theme.colors;
+  const [a, setA] = useState(0);
+  const [b, setB] = useState(0);
+  const [winner, setWinner] = useState<0 | 1 | null>(null);
+  const target = match.targetScore;
+
+  useEffect(() => {
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout>;
+    let i = 0;
+    let sa = 0;
+    let sb = 0;
+
+    const points = (ratio: number) => Math.max(1, Math.round(target * ratio));
+    const reset = () => {
+      sa = 0;
+      sb = 0;
+      i = 0;
+      setA(0);
+      setB(0);
+      setWinner(null);
+    };
+    const tick = () => {
+      if (!alive) return;
+      const r = HOME_SCORE_SCRIPT[i++];
+      if (r.team === 0) {
+        sa += points(r.ratio);
+        setA(sa);
+      } else {
+        sb += points(r.ratio);
+        setB(sb);
+      }
+
+      if (sa >= target || sb >= target || i >= HOME_SCORE_SCRIPT.length) {
+        setWinner(sa >= sb ? 0 : 1);
+        timer = setTimeout(() => {
+          reset();
+          timer = setTimeout(tick, 800);
+        }, 2400);
+      } else {
+        timer = setTimeout(tick, 950);
+      }
+    };
+
+    timer = setTimeout(tick, 650);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [target]);
+
+  const toWinA = Math.max(0, target - a);
+  const toWinB = Math.max(0, target - b);
+  const lead = a === b ? null : a > b ? 0 : 1;
+  const dangerA = winner === null && lead === 0 && toWinA <= target * 0.25;
+  const dangerB = winner === null && lead === 1 && toWinB <= target * 0.25;
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: s(10),
+      }}
+    >
+      <HomeScoreSide
+        team={match.teams[0]}
+        score={a}
+        target={target}
+        color={c.teamA}
+        pulse={dangerA}
+        win={winner === 0}
+      />
+      <Text style={{ color: c.textMuted, fontWeight: '800', fontSize: s(16) }}>
+        {t.vs}
+      </Text>
+      <HomeScoreSide
+        team={match.teams[1]}
+        score={b}
+        target={target}
+        color={c.teamB}
+        pulse={dangerB}
+        win={winner === 1}
+        alignRight
+      />
+    </View>
+  );
+}
+
+function HomeScoreSide({
+  team,
   score,
+  target,
   color,
+  pulse,
+  win,
   alignRight,
 }: {
-  name: string;
+  team: Team;
   score: number;
+  target: number;
   color: string;
+  pulse: boolean;
+  win: boolean;
   alignRight?: boolean;
 }) {
   const { theme, s } = useTheme();
+  const c = theme.colors;
+  const caption = String(Math.max(0, target - score));
+  const beat = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (!win) return;
+    const thump = (to: number, duration: number) =>
+      Animated.timing(beat, { toValue: to, duration, useNativeDriver: true });
+    Animated.sequence([thump(1.08, 150), thump(1, 140), thump(1.05, 150), thump(1, 180)]).start();
+  }, [win, beat]);
+
   return (
-    <View style={{ flex: 1, alignItems: alignRight ? 'flex-end' : 'flex-start' }}>
+    <Animated.View style={{ flex: 1, alignItems: alignRight ? 'flex-end' : 'flex-start', transform: [{ scale: beat }] }}>
       <Text
         numberOfLines={1}
-        style={{ color: theme.colors.text, fontSize: s(15), fontWeight: '700' }}
+        style={{ color: c.text, fontSize: s(15), fontWeight: '800', marginBottom: s(8) }}
       >
-        {name}
+        {team.name}
       </Text>
-      <Text style={{ color, fontSize: s(30), fontWeight: '900' }}>{score}</Text>
-    </View>
+      <ScoreRing
+        score={score}
+        target={target}
+        color={color}
+        size={s(92)}
+        caption={caption}
+        pulse={pulse}
+        intensity={pulse ? 0.6 : 0}
+      />
+    </Animated.View>
   );
 }

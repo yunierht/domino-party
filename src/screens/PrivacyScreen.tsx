@@ -28,7 +28,7 @@ export function PrivacyScreen() {
         Effective date: June 17, 2026
       </Text>
       <Text style={{ color: c.textMuted, fontSize: s(14), lineHeight: s(21), marginTop: s(8) }}>
-        Domino Party (“the App”, “we”) is a domino score-tracking app. It has no user accounts,
+        Domino Social Club (“the App”, “we”) is a domino score-tracking app. It has no user accounts,
         asks for no email or password, and shows no ads.
       </Text>
 

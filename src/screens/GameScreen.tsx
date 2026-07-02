@@ -458,6 +458,7 @@ function TeamPanel({
   const { t } = useI18n();
   const c = theme.colors;
   const locked = finished || readOnly;
+  const addTextColor = color === c.teamA ? c.onPrimary : c.text;
   const playerLine = team.players.filter((p) => p.trim()).join(' & ');
   const pressScale = useRef(new Animated.Value(1)).current;
   const spring = (toValue: number, opts: object) =>
@@ -491,25 +492,50 @@ function TeamPanel({
         backgroundColor: c.surface,
         borderRadius: theme.radius + 4,
         padding: s(18),
-        borderWidth: 1,
+        borderWidth: 1.5,
         borderColor: isWinner || leading ? color : c.border,
         overflow: 'hidden',
         // Raised 3D look.
         shadowColor: '#000',
-        shadowOpacity: 0.3,
-        shadowRadius: s(16),
-        shadowOffset: { width: 0, height: s(9) },
-        elevation: 12,
+        shadowOpacity: 0.42,
+        shadowRadius: s(24),
+        shadowOffset: { width: 0, height: s(13) },
+        elevation: 14,
         transform: [{ scale: pressScale }, { scale: winBeat }],
       }}
     >
+      <LinearGradient
+        colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.025)', 'rgba(0,0,0,0.30)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <LinearGradient
+        colors={[color, 'rgba(0,0,0,0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(3), opacity: 0.9 }}
+      />
       {/* Glossy top sheen for depth */}
       <LinearGradient
-        colors={[theme.dark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.75)', 'rgba(255,255,255,0)']}
+        colors={[theme.dark ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.75)', 'rgba(255,255,255,0)']}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         pointerEvents="none"
         style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(70) }}
+      />
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: s(5),
+          left: s(10),
+          right: s(10),
+          height: 1,
+          backgroundColor: 'rgba(255,255,255,0.14)',
+        }}
       />
 
       {/* Top row: identity + big total */}
@@ -570,6 +596,11 @@ function TeamPanel({
                 paddingVertical: s(7),
                 borderWidth: 1,
                 borderColor: c.border,
+                shadowColor: '#000',
+                shadowOpacity: 0.25,
+                shadowRadius: s(5),
+                shadowOffset: { width: 0, height: s(2) },
+                elevation: 3,
                 opacity: pressed ? 0.7 : 1,
               })}
             >
@@ -578,13 +609,13 @@ function TeamPanel({
                   width: s(22),
                   height: s(22),
                   borderRadius: s(11),
-                  backgroundColor: color,
+              backgroundColor: color,
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginRight: s(7),
                 }}
               >
-                <Text style={{ color: '#fff', fontSize: s(11), fontWeight: '800' }}>{n}</Text>
+                <Text style={{ color: addTextColor, fontSize: s(11), fontWeight: '800' }}>{n}</Text>
               </View>
               <Text style={{ color: c.text, fontSize: s(15), fontWeight: '800' }}>+{r.points}</Text>
             </Pressable>
@@ -594,28 +625,50 @@ function TeamPanel({
 
       {/* Add-points button */}
       {!locked && (
-        <View
+        <LinearGradient
+          colors={color === c.teamA ? ['#FFE08A', color, '#8B581F'] : ['#D1695E', color, '#5E1F1A']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={{
             marginTop: s(14),
             borderRadius: 999,
-            backgroundColor: color,
             paddingVertical: s(13),
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
             gap: s(8),
+            borderWidth: 1,
+            borderColor: color === c.teamA ? '#F6D37B' : '#C86256',
             shadowColor: color,
-            shadowOpacity: 0.45,
-            shadowRadius: s(10),
-            shadowOffset: { width: 0, height: s(4) },
-            elevation: 4,
+            shadowOpacity: 0.42,
+            shadowRadius: s(13),
+            shadowOffset: { width: 0, height: s(6) },
+            elevation: 7,
+            overflow: 'hidden',
           }}
         >
-          <Feather name="plus-circle" size={s(20)} color="#fff" />
-          <Text style={{ color: '#fff', fontSize: s(16), fontWeight: '900', letterSpacing: 0.3 }}>
+          <LinearGradient
+            colors={['rgba(255,255,255,0.36)', 'rgba(255,255,255,0.02)', 'rgba(0,0,0,0.22)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            pointerEvents="none"
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          />
+          <Feather name="plus-circle" size={s(20)} color={addTextColor} />
+          <Text
+            style={{
+              color: addTextColor,
+              fontSize: s(16),
+              fontWeight: '900',
+              letterSpacing: 0.3,
+              textShadowColor: 'rgba(0,0,0,0.35)',
+              textShadowOffset: { width: 0, height: 1 },
+              textShadowRadius: 1,
+            }}
+          >
             {t.addPoints}
           </Text>
-        </View>
+        </LinearGradient>
       )}
     </AnimatedPressable>
   );

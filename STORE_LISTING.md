@@ -1,15 +1,15 @@
-# Store listing — Domino Party
+# Store listing — Domino Social Club
 
 ## App name
-Domino Party
+Domino Social Club
 
 ## Short description (≤ 80 chars)
 Dominoes scorekeeper for two teams — fast scoring & live sharing with friends.
 
 ## Full description
-Domino Party is the easiest way to keep score for your domino games.
+Domino Social Club is the easiest way to keep score for your domino games.
 
-Built for the classic game of two teams of two, Domino Party tracks every hand
+Built for the classic game of two teams of two, Domino Social Club tracks every hand
 and shows exactly who's winning and how many points are left to win — with big,
 beautiful score rings that fill as you race to the target.
 

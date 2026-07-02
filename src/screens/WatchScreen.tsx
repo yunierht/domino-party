@@ -326,10 +326,23 @@ function LiveBoard({
           borderRadius: theme.radius + 4,
           padding: s(14),
           marginBottom: s(16),
-          borderWidth: 1,
+          borderWidth: 1.5,
           borderColor: c.border,
+          overflow: 'hidden',
+          shadowColor: '#000',
+          shadowOpacity: 0.34,
+          shadowRadius: s(16),
+          shadowOffset: { width: 0, height: s(8) },
+          elevation: 9,
         }}
       >
+        <LinearGradient
+          colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0)', 'rgba(0,0,0,0.22)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          pointerEvents="none"
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        />
         <Text style={{ flex: 1, color: c.text, fontSize: s(14), fontWeight: '700' }}>
           {t.currentlyScoring.replace('{name}', game.controllerName ?? '')}
         </Text>
@@ -353,7 +366,14 @@ function LiveBoard({
 
 
       {game.nextCode && finished && (
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: s(8), marginBottom: s(14), backgroundColor: c.surfaceAlt, borderRadius: theme.radius, padding: s(12), borderWidth: 1, borderColor: c.border }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: s(8), marginBottom: s(14), backgroundColor: c.surfaceAlt, borderRadius: theme.radius, padding: s(12), borderWidth: 1.5, borderColor: c.border, shadowColor: '#000', shadowOpacity: 0.24, shadowRadius: s(10), shadowOffset: { width: 0, height: s(5) }, elevation: 5, overflow: 'hidden' }}>
+          <LinearGradient
+            colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0)', 'rgba(0,0,0,0.20)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            pointerEvents="none"
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          />
           <ActivityIndicator size="small" color={c.primary} />
           <Text style={{ color: c.textMuted, fontSize: s(13), fontWeight: '700' }}>
             {t.nextGameFollowing}
@@ -410,22 +430,47 @@ function ReadOnlyTeam({
         backgroundColor: c.surface,
         borderRadius: theme.radius + 4,
         padding: s(18),
-        borderWidth: 1,
+        borderWidth: 1.5,
         borderColor: isWinner || leading ? color : c.border,
         overflow: 'hidden',
         shadowColor: '#000',
-        shadowOpacity: 0.3,
-        shadowRadius: s(16),
-        shadowOffset: { width: 0, height: s(9) },
-        elevation: 12,
+        shadowOpacity: 0.42,
+        shadowRadius: s(24),
+        shadowOffset: { width: 0, height: s(13) },
+        elevation: 14,
       }}
     >
       <LinearGradient
-        colors={[theme.dark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.75)', 'rgba(255,255,255,0)']}
+        colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.025)', 'rgba(0,0,0,0.30)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <LinearGradient
+        colors={[color, 'rgba(0,0,0,0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(3), opacity: 0.9 }}
+      />
+      <LinearGradient
+        colors={[theme.dark ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.75)', 'rgba(255,255,255,0)']}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         pointerEvents="none"
         style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(70) }}
+      />
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: s(5),
+          left: s(10),
+          right: s(10),
+          height: 1,
+          backgroundColor: 'rgba(255,255,255,0.14)',
+        }}
       />
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={{ flex: 1 }}>
@@ -475,6 +520,11 @@ function ReadOnlyTeam({
                   paddingVertical: s(7),
                   borderWidth: 1,
                   borderColor: c.border,
+                  shadowColor: '#000',
+                  shadowOpacity: 0.25,
+                  shadowRadius: s(5),
+                  shadowOffset: { width: 0, height: s(2) },
+                  elevation: 3,
                 }}
               >
                 <View style={{ width: s(22), height: s(22), borderRadius: s(11), backgroundColor: color, alignItems: 'center', justifyContent: 'center', marginRight: s(7) }}>

@@ -1,5 +1,5 @@
 // Generates app icons from assets/logo.png:
-//   - assets/icon.png             (1024² opaque: logo on a party-night gradient)
+//   - assets/icon.png             (1024² opaque: logo on a carbon-and-gold gradient)
 //   - assets/adaptive-foreground.png (1024² transparent: logo sized to the
 //                                     Android adaptive-icon safe zone)
 // Run: node scripts/make-icons.js

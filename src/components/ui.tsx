@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   StyleProp,
   Text,
@@ -44,6 +45,7 @@ export function Button({
     paddingHorizontal: s(20),
     opacity: disabled ? 0.5 : 1,
     alignSelf: fullWidth ? 'stretch' : 'auto',
+    overflow: 'hidden',
   };
 
   const textColor =
@@ -58,8 +60,11 @@ export function Button({
       style={{
         color: textColor,
         fontSize: s(17),
-        fontWeight: '700',
+        fontWeight: '900',
         letterSpacing: 0.3,
+        textShadowColor: variant === 'primary' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.45)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 1,
       }}
     >
       {label}
@@ -68,14 +73,53 @@ export function Button({
 
   if (variant === 'primary') {
     return (
-      <Pressable onPress={disabled ? undefined : onPress} style={style}>
+      <Pressable
+        onPress={disabled ? undefined : onPress}
+        style={({ pressed }) => [
+          {
+            alignSelf: fullWidth ? 'stretch' : 'auto',
+            transform: [{ translateY: pressed ? s(2) : 0 }],
+            shadowColor: c.primary,
+            shadowOpacity: pressed ? 0.18 : 0.38,
+            shadowRadius: pressed ? s(8) : s(16),
+            shadowOffset: { width: 0, height: pressed ? s(3) : s(9) },
+            elevation: pressed ? 4 : 10,
+          },
+          style,
+        ]}
+      >
         {({ pressed }) => (
           <LinearGradient
-            colors={c.gradient}
+            colors={pressed ? [c.gradient[1], c.gradient[0]] : ['#FFE08A', c.gradient[0], c.gradient[1]]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={[base, { opacity: pressed ? 0.85 : disabled ? 0.5 : 1 }]}
+            style={[
+              base,
+              {
+                opacity: disabled ? 0.5 : 1,
+                borderWidth: 1,
+                borderColor: '#F6D37B',
+              },
+            ]}
           >
+            <LinearGradient
+              colors={['rgba(255,255,255,0.42)', 'rgba(255,255,255,0.06)', 'rgba(0,0,0,0.18)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              pointerEvents="none"
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+            />
+            <View
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                top: s(4),
+                left: s(8),
+                right: s(8),
+                height: 1,
+                backgroundColor: 'rgba(255,255,255,0.45)',
+              }}
+            />
             {content}
           </LinearGradient>
         )}
@@ -90,7 +134,7 @@ export function Button({
         ? 'transparent'
         : 'transparent';
   const border =
-    variant === 'danger' ? c.danger : variant === 'ghost' ? c.border : 'transparent';
+    variant === 'danger' ? c.danger : variant === 'ghost' || variant === 'secondary' ? c.border : 'transparent';
 
   return (
     <Pressable
@@ -99,13 +143,28 @@ export function Button({
         base,
         {
           backgroundColor: bg,
-          borderWidth: variant === 'ghost' || variant === 'danger' ? 1.5 : 0,
+          borderWidth: variant === 'ghost' || variant === 'danger' || variant === 'secondary' ? 1.5 : 0,
           borderColor: border,
           opacity: pressed ? 0.7 : disabled ? 0.5 : 1,
+          shadowColor: variant === 'secondary' ? '#000' : c.primary,
+          shadowOpacity: variant === 'secondary' ? 0.34 : 0.08,
+          shadowRadius: s(12),
+          shadowOffset: { width: 0, height: pressed ? s(2) : s(6) },
+          elevation: variant === 'secondary' ? 7 : 1,
+          transform: [{ translateY: pressed ? s(1) : 0 }],
         },
         style,
       ]}
     >
+      {variant === 'secondary' && (
+        <LinearGradient
+          colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0)', 'rgba(0,0,0,0.22)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          pointerEvents="none"
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: radius }}
+        />
+      )}
       {content}
     </Pressable>
   );
@@ -127,12 +186,25 @@ export function Card({
           backgroundColor: theme.colors.surface,
           borderRadius: theme.radius,
           padding: s(16),
-          borderWidth: theme.dark ? 0 : 1,
+          borderWidth: 1,
           borderColor: theme.colors.border,
+          shadowColor: '#000',
+          shadowOpacity: theme.dark ? 0.36 : 0.1,
+          shadowRadius: s(18),
+          shadowOffset: { width: 0, height: s(10) },
+          elevation: 8,
+          overflow: 'hidden',
         },
         style,
       ]}
     >
+      <LinearGradient
+        colors={['rgba(255,255,255,0.075)', 'rgba(255,255,255,0)', 'rgba(0,0,0,0.18)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
       {children}
     </View>
   );
@@ -207,8 +279,13 @@ export function Field({
             height: s(50),
             color: c.text,
             fontSize: s(17),
-            borderWidth: 1,
+            borderWidth: 1.5,
             borderColor: c.border,
+            shadowColor: '#000',
+            shadowOpacity: theme.dark ? 0.28 : 0.08,
+            shadowRadius: s(9),
+            shadowOffset: { width: 0, height: s(4) },
+            elevation: 4,
           },
           props.style as StyleProp<TextStyle>,
         ]}
@@ -219,7 +296,7 @@ export function Field({
 
 // ---- Loading splash --------------------------------------------------------
 export function FullScreenLoader() {
-  const { theme } = useTheme();
+  const { theme, s } = useTheme();
   return (
     <View
       style={{
@@ -229,6 +306,11 @@ export function FullScreenLoader() {
         justifyContent: 'center',
       }}
     >
+      <Image
+        source={require('../../assets/social-club-splash.png')}
+        style={{ width: s(190), height: s(190), marginBottom: s(18) }}
+        resizeMode="contain"
+      />
       <ActivityIndicator color={theme.colors.primary} size="large" />
     </View>
   );
@@ -260,7 +342,7 @@ export function DominoTile({ size = 40, a = 6, b = 3 }: { size?: number; a?: num
               width: cell * 0.42,
               height: cell * 0.42,
               borderRadius: cell,
-              backgroundColor: theme.dark ? c.text : '#2A2A2A',
+              backgroundColor: theme.dark ? '#17110A' : '#2A2A2A',
               top: r * cell + cell * 0.29,
               left: col * cell + cell * 0.29,
             }}
@@ -273,10 +355,10 @@ export function DominoTile({ size = 40, a = 6, b = 3 }: { size?: number; a?: num
     <View
       style={{
         flexDirection: 'row',
-        backgroundColor: theme.dark ? c.surfaceAlt : '#FFFDF5',
+        backgroundColor: theme.dark ? '#F6E7C1' : '#FFFDF5',
         borderRadius: 8,
         borderWidth: 1.5,
-        borderColor: c.border,
+        borderColor: theme.dark ? '#B98936' : c.border,
         overflow: 'hidden',
       }}
     >

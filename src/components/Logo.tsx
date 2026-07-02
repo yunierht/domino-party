@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeContext';
 
 /**
- * Home-screen "Domino Party" logo (transparent PNG). Bumping `spinTrigger`
+ * Home-screen "Domino Social Club" logo (transparent PNG). Bumping `spinTrigger`
  * (e.g. tapping the YHT signature) makes it spin three times with a bounce
  * and a tiny haptic buzz.
  */
@@ -47,7 +47,7 @@ export function Logo({ spinTrigger = 0 }: { spinTrigger?: number }) {
   return (
     <View style={{ alignItems: 'center', marginTop: s(4), marginBottom: s(10) }}>
       <Animated.Image
-        source={require('../../assets/logo.png')}
+        source={require('../../assets/social-club-logo.png')}
         style={{ width: '100%', height: s(205), transform: [{ rotate }, { scale: dip }, { scale: bounce }] }}
         resizeMode="contain"
       />

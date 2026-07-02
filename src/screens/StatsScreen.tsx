@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { useGame } from '../state/GameContext';
@@ -35,7 +36,14 @@ export function StatsScreen() {
           <Text style={{ color: c.textMuted, fontSize: s(11), marginTop: -s(6), marginBottom: s(10), lineHeight: s(15) }}>
             🥚 {t.pollonasLabel} — {t.pollonasLegend}
           </Text>
-          <Card style={{ padding: 0, overflow: 'hidden' }}>
+          <Card style={{ padding: 0, overflow: 'hidden', borderColor: c.primary }}>
+            <LinearGradient
+              colors={[c.primary, 'rgba(0,0,0,0)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              pointerEvents="none"
+              style={{ height: s(3), opacity: 0.9 }}
+            />
             {board.map((rec, i) => (
               <LeaderRow key={rec.key} rec={rec} rank={i + 1} last={i === board.length - 1} />
             ))}
@@ -72,7 +80,25 @@ function RivalryCard({ r, lang }: { r: Rivalry; lang: string }) {
   });
 
   return (
-    <Card>
+    <Card style={{ borderColor: c.primary }}>
+      <LinearGradient
+        colors={[c.primary, 'rgba(0,0,0,0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(3), opacity: 0.85 }}
+      />
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: s(5),
+          left: s(10),
+          right: s(10),
+          height: 1,
+          backgroundColor: 'rgba(255,255,255,0.13)',
+        }}
+      />
       {/* names + head-to-head */}
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: s(10) }}>
         <Text numberOfLines={1} style={{ flex: 1, color: c.text, fontSize: s(15), fontWeight: '800' }}>
@@ -87,7 +113,22 @@ function RivalryCard({ r, lang }: { r: Rivalry; lang: string }) {
       </View>
 
       {/* proportion bar */}
-      <View style={{ flexDirection: 'row', height: s(8), borderRadius: 999, overflow: 'hidden', backgroundColor: c.surfaceAlt }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          height: s(10),
+          borderRadius: 999,
+          overflow: 'hidden',
+          backgroundColor: c.surfaceAlt,
+          borderWidth: 1,
+          borderColor: c.border,
+          shadowColor: '#000',
+          shadowOpacity: 0.28,
+          shadowRadius: s(6),
+          shadowOffset: { width: 0, height: s(3) },
+          elevation: 3,
+        }}
+      >
         <View style={{ flex: aFrac, backgroundColor: c.teamA }} />
         <View style={{ flex: 1 - aFrac, backgroundColor: c.teamB }} />
       </View>
@@ -125,7 +166,26 @@ function LeaderRow({ rec, rank, last }: { rec: TeamRecord; rank: number; last: b
         borderBottomColor: c.border,
       }}
     >
-      <Text style={{ width: s(26), color: c.textMuted, fontSize: s(15), fontWeight: '900' }}>{rank}</Text>
+      <View
+        style={{
+          width: s(28),
+          height: s(28),
+          borderRadius: s(14),
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginRight: s(8),
+          backgroundColor: rank === 1 ? c.primary : c.surfaceAlt,
+          borderWidth: 1,
+          borderColor: rank === 1 ? '#F6D37B' : c.border,
+          shadowColor: rank === 1 ? c.primary : '#000',
+          shadowOpacity: rank === 1 ? 0.32 : 0.22,
+          shadowRadius: s(7),
+          shadowOffset: { width: 0, height: s(3) },
+          elevation: rank === 1 ? 5 : 3,
+        }}
+      >
+        <Text style={{ color: rank === 1 ? c.onPrimary : c.textMuted, fontSize: s(13), fontWeight: '900' }}>{rank}</Text>
+      </View>
       <View style={{ flex: 1, paddingRight: s(8) }}>
         <Text numberOfLines={1} style={{ color: c.text, fontSize: s(16), fontWeight: '700' }}>
           {rec.name}
@@ -156,6 +216,13 @@ function PollonaBadge({ count, color }: { count: number; color: string }) {
         paddingVertical: s(2),
         borderRadius: 999,
         backgroundColor: color + '22',
+        borderWidth: 1,
+        borderColor: color + '55',
+        shadowColor: color,
+        shadowOpacity: 0.2,
+        shadowRadius: s(5),
+        shadowOffset: { width: 0, height: s(2) },
+        elevation: 2,
       }}
     >
       <Text style={{ fontSize: s(10) }}>🥚</Text>
