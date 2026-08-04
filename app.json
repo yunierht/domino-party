@@ -2,7 +2,7 @@
   "expo": {
     "name": "Domino Social Club",
     "slug": "domino-party",
-    "version": "1.0.7",
+    "version": "1.0.10",
     "scheme": "dominoparty",
     "orientation": "portrait",
     "icon": "./assets/social-club-icon.png",
@@ -10,7 +10,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.yht.dominoparty",
-      "buildNumber": "7",
+      "buildNumber": "9",
       "icon": "./assets/social-club-ios-icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -19,7 +19,7 @@
     },
     "android": {
       "package": "com.yht.dominoparty",
-      "versionCode": 16,
+      "versionCode": 18,
       "blockedPermissions": [
         "android.permission.ACTIVITY_RECOGNITION",
         "android.permission.RECORD_AUDIO"
