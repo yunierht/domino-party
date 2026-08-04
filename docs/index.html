@@ -304,6 +304,9 @@
           link.classList.toggle("primary", preferred);
           link.classList.toggle("secondary", !preferred);
         });
+        // Route based on the recipient's device. If navigation is blocked or
+        // fails, the fully rendered page remains available with both buttons.
+        window.location.replace(storeUrl);
       }
     })();
   </script>

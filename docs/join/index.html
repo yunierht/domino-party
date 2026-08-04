@@ -97,6 +97,11 @@
     var ua = navigator.userAgent || "";
     var isIPadOS = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
     var platform = /android/i.test(ua) ? "android" : /iPad|iPhone|iPod/i.test(ua) || isIPadOS ? "ios" : "";
+    var storeUrl = platform === "ios"
+      ? "https://apps.apple.com/app/id6793746031"
+      : platform === "android"
+        ? "https://play.google.com/store/apps/details?id=com.yht.dominoparty"
+        : "";
     if (platform) {
       document.querySelectorAll("[data-store]").forEach(function (link) {
         var preferred = link.getAttribute("data-store") === platform;
@@ -108,6 +113,15 @@
       setTimeout(function () {
         window.location.href = appLink;
       }, 450);
+      if (storeUrl) {
+        // If the app is not installed, automatically continue to the matching
+        // store. Opening the app suspends this page before the fallback fires.
+        setTimeout(function () {
+          window.location.replace(storeUrl);
+        }, 1600);
+      }
+    } else if (storeUrl) {
+      window.location.replace(storeUrl);
     }
   </script>
 </body>
