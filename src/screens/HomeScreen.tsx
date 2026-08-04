@@ -11,17 +11,10 @@ import { Logo } from '../components/Logo';
 import { Menu } from '../components/Menu';
 import { DemoMatch } from '../components/DemoMatch';
 import { ScoreRing } from '../components/ScoreRing';
-import { Match, Team } from '../types';
+import { Match, Team, teamTotal } from '../types';
+import { ThemeName } from '../theme/themes';
 
-const HOME_SCORE_SCRIPT: { team: 0 | 1; ratio: number }[] = [
-  { team: 0, ratio: 0.17 },
-  { team: 1, ratio: 0.27 },
-  { team: 0, ratio: 0.33 },
-  { team: 1, ratio: 0.2 },
-  { team: 0, ratio: 0.3 },
-  { team: 1, ratio: 0.23 },
-  { team: 0, ratio: 0.23 },
-];
+const HOME_THEME_ORDER: ThemeName[] = ['carbon', 'dark', 'casino', 'cubano', 'usa'];
 
 export function HomeScreen() {
   const { theme, s } = useTheme();
@@ -34,23 +27,7 @@ export function HomeScreen() {
     currentMatch && !currentMatch.winnerTeamId ? currentMatch : null;
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [spin, setSpin] = useState(0); // bump to spin the logo
-
-  // Excited, looping heartbeat for the YHT monogram.
-  const beat = useRef(new Animated.Value(1)).current;
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(beat, { toValue: 1.28, duration: 120, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.timing(beat, { toValue: 1, duration: 110, easing: Easing.in(Easing.quad), useNativeDriver: true }),
-        Animated.timing(beat, { toValue: 1.18, duration: 95, useNativeDriver: true }),
-        Animated.timing(beat, { toValue: 1, duration: 130, useNativeDriver: true }),
-        Animated.delay(420),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [beat]);
+  const [logoSpin, setLogoSpin] = useState(0);
 
   return (
     <View style={{ flex: 1 }}>
@@ -68,53 +45,16 @@ export function HomeScreen() {
       <Menu visible={menuOpen} onClose={() => setMenuOpen(false)} />
 
       {/* Logo */}
-      <Logo spinTrigger={spin} />
+      <Logo spinTrigger={logoSpin} />
 
       {/* Active match resume card */}
       {activeMatch ? (
         <>
-        <Pressable
-          onPress={() => go('game')}
-          style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1, marginBottom: s(16) })}
-        >
-          <Card style={{ borderColor: c.primary }}>
-            <LinearGradient
-              colors={[c.primary, 'rgba(0,0,0,0)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              pointerEvents="none"
-              style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(3), opacity: 0.9 }}
-            />
-            <View
-              pointerEvents="none"
-              style={{
-                position: 'absolute',
-                top: s(5),
-                left: s(10),
-                right: s(10),
-                height: 1,
-                backgroundColor: 'rgba(255,255,255,0.13)',
-              }}
-            />
-            <Text
-              style={{
-                color: c.textMuted,
-                fontSize: s(12),
-                fontWeight: '700',
-                textTransform: 'uppercase',
-                letterSpacing: 1,
-              }}
-            >
-              {t.resumeMatch}
-            </Text>
-            <LoopingHomeScoreboard match={activeMatch} />
-            <Text style={{ color: c.textMuted, fontSize: s(13), marginTop: s(10) }}>
-              {t.targetScore}: {activeMatch.targetScore}
-            </Text>
-          </Card>
-        </Pressable>
-          <Button label={t.newMatch} onPress={() => go('newMatch')} fullWidth />
-          <View style={{ height: s(12) }} />
+          <ResumeMatchCard
+            match={activeMatch}
+            onResume={() => go('game')}
+            onNewMatch={() => go('newMatch')}
+          />
         </>
       ) : (
         <DemoMatch onNewMatch={() => go('newMatch')} />
@@ -128,121 +68,206 @@ export function HomeScreen() {
         variant="secondary"
         fullWidth
       />
-
-      {/* Personal signature (tap to spin the logo); YHT heartbeats */}
-      <Pressable onPress={() => setSpin((n) => n + 1)} style={{ marginTop: s(26) }} hitSlop={10}>
-        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: c.textMuted, fontSize: s(12), fontWeight: '600', letterSpacing: 0.5 }}>
-            Made by{' '}
-          </Text>
-          <Animated.Text
-            style={{
-              color: c.primary,
-              fontSize: s(12),
-              fontWeight: '900',
-              letterSpacing: 1,
-              transform: [{ scale: beat }],
-            }}
-          >
-            YHT
-          </Animated.Text>
-        </View>
-      </Pressable>
       </ScrollView>
+      <AppearanceSpinner onSpin={() => setLogoSpin((n) => n + 1)} />
     </View>
   );
 }
 
-function LoopingHomeScoreboard({ match }: { match: Match }) {
+function AppearanceSpinner({ onSpin }: { onSpin: () => void }) {
+  const { theme, themeName, setThemeName, s } = useTheme();
+  const c = theme.colors;
+  const spin = useRef(new Animated.Value(0)).current;
+
+  const rotate = spin.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const cycleTheme = () => {
+    const currentIndex = HOME_THEME_ORDER.indexOf(themeName);
+    const next = HOME_THEME_ORDER[(currentIndex + 1) % HOME_THEME_ORDER.length] ?? HOME_THEME_ORDER[0];
+    spin.setValue(0);
+    Animated.timing(spin, {
+      toValue: 1,
+      duration: 420,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+    setThemeName(next);
+    onSpin();
+  };
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Change appearance"
+      onPress={cycleTheme}
+      hitSlop={10}
+      style={({ pressed }) => ({
+        position: 'absolute',
+        right: s(18),
+        bottom: s(18),
+        shadowColor: '#000',
+        shadowOpacity: pressed ? 0.24 : 0.38,
+        shadowRadius: pressed ? s(8) : s(14),
+        shadowOffset: { width: 0, height: pressed ? s(3) : s(8) },
+        elevation: pressed ? 5 : 10,
+        transform: [{ translateY: pressed ? s(1) : 0 }],
+      })}
+    >
+      {({ pressed }) => (
+        <LinearGradient
+          colors={pressed ? [c.surfaceAlt, c.surface, c.surfaceAlt] : ['rgba(255,255,255,0.18)', c.surfaceAlt, c.surface]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            width: s(52),
+            height: s(52),
+            borderRadius: s(26),
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
+            borderColor: pressed ? c.border : c.primary,
+            overflow: 'hidden',
+          }}
+        >
+          <LinearGradient
+            colors={['rgba(255,255,255,0.42)', 'rgba(255,255,255,0.08)', 'rgba(0,0,0,0.34)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            pointerEvents="none"
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          />
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: s(5),
+              left: s(9),
+              right: s(9),
+              height: s(14),
+              borderRadius: s(12),
+              backgroundColor: 'rgba(255,255,255,0.13)',
+              opacity: pressed ? 0.32 : 0.7,
+            }}
+          />
+          <View
+            style={{
+              width: s(32),
+              height: s(32),
+              borderRadius: s(16),
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: c.primary,
+              borderWidth: 1,
+              borderColor: '#F6D37B',
+              shadowColor: c.primary,
+              shadowOpacity: 0.3,
+              shadowRadius: s(5),
+              shadowOffset: { width: 0, height: s(2) },
+              elevation: 4,
+            }}
+          >
+            <Animated.View style={{ transform: [{ rotate }] }}>
+              <Feather name="refresh-cw" size={s(17)} color={c.onPrimary} />
+            </Animated.View>
+          </View>
+        </LinearGradient>
+      )}
+    </Pressable>
+  );
+}
+
+function ResumeMatchCard({
+  match,
+  onResume,
+  onNewMatch,
+}: {
+  match: Match;
+  onResume: () => void;
+  onNewMatch: () => void;
+}) {
   const { theme, s } = useTheme();
   const { t } = useI18n();
   const c = theme.colors;
-  const [a, setA] = useState(0);
-  const [b, setB] = useState(0);
-  const [winner, setWinner] = useState<0 | 1 | null>(null);
-  const target = match.targetScore;
+  const attention = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    let alive = true;
-    let timer: ReturnType<typeof setTimeout>;
-    let i = 0;
-    let sa = 0;
-    let sb = 0;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(attention, { toValue: 1.025, duration: 260, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(attention, { toValue: 1, duration: 280, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+        Animated.delay(1500),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [attention]);
 
-    const points = (ratio: number) => Math.max(1, Math.round(target * ratio));
-    const reset = () => {
-      sa = 0;
-      sb = 0;
-      i = 0;
-      setA(0);
-      setB(0);
-      setWinner(null);
-    };
-    const tick = () => {
-      if (!alive) return;
-      const r = HOME_SCORE_SCRIPT[i++];
-      if (r.team === 0) {
-        sa += points(r.ratio);
-        setA(sa);
-      } else {
-        sb += points(r.ratio);
-        setB(sb);
-      }
-
-      if (sa >= target || sb >= target || i >= HOME_SCORE_SCRIPT.length) {
-        setWinner(sa >= sb ? 0 : 1);
-        timer = setTimeout(() => {
-          reset();
-          timer = setTimeout(tick, 800);
-        }, 2400);
-      } else {
-        timer = setTimeout(tick, 950);
-      }
-    };
-
-    timer = setTimeout(tick, 650);
-    return () => {
-      alive = false;
-      clearTimeout(timer);
-    };
-  }, [target]);
-
-  const toWinA = Math.max(0, target - a);
-  const toWinB = Math.max(0, target - b);
-  const lead = a === b ? null : a > b ? 0 : 1;
-  const dangerA = winner === null && lead === 0 && toWinA <= target * 0.25;
-  const dangerB = winner === null && lead === 1 && toWinB <= target * 0.25;
+  const scoreA = teamTotal(match, match.teams[0].id);
+  const scoreB = teamTotal(match, match.teams[1].id);
 
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginTop: s(10),
-      }}
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t.resumeMatch}
+      onPress={onResume}
+      style={({ pressed }) => ({
+        marginBottom: s(18),
+        paddingVertical: s(3),
+        opacity: pressed ? 0.88 : 1,
+      })}
     >
-      <HomeScoreSide
-        team={match.teams[0]}
-        score={a}
-        target={target}
-        color={c.teamA}
-        pulse={dangerA}
-        win={winner === 0}
-      />
-      <Text style={{ color: c.textMuted, fontWeight: '800', fontSize: s(16) }}>
-        {t.vs}
-      </Text>
-      <HomeScoreSide
-        team={match.teams[1]}
-        score={b}
-        target={target}
-        color={c.teamB}
-        pulse={dangerB}
-        win={winner === 1}
-        alignRight
-      />
-    </View>
+      <Animated.View style={{ transform: [{ scale: attention }] }}>
+        <Card style={{ borderColor: c.primary }}>
+          <LinearGradient
+            colors={[c.primary, 'rgba(0,0,0,0)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            pointerEvents="none"
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(3), opacity: 0.9 }}
+          />
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: s(5),
+              left: s(10),
+              right: s(10),
+              height: 1,
+              backgroundColor: 'rgba(255,255,255,0.13)',
+            }}
+          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <HomeScoreSide
+              team={match.teams[0]}
+              score={scoreA}
+              target={match.targetScore}
+              color={c.teamA}
+            />
+            <Text style={{ color: c.textMuted, fontWeight: '800', fontSize: s(16) }}>
+              {t.vs}
+            </Text>
+            <HomeScoreSide
+              team={match.teams[1]}
+              score={scoreB}
+              target={match.targetScore}
+              color={c.teamB}
+              alignRight
+            />
+          </View>
+          <View style={{ marginTop: s(16), flexDirection: 'row', gap: s(10) }}>
+            <View style={{ flex: 1 }} pointerEvents="none">
+              <Button label={t.resumeShort} onPress={onResume} fullWidth />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button label={t.matchShort} onPress={onNewMatch} fullWidth />
+            </View>
+          </View>
+        </Card>
+      </Animated.View>
+    </Pressable>
   );
 }
 
@@ -251,32 +276,20 @@ function HomeScoreSide({
   score,
   target,
   color,
-  pulse,
-  win,
   alignRight,
 }: {
   team: Team;
   score: number;
   target: number;
   color: string;
-  pulse: boolean;
-  win: boolean;
   alignRight?: boolean;
 }) {
   const { theme, s } = useTheme();
   const c = theme.colors;
   const caption = String(Math.max(0, target - score));
-  const beat = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    if (!win) return;
-    const thump = (to: number, duration: number) =>
-      Animated.timing(beat, { toValue: to, duration, useNativeDriver: true });
-    Animated.sequence([thump(1.08, 150), thump(1, 140), thump(1.05, 150), thump(1, 180)]).start();
-  }, [win, beat]);
 
   return (
-    <Animated.View style={{ flex: 1, alignItems: alignRight ? 'flex-end' : 'flex-start', transform: [{ scale: beat }] }}>
+    <View style={{ flex: 1, alignItems: alignRight ? 'flex-end' : 'flex-start' }}>
       <Text
         numberOfLines={1}
         style={{ color: c.text, fontSize: s(15), fontWeight: '800', marginBottom: s(8) }}
@@ -289,9 +302,7 @@ function HomeScoreSide({
         color={color}
         size={s(92)}
         caption={caption}
-        pulse={pulse}
-        intensity={pulse ? 0.6 : 0}
       />
-    </Animated.View>
+    </View>
   );
 }

@@ -25,18 +25,30 @@ export function Menu({ visible, onClose }: { visible: boolean; onClose: () => vo
   }, [visible, tx, PANEL_W]);
 
   const invite = () => {
-    Share.share({
-      message: t.inviteMessage
-        .replace('{play}', STORE_LINKS.playStore)
-        .replace('{apple}', STORE_LINKS.appStore),
-    }).catch(() => {});
+    const message = t.inviteMessage.replace('{site}', STORE_LINKS.website);
+    const content = {
+      title: t.appName,
+      message,
+      // iOS uses this to create a native link attachment. The URL also stays in
+      // the message so Android and share targets that ignore `url` still get it.
+      url: STORE_LINKS.website,
+    };
+
+    Share.share(content, {
+      dialogTitle: t.inviteFriends,
+      subject: t.inviteFriends,
+    }).catch(() => {
+      // Some share targets reject richer metadata. Keep a plain-text fallback
+      // so the invite remains useful on both Android and iPhone.
+      Share.share({ message }).catch(() => {});
+    });
   };
 
   const items: { icon: keyof typeof Feather.glyphMap; label: string; run: () => void }[] = [
+    { icon: 'settings', label: t.settings, run: () => go('settings') },
     { icon: 'bar-chart-2', label: t.statsTitle, run: () => go('stats') },
     { icon: 'help-circle', label: t.howToPlay, run: () => go('howto') },
     { icon: 'share-2', label: t.inviteFriends, run: invite },
-    { icon: 'settings', label: t.settings, run: () => go('settings') },
     { icon: 'shield', label: t.privacy, run: () => go('privacy') },
   ];
 

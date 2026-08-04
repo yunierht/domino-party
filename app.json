@@ -1,28 +1,31 @@
 {
   "expo": {
     "name": "Domino Social Club",
-    "slug": "domino-social-club",
-    "version": "1.0.4",
-    "scheme": "dominosocialclub",
+    "slug": "domino-party",
+    "version": "1.0.7",
+    "scheme": "dominoparty",
     "orientation": "portrait",
     "icon": "./assets/social-club-icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.yht.dominoparty",
-      "buildNumber": "1",
+      "buildNumber": "7",
+      "icon": "./assets/social-club-ios-icon.png",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": []
       }
     },
     "android": {
       "package": "com.yht.dominoparty",
-      "versionCode": 8,
+      "versionCode": 16,
       "blockedPermissions": [
-        "android.permission.ACTIVITY_RECOGNITION"
+        "android.permission.ACTIVITY_RECOGNITION",
+        "android.permission.RECORD_AUDIO"
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#08090C",
+        "backgroundColor": "#04130D",
         "foregroundImage": "./assets/social-club-adaptive-foreground.png"
       },
       "predictiveBackGestureEnabled": false
@@ -37,16 +40,31 @@
           "image": "./assets/social-club-splash.png",
           "imageWidth": 240,
           "resizeMode": "contain",
-          "backgroundColor": "#08090C"
+          "backgroundColor": "#04130D"
         }
       ],
-      "expo-audio"
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Domino Social Club to scan shared game QR codes."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": false,
+          "enableBackgroundRecording": false
+        }
+      ],
+      "expo-status-bar",
+      "expo-font",
+      "expo-asset"
     ],
+    "owner": "yunierht",
     "extra": {
       "eas": {
         "projectId": "4ca6648b-ec5a-4b08-b425-519db3c4ebd7"
       }
-    },
-    "owner": "yunierht"
+    }
   }
 }

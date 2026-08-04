@@ -7,6 +7,8 @@ export interface Strings {
   // Home
   newMatch: string;
   resumeMatch: string;
+  resumeShort: string;
+  matchShort: string;
   history: string;
   settings: string;
   noActiveMatch: string;
@@ -77,10 +79,12 @@ export interface Strings {
   previewVoice: string;
   appearance: string;
   themeDark: string;
+  themeCasino: string;
   themeCubano: string;
   themeUsa: string;
   themeCarbon: string;
   themeDarkDesc: string;
+  themeCasinoDesc: string;
   themeCubanoDesc: string;
   themeUsaDesc: string;
   themeCarbonDesc: string;
@@ -95,6 +99,13 @@ export interface Strings {
   live: string;
   gameCode: string;
   enterCode: string;
+  scanQrCode: string;
+  scanQrHint: string;
+  cameraPermissionTitle: string;
+  cameraPermissionBody: string;
+  invalidQrCode: string;
+  watchWinnerAudioTitle: string;
+  watchWinnerAudioDesc: string;
   watch: string;
   shareHint: string;
   scanToJoin: string;
@@ -157,6 +168,12 @@ export interface Strings {
   recapShareMessage: string; // {winner}{ws}{ls}{loser}{rounds}{dur}
   viewStats: string;
   statsTitle: string;
+  clubBadges: string;
+  badgeKing: string;
+  badgeRivalry: string;
+  badgeComeback: string;
+  badgePollona: string;
+  noBadgeYet: string;
   rivalriesLabel: string;
   leaderboardLabel: string;
   noStats: string;
@@ -173,6 +190,8 @@ const en: Strings = {
   appName: 'Domino Social Club',
   newMatch: 'New Match',
   resumeMatch: 'Resume Match',
+  resumeShort: 'Resume',
+  matchShort: 'New',
   history: 'History',
   settings: 'Settings',
   noActiveMatch: 'No match in progress',
@@ -237,14 +256,16 @@ const en: Strings = {
   voiceRobot: 'Robot',
   previewVoice: 'Preview voice',
   appearance: 'Appearance',
-  themeDark: 'Dark',
+  themeDark: 'Carbon Fiber',
+  themeCasino: 'Casino',
   themeCubano: 'Cuban Board',
   themeUsa: 'USA Board',
-  themeCarbon: 'Carbon Fiber',
-  themeDarkDesc: 'Clean solid dark interface',
+  themeCarbon: 'Boxed Dots',
+  themeDarkDesc: 'Sport car carbon weave',
+  themeCasinoDesc: 'Green poker table felt',
   themeCubanoDesc: 'Cuban–American domino board',
   themeUsaDesc: 'Stars & stripes flag',
-  themeCarbonDesc: 'Graphite weave & gold trim',
+  themeCarbonDesc: 'Graphite boxes, dots & gold trim',
   language: 'Language',
   english: 'English',
   spanish: 'Español',
@@ -252,7 +273,7 @@ const en: Strings = {
   aboutText: 'Track dominoes scores for two teams. First to the target score wins.',
   inviteFriends: 'Invite Friends',
   inviteMessage:
-    'Play Domino Social Club with me! Keep score for your domino games and follow them live.\n\nAndroid: {play}\niPhone: {apple}',
+    'Play Domino Social Club with me! Keep score for your domino games and follow them live.\n\nLearn more: {site}',
   howToPlay: 'How to Play',
   privacy: 'Privacy Policy',
   introNext: 'Next',
@@ -271,6 +292,13 @@ const en: Strings = {
   live: 'LIVE',
   gameCode: 'Game Code',
   enterCode: 'Enter game code',
+  scanQrCode: 'Scan QR Code',
+  scanQrHint: 'Point your camera at the shared game QR code.',
+  cameraPermissionTitle: 'Camera access needed',
+  cameraPermissionBody: 'Allow camera access to scan a shared game QR code.',
+  invalidQrCode: 'That QR code does not include a game code.',
+  watchWinnerAudioTitle: 'Team won audio',
+  watchWinnerAudioDesc: 'Play a chime and announce the winning team while watching.',
   watch: 'Watch',
   shareHint: 'Others can follow this game live by entering this code in "Watch a Game".',
   scanToJoin: 'Scan to follow live — or enter this code in "Watch a Game".',
@@ -284,7 +312,7 @@ const en: Strings = {
     'Firebase has not been configured yet, so live following is disabled. Add your Firebase keys to enable it.',
   spectating: 'Watching live',
   stopWatching: 'Stop watching',
-  stopBroadcasting: 'Stop broadcasting',
+  stopBroadcasting: 'Stop Broadcasting',
   broadcastEnded: 'The host ended the live broadcast.',
   nextGameFollowing: 'Host started a new game — following...',
   shareError: 'Could not start sharing. Check your connection and try again.',
@@ -315,6 +343,12 @@ const en: Strings = {
   recapShareMessage: '🏆 {winner} won {ws}–{ls} over {loser}!\n{rounds} rounds · {dur}\nScored with Domino Social Club',
   viewStats: 'Stats & Rivalries',
   statsTitle: 'Stats & Rivalries',
+  clubBadges: 'Club Badges',
+  badgeKing: 'King of the Table',
+  badgeRivalry: 'Best Rivalry',
+  badgeComeback: 'Biggest Comeback',
+  badgePollona: 'Pollona Master',
+  noBadgeYet: 'Finish more matches to unlock this badge.',
   rivalriesLabel: 'Rivalries',
   leaderboardLabel: 'Leaderboard',
   noStats: 'Finish a few matches and your stats and rivalries will show up here.',
@@ -330,6 +364,8 @@ const es: Strings = {
   appName: 'Domino Social Club',
   newMatch: 'Nueva Partida',
   resumeMatch: 'Continuar Partida',
+  resumeShort: 'Continuar',
+  matchShort: 'Nueva',
   history: 'Historial',
   settings: 'Ajustes',
   noActiveMatch: 'No hay partida en curso',
@@ -394,14 +430,16 @@ const es: Strings = {
   voiceRobot: 'Robot',
   previewVoice: 'Probar voz',
   appearance: 'Apariencia',
-  themeDark: 'Oscuro',
+  themeDark: 'Fibra de carbono',
+  themeCasino: 'Casino',
   themeCubano: 'Mesa Cubana',
   themeUsa: 'Mesa USA',
-  themeCarbon: 'Fibra de carbono',
-  themeDarkDesc: 'Interfaz oscura y sólida',
+  themeCarbon: 'Puntos en cuadros',
+  themeDarkDesc: 'Trama deportiva tipo auto',
+  themeCasinoDesc: 'Fieltro verde de mesa de poker',
   themeCubanoDesc: 'Mesa de dominó cubano-americana',
   themeUsaDesc: 'Bandera de estrellas y franjas',
-  themeCarbonDesc: 'Trama grafito y borde dorado',
+  themeCarbonDesc: 'Cuadros grafito, puntos y borde dorado',
   language: 'Idioma',
   english: 'English',
   spanish: 'Español',
@@ -409,7 +447,7 @@ const es: Strings = {
   aboutText: 'Lleva la cuenta del dominó para dos equipos. El primero en llegar al puntaje gana.',
   inviteFriends: 'Invitar Amigos',
   inviteMessage:
-    '¡Juega Domino Social Club conmigo! Lleva la cuenta de tus partidas de dominó y síguelas en vivo.\n\nAndroid: {play}\niPhone: {apple}',
+    '¡Juega Domino Social Club conmigo! Lleva la cuenta de tus partidas de dominó y síguelas en vivo.\n\nMás información: {site}',
   howToPlay: 'Cómo Jugar',
   privacy: 'Política de Privacidad',
   introNext: 'Siguiente',
@@ -428,6 +466,13 @@ const es: Strings = {
   live: 'EN VIVO',
   gameCode: 'Código de Partida',
   enterCode: 'Ingresa el código',
+  scanQrCode: 'Escanear QR',
+  scanQrHint: 'Apunta la cámara al código QR compartido.',
+  cameraPermissionTitle: 'Se necesita acceso a la cámara',
+  cameraPermissionBody: 'Permite acceso a la cámara para escanear el QR de una partida compartida.',
+  invalidQrCode: 'Ese QR no incluye un código de partida.',
+  watchWinnerAudioTitle: 'Audio al ganar',
+  watchWinnerAudioDesc: 'Reproduce un sonido y anuncia el equipo ganador mientras miras.',
   watch: 'Ver',
   shareHint: 'Otros pueden seguir esta partida en vivo ingresando este código en "Ver una Partida".',
   scanToJoin: 'Escanea para seguir en vivo — o ingresa este código en "Ver una Partida".',
@@ -472,6 +517,12 @@ const es: Strings = {
   recapShareMessage: '🏆 ¡{winner} ganó {ws}–{ls} a {loser}!\n{rounds} rondas · {dur}\nAnotado con Domino Social Club',
   viewStats: 'Estadísticas y Rivalidades',
   statsTitle: 'Estadísticas y Rivalidades',
+  clubBadges: 'Insignias del Club',
+  badgeKing: 'Rey de la Mesa',
+  badgeRivalry: 'Mejor Rivalidad',
+  badgeComeback: 'Mayor Remontada',
+  badgePollona: 'Maestro de Pollonas',
+  noBadgeYet: 'Termina mas partidas para desbloquear esta insignia.',
   rivalriesLabel: 'Rivalidades',
   leaderboardLabel: 'Clasificación',
   noStats: 'Termina algunas partidas y aquí aparecerán tus estadísticas y rivalidades.',

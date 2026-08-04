@@ -1,5 +1,5 @@
 // Generates app icons from assets/logo.png:
-//   - assets/icon.png             (1024² opaque: logo on a carbon-and-gold gradient)
+//   - assets/icon.png             (1024² opaque: logo on a casino-green felt gradient)
 //   - assets/adaptive-foreground.png (1024² transparent: logo sized to the
 //                                     Android adaptive-icon safe zone)
 // Run: node scripts/make-icons.js
@@ -15,12 +15,12 @@ const SIZE = 1024;
     `<svg width="${SIZE}" height="${SIZE}" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#2A1D5E"/>
-          <stop offset="1" stop-color="#0B0922"/>
+          <stop offset="0" stop-color="#123522"/>
+          <stop offset="1" stop-color="#04130D"/>
         </linearGradient>
         <radialGradient id="glow" cx="0.5" cy="0.42" r="0.62">
-          <stop offset="0" stop-color="#6A46C8" stop-opacity="0.55"/>
-          <stop offset="1" stop-color="#6A46C8" stop-opacity="0"/>
+          <stop offset="0" stop-color="#2B5A3C" stop-opacity="0.58"/>
+          <stop offset="1" stop-color="#2B5A3C" stop-opacity="0"/>
         </radialGradient>
       </defs>
       <rect width="${SIZE}" height="${SIZE}" fill="url(#g)"/>

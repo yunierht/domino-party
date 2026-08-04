@@ -65,6 +65,48 @@ export function Background({
     ? { position: 'absolute', top: 0, left: 0, transform: [{ scale: 1.12 }, { translateX: tiltX }, { translateY: tiltY }] }
     : { position: 'absolute', top: 0, left: 0 };
 
+  if (kind === 'sportCarbon') {
+    return (
+      <Bg width={w} height={h} style={style} pointerEvents="none">
+        <Defs>
+          <Pattern id="sportCarbonWeaveA" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(32)">
+            <Rect x="0" y="0" width="11" height="22" fill="#06080A" />
+            <Rect x="11" y="0" width="11" height="22" fill="#161B20" />
+            <Rect x="0" y="0" width="22" height="3" fill="#3C4652" opacity="0.58" />
+            <Rect x="0" y="10" width="22" height="3" fill="#000000" opacity="0.70" />
+            <Rect x="0" y="19" width="22" height="1" fill="#56616D" opacity="0.26" />
+          </Pattern>
+          <Pattern id="sportCarbonWeaveB" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-32)">
+            <Rect x="0" y="0" width="11" height="22" fill="#07090B" />
+            <Rect x="11" y="0" width="11" height="22" fill="#20262D" />
+            <Rect x="0" y="4" width="22" height="3" fill="#4B5662" opacity="0.42" />
+            <Rect x="0" y="14" width="22" height="3" fill="#000000" opacity="0.64" />
+          </Pattern>
+          <LinearGradient id="sportCarbonSweep" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor="#333C46" stopOpacity="0.24" />
+            <Stop offset="0.34" stopColor="#050607" stopOpacity="0" />
+            <Stop offset="0.76" stopColor="#D34A3F" stopOpacity="0.06" />
+            <Stop offset="1" stopColor="#F1C46B" stopOpacity="0.08" />
+          </LinearGradient>
+          <RadialGradient id="sportCarbonGoldGlow" cx="0.82" cy="0.12" r="0.72">
+            <Stop offset="0" stopColor="#F1C46B" stopOpacity="0.10" />
+            <Stop offset="1" stopColor="#F1C46B" stopOpacity="0" />
+          </RadialGradient>
+        </Defs>
+        <Rect width={w} height={h} fill="#040506" />
+        <Rect width={w} height={h} fill="url(#sportCarbonWeaveA)" opacity="0.96" />
+        <Rect width={w} height={h} fill="url(#sportCarbonWeaveB)" opacity="0.46" />
+        <G opacity="0.22">
+          {Array.from({ length: 9 }).map((_, i) => (
+            <Rect key={i} x={-w * 0.2 + i * w * 0.2} y={0} width={w * 0.018} height={h * 1.18} fill="#FFFFFF" opacity="0.10" transform={`rotate(24 ${w / 2} ${h / 2})`} />
+          ))}
+        </G>
+        <Rect width={w} height={h} fill="url(#sportCarbonSweep)" />
+        <Rect width={w} height={h} fill="url(#sportCarbonGoldGlow)" />
+      </Bg>
+    );
+  }
+
   if (kind === 'carbon') {
     const hexes: { x: number; y: number; r: number }[] = [];
     const hr = Math.max(70, w * 0.22);
@@ -93,6 +135,40 @@ export function Background({
           ))}
         </G>
         <Rect width={w} height={h} fill="url(#carbonGoldGlow)" />
+      </Bg>
+    );
+  }
+
+  if (kind === 'casino') {
+    return (
+      <Bg width={w} height={h} style={style} pointerEvents="none">
+        <Defs>
+          <Pattern id="casinoFelt" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
+            <Rect width="18" height="18" fill="#082015" />
+            <Rect x="0" y="0" width="18" height="2" fill="#1E5134" opacity="0.34" />
+            <Rect x="0" y="8" width="18" height="1.4" fill="#06150E" opacity="0.48" />
+            <Circle cx="4" cy="5" r="0.9" fill="#3A7650" opacity="0.32" />
+            <Circle cx="13" cy="14" r="0.75" fill="#B9D0A8" opacity="0.12" />
+          </Pattern>
+          <Pattern id="casinoCrossFelt" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-24)">
+            <Rect width="22" height="22" fill="#0A2A1A" />
+            <Rect x="0" y="0" width="22" height="2" fill="#2E6943" opacity="0.26" />
+            <Rect x="0" y="11" width="22" height="1.5" fill="#021008" opacity="0.42" />
+          </Pattern>
+          <RadialGradient id="casinoCenterGlow" cx="0.50" cy="0.42" r="0.72">
+            <Stop offset="0" stopColor="#1F7A45" stopOpacity="0.44" />
+            <Stop offset="1" stopColor="#04130D" stopOpacity="0" />
+          </RadialGradient>
+          <RadialGradient id="casinoGoldGlow" cx="0.80" cy="0.10" r="0.72">
+            <Stop offset="0" stopColor="#D6AE54" stopOpacity="0.18" />
+            <Stop offset="1" stopColor="#D6AE54" stopOpacity="0" />
+          </RadialGradient>
+        </Defs>
+        <Rect width={w} height={h} fill="#04130D" />
+        <Rect width={w} height={h} fill="url(#casinoFelt)" opacity="0.92" />
+        <Rect width={w} height={h} fill="url(#casinoCrossFelt)" opacity="0.28" />
+        <Rect width={w} height={h} fill="url(#casinoCenterGlow)" />
+        <Rect width={w} height={h} fill="url(#casinoGoldGlow)" />
       </Bg>
     );
   }

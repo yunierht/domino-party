@@ -2,10 +2,10 @@
 // restyles the entire app. Themes other than "modern" also paint a textured
 // background (see components/Background.tsx), recreated from reference images.
 
-export type ThemeName = 'dark' | 'cubano' | 'usa' | 'carbon';
+export type ThemeName = 'dark' | 'casino' | 'cubano' | 'usa' | 'carbon';
 
 /** Which textured background a theme paints behind the app. */
-export type BackgroundKind = 'carbon' | 'cubano' | 'usa' | undefined;
+export type BackgroundKind = 'carbon' | 'sportCarbon' | 'casino' | 'cubano' | 'usa' | undefined;
 
 export interface Theme {
   name: ThemeName;
@@ -36,27 +36,28 @@ export interface Theme {
   background?: BackgroundKind;
 }
 
-// Plain graphite theme (no textured background).
+// Sport carbon fiber theme inspired by performance car interiors.
 const dark: Theme = {
   name: 'dark',
   dark: true,
   colors: {
-    bg: '#070809',
-    surface: '#111316',
-    surfaceAlt: '#1B1E22',
-    primary: '#D6A642',
-    onPrimary: '#241608',
-    text: '#F4EFE2',
-    textMuted: '#9A968C',
-    border: '#34363A',
-    success: '#83B86F',
-    danger: '#A6463C',
-    gradient: ['#D6A642', '#8C5A20'],
-    teamA: '#D6A642',
-    teamB: '#A6463C',
+    bg: '#040506',
+    surface: '#0D1013',
+    surfaceAlt: '#171B20',
+    primary: '#E4B452',
+    onPrimary: '#16100A',
+    text: '#F6F1E7',
+    textMuted: '#A6A19A',
+    border: '#343A42',
+    success: '#72B86B',
+    danger: '#D34A3F',
+    gradient: ['#F1C46B', '#B8832F'],
+    teamA: '#E4B452',
+    teamB: '#D34A3F',
   },
-  radius: 16,
+  radius: 14,
   scale: 1,
+  background: 'sportCarbon',
 };
 
 // Image 2 — black carbon halftone.
@@ -83,6 +84,30 @@ const carbon: Theme = {
   background: 'carbon',
 };
 
+// Green felt casino theme, inspired by poker table cloth and brass trim.
+const casino: Theme = {
+  name: 'casino',
+  dark: true,
+  colors: {
+    bg: '#04130D',
+    surface: '#0B2418',
+    surfaceAlt: '#123522',
+    primary: '#D6AE54',
+    onPrimary: '#171006',
+    text: '#F5EFE1',
+    textMuted: '#A9B9A8',
+    border: '#2B5A3C',
+    success: '#5ED17A',
+    danger: '#C9473F',
+    gradient: ['#E7C777', '#9E6E24'],
+    teamA: '#D6AE54',
+    teamB: '#C9473F',
+  },
+  radius: 14,
+  scale: 1,
+  background: 'casino',
+};
+
 // Image 3 — Cuban–American domino board (flag motif).
 const cubano: Theme = {
   name: 'cubano',
@@ -103,7 +128,7 @@ const cubano: Theme = {
     teamB: '#D2515F',
   },
   radius: 14,
-  scale: 1.05,
+  scale: 1,
   background: 'cubano',
 };
 
@@ -127,8 +152,8 @@ const usa: Theme = {
     teamB: '#CB4F5B',
   },
   radius: 14,
-  scale: 1.05,
+  scale: 1,
   background: 'usa',
 };
 
-export const THEMES: Record<ThemeName, Theme> = { dark, cubano, usa, carbon };
+export const THEMES: Record<ThemeName, Theme> = { dark, casino, cubano, usa, carbon };
