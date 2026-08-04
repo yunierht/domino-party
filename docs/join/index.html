@@ -4,96 +4,111 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Join a Domino Social Club game</title>
-  <meta name="description" content="Follow a Domino Social Club game live — open the app or install it, carrying your game code." />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070709'/%3E%3Crect x='8' y='5' width='16' height='22' rx='3' fill='%2314161b' stroke='%23262a32'/%3E%3Cline x1='8' y1='16' x2='24' y2='16' stroke='%23262a32'/%3E%3Ccircle cx='16' cy='10.5' r='1.8' fill='%2322D3EE'/%3E%3Ccircle cx='12.5' cy='21.5' r='1.8' fill='%23A78BFA'/%3E%3Ccircle cx='19.5' cy='21.5' r='1.8' fill='%23A78BFA'/%3E%3C/svg%3E" />
+  <meta name="description" content="Open a live Domino Social Club match from a shared game code." />
+  <link rel="icon" type="image/png" href="../img/icon.png?v=social-club" />
+  <link rel="apple-touch-icon" href="../img/icon.png?v=social-club" />
   <style>
-    :root{
-      --bg:#070709; --surface:#14161b; --border:#272b34; --text:#f5f6f8; --muted:#9096a1;
-      --cyan:#22D3EE; --purple:#A78BFA; --grad:linear-gradient(135deg,#22D3EE,#A78BFA);
+    :root {
+      --ink: #0a0b0a;
+      --panel: #111412;
+      --line: #2d332e;
+      --text: #f7f3e8;
+      --muted: #b9b0a1;
+      --gold: #d7ad55;
+      --gold-2: #f1d17b;
     }
-    *{box-sizing:border-box; margin:0; padding:0}
-    body{
-      min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
-      text-align:center; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-      color:var(--text); padding:28px; background:var(--bg); position:relative; overflow:hidden;
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      margin: 0;
+      padding: 24px;
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        linear-gradient(180deg, rgba(10, 11, 10, 0.72), rgba(10, 11, 10, 0.96)),
+        repeating-linear-gradient(45deg, #101210 0 10px, #0b0c0b 10px 20px);
+      text-align: center;
     }
-    .glow{position:fixed; border-radius:50%; filter:blur(90px); opacity:.45; z-index:-1}
-    .glow.a{width:460px;height:460px; top:-140px; left:-120px; background:radial-gradient(circle,#1a6b8c,transparent 70%)}
-    .glow.b{width:460px;height:460px; bottom:-160px; right:-120px; background:radial-gradient(circle,#5a3f9e,transparent 70%)}
-    .lang{position:absolute; top:18px; right:18px; display:flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; font-size:.78rem; font-weight:800}
-    .lang button{background:none;border:0;color:var(--muted);padding:6px 11px;cursor:pointer}
-    .lang button.on{background:var(--grad); color:#04121a}
-    .tile{width:54px;height:54px; margin-bottom:18px}
-    h1{font-size:1.6rem; font-weight:900; margin-bottom:6px}
-    p{color:#cdd1d9; margin:6px 0}
-    .label{color:var(--muted); font-size:.78rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; margin-top:18px}
-    .code{font-size:3rem; font-weight:900; letter-spacing:.3em; padding-left:.3em; margin:6px 0 18px; background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-    .btn{display:flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:330px; margin:8px auto; padding:15px 20px; border-radius:14px; font-weight:800; font-size:1rem; text-decoration:none; cursor:pointer; transition:transform .15s,border-color .2s}
-    .primary{background:var(--grad); color:#04121a; box-shadow:0 10px 28px -8px rgba(34,211,238,.5)}
-    .primary:hover{transform:translateY(-2px)}
-    .store{background:var(--surface); color:#fff; border:1px solid var(--border)}
-    .store:hover{border-color:var(--cyan)}
-    .store.soon{opacity:.55; pointer-events:none}
-    .store svg{width:20px;height:20px}
-    .muted{color:var(--muted); font-size:.85rem; margin-top:16px; max-width:330px}
-    footer{margin-top:26px}
-    footer a{color:var(--muted); text-decoration:none; font-size:.85rem}
-    footer a:hover{color:var(--cyan)}
-    footer b{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    main {
+      width: min(420px, 100%);
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(17, 20, 18, 0.96);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    }
+    img { width: 86px; height: 86px; border-radius: 18px; margin: 0 auto 18px; }
+    h1 { margin: 0; font-size: 1.55rem; line-height: 1.15; letter-spacing: 0; }
+    p { color: var(--muted); margin: 10px 0 0; }
+    .code {
+      margin: 22px auto;
+      padding: 12px 16px;
+      border: 1px solid rgba(215, 173, 85, 0.28);
+      border-radius: 8px;
+      color: var(--gold-2);
+      background: rgba(215, 173, 85, 0.08);
+      font-size: 2.8rem;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: 0.16em;
+      text-indent: 0.16em;
+    }
+    .button {
+      width: 100%;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #e7c469;
+      color: #171007;
+      background: linear-gradient(180deg, var(--gold-2), var(--gold));
+      font-weight: 900;
+      text-decoration: none;
+    }
+    .button.secondary {
+      color: var(--text);
+      border-color: var(--line);
+      background: rgba(255, 255, 255, 0.04);
+    }
+    footer { margin-top: 20px; color: #7d766c; font-size: 0.86rem; }
   </style>
 </head>
 <body>
-  <div class="glow a"></div>
-  <div class="glow b"></div>
-
-  <div class="lang" role="group" aria-label="Language">
-    <button data-lang="en" class="on">EN</button>
-    <button data-lang="es">ES</button>
-  </div>
-
-  <img src="../img/logo.png" alt="Domino Social Club" style="width:230px; max-width:74%; margin-bottom:10px; filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))" />
-  <p data-en="You're invited to follow a game live!" data-es="¡Estás invitado a seguir una partida en vivo!"></p>
-
-  <div class="label" data-en="Game code" data-es="Código de partida"></div>
-  <div class="code" id="code">—</div>
-
-  <a class="btn primary" id="open" href="#" data-en="Open in the app" data-es="Abrir en la app"></a>
-  <p class="muted" data-en="Don't have the app yet? Install it, then open this link again — or enter the code in the app." data-es="¿Aún no tienes la app? Instálala y abre este enlace de nuevo — o ingresa el código en la app."></p>
-
-  <a class="btn store" id="play" href="#">
-    <svg viewBox="0 0 512 512" fill="none"><path d="M48 59v394c0 8 9 13 16 9l219-206L64 50c-7-4-16 0-16 9z" fill="#22D3EE"/><path d="M283 256l72-68 116 68c12 7 12 25 0 32l-116 68-72-100z" fill="#A78BFA"/><path d="M64 50l219 206 72-68L80 41c-6-4-16-1-16 9z" fill="#5B8DEF" opacity=".85"/><path d="M64 462l219-206 72 68L80 471c-6 4-16 1-16-9z" fill="#F472B6" opacity=".85"/></svg>
-    <span data-en="Get it on Google Play" data-es="Descargar en Google Play"></span>
-  </a>
-  <a class="btn store soon" id="apple" href="#">
-    <svg viewBox="0 0 384 512" fill="#f5f6f8"><path d="M318.7 268c-.3-37 16.4-65 50.1-85.6-18.9-27-47.4-41.9-85-44.8-35.6-2.8-74.5 20.9-88.7 20.9-15 0-49.4-19.9-76.4-19.9C61.2 139.2 0 184.4 0 276.1c0 27.1 5 55.1 14.9 84 13.3 38 61.3 131.3 111.4 129.8 26.2-.6 44.7-18.6 78.8-18.6 33.1 0 50.2 18.6 76.4 18.6 50.5-.7 93.9-85.5 106.6-123.6-67.8-32-69.4-93.8-69.4-95.7zM262.8 89.8c27-32 24.5-61.1 23.7-71.6-23.8 1.4-51.3 16.2-67 34.5-17.3 19.6-27.5 43.9-25.3 71.1 25.7 2 49.1-11.2 68.6-34z"/></svg>
-    <span data-en="App Store — coming soon" data-es="App Store — próximamente"></span>
-  </a>
-
-  <footer><a href="/">dominoparty.com · <span data-en="Made by" data-es="Hecho por"></span> <b>YHT</b></a></footer>
-
+  <main>
+    <img src="../img/icon.png?v=social-club" alt="Domino Social Club" />
+    <h1>Follow this domino match live</h1>
+    <p>Open Domino Social Club and enter the game code.</p>
+    <div class="code" id="code">----</div>
+    <a class="button" id="open" href="#">Open in the app</a>
+    <a class="button secondary" data-store="android" href="https://play.google.com/store/apps/details?id=com.yht.dominoparty" target="_blank" rel="noopener">Get it on Google Play</a>
+    <a class="button secondary" data-store="ios" href="https://apps.apple.com/app/id6793746031" target="_blank" rel="noopener">Download on the App Store</a>
+    <footer>Domino Social Club by YHT</footer>
+  </main>
   <script>
-    var PLAY = "https://play.google.com/store/apps/details?id=com.yht.dominoparty";
     var params = new URLSearchParams(location.search);
     var code = (params.get("code") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
-    document.getElementById("code").textContent = code || "—";
+    document.getElementById("code").textContent = code || "----";
     var appLink = "dominoparty://watch?code=" + encodeURIComponent(code);
     document.getElementById("open").href = appLink;
-    document.getElementById("play").href = PLAY;
-
-    function setLang(lang){
-      document.documentElement.lang = lang;
-      document.querySelectorAll('[data-en]').forEach(function(el){
-        var v = el.getAttribute('data-' + lang); if(v!==null) el.textContent = v;
+    var ua = navigator.userAgent || "";
+    var isIPadOS = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+    var platform = /android/i.test(ua) ? "android" : /iPad|iPhone|iPod/i.test(ua) || isIPadOS ? "ios" : "";
+    if (platform) {
+      document.querySelectorAll("[data-store]").forEach(function (link) {
+        var preferred = link.getAttribute("data-store") === platform;
+        link.classList.toggle("primary", preferred);
+        link.classList.toggle("secondary", !preferred);
       });
-      document.querySelectorAll('.lang button').forEach(function(b){ b.classList.toggle('on', b.dataset.lang===lang); });
-      try{ localStorage.setItem('dp_lang', lang); }catch(e){}
     }
-    document.querySelectorAll('.lang button').forEach(function(b){ b.addEventListener('click', function(){ setLang(b.dataset.lang); }); });
-    var saved=null; try{ saved=localStorage.getItem('dp_lang'); }catch(e){}
-    setLang(saved || ((navigator.language||'en').toLowerCase().indexOf('es')===0 ? 'es':'en'));
-
-    // Try to open the app automatically; if not installed, the page stays.
-    if (code) { setTimeout(function(){ window.location.href = appLink; }, 400); }
+    if (code) {
+      setTimeout(function () {
+        window.location.href = appLink;
+      }, 450);
+    }
   </script>
 </body>
 </html>

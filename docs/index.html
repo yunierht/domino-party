@@ -3,431 +3,309 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Domino Social Club — Dominoes Scorekeeper for Two Teams</title>
-  <meta name="description" content="The easiest way to keep score for dominoes. Big score rings, live game-following with a QR code, stats & rivalries, four themes — free, no ads, no account. English & Spanish." />
-  <meta name="theme-color" content="#070709" />
+  <title>Domino Social Club | Dominoes Scorekeeper</title>
+  <meta name="description" content="Domino Social Club is a clean dominoes scorekeeper for local matches, live score sharing, team history, and no account required." />
+  <meta name="theme-color" content="#0A0B0A" />
   <link rel="canonical" href="https://dominoparty.com/" />
-  <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Domino Social Club — Dominoes Scorekeeper" />
-  <meta property="og:description" content="Keep score, share the game live, and remember every rivalry. Free, no ads, no account." />
+  <meta property="og:title" content="Domino Social Club" />
+  <meta property="og:description" content="Score dominoes, share live games, and keep the rivalry moving. No account. No ads." />
   <meta property="og:url" content="https://dominoparty.com/" />
-  <meta property="og:image" content="https://dominoparty.com/img/og.png" />
+  <meta property="og:image" content="https://dominoparty.com/img/og.png?v=social-club" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content="https://dominoparty.com/img/og.png" />
-  <link rel="icon" type="image/png" href="img/icon.png" />
-  <link rel="apple-touch-icon" href="img/icon.png" />
+  <meta name="twitter:image" content="https://dominoparty.com/img/og.png?v=social-club" />
+  <link rel="icon" type="image/png" href="img/icon.png?v=social-club" />
+  <link rel="apple-touch-icon" href="img/icon.png?v=social-club" />
   <style>
-    :root{
-      --bg:#070709; --bg2:#0b0d12; --surface:#14161b; --surface2:#1b1e25;
-      --border:#272b34; --text:#f5f6f8; --muted:#9096a1;
-      --cyan:#22D3EE; --purple:#A78BFA; --blue:#5B8DEF; --pink:#F472B6; --red:#D2515F;
-      --grad:linear-gradient(135deg,#22D3EE,#A78BFA);
-      --radius:18px; --maxw:1120px;
+    :root {
+      --ink: #0a0b0a;
+      --panel: #111412;
+      --line: #2d332e;
+      --text: #f7f3e8;
+      --muted: #b9b0a1;
+      --gold: #d7ad55;
+      --gold-2: #f1d17b;
+      --red: #e05243;
+      --green: #1f7a52;
+      --radius: 8px;
+      --max: 1180px;
     }
-    *{box-sizing:border-box; margin:0; padding:0}
-    html{scroll-behavior:smooth}
-    body{
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      background:var(--bg); color:var(--text); line-height:1.6; overflow-x:hidden;
-      -webkit-font-smoothing:antialiased;
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        linear-gradient(180deg, rgba(10, 11, 10, 0.8), rgba(10, 11, 10, 0.96)),
+        repeating-linear-gradient(45deg, #101210 0 10px, #0b0c0b 10px 20px);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
     }
-    a{color:inherit; text-decoration:none}
-    .wrap{max-width:var(--maxw); margin:0 auto; padding:0 22px}
-    .grad-text{background:var(--grad); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
-    .eyebrow{display:inline-block; font-size:.8rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--cyan); margin-bottom:18px}
-
-    /* ambient background glows */
-    .glow{position:fixed; border-radius:50%; filter:blur(90px); opacity:.5; z-index:-1; pointer-events:none}
-    .glow.a{width:520px;height:520px; top:-160px; left:-120px; background:radial-gradient(circle,#1a6b8c,transparent 70%)}
-    .glow.b{width:560px;height:560px; top:280px; right:-180px; background:radial-gradient(circle,#5a3f9e,transparent 70%)}
-
-    /* header */
-    header.nav{position:sticky; top:0; z-index:50; transition:background .3s,border-color .3s, backdrop-filter .3s; border-bottom:1px solid transparent}
-    header.nav.scrolled{background:rgba(7,7,9,.72); backdrop-filter:blur(14px); border-bottom-color:var(--border)}
-    .nav-inner{display:flex; align-items:center; justify-content:space-between; height:68px}
-    .brand{display:flex; align-items:center; gap:11px}
-    .brand img{height:50px; width:auto; display:block}
-    .hero-logo{height:115px; width:auto; display:block; margin-bottom:22px; filter:drop-shadow(0 8px 24px rgba(0,0,0,.45))}
-    .nav-links{display:flex; align-items:center; gap:30px}
-    .nav-links a{color:var(--muted); font-weight:600; font-size:.95rem; transition:color .2s}
-    .nav-links a:hover{color:var(--text)}
-    .nav-right{display:flex; align-items:center; gap:14px; margin-left:auto}
-    .lang{display:flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; font-size:.8rem; font-weight:800}
-    .lang button{background:none; border:0; color:var(--muted); padding:7px 12px; cursor:pointer; transition:.2s}
-    .lang button.on{background:var(--grad); color:#04121a}
-    .btn{display:inline-flex; align-items:center; gap:9px; font-weight:800; border-radius:999px; padding:12px 20px; cursor:pointer; border:0; transition:transform .15s, box-shadow .2s; font-size:.95rem; white-space:nowrap}
-    .btn-grad{background:var(--grad); color:#04121a; box-shadow:0 8px 26px rgba(34,211,238,.28)}
-    .btn-grad:hover{transform:translateY(-2px); box-shadow:0 12px 32px rgba(34,211,238,.36)}
-    .btn-ghost{background:var(--surface); color:var(--text); border:1px solid var(--border)}
-    .btn-ghost:hover{border-color:var(--cyan); color:#fff}
-    .nav-links .menu-btn, .menu-btn{display:none}
-
-    /* hero */
-    .hero{padding:74px 0 70px}
-    .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:54px; align-items:center}
-    h1.hero-title{font-size:clamp(2.4rem,5.4vw,4rem); line-height:1.04; font-weight:900; letter-spacing:-.025em}
-    .hero p.lead{font-size:1.18rem; color:#c8ccd4; margin:22px 0 30px; max-width:540px}
-    .cta-row{display:flex; gap:14px; flex-wrap:wrap; align-items:center}
-    .store-badge{display:inline-flex; align-items:center; gap:11px; background:#111317; border:1px solid var(--border); border-radius:14px; padding:11px 18px; transition:.2s}
-    .store-badge:hover{border-color:#3a4150; transform:translateY(-2px)}
-    .store-badge svg{width:24px;height:24px; flex:none}
-    .store-badge .sb-sm{font-size:.66rem; color:var(--muted); line-height:1.1}
-    .store-badge .sb-lg{font-size:1.02rem; font-weight:800; line-height:1.15}
-    .store-badge.soon{opacity:.6}
-    .beta-note{margin-top:16px; font-size:.86rem; color:var(--muted)}
-    .beta-note b{color:var(--cyan)}
-
-    /* phone mockup */
-    .phone-wrap{display:flex; justify-content:center; position:relative}
-    .float-tile{position:absolute; opacity:.5; animation:bob 6s ease-in-out infinite}
-    .phone{position:relative; width:300px; border-radius:42px; background:linear-gradient(160deg,#1c1f27,#0c0e12); border:1px solid #2b2f39; padding:14px; box-shadow:0 40px 90px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.03) inset; transform:rotate(2.5deg)}
-    .screen{background:#070709; border-radius:30px; padding:20px 16px 22px; overflow:hidden}
-    .scr-head{display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:.78rem; font-weight:700; margin-bottom:16px}
-    .scr-head .live{display:flex;align-items:center;gap:6px; color:var(--red); font-weight:900}
-    .scr-head .live i{width:8px;height:8px;border-radius:50%; background:var(--red); display:inline-block; animation:pulse 1.6s infinite}
-    .team{background:#14161b; border:1px solid #23262e; border-radius:18px; padding:14px 15px; margin-bottom:12px; display:flex; align-items:center; gap:14px}
-    .team .info{flex:1; min-width:0}
-    .team .nm{font-weight:800; font-size:1.02rem}
-    .team .pl{color:var(--muted); font-size:.76rem; margin-top:2px}
-    .ring{width:74px;height:74px; flex:none; position:relative}
-    .ring svg{transform:rotate(-90deg)}
-    .ring .num{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center}
-    .ring .num b{font-size:1.5rem; font-weight:900; line-height:1}
-    .ring .num span{font-size:.6rem; color:var(--muted); font-weight:800}
-    .addbtn{margin-top:4px; border-radius:999px; padding:13px; text-align:center; font-weight:900; color:#04121a; background:var(--grad); font-size:.95rem; box-shadow:0 10px 24px -8px rgba(34,211,238,.5)}
-
-    /* sections */
-    section{padding:72px 0}
-    .sec-head{text-align:center; max-width:660px; margin:0 auto 50px}
-    .sec-head h2{font-size:clamp(1.9rem,3.8vw,2.7rem); font-weight:900; letter-spacing:-.02em}
-    .sec-head p{color:var(--muted); font-size:1.1rem; margin-top:14px}
-
-    .features{display:grid; grid-template-columns:repeat(3,1fr); gap:20px}
-    .card{background:linear-gradient(180deg,var(--surface),#101218); border:1px solid var(--border); border-radius:var(--radius); padding:26px; transition:transform .25s, border-color .25s}
-    .card:hover{transform:translateY(-5px); border-color:#3a4150}
-    .card .ico{width:48px;height:48px; border-radius:13px; display:flex; align-items:center; justify-content:center; margin-bottom:18px; background:rgba(34,211,238,.1); border:1px solid rgba(34,211,238,.22)}
-    .card .ico svg{width:24px;height:24px; stroke:var(--cyan)}
-    .card h3{font-size:1.18rem; font-weight:800; margin-bottom:9px}
-    .card p{color:var(--muted); font-size:.97rem}
-
-    /* live split */
-    .split{display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:center}
-    .split .pts li{display:flex; gap:13px; margin-bottom:20px; align-items:flex-start}
-    .split .pts .n{flex:none; width:32px;height:32px;border-radius:10px; background:var(--grad); color:#04121a; font-weight:900; display:flex;align-items:center;justify-content:center}
-    .split .pts h4{font-weight:800; font-size:1.05rem}
-    .split .pts p{color:var(--muted); font-size:.95rem}
-    .qr-card{background:linear-gradient(180deg,var(--surface),#0e1015); border:1px solid var(--border); border-radius:24px; padding:34px; text-align:center}
-    .qr-card .code{font-size:2.6rem; font-weight:900; letter-spacing:.32em; padding-left:.32em; background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent; margin:6px 0 22px}
-    .qr{width:172px;height:172px; margin:0 auto; background:#fff; border-radius:16px; padding:14px}
-    .qr svg{width:100%;height:100%}
-
-    /* themes */
-    .themes{display:grid; grid-template-columns:repeat(4,1fr); gap:18px}
-    .theme{border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; transition:transform .25s}
-    .theme:hover{transform:translateY(-5px)}
-    .theme .sw{height:120px; display:flex; align-items:flex-end; padding:14px}
-    .theme .swdot{display:flex; gap:7px}
-    .theme .swdot span{width:15px;height:15px;border-radius:50%; border:2px solid rgba(255,255,255,.25)}
-    .theme .lbl{padding:14px 16px; background:var(--surface); font-weight:800}
-    .theme .lbl small{display:block; color:var(--muted); font-weight:600; font-size:.8rem; margin-top:2px}
-
-    /* faq */
-    .faq{max-width:760px; margin:0 auto}
-    .qa{border:1px solid var(--border); border-radius:14px; margin-bottom:12px; background:var(--surface); overflow:hidden}
-    .qa summary{list-style:none; cursor:pointer; padding:20px 22px; font-weight:800; font-size:1.05rem; display:flex; justify-content:space-between; align-items:center; gap:14px}
-    .qa summary::-webkit-details-marker{display:none}
-    .qa summary .pm{color:var(--cyan); font-size:1.5rem; transition:transform .2s; flex:none}
-    .qa[open] summary .pm{transform:rotate(45deg)}
-    .qa .a{padding:0 22px 22px; color:var(--muted)}
-
-    /* cta band */
-    .cta-band{margin:30px auto 0; max-width:var(--maxw)}
-    .cta-inner{position:relative; border-radius:30px; overflow:hidden; padding:64px 30px; text-align:center; background:linear-gradient(135deg,#0e2a33,#241a3d); border:1px solid var(--border)}
-    .cta-inner h2{font-size:clamp(1.9rem,4vw,2.7rem); font-weight:900; letter-spacing:-.02em}
-    .cta-inner p{color:#c8ccd4; margin:14px 0 28px; font-size:1.1rem}
-
-    /* footer */
-    footer{border-top:1px solid var(--border); margin-top:80px; padding:40px 0 56px}
-    .foot{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px}
-    .foot .links{display:flex; gap:26px; flex-wrap:wrap}
-    .foot a{color:var(--muted); font-weight:600}
-    .foot a:hover{color:var(--cyan)}
-    .foot .copy{color:#5f636d; font-size:.88rem}
-    .foot .copy b{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-
-    /* reveal */
-    .reveal{opacity:0; transform:translateY(24px); transition:opacity .7s, transform .7s}
-    .reveal.in{opacity:1; transform:none}
-
-    @keyframes bob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-16px) rotate(4deg)}}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-
-    @media(max-width:900px){
-      .hero-grid{grid-template-columns:1fr; gap:48px; text-align:center}
-      .hero p.lead{margin-left:auto;margin-right:auto}
-      .hero-logo{margin-left:auto;margin-right:auto; height:100px}
-      .cta-row{justify-content:center}
-      .features{grid-template-columns:1fr 1fr}
-      .split{grid-template-columns:1fr; gap:36px}
-      .themes{grid-template-columns:1fr 1fr}
-      .nav-links{display:none}
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    .wrap { width: min(var(--max), calc(100% - 40px)); margin: 0 auto; }
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(215, 173, 85, 0.18);
+      background: rgba(10, 11, 10, 0.9);
+      backdrop-filter: blur(18px);
     }
-    @media(max-width:560px){
-      .features{grid-template-columns:1fr}
-      .foot{flex-direction:column; text-align:center}
-      .phone{transform:none}
+    .nav-inner { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; font-weight: 900; }
+    .brand img { width: 44px; height: 44px; border-radius: 8px; }
+    .brand span { white-space: nowrap; }
+    .nav-links { display: flex; align-items: center; gap: 24px; color: var(--muted); font-weight: 700; }
+    .nav-links a:hover { color: var(--gold-2); }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      font-weight: 900;
+      color: var(--text);
+      background: var(--panel);
     }
-    @media(prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+    .button.primary {
+      color: #171007;
+      border-color: #e7c469;
+      background: linear-gradient(180deg, var(--gold-2), var(--gold));
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+    }
+    .button.secondary { color: var(--text); background: rgba(255, 255, 255, 0.04); }
+    .button:hover { transform: translateY(-1px); }
+    .hero {
+      min-height: calc(100vh - 72px);
+      display: grid;
+      align-items: center;
+      padding: 46px 0 52px;
+      border-bottom: 1px solid rgba(215, 173, 85, 0.16);
+    }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr); gap: 46px; align-items: center; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border: 1px solid rgba(215, 173, 85, 0.38);
+      border-radius: 999px;
+      color: var(--gold-2);
+      background: rgba(215, 173, 85, 0.1);
+      font-size: 0.82rem;
+      font-weight: 900;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+    h1 { margin: 22px 0 18px; max-width: 660px; font-size: clamp(2.7rem, 7vw, 5.7rem); line-height: 0.96; font-weight: 950; letter-spacing: 0; }
+    .lead { max-width: 570px; margin: 0 0 28px; color: #d8d0c2; font-size: 1.18rem; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .trust-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 28px; max-width: 600px; }
+    .trust { border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius); padding: 12px; background: rgba(255, 255, 255, 0.04); color: var(--muted); font-size: 0.9rem; font-weight: 800; }
+    .trust b { display: block; color: var(--text); font-size: 1rem; }
+    .showcase { position: relative; min-height: 620px; display: grid; align-items: center; }
+    .screen-wall { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: center; }
+    .phone-shot { overflow: hidden; border-radius: 28px; border: 1px solid rgba(215, 173, 85, 0.24); background: #050505; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55); }
+    .phone-shot.tall { transform: translateY(42px); }
+    .phone-shot.main { transform: scale(1.04); border-color: rgba(241, 209, 123, 0.55); }
+    .section { padding: 80px 0; }
+    .section-header { max-width: 680px; margin-bottom: 30px; }
+    .section-header.center { text-align: center; margin-left: auto; margin-right: auto; }
+    h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.05; letter-spacing: 0; }
+    .section-header p { color: var(--muted); font-size: 1.08rem; margin: 14px 0 0; }
+    .feature-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .feature { min-height: 210px; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(180deg, rgba(23, 27, 24, 0.96), rgba(13, 15, 13, 0.96)); }
+    .icon { width: 38px; height: 38px; display: grid; place-items: center; margin-bottom: 18px; border-radius: var(--radius); color: #1a1003; background: var(--gold); font-weight: 950; }
+    .feature h3 { margin: 0 0 8px; font-size: 1.12rem; }
+    .feature p { margin: 0; color: var(--muted); }
+    .split { display: grid; grid-template-columns: 0.82fr 1.18fr; gap: 44px; align-items: center; }
+    .live-list { display: grid; gap: 12px; margin-top: 24px; }
+    .live-step { display: grid; grid-template-columns: 40px 1fr; gap: 14px; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius); background: rgba(255, 255, 255, 0.04); }
+    .live-step strong { color: var(--gold-2); }
+    .live-step p { margin: 3px 0 0; color: var(--muted); }
+    .gallery { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; align-items: end; }
+    .gallery figure { margin: 0; }
+    .gallery img { border-radius: 22px; border: 1px solid rgba(215, 173, 85, 0.22); box-shadow: 0 24px 46px rgba(0, 0, 0, 0.42); }
+    .gallery figcaption { margin-top: 10px; color: var(--muted); text-align: center; font-weight: 800; font-size: 0.92rem; }
+    .themes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .theme { min-height: 180px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--panel); }
+    .swatch { height: 118px; display: flex; align-items: flex-end; gap: 8px; padding: 12px; }
+    .chip { width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.3); }
+    .theme strong { display: block; padding: 13px 14px 0; }
+    .theme span { display: block; padding: 2px 14px 14px; color: var(--muted); font-size: 0.88rem; }
+    .privacy-band { padding: 26px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border: 1px solid rgba(215, 173, 85, 0.26); border-radius: var(--radius); background: #101410; }
+    .privacy-band p { margin: 6px 0 0; color: var(--muted); }
+    footer { border-top: 1px solid rgba(215, 173, 85, 0.18); padding: 34px 0 46px; color: var(--muted); }
+    .foot { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .foot-links { display: flex; gap: 18px; flex-wrap: wrap; }
+    .foot a:hover { color: var(--gold-2); }
+    @media (max-width: 980px) {
+      .hero-grid, .split { grid-template-columns: 1fr; }
+      .showcase { min-height: auto; }
+      .feature-grid, .themes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 640px) {
+      .wrap { width: min(100% - 28px, var(--max)); }
+      .hero { padding-top: 32px; }
+      .screen-wall { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .phone-shot.tall, .phone-shot.main { transform: none; }
+      .feature-grid, .themes, .trust-strip, .gallery { grid-template-columns: 1fr; }
+      .privacy-band { display: block; }
+      .privacy-band .button { margin-top: 16px; width: 100%; }
+      .brand span { white-space: normal; }
+    }
   </style>
 </head>
 <body>
-  <div class="glow a"></div>
-  <div class="glow b"></div>
-
-  <!-- HEADER -->
-  <header class="nav" id="nav">
+  <header class="nav">
     <div class="wrap nav-inner">
-      <nav class="nav-links">
-        <a href="#features" data-en="Features" data-es="Funciones"></a>
-        <a href="#live" data-en="Live play" data-es="En vivo"></a>
-        <a href="#themes" data-en="Themes" data-es="Temas"></a>
-        <a href="#faq" data-en="FAQ" data-es="Preguntas"></a>
+      <a class="brand" href="/">
+        <img src="img/icon.png?v=social-club" alt="" />
+        <span>Domino Social Club</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#score">Score</a>
+        <a href="#live">Live sharing</a>
+        <a href="#screens">Screens</a>
+        <a href="/privacy/">Privacy</a>
       </nav>
-      <div class="nav-right">
-        <div class="lang" role="group" aria-label="Language">
-          <button data-lang="en" class="on">EN</button>
-          <button data-lang="es">ES</button>
-        </div>
-        <a class="btn btn-grad" href="#download" data-en="Get the app" data-es="Descargar"></a>
-      </div>
+      <a class="button primary" id="store-cta" href="#download">Get the app</a>
     </div>
   </header>
-
-  <a id="top"></a>
-
-  <!-- HERO -->
-  <section class="hero">
-    <div class="wrap hero-grid">
-      <div class="reveal">
-        <img src="img/logo.png" alt="Domino Social Club" class="hero-logo" />
-        <span class="eyebrow" data-en="Free • No ads • No sign-up" data-es="Gratis • Sin anuncios • Sin registro"></span>
-        <h1 class="hero-title"><span data-en="Keep score." data-es="Lleva la cuenta."></span><br><span class="grad-text" data-en="Share the game." data-es="Comparte el juego."></span></h1>
-        <p class="lead" data-en="Domino Social Club is the easiest way to score dominoes for two teams — with big score rings, live game-following by QR, and stats that remember every rivalry." data-es="Domino Social Club es la forma más fácil de anotar el dominó para dos equipos — con anillos de puntuación, seguimiento en vivo por QR y estadísticas que recuerdan cada rivalidad."></p>
-        <div class="cta-row" id="download">
-          <a class="store-badge" href="https://play.google.com/store/apps/details?id=com.yht.dominoparty" target="_blank" rel="noopener">
-            <svg viewBox="0 0 512 512" fill="none"><path d="M48 59v394c0 8 9 13 16 9l219-206L64 50c-7-4-16 0-16 9z" fill="#22D3EE"/><path d="M283 256l72-68 116 68c12 7 12 25 0 32l-116 68-72-100z" fill="#A78BFA"/><path d="M64 50l219 206 72-68L80 41c-6-4-16-1-16 9z" fill="#5B8DEF" opacity=".85"/><path d="M64 462l219-206 72 68L80 471c-6 4-16 1-16-9z" fill="#F472B6" opacity=".85"/></svg>
-            <span><span class="sb-sm" data-en="Get it on" data-es="Disponible en">Get it on</span><span class="sb-lg">Google Play</span></span>
-          </a>
-          <span class="store-badge soon">
-            <svg viewBox="0 0 384 512" fill="#f5f6f8"><path d="M318.7 268c-.3-37 16.4-65 50.1-85.6-18.9-27-47.4-41.9-85-44.8-35.6-2.8-74.5 20.9-88.7 20.9-15 0-49.4-19.9-76.4-19.9C61.2 139.2 0 184.4 0 276.1c0 27.1 5 55.1 14.9 84 13.3 38 61.3 131.3 111.4 129.8 26.2-.6 44.7-18.6 78.8-18.6 33.1 0 50.2 18.6 76.4 18.6 50.5-.7 93.9-85.5 106.6-123.6-67.8-32-69.4-93.8-69.4-95.7zM262.8 89.8c27-32 24.5-61.1 23.7-71.6-23.8 1.4-51.3 16.2-67 34.5-17.3 19.6-27.5 43.9-25.3 71.1 25.7 2 49.1-11.2 68.6-34z"/></svg>
-            <span><span class="sb-sm" data-en="Coming soon" data-es="Próximamente">Coming soon</span><span class="sb-lg">App Store</span></span>
-          </span>
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <span class="badge"><span class="dot"></span> Built for domino nights</span>
+          <h1>Score the match. Keep the club alive.</h1>
+          <p class="lead">Domino Social Club gives your table a clean scoreboard, live score sharing, match history, and four board styles. No sign-in. No ads. Just score your game.</p>
+          <div class="cta-row" id="download">
+            <a class="button primary" data-store="android" href="https://play.google.com/store/apps/details?id=com.yht.dominoparty" target="_blank" rel="noopener">Google Play</a>
+            <a class="button secondary" data-store="ios" href="https://apps.apple.com/app/id6793746031" target="_blank" rel="noopener">App Store</a>
+          </div>
+          <div class="trust-strip" aria-label="App highlights">
+            <div class="trust"><b>2 teams</b>Fast local scoring</div>
+            <div class="trust"><b>Live code</b>QR score following</div>
+            <div class="trust"><b>Private</b>No account or ads</div>
+          </div>
         </div>
-        <p class="beta-note" data-en="🎉 In beta now — launching soon on Google Play and iPhone." data-es="🎉 En beta ahora — pronto en Google Play y iPhone."></p>
-      </div>
-
-      <!-- phone mockup -->
-      <div class="phone-wrap reveal">
-        <svg class="float-tile" style="top:-10px;left:4%" width="58" height="58" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#14161b" stroke="#2b2f39"/><line x1="6" y1="16" x2="26" y2="16" stroke="#2b2f39"/><circle cx="11" cy="10" r="1.8" fill="#22D3EE"/><circle cx="21" cy="10" r="1.8" fill="#22D3EE"/><circle cx="16" cy="22" r="1.8" fill="#A78BFA"/></svg>
-        <svg class="float-tile" style="bottom:8px;right:2%; animation-delay:1.5s" width="50" height="50" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#14161b" stroke="#2b2f39"/><line x1="6" y1="16" x2="26" y2="16" stroke="#2b2f39"/><circle cx="16" cy="10" r="1.8" fill="#F472B6"/><circle cx="11" cy="22" r="1.8" fill="#5B8DEF"/><circle cx="21" cy="22" r="1.8" fill="#5B8DEF"/></svg>
-        <div class="phone">
-          <div class="screen">
-            <div class="scr-head"><span>Target: 150</span><span class="live"><i></i>LIVE</span></div>
-            <div class="team">
-              <div class="info"><div class="nm">Los Tigres</div><div class="pl">Ana &amp; Beto</div></div>
-              <div class="ring">
-                <svg width="74" height="74"><circle cx="37" cy="37" r="31" stroke="#23262e" stroke-width="6" fill="none"/><circle cx="37" cy="37" r="31" stroke="#22D3EE" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="195" stroke-dashoffset="39"/></svg>
-                <div class="num"><b style="color:#22D3EE">120</b><span>30</span></div>
-              </div>
-            </div>
-            <div class="team">
-              <div class="info"><div class="nm">Las Estrellas</div><div class="pl">Cdi &amp; Dani</div></div>
-              <div class="ring">
-                <svg width="74" height="74"><circle cx="37" cy="37" r="31" stroke="#23262e" stroke-width="6" fill="none"/><circle cx="37" cy="37" r="31" stroke="#A78BFA" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="195" stroke-dashoffset="72"/></svg>
-                <div class="num"><b style="color:#A78BFA">95</b><span>55</span></div>
-              </div>
-            </div>
-            <div class="addbtn" data-en="＋ Add Points" data-es="＋ Sumar Puntos"></div>
+        <div class="showcase" aria-label="Domino Social Club app screenshots">
+          <div class="screen-wall">
+            <img class="phone-shot tall" src="img/screens/new-game.jpg" alt="Set up a Domino Social Club match" />
+            <img class="phone-shot main" src="img/screens/home.jpg" alt="Domino Social Club scoreboard home" />
+            <img class="phone-shot tall" src="img/screens/score-board.jpg" alt="Live dominoes score board" />
           </div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- FEATURES -->
-  <section id="features">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <h2 data-en="Everything you need to keep score" data-es="Todo para llevar la cuenta"></h2>
-        <p data-en="Built for the classic game of two teams of two — fast, beautiful, and alive." data-es="Hecho para el juego clásico de dos equipos de dos — rápido, bonito y con vida."></p>
-      </div>
-      <div class="features">
-        <div class="card reveal">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-          <h3 data-en="Score in a tap" data-es="Anota con un toque"></h3>
-          <p data-en="Tap a team to add the points they won each hand. Big rings fill toward your target — 100, 150, or your own." data-es="Toca un equipo para sumar los puntos de cada mano. Los anillos se llenan hacia tu meta — 100, 150 o la tuya."></p>
+    </section>
+    <section class="section" id="score">
+      <div class="wrap">
+        <div class="section-header">
+          <h2>A scoreboard made for the way dominoes is actually played.</h2>
+          <p>Two teams, four players, custom targets, round history, and big score rings that make the table easy to read from across the room.</p>
         </div>
-        <div class="card reveal">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 21v.01M17 21h.01M21 17v.01"/></svg></div>
-          <h3 data-en="Play together, live" data-es="Jueguen juntos, en vivo"></h3>
-          <p data-en="Share a game code or QR — friends follow every point in real time on their own phones. Pass the pen to let someone else score." data-es="Comparte un código o QR — tus amigos siguen cada punto en tiempo real. Pasa el control para que otro anote."></p>
-        </div>
-        <div class="card reveal">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 20h18"/><rect x="5" y="11" width="3.5" height="6"/><rect x="10.2" y="7" width="3.5" height="10"/><rect x="15.5" y="13" width="3.5" height="4"/></svg></div>
-          <h3 data-en="Stats &amp; rivalries" data-es="Estadísticas y rivalidades"></h3>
-          <p data-en="Head-to-head records, win streaks, and Pollonas (shutouts) — your domino nights, remembered." data-es="Historial entre equipos, rachas y Pollonas (blanqueadas) — tus noches de dominó, recordadas."></p>
-        </div>
-        <div class="card reveal">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="12" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="13" r="2.5"/><path d="M12 22a9 9 0 1 1 0-18 4 4 0 0 0 0 8 3 3 0 0 0 0 6"/></svg></div>
-          <h3 data-en="Four tables to play on" data-es="Cuatro mesas para jugar"></h3>
-          <p data-en="Dark, Cuban, USA, and Carbon — pick the look that fits your table, with tilt-parallax backgrounds." data-es="Oscuro, Cubano, USA y Carbón — elige el estilo de tu mesa, con fondos que reaccionan al movimiento."></p>
-        </div>
-        <div class="card reveal">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 5h12M9 3v2M5 5c0 6 3 9 7 9M11 17c4 0 6-3 6-6"/><path d="M13 21l4-9 4 9M14.5 18h5"/></svg></div>
-          <h3 data-en="Alive &amp; bilingual" data-es="Con vida y bilingüe"></h3>
-          <p data-en="Count-up scores, a winner's heartbeat, sound and haptics — fully in English and Spanish." data-es="Marcadores animados, latido del ganador, sonido y vibración — totalmente en inglés y español."></p>
-        </div>
-        <div class="card reveal">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
-          <h3 data-en="Yours, privately" data-es="Tuyo, en privado"></h3>
-          <p data-en="No account, no ads. Everything stays on your phone unless you choose to share a game." data-es="Sin cuenta ni anuncios. Todo se queda en tu teléfono salvo que compartas una partida."></p>
+        <div class="feature-grid">
+          <article class="feature"><div class="icon">15</div><h3>Tap in points</h3><p>Add each round quickly, then edit a hand if the table changes its mind.</p></article>
+          <article class="feature"><div class="icon">QR</div><h3>Share live</h3><p>Start a broadcast and show a QR code so friends can follow the score.</p></article>
+          <article class="feature"><div class="icon">W</div><h3>Track wins</h3><p>Keep match history and remember the rivalries that keep coming back.</p></article>
+          <article class="feature"><div class="icon">ES</div><h3>English and Spanish</h3><p>Switch language and table style from settings whenever you want.</p></article>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- LIVE -->
-  <section id="live" style="background:linear-gradient(180deg,transparent,#0a0c10,transparent)">
-    <div class="wrap split">
-      <div class="reveal">
-        <span class="eyebrow" data-en="Live game-following" data-es="Seguimiento en vivo"></span>
-        <h2 style="font-size:clamp(1.8rem,3.6vw,2.5rem);font-weight:900;letter-spacing:-.02em" data-en="Everyone watches. One person scores." data-es="Todos miran. Una persona anota."></h2>
-        <ul class="pts" style="margin-top:26px; list-style:none">
-          <li><span class="n">1</span><div><h4 data-en="Share a code or QR" data-es="Comparte un código o QR"></h4><p data-en="Start broadcasting and a 4-letter code and QR appear. Friends scan or type it to follow." data-es="Empieza a transmitir y aparece un código de 4 letras y un QR. Tus amigos lo escanean o lo escriben para seguir."></p></div></li>
-          <li><span class="n">2</span><div><h4 data-en="Follow every point, live" data-es="Sigue cada punto, en vivo"></h4><p data-en="The scoreboard updates in real time on every phone — rings fill, the leader's number beats near the win." data-es="El marcador se actualiza en tiempo real en cada teléfono — los anillos se llenan y el líder late cerca de la victoria."></p></div></li>
-          <li><span class="n">3</span><div><h4 data-en="Pass the pen" data-es="Pasa el control"></h4><p data-en="A watcher can request to take over scoring — the current scorer just approves. Only one scores at a time." data-es="Un espectador puede pedir tomar el control — quien anota solo aprueba. Solo uno anota a la vez."></p></div></li>
-        </ul>
+    </section>
+    <section class="section" id="live">
+      <div class="wrap split">
+        <div>
+          <div class="section-header">
+            <h2>One scorer. Everyone watching live.</h2>
+            <p>Live sharing is built for family tables, tournament corners, and anyone waiting on the next hand.</p>
+          </div>
+          <div class="live-list">
+            <div class="live-step"><div class="icon">1</div><div><strong>Start broadcasting</strong><p>The app creates a short code and QR for that match.</p></div></div>
+            <div class="live-step"><div class="icon">2</div><div><strong>Friends scan</strong><p>They follow score changes from their own phones in real time.</p></div></div>
+            <div class="live-step"><div class="icon">3</div><div><strong>Stop when done</strong><p>Keep the match local, private, and under your control.</p></div></div>
+          </div>
+        </div>
+        <img class="phone-shot" src="img/screens/share-score.jpg" alt="QR code screen for sharing a live game" />
       </div>
-      <div class="qr-card reveal">
-        <div style="color:var(--muted);font-weight:800;letter-spacing:.1em;font-size:.78rem;text-transform:uppercase" data-en="Game code" data-es="Código de partida"></div>
-        <div class="code">KQ7M</div>
-        <div class="qr">
-          <svg viewBox="0 0 100 100" shape-rendering="crispEdges" fill="#070709"><rect width="100" height="100" fill="#fff"/><path d="M10 10h25v25h-25zM15 15h15v15h-15zM65 10h25v25h-25zM70 15h15v15h-15zM10 65h25v25h-25zM15 70h15v15h-15z"/><rect x="40" y="10" width="6" height="6"/><rect x="52" y="16" width="6" height="6"/><rect x="40" y="28" width="6" height="6"/><rect x="46" y="40" width="6" height="6"/><rect x="10" y="46" width="6" height="6"/><rect x="22" y="46" width="6" height="6"/><rect x="34" y="46" width="6" height="6"/><rect x="58" y="46" width="6" height="6"/><rect x="70" y="46" width="6" height="6"/><rect x="88" y="46" width="6" height="6"/><rect x="46" y="58" width="6" height="6"/><rect x="64" y="64" width="6" height="6"/><rect x="76" y="70" width="6" height="6"/><rect x="88" y="64" width="6" height="6"/><rect x="46" y="76" width="6" height="6"/><rect x="58" y="82" width="6" height="6"/><rect x="64" y="88" width="6" height="6"/><rect x="82" y="82" width="6" height="6"/><rect x="40" y="64" width="6" height="6"/><rect x="40" y="88" width="6" height="6"/></svg>
+    </section>
+    <section class="section" id="screens">
+      <div class="wrap">
+        <div class="section-header center">
+          <h2>Designed like a dark domino table.</h2>
+          <p>Gold controls, red and green scoring moments, and real match screens that stay readable while the game gets loud.</p>
         </div>
-        <p style="color:var(--muted);font-size:.9rem;margin-top:18px" data-en="Scan to follow the game live" data-es="Escanea para seguir la partida en vivo"></p>
-      </div>
-    </div>
-  </section>
-
-  <!-- THEMES -->
-  <section id="themes">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <h2 data-en="Choose your table" data-es="Elige tu mesa"></h2>
-        <p data-en="Four hand-crafted looks. Switch any time in Settings." data-es="Cuatro estilos hechos a mano. Cámbialo cuando quieras en Ajustes."></p>
-      </div>
-      <div class="themes">
-        <div class="theme reveal">
-          <div class="sw" style="background:radial-gradient(120% 120% at 20% 30%,#1c2230,#070709)"><div class="swdot"><span style="background:#22D3EE"></span><span style="background:#A78BFA"></span></div></div>
-          <div class="lbl">Carbon<small data-en="Black carbon halftone · default" data-es="Semitono de carbón · predeterminado"></small></div>
-        </div>
-        <div class="theme reveal">
-          <div class="sw" style="background:linear-gradient(135deg,#5B8DEF,#22D3EE)"><div class="swdot"><span style="background:#5B8DEF"></span><span style="background:#F472B6"></span></div></div>
-          <div class="lbl">Dark<small data-en="Clean solid dark" data-es="Oscuro y sólido"></small></div>
-        </div>
-        <div class="theme reveal">
-          <div class="sw" style="background:linear-gradient(135deg,#1E5AA8,#D2515F)"><div class="swdot"><span style="background:#2E69B8"></span><span style="background:#D2515F"></span></div></div>
-          <div class="lbl" data-en="Cuban Board" data-es="Mesa Cubana"><small data-en="Cuban–American flag motif" data-es="Motivo de bandera cubano-americana"></small></div>
-        </div>
-        <div class="theme reveal">
-          <div class="sw" style="background:linear-gradient(135deg,#3D4C96,#CB4F5B)"><div class="swdot"><span style="background:#4A66B5"></span><span style="background:#CB4F5B"></span></div></div>
-          <div class="lbl" data-en="USA Board" data-es="Mesa USA"><small data-en="Stars &amp; stripes" data-es="Estrellas y franjas"></small></div>
+        <div class="gallery">
+          <figure><img src="img/screens/home.jpg" alt="Home screen" /><figcaption>Home</figcaption></figure>
+          <figure><img src="img/screens/new-game.jpg" alt="New match screen" /><figcaption>New match</figcaption></figure>
+          <figure><img src="img/screens/score-board.jpg" alt="Score board screen" /><figcaption>Score board</figcaption></figure>
+          <figure><img src="img/screens/share-score.jpg" alt="Share score screen" /><figcaption>Live QR</figcaption></figure>
+          <figure><img src="img/screens/settings.jpg" alt="Settings screen" /><figcaption>Settings</figcaption></figure>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section id="faq">
-    <div class="wrap">
-      <div class="sec-head reveal"><h2 data-en="Questions" data-es="Preguntas"></h2></div>
-      <div class="faq">
-        <details class="qa reveal"><summary><span data-en="Is it free?" data-es="¿Es gratis?"></span><span class="pm">+</span></summary><div class="a" data-en="Yes — completely free, with no ads and no account to create." data-es="Sí — completamente gratis, sin anuncios y sin cuentas que crear."></div></details>
-        <details class="qa reveal"><summary><span data-en="How does live sharing work?" data-es="¿Cómo funciona el modo en vivo?"></span><span class="pm">+</span></summary><div class="a" data-en="Share a 4-letter code or a QR. Anyone who enters it follows your game live on their phone. Only one person scores at a time; others can request to take over." data-es="Comparte un código de 4 letras o un QR. Quien lo ingrese sigue tu partida en vivo en su teléfono. Solo una persona anota a la vez; los demás pueden pedir el control."></div></details>
-        <details class="qa reveal"><summary><span data-en="Do I need an internet connection?" data-es="¿Necesito conexión a internet?"></span><span class="pm">+</span></summary><div class="a" data-en="No for scoring — it works fully offline. You only need a connection to share or follow a game live." data-es="No para anotar — funciona sin conexión. Solo necesitas internet para compartir o seguir una partida en vivo."></div></details>
-        <details class="qa reveal"><summary><span data-en="What about my data?" data-es="¿Y mis datos?"></span><span class="pm">+</span></summary><div class="a" data-en="Your scores stay on your device. We don't collect personal information. Read the full Privacy Policy for details." data-es="Tus puntuaciones se quedan en tu dispositivo. No recopilamos información personal. Lee la Política de Privacidad para más detalles."></div></details>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section style="padding-top:10px">
-    <div class="wrap cta-band">
-      <div class="cta-inner reveal">
-        <h2 data-en="Ready to play?" data-es="¿Listo para jugar?"></h2>
-        <p data-en="Grab the app and keep score for your next domino night." data-es="Descarga la app y lleva la cuenta de tu próxima noche de dominó."></p>
-        <div class="cta-row" style="justify-content:center">
-          <a class="store-badge" href="https://play.google.com/store/apps/details?id=com.yht.dominoparty" target="_blank" rel="noopener">
-            <svg viewBox="0 0 512 512" fill="none"><path d="M48 59v394c0 8 9 13 16 9l219-206L64 50c-7-4-16 0-16 9z" fill="#22D3EE"/><path d="M283 256l72-68 116 68c12 7 12 25 0 32l-116 68-72-100z" fill="#A78BFA"/><path d="M64 50l219 206 72-68L80 41c-6-4-16-1-16 9z" fill="#5B8DEF" opacity=".85"/><path d="M64 462l219-206 72 68L80 471c-6 4-16 1-16-9z" fill="#F472B6" opacity=".85"/></svg>
-            <span><span class="sb-sm" data-en="Get it on" data-es="Disponible en">Get it on</span><span class="sb-lg">Google Play</span></span>
-          </a>
+    </section>
+    <section class="section">
+      <div class="wrap">
+        <div class="section-header">
+          <h2>Choose the board.</h2>
+          <p>Switch the table look to match the night.</p>
+        </div>
+        <div class="themes">
+          <div class="theme"><div class="swatch" style="background: #111412;"><span class="chip" style="background:#d7ad55"></span><span class="chip" style="background:#e05243"></span></div><strong>Boxed Dots</strong><span>Graphite boxes, gold and red accents.</span></div>
+          <div class="theme"><div class="swatch" style="background: #050705;"><span class="chip" style="background:#101010"></span><span class="chip" style="background:#f1d17b"></span></div><strong>Carbon Fiber</strong><span>Deep black table texture.</span></div>
+          <div class="theme"><div class="swatch" style="background: #0d281b;"><span class="chip" style="background:#1f7a52"></span><span class="chip" style="background:#d7ad55"></span></div><strong>Casino</strong><span>Green felt and warm buttons.</span></div>
+          <div class="theme"><div class="swatch" style="background: #102047;"><span class="chip" style="background:#284e9d"></span><span class="chip" style="background:#e05243"></span></div><strong>Cuban Board</strong><span>Blue, red, and classic table energy.</span></div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
+    </section>
+    <section class="section">
+      <div class="wrap privacy-band">
+        <div><h2>No account. No ads.</h2><p>Game data stays on your device unless you choose to share a live match. Live sharing uses Firebase only for app functionality.</p></div>
+        <a class="button secondary" href="/privacy/">Read privacy policy</a>
+      </div>
+    </section>
+  </main>
   <footer>
     <div class="wrap foot">
-      <a href="#top" class="brand">
-        <img src="img/logo.png" alt="Domino Social Club" />
-      </a>
-      <div class="links">
-        <a href="#features" data-en="Features" data-es="Funciones"></a>
-        <a href="/privacy/" data-en="Privacy" data-es="Privacidad"></a>
-        <a href="mailto:Yunierht@yahoo.com" data-en="Contact" data-es="Contacto"></a>
+      <div class="brand"><img src="img/icon.png?v=social-club" alt="" /><span>Domino Social Club</span></div>
+      <div class="foot-links">
+        <a href="/privacy/">Privacy</a>
+        <a href="mailto:Yunierht@yahoo.com">Contact</a>
+        <a href="https://play.google.com/store/apps/details?id=com.yht.dominoparty" target="_blank" rel="noopener">Google Play</a>
+        <a href="https://apps.apple.com/app/id6793746031" target="_blank" rel="noopener">App Store</a>
       </div>
-      <div class="copy">© <span id="yr"></span> Domino Social Club · <span data-en="Made by" data-es="Hecho por"></span> <b>YHT</b></div>
+      <div>Copyright 2026 YHT</div>
     </div>
   </footer>
-
   <script>
-    // ---- bilingual ----
-    function setLang(lang){
-      document.documentElement.lang = lang;
-      document.querySelectorAll('[data-en]').forEach(function(el){
-        var v = el.getAttribute('data-' + lang);
-        if(v !== null) el.textContent = v;
-      });
-      document.querySelectorAll('.lang button').forEach(function(b){
-        b.classList.toggle('on', b.dataset.lang === lang);
-      });
-      try{ localStorage.setItem('dp_lang', lang); }catch(e){}
-    }
-    document.querySelectorAll('.lang button').forEach(function(b){
-      b.addEventListener('click', function(){ setLang(b.dataset.lang); });
-    });
-    (function(){
-      var saved = null;
-      try{ saved = localStorage.getItem('dp_lang'); }catch(e){}
-      var lang = saved || ((navigator.language||'en').toLowerCase().indexOf('es')===0 ? 'es' : 'en');
-      setLang(lang);
+    (function () {
+      var ua = navigator.userAgent || "";
+      var isIPadOS = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+      var platform = /android/i.test(ua) ? "android" : /iPad|iPhone|iPod/i.test(ua) || isIPadOS ? "ios" : "";
+      var storeUrl = platform === "ios"
+        ? "https://apps.apple.com/app/id6793746031"
+        : platform === "android"
+          ? "https://play.google.com/store/apps/details?id=com.yht.dominoparty"
+          : "#download";
+      var storeLabel = platform === "ios" ? "Download on the App Store" : platform === "android" ? "Get it on Google Play" : "Get the app";
+      var cta = document.getElementById("store-cta");
+      cta.href = storeUrl;
+      cta.textContent = storeLabel;
+      if (platform) {
+        cta.target = "_blank";
+        cta.rel = "noopener";
+        document.querySelectorAll("[data-store]").forEach(function (link) {
+          var preferred = link.getAttribute("data-store") === platform;
+          link.classList.toggle("primary", preferred);
+          link.classList.toggle("secondary", !preferred);
+        });
+      }
     })();
-
-    // ---- header on scroll ----
-    var nav = document.getElementById('nav');
-    var onScroll = function(){ nav.classList.toggle('scrolled', window.scrollY > 12); };
-    onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
-
-    // ---- scroll reveal ----
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
-    }, {threshold:.12});
-    document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
-
-    // ---- year ----
-    document.getElementById('yr').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
