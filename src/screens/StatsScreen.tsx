@@ -6,7 +6,8 @@ import { useI18n } from '../i18n/I18nContext';
 import { useGame } from '../state/GameContext';
 import { Card } from '../components/ui';
 import { Header } from '../components/Header';
-import { Rivalry, TeamRecord, leaderboard, rivalries } from '../stats/stats';
+import { Match } from '../types';
+import { Rivalry, TeamRecord, leaderboard, momentumSeries, rivalries, summarizeMatch } from '../stats/stats';
 
 export function StatsScreen() {
   const { theme, s } = useTheme();
@@ -16,6 +17,7 @@ export function StatsScreen() {
 
   const board = useMemo(() => leaderboard(matches), [matches]);
   const rivs = useMemo(() => rivalries(matches), [matches]);
+  const badges = useMemo(() => clubBadges(matches, board, rivs, t), [matches, board, rivs, t]);
   const hasData = board.length > 0;
 
   return (
@@ -31,6 +33,13 @@ export function StatsScreen() {
         </Card>
       ) : (
         <>
+          <SectionLabel>{t.clubBadges}</SectionLabel>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: s(10), marginBottom: s(22) }}>
+            {badges.map((badge) => (
+              <BadgeCard key={badge.title} badge={badge} />
+            ))}
+          </View>
+
           {/* Leaderboard */}
           <SectionLabel>{t.leaderboardLabel}</SectionLabel>
           <Text style={{ color: c.textMuted, fontSize: s(11), marginTop: -s(6), marginBottom: s(10), lineHeight: s(15) }}>
@@ -64,6 +73,102 @@ export function StatsScreen() {
         </>
       )}
     </ScrollView>
+  );
+}
+
+type ClubBadge = {
+  title: string;
+  value: string;
+  detail: string;
+  color: string;
+};
+
+function clubBadges(matches: Match[], board: TeamRecord[], rivs: Rivalry[], t: ReturnType<typeof useI18n>['t']): ClubBadge[] {
+  const king = board[0];
+  const rivalry = rivs[0];
+  const pollona = [...board].sort((a, b) => b.pollonasWon - a.pollonasWon)[0];
+  let comebackName = '';
+  let comebackDeficit = 0;
+
+  matches.filter((m) => m.winnerTeamId).forEach((m) => {
+    const summary = summarizeMatch(m);
+    if (!summary.winner) return;
+    const series = momentumSeries(m);
+    const winnerIsA = summary.winner.id === m.teams[0].id;
+    const deficit = winnerIsA
+      ? Math.max(0, ...series.map((v) => -v))
+      : Math.max(0, ...series);
+    if (deficit > comebackDeficit) {
+      comebackName = summary.winner.name;
+      comebackDeficit = deficit;
+    }
+  });
+
+  return [
+    {
+      title: t.badgeKing,
+      value: king ? king.name : '-',
+      detail: king ? `${king.wins}W · ${Math.round(king.winPct * 100)}%` : t.noBadgeYet,
+      color: '#D7A63F',
+    },
+    {
+      title: t.badgeRivalry,
+      value: rivalry ? `${rivalry.aName} vs ${rivalry.bName}` : '-',
+      detail: rivalry ? `${rivalry.total} ${t.played.toLowerCase()}` : t.noBadgeYet,
+      color: '#C8564B',
+    },
+    {
+      title: t.badgeComeback,
+      value: comebackDeficit > 0 ? comebackName : '-',
+      detail: comebackDeficit > 0 ? `-${comebackDeficit}` : t.noBadgeYet,
+      color: '#4E9F87',
+    },
+    {
+      title: t.badgePollona,
+      value: pollona && pollona.pollonasWon > 0 ? pollona.name : '-',
+      detail: pollona && pollona.pollonasWon > 0 ? `${pollona.pollonasWon} ${t.pollonasLabel}` : t.noBadgeYet,
+      color: '#6E8AD8',
+    },
+  ];
+}
+
+function BadgeCard({ badge }: { badge: ClubBadge }) {
+  const { theme, s } = useTheme();
+  const c = theme.colors;
+  return (
+    <Card style={{ width: '48%', minHeight: s(104), borderColor: badge.color, padding: s(13) }}>
+      <LinearGradient
+        colors={[badge.color, 'rgba(0,0,0,0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(3), opacity: 0.9 }}
+      />
+      <View
+        style={{
+          width: s(30),
+          height: s(30),
+          borderRadius: s(15),
+          backgroundColor: badge.color + '26',
+          borderWidth: 1,
+          borderColor: badge.color + '66',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: s(8),
+        }}
+      >
+        <Text style={{ color: badge.color, fontSize: s(16), fontWeight: '900' }}>★</Text>
+      </View>
+      <Text numberOfLines={1} style={{ color: c.textMuted, fontSize: s(10), fontWeight: '900', textTransform: 'uppercase' }}>
+        {badge.title}
+      </Text>
+      <Text numberOfLines={1} style={{ color: c.text, fontSize: s(15), fontWeight: '900', marginTop: s(4) }}>
+        {badge.value}
+      </Text>
+      <Text numberOfLines={2} style={{ color: c.textMuted, fontSize: s(11), fontWeight: '700', marginTop: s(3), lineHeight: s(15) }}>
+        {badge.detail}
+      </Text>
+    </Card>
   );
 }
 

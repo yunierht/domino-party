@@ -6,11 +6,13 @@ import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-aud
 let tap: AudioPlayer | null = null;
 let win: AudioPlayer | null = null;
 let ready = false;
+let initializedAt = 0;
 
 /** Lazily create the sound players. Safe to call repeatedly. */
 export function initSounds() {
   if (ready) return;
   ready = true;
+  initializedAt = Date.now();
   try {
     setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
     tap = createAudioPlayer(require('../../assets/sounds/tap.wav'));
@@ -23,8 +25,12 @@ export function initSounds() {
 function trigger(p: AudioPlayer | null) {
   if (!p) return;
   try {
-    p.seekTo(0);
-    p.play();
+    const play = () => {
+      p.seekTo(0);
+      p.play();
+    };
+    if (Date.now() - initializedAt < 250) setTimeout(play, 180);
+    else play();
   } catch {
     // ignore playback hiccups
   }

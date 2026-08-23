@@ -44,3 +44,9 @@ yarn-error.*
 # Build artifacts
 *.aab
 *.apk
+
+# Local release inspection and device-test output (never application source).
+/.release-audit/
+/.release-build/
+/.idea/
+*expo-qr*.png

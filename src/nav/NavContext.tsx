@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import type { Match } from '../types';
 
 export type ScreenName =
   | 'home'
@@ -8,6 +9,7 @@ export type ScreenName =
   | 'stats'
   | 'settings'
   | 'watch'
+  | 'watchHistory'
   | 'howto'
   | 'privacy';
 
@@ -22,6 +24,9 @@ interface NavContextValue {
   openWatch: (code: string) => void;
   /** Clear the pending code once consumed. */
   clearWatchCode: () => void;
+  /** Open the normal History UI for a followed history space in read-only mode. */
+  watchHistory: { fallback: Match; historySpaceId?: string } | null;
+  openWatchHistory: (match: Match) => void;
 }
 
 const NavContext = createContext<NavContextValue | undefined>(undefined);
@@ -29,6 +34,10 @@ const NavContext = createContext<NavContextValue | undefined>(undefined);
 export function NavProvider({ children }: { children: React.ReactNode }) {
   const [stack, setStack] = useState<ScreenName[]>(['home']);
   const [pendingWatchCode, setPendingWatchCode] = useState<string | null>(null);
+  const [watchHistory, setWatchHistory] = useState<{
+    fallback: Match;
+    historySpaceId?: string;
+  } | null>(null);
 
   const go = (screen: ScreenName) => setStack((s) => [...s, screen]);
   const back = () =>
@@ -49,6 +58,11 @@ export function NavProvider({ children }: { children: React.ReactNode }) {
         pendingWatchCode,
         openWatch,
         clearWatchCode: () => setPendingWatchCode(null),
+        watchHistory,
+        openWatchHistory: (match) => {
+          setWatchHistory({ fallback: match, historySpaceId: match.historySpaceId });
+          setStack((s) => [...s, 'watchHistory']);
+        },
       }}
     >
       {children}

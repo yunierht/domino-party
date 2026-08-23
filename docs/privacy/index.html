@@ -51,6 +51,11 @@
       background: rgba(255,255,255,0.04);
       font-weight: 800;
     }
+    .header-actions { display:flex; align-items:center; gap:10px; }
+    .lang { display:flex; padding:3px; border:1px solid var(--line); border-radius:9px; }
+    .lang button { min-width:40px; min-height:36px; border:0; border-radius:6px; color:var(--muted); background:transparent; font-weight:900; cursor:pointer; }
+    .lang button[aria-pressed="true"] { color:#171007; background:var(--gold); }
+    .legal-link { min-height:40px; display:inline-flex; align-items:center; padding:0 12px; border:1px solid var(--line); border-radius:8px; color:var(--text); text-decoration:none; font-weight:800; }
     main { border: 1px solid var(--line); border-radius: 8px; background: rgba(17, 20, 18, 0.94); padding: 28px; }
     h1 { margin: 0; font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.05; letter-spacing: 0; }
     .effective { color: var(--muted); margin-top: 8px; }
@@ -66,7 +71,8 @@
     p { color: #ded6c8; margin: 10px 0; }
     strong { color: var(--text); }
     @media (max-width: 640px) {
-      header { display: block; }
+      header { display:block; }
+      .header-actions { margin-top:16px; flex-wrap:wrap; }
       .back { margin-top: 16px; width: 100%; justify-content: center; }
       main { padding: 20px; }
     }
@@ -79,18 +85,18 @@
         <img src="../img/icon.png?v=social-club" alt="" />
         <span>Domino Social Club</span>
       </a>
-      <a class="back" href="/">Back to site</a>
+      <div class="header-actions"><div class="lang" role="group" aria-label="Document language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="es" aria-pressed="false">ES</button></div><a class="legal-link" href="/legal/" id="legal-link">Legal</a><a class="back" href="/" id="back-link">Back to site</a></div>
     </header>
-    <main>
+    <main id="privacy-content">
       <h1>Privacy Policy</h1>
-      <p class="effective"><strong>Effective date:</strong> June 17, 2026</p>
+      <p class="effective"><strong>Effective date:</strong> August 23, 2026</p>
       <div class="notice">
         <strong>Simple version:</strong> Domino Social Club has no user accounts, no ads, and no tracking. Your scorekeeping data stays on your device unless you choose to share a live game.
       </div>
       <p>Domino Social Club ("the App", "we", "us") is a domino scorekeeping app. This policy explains what information the App handles and how.</p>
       <h2>1. Information we handle</h2>
       <p><strong>Data stored only on your device.</strong> Your matches, teams, player names, scores, round history, settings, language, and optional display name are saved locally on your phone and are not sent to us unless you use live sharing. This data is removed if you delete the App.</p>
-      <p><strong>Data stored in the cloud when you share a game.</strong> Only when you choose to share a game do we send that game's score information to Google Firebase / Cloud Firestore so people with the game code can follow it live. This can include team names, player names, scores, rounds, a short game code, the display name you enter, and an anonymous identifier created for your device.</p>
+      <p><strong>Data stored in the cloud when you share a game.</strong> Only when you choose to share a game do we send the complete match history stored on your device to Google Firebase / Cloud Firestore so people with that game's code can follow the live score and view the shared history read-only. This can include team names, player names, scores, rounds, dates, a short game code, the display name you enter, and an anonymous identifier created for your device.</p>
       <p><strong>Anonymous authentication.</strong> To enable live sharing, the App uses Firebase Anonymous Authentication, which creates a random identifier for your device. It is not linked to your name, email, phone number, or any personal account.</p>
       <p><strong>What we do not collect:</strong> we do not collect your email, phone number, contacts, photos, precise location, or advertising identifiers. The App contains no third-party advertising.</p>
       <h2>2. How we use information</h2>
@@ -112,5 +118,25 @@
       <p><strong><a href="mailto:Yunierht@yahoo.com">Yunierht@yahoo.com</a></strong><br />Developer: YHT</p>
     </main>
   </div>
+  <script>
+    const content=document.getElementById('privacy-content');const en=content.innerHTML;const es=`
+      <h1>Política de privacidad</h1><p class="effective"><strong>Fecha de vigencia:</strong> 23 de agosto de 2026</p>
+      <div class="notice"><strong>Versión simple:</strong> Domino Social Club no tiene cuentas de usuario, anuncios ni seguimiento. Tus datos de puntuación permanecen en tu dispositivo salvo que decidas compartir una partida en vivo.</div>
+      <p>Domino Social Club ("la Aplicación", "nosotros") es una aplicación para anotar partidas de dominó. Esta política explica qué información maneja y cómo.</p>
+      <h2>1. Información que manejamos</h2><p><strong>Datos guardados solo en tu dispositivo.</strong> Tus partidas, equipos, nombres, puntuaciones, historial de rondas, ajustes, idioma y nombre opcional se guardan localmente en tu teléfono y no se envían salvo que uses el seguimiento en vivo. Estos datos se eliminan si borras la Aplicación.</p>
+      <p><strong>Datos guardados en la nube al compartir una partida.</strong> Solo cuando compartes una partida enviamos el historial completo de partidas guardado en tu dispositivo a Google Firebase / Cloud Firestore para que personas con el código de esa partida sigan el marcador en vivo y vean el historial compartido en modo de solo lectura. Puede incluir nombres de equipos y jugadores, puntuaciones, rondas, fechas, un código corto, el nombre visible que ingreses y un identificador anónimo del dispositivo.</p>
+      <p><strong>Autenticación anónima.</strong> Para compartir en vivo, Firebase crea un identificador aleatorio para tu dispositivo. No está vinculado a tu nombre, correo, teléfono ni a una cuenta personal.</p>
+      <p><strong>Lo que no recopilamos:</strong> no recopilamos correo electrónico, teléfono, contactos, fotos, ubicación precisa ni identificadores publicitarios. La Aplicación no contiene publicidad de terceros.</p>
+      <h2>2. Cómo usamos la información</h2><p>Usamos la información para la puntuación local y el seguimiento en vivo que tú decidas compartir. No vendemos tu información ni la usamos para publicidad.</p>
+      <h2>3. Proveedores de servicio</h2><p>Las funciones en la nube usan <strong>Google Firebase</strong> Authentication y Cloud Firestore. La información compartida se procesa y guarda en servidores de Google. Consulta la Política de privacidad de Google: <a href="https://policies.google.com/privacy">https://policies.google.com/privacy</a>.</p>
+      <h2>4. Conservación y eliminación</h2><p><strong>Datos del dispositivo:</strong> elimínalos borrando la Aplicación. <strong>Datos de partidas compartidas:</strong> pueden permanecer en nuestra base de datos al terminar. Para solicitar su eliminación, escríbenos al correo indicado abajo.</p>
+      <h2>5. Seguridad</h2><p>Usamos la infraestructura y reglas de acceso de Firebase. Ningún método es completamente seguro, pero tomamos medidas razonables para proteger la información.</p>
+      <h2>6. Privacidad infantil</h2><p>La Aplicación es para público general y no está dirigida a menores de 13 años o la edad mínima equivalente en tu país. No recopilamos deliberadamente información personal de menores.</p>
+      <h2>7. Tus derechos</h2><p>Según tu lugar de residencia, puedes tener derechos de acceso, corrección o eliminación. Como no exigimos una cuenta, controlas directamente la mayoría de los datos del dispositivo. Para datos compartidos o anónimos, contáctanos.</p>
+      <h2>8. Cambios</h2><p>Podemos actualizar esta política. Revisaremos la fecha de vigencia y, para cambios importantes, daremos aviso en la Aplicación o su ficha de tienda.</p>
+      <h2>9. Contacto</h2><p>Si tienes preguntas sobre esta política o tus datos, contacta:</p><p><strong><a href="mailto:Yunierht@yahoo.com">Yunierht@yahoo.com</a></strong><br>Desarrollador: YHT</p>`;
+    function setLang(lang){document.documentElement.lang=lang;content.innerHTML=lang==='es'?es:en;document.getElementById('back-link').textContent=lang==='es'?'Volver al sitio':'Back to site';document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===lang)));localStorage.setItem('domino-watch-lang',lang)}
+    document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang)));setLang(localStorage.getItem('domino-watch-lang')==='es'?'es':'en');
+  </script>
 </body>
 </html>

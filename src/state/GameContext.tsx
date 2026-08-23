@@ -15,13 +15,16 @@ import {
   ControlRequest,
   SharedGame,
   approveControl as approveControlSync,
+  createHistorySpaceId,
   createGame,
   denyControl as denyControlSync,
   pushGame,
   requestControl as requestControlSync,
   setGameLive,
+  setGameHistorySpace,
   setNextGame,
   subscribeGame,
+  syncHistorySpace,
 } from '../firebase/sync';
 
 /** Live-control metadata for the current shared match. */
@@ -81,7 +84,13 @@ type Action =
   | { type: 'DELETE_MATCH'; matchId: string }
   | { type: 'DELETE_ALL_MATCHES' }
   | { type: 'SET_CURRENT'; matchId: string | null }
-  | { type: 'SET_SHARE_CODE'; matchId: string; shareCode: string }
+  | {
+      type: 'SET_SHARE_CODE';
+      matchId: string;
+      shareCode: string;
+      historySpaceId: string;
+      sharedHostId?: string;
+    }
   | { type: 'STOP_SHARING'; matchId: string };
 
 /** Recompute winner/finishedAt after rounds change. */
@@ -213,7 +222,14 @@ function reducer(state: GameState, action: Action): GameState {
       return {
         ...state,
         matches: state.matches.map((m) =>
-          m.id === action.matchId ? { ...m, shareCode: action.shareCode } : m,
+          m.id === action.matchId
+            ? {
+                ...m,
+                shareCode: action.shareCode,
+                historySpaceId: action.historySpaceId,
+                sharedHostId: action.sharedHostId ?? m.sharedHostId,
+              }
+            : m,
         ),
       };
 
@@ -297,6 +313,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [liveUid, setLiveUid] = useState<string | null>(null);
   const [liveMeta, setLiveMeta] = useState<LiveMeta | null>(null);
   const [liveReady, setLiveReady] = useState(false);
+  const matchesRef = useRef<Match[]>([]);
+  const migratingHistoryCodes = useRef(new Set<string>());
 
   // Load persisted state once.
   useEffect(() => {
@@ -324,6 +342,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!hydrated.current) return;
     saveJSON(KEYS.matches, state.matches);
+  }, [state.matches]);
+
+  useEffect(() => {
+    matchesRef.current = state.matches;
   }, [state.matches]);
 
   useEffect(() => {
@@ -368,6 +390,33 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           controllerName: g.controllerName,
           pendingRequest: g.pendingRequest ?? null,
         });
+        // Upgrade a game created by an earlier app version. Only its original
+        // host can publish the full local history; a controller takeover must
+        // never replace that collection.
+        if (!g.historySpaceId && g.hostId === liveUid && !migratingHistoryCodes.current.has(g.code)) {
+          migratingHistoryCodes.current.add(g.code);
+          const localMatches = matchesRef.current;
+          const historySpaceId =
+            localMatches.find((match) => match.id === currentMatchId)?.historySpaceId ??
+            localMatches.find((match) => match.historySpaceId)?.historySpaceId ??
+            createHistorySpaceId();
+          syncHistorySpace(historySpaceId, localMatches)
+            .then(() => setGameHistorySpace(g.code, historySpaceId))
+            .then(() => {
+              if (currentMatchId) {
+                dispatch({
+                  type: 'SET_SHARE_CODE',
+                  matchId: currentMatchId,
+                  shareCode: g.code,
+                  historySpaceId,
+                  sharedHostId: g.hostId,
+                });
+              }
+            })
+            .catch(() => {
+              migratingHistoryCodes.current.delete(g.code);
+            });
+        }
         // If I'm not the controller, mirror the controller's score locally.
         if (liveUid && g.controllerId !== liveUid && currentMatchId) {
           dispatch({
@@ -389,8 +438,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (!hydrated.current) return;
     if (currentMatch?.shareCode && amController) {
       pushGame(currentMatch.shareCode, currentMatch).catch(() => {});
+      if (!currentMatch.historySpaceId) return;
+      // A controller who took over may update the live record, but only the
+      // original host mirrors/deletes the full local collection.
+      if (currentMatch.sharedHostId === liveUid) {
+        syncHistorySpace(currentMatch.historySpaceId, state.matches).catch(() => {});
+      }
     }
-  }, [currentMatch, amController]);
+  }, [currentMatch, state.matches, amController, liveUid]);
 
   // Auto-broadcast when the host starts a new match while already broadcasting.
   // This keeps spectators connected without the host needing to re-tap Broadcast.
@@ -415,9 +470,35 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const shareMatch = async (matchId: string): Promise<string> => {
     const m = state.matches.find((x) => x.id === matchId);
     if (!m) throw new Error('Match not found');
-    if (m.shareCode) return m.shareCode;
-    const code = await createGame(m, state.displayName);
-    dispatch({ type: 'SET_SHARE_CODE', matchId, shareCode: code });
+    const historySpaceId =
+      m.historySpaceId ??
+      state.matches.find((x) => x.historySpaceId)?.historySpaceId ??
+      createHistorySpaceId();
+
+    // The website and mobile spectator both read this collection. Do this
+    // before publishing the game code so a follower never sees a partial list.
+    await syncHistorySpace(historySpaceId, state.matches);
+
+    if (m.shareCode) {
+      await setGameHistorySpace(m.shareCode, historySpaceId);
+      dispatch({
+        type: 'SET_SHARE_CODE',
+        matchId,
+        shareCode: m.shareCode,
+        historySpaceId,
+        sharedHostId: m.sharedHostId ?? liveUid ?? undefined,
+      });
+      return m.shareCode;
+    }
+
+    const { code, hostId } = await createGame(m, state.displayName, historySpaceId);
+    dispatch({
+      type: 'SET_SHARE_CODE',
+      matchId,
+      shareCode: code,
+      historySpaceId,
+      sharedHostId: hostId,
+    });
     // Point any previously shared finished games to this new code so spectators auto-follow.
     const prevCodes = state.matches
       .filter((x) => x.id !== matchId && x.shareCode && x.winnerTeamId)
@@ -465,6 +546,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       finishedAt: g.finishedAt ?? null,
       winnerTeamId: g.winnerTeamId ?? null,
       shareCode: g.code,
+      historySpaceId: g.historySpaceId,
+      sharedHostId: g.hostId,
     };
     dispatch({ type: 'ADOPT_MATCH', match });
     return match.id;

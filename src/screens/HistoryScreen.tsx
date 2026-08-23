@@ -9,14 +9,21 @@ import { useNav } from '../nav/NavContext';
 import { Card } from '../components/ui';
 import { Header } from '../components/Header';
 import { AppDialog } from '../components/AppDialog';
-import { teamById, teamTotal } from '../types';
+import { Match, teamById, teamTotal } from '../types';
 
-export function HistoryScreen() {
+export function HistoryScreen({
+  matches: providedMatches,
+  readOnly = false,
+}: {
+  matches?: Match[];
+  readOnly?: boolean;
+}) {
   const { theme, s } = useTheme();
   const { t, lang } = useI18n();
-  const { matches, setCurrent, deleteMatch, deleteAllMatches } = useGame();
+  const { matches: localMatches, setCurrent, deleteMatch, deleteAllMatches } = useGame();
   const { go } = useNav();
   const c = theme.colors;
+  const matches = providedMatches ?? localMatches;
 
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [clearAllOpen, setClearAllOpen] = useState(false);
@@ -31,7 +38,7 @@ export function HistoryScreen() {
       <Header
         title={t.history}
         right={
-          matches.length > 0 ? (
+          matches.length > 0 && !readOnly ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(4) }}>
               <Pressable onPress={() => go('stats')} hitSlop={10} style={{ padding: s(6) }}>
                 <Feather name="bar-chart-2" size={s(22)} color={c.primary} />
@@ -55,6 +62,7 @@ export function HistoryScreen() {
             const ta = teamTotal(m, a.id);
             const tb = teamTotal(m, b.id);
             const winner = m.winnerTeamId ? teamById(m, m.winnerTeamId) : null;
+            const winnerColor = '#E4B452';
             const date = new Date(m.createdAt).toLocaleDateString(
               lang === 'es' ? 'es' : 'en',
               { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' },
@@ -62,8 +70,13 @@ export function HistoryScreen() {
             return (
               <Pressable
                 key={m.id}
-                onPress={() => open(m.id)}
-                onLongPress={() => setPendingDelete(m.id)}
+                onPress={readOnly ? undefined : () => open(m.id)}
+                onLongPress={readOnly ? undefined : () => setPendingDelete(m.id)}
+                accessibilityLabel={
+                  winner
+                    ? `${t.winner}: ${winner.name}. ${a.name} ${ta}, ${b.name} ${tb}. ${date}`
+                    : `${t.inProgress}. ${a.name} ${ta}, ${b.name} ${tb}. ${date}`
+                }
                 style={({ pressed }) => ({
                   transform: [{ translateY: pressed ? s(2) : 0 }],
                   shadowColor: '#000',
@@ -95,7 +108,7 @@ export function HistoryScreen() {
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: s(8) }}>
                     <Text
                       style={{
-                        color: winner ? c.success : c.primary,
+                        color: winner ? winnerColor : c.primary,
                         fontSize: s(12),
                         fontWeight: '800',
                         textTransform: 'uppercase',
@@ -107,62 +120,78 @@ export function HistoryScreen() {
                     <Text style={{ color: c.textMuted, fontSize: s(12) }}>{date}</Text>
                   </View>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Side name={a.name} score={ta} color={c.teamA} win={winner?.id === a.id} />
+                    <Side
+                      name={a.name}
+                      score={ta}
+                      color={winner ? (winner.id === a.id ? winnerColor : c.danger) : c.teamA}
+                      win={winner?.id === a.id}
+                      decided={!!winner}
+                    />
                     <Text style={{ color: c.textMuted, fontWeight: '800', marginHorizontal: s(8) }}>—</Text>
-                    <Side name={b.name} score={tb} color={c.teamB} win={winner?.id === b.id} alignRight />
+                    <Side
+                      name={b.name}
+                      score={tb}
+                      color={winner ? (winner.id === b.id ? winnerColor : c.danger) : c.teamB}
+                      win={winner?.id === b.id}
+                      decided={!!winner}
+                      alignRight
+                    />
                   </View>
-                  <Text style={{ color: c.textMuted, fontSize: s(11), marginTop: s(8) }}>
-                    {t.targetScore}: {m.targetScore} · {m.rounds.length} {t.rounds.toLowerCase()}
-                  </Text>
                 </Card>
               </Pressable>
             );
           })}
-          <Text style={{ color: c.textMuted, fontSize: s(12), textAlign: 'center', marginTop: s(8) }}>
-            {t.longPressHint}
-          </Text>
+          {!readOnly && (
+            <Text style={{ color: c.textMuted, fontSize: s(12), textAlign: 'center', marginTop: s(8) }}>
+              {t.longPressHint}
+            </Text>
+          )}
         </View>
       )}
 
-      <AppDialog
-        visible={!!pendingDelete}
-        icon="trash-2"
-        iconColor={c.danger}
-        title={t.deleteMatch}
-        message={t.confirmDeleteMatch}
-        actions={[
-          {
-            label: t.delete,
-            variant: 'danger',
-            onPress: () => {
-              if (pendingDelete) deleteMatch(pendingDelete);
-              setPendingDelete(null);
-            },
-          },
-          { label: t.cancel, variant: 'ghost', onPress: () => setPendingDelete(null) },
-        ]}
-        onRequestClose={() => setPendingDelete(null)}
-      />
+        {!readOnly && (
+          <>
+            <AppDialog
+              visible={!!pendingDelete}
+              icon="trash-2"
+              iconColor={c.danger}
+              title={t.deleteMatch}
+              message={t.confirmDeleteMatch}
+              actions={[
+                {
+                  label: t.delete,
+                  variant: 'danger',
+                  onPress: () => {
+                    if (pendingDelete) deleteMatch(pendingDelete);
+                    setPendingDelete(null);
+                  },
+                },
+                { label: t.cancel, variant: 'ghost', onPress: () => setPendingDelete(null) },
+              ]}
+              onRequestClose={() => setPendingDelete(null)}
+            />
 
-      <AppDialog
-        visible={clearAllOpen}
-        icon="trash-2"
-        iconColor={c.danger}
-        title={t.clearAllTitle}
-        message={t.clearAllBody}
-        actions={[
-          {
-            label: t.clearAll,
-            variant: 'danger',
-            onPress: () => {
-              deleteAllMatches();
-              setClearAllOpen(false);
-            },
-          },
-          { label: t.cancel, variant: 'ghost', onPress: () => setClearAllOpen(false) },
-        ]}
-        onRequestClose={() => setClearAllOpen(false)}
-      />
+            <AppDialog
+              visible={clearAllOpen}
+              icon="trash-2"
+              iconColor={c.danger}
+              title={t.clearAllTitle}
+              message={t.clearAllBody}
+              actions={[
+                {
+                  label: t.clearAll,
+                  variant: 'danger',
+                  onPress: () => {
+                    deleteAllMatches();
+                    setClearAllOpen(false);
+                  },
+                },
+                { label: t.cancel, variant: 'ghost', onPress: () => setClearAllOpen(false) },
+              ]}
+              onRequestClose={() => setClearAllOpen(false)}
+            />
+          </>
+        )}
     </ScrollView>
   );
 }
@@ -172,19 +201,21 @@ function Side({
   score,
   color,
   win,
+  decided,
   alignRight,
 }: {
   name: string;
   score: number;
   color: string;
   win?: boolean;
+  decided?: boolean;
   alignRight?: boolean;
 }) {
   const { theme, s } = useTheme();
   const c = theme.colors;
   return (
     <View style={{ flex: 1, alignItems: alignRight ? 'flex-end' : 'flex-start' }}>
-      <Text numberOfLines={1} style={{ color: c.text, fontSize: s(14), fontWeight: win ? '900' : '700' }}>
+      <Text numberOfLines={1} style={{ color: decided ? color : c.text, fontSize: s(14), fontWeight: win ? '900' : '700' }}>
         {name}
       </Text>
       <View

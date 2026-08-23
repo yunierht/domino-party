@@ -1,0 +1,32 @@
+# Keep all standard repository exclusions when EAS creates the upload archive.
+node_modules/
+.expo/
+dist/
+dist-check/
+web-build/
+expo-env.d.ts
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.DS_Store
+*.pem
+.env*.local
+*.tsbuildinfo
+/ios
+/android
+*.aab
+*.apk
+
+# Local audit/build copies are not application source and make the EAS archive oversized.
+/.release-audit/
+/.release-build/
+/.idea/
+*expo-qr*.png

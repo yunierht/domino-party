@@ -25,20 +25,20 @@ export function PrivacyScreen() {
       <Header title={t.privacy} />
 
       <Text style={{ color: c.textMuted, fontSize: s(12), marginBottom: s(4) }}>
-        Effective date: June 17, 2026
+        Effective date: August 23, 2026
       </Text>
       <Text style={{ color: c.textMuted, fontSize: s(14), lineHeight: s(21), marginTop: s(8) }}>
-        Domino Social Club (“the App”, “we”) is a domino score-tracking app. It has no user accounts,
+        Domino Social Club ("the App", "we") is a domino score-tracking app. It has no user accounts,
         asks for no email or password, and shows no ads.
       </Text>
 
       <Section title="Information we handle">
         Your matches, teams, player names, scores, and settings are stored only on your device and
         are removed if you delete the App. The only time data leaves your device is the optional
-        live-sharing feature: when you choose to share a game, that game’s teams, names, scores, a
-        short code, and an anonymous device identifier are sent to our cloud database so people with
-        the code can follow it live. We do not collect your email, phone number, contacts, photos, or
-        location.
+        live-sharing feature: when you choose to share a game, your complete match history is shared
+        with people who have that game's code so they can view it read-only. This can include teams,
+        player names, scores, rounds, dates, a short game code, and an anonymous device identifier.
+        We do not collect your email, phone number, contacts, photos, or location.
       </Section>
 
       <Section title="Anonymous sign-in">
@@ -47,8 +47,8 @@ export function PrivacyScreen() {
       </Section>
 
       <Section title="Service providers">
-        Cloud features use Google Firebase (Authentication and Cloud Firestore). Data sent for live
-        sharing is processed on Google’s servers. See Google’s Privacy Policy at
+        Cloud features use Google Firebase Authentication and Cloud Firestore. Data sent for live
+        sharing is processed on Google's servers. See Google's Privacy Policy at
         policies.google.com/privacy.
       </Section>
 
@@ -57,7 +57,7 @@ export function PrivacyScreen() {
         after a game ends; contact us to request deletion.
       </Section>
 
-      <Section title="Children’s privacy">
+      <Section title="Children's privacy">
         The App is for a general audience and is not directed to children under 13. We do not
         knowingly collect personal information from children.
       </Section>

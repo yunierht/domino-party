@@ -52,7 +52,7 @@ export function Button({
     variant === 'primary'
       ? c.onPrimary
       : variant === 'danger'
-        ? c.danger
+        ? '#FFFFFF'
         : c.text;
 
   const content = (
@@ -128,13 +128,13 @@ export function Button({
   }
 
   const bg =
-    variant === 'secondary'
+    variant === 'secondary' || variant === 'ghost'
       ? c.surfaceAlt
       : variant === 'danger'
-        ? 'transparent'
+        ? c.danger
         : 'transparent';
   const border =
-    variant === 'danger' ? c.danger : variant === 'ghost' || variant === 'secondary' ? c.border : 'transparent';
+    variant === 'danger' ? '#D86A5F' : variant === 'ghost' || variant === 'secondary' ? c.border : 'transparent';
 
   return (
     <Pressable
@@ -146,19 +146,23 @@ export function Button({
           borderWidth: variant === 'ghost' || variant === 'danger' || variant === 'secondary' ? 1.5 : 0,
           borderColor: border,
           opacity: pressed ? 0.7 : disabled ? 0.5 : 1,
-          shadowColor: variant === 'secondary' ? '#000' : c.primary,
-          shadowOpacity: variant === 'secondary' ? 0.34 : 0.08,
+          shadowColor: variant === 'danger' ? c.danger : variant === 'secondary' || variant === 'ghost' ? '#000' : c.primary,
+          shadowOpacity: variant === 'danger' ? 0.34 : variant === 'secondary' || variant === 'ghost' ? 0.34 : 0.08,
           shadowRadius: s(12),
           shadowOffset: { width: 0, height: pressed ? s(2) : s(6) },
-          elevation: variant === 'secondary' ? 7 : 1,
+          elevation: variant === 'danger' || variant === 'secondary' || variant === 'ghost' ? 7 : 1,
           transform: [{ translateY: pressed ? s(1) : 0 }],
         },
         style,
       ]}
     >
-      {variant === 'secondary' && (
+      {(variant === 'secondary' || variant === 'ghost' || variant === 'danger') && (
         <LinearGradient
-          colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0)', 'rgba(0,0,0,0.22)']}
+          colors={
+            variant === 'danger'
+              ? ['rgba(255,255,255,0.24)', 'rgba(255,255,255,0.02)', 'rgba(0,0,0,0.24)']
+              : ['rgba(255,255,255,0.10)', 'rgba(255,255,255,0)', 'rgba(0,0,0,0.22)']
+          }
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           pointerEvents="none"

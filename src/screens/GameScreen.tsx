@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, Easing, Modal, Pressable, ScrollView, Share, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Easing, Modal, Pressable, ScrollView, Share, Text, useWindowDimensions, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -25,6 +25,7 @@ import { Match, Round, Team, computeWinner, pointsToWin, teamTotal } from '../ty
 export function GameScreen() {
   const { theme, s } = useTheme();
   const { t } = useI18n();
+  const { width } = useWindowDimensions();
   const {
     currentMatch,
     addRound,
@@ -119,9 +120,14 @@ export function GameScreen() {
   const pulseB = danger && leadId === teamB.id;
   const isShared = !!match.shareCode;
   const myPending = liveMeta?.pendingRequest?.uid === liveUid;
+  // Keep enough horizontal room for the tappable target on narrow phones.
+  const compactHeaderActions = width < 390;
+  const headerActionPadding = compactHeaderActions ? s(6) : s(10);
+  const headerActionHitSlop = compactHeaderActions ? 8 : 4;
 
   const openAddFor = (teamId: string) => {
     if (finished || !canEdit) return;
+    Haptics.selectionAsync().catch(() => {});
     setEditing(undefined);
     setAddTeamId(teamId);
     setEditorOpen(true);
@@ -196,16 +202,20 @@ export function GameScreen() {
         <Header
           title={`${t.target}: ${match.targetScore}`}
           onTitlePress={canEdit && !finished ? () => setTargetOpen(true) : undefined}
+          showTitleEditHint={false}
           right={
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(10) }}>
+            <View style={{ flexShrink: 0, flexDirection: 'row', alignItems: 'center', gap: s(2), marginLeft: s(4) }}>
               <Pressable
                 onPress={onSharePress}
+                accessibilityRole="button"
+                accessibilityLabel={match.shareCode ? t.live : t.shareGame}
+                hitSlop={headerActionHitSlop}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: s(5),
-                  paddingHorizontal: s(11),
-                  paddingVertical: s(10),
+                  gap: compactHeaderActions ? 0 : s(5),
+                  paddingHorizontal: compactHeaderActions ? s(6) : s(11),
+                  paddingVertical: compactHeaderActions ? s(6) : s(10),
                   borderRadius: 999,
                   backgroundColor: match.shareCode ? c.surfaceAlt : 'transparent',
                 }}
@@ -215,16 +225,30 @@ export function GameScreen() {
                 ) : match.shareCode ? (
                   <>
                     <Feather name="radio" size={s(20)} color={c.danger} />
-                    <Text style={{ color: c.danger, fontWeight: '900', fontSize: s(13) }}>{t.live}</Text>
+                    {!compactHeaderActions && (
+                      <Text style={{ color: c.danger, fontWeight: '900', fontSize: s(13) }}>{t.live}</Text>
+                    )}
                   </>
                 ) : (
                   <Feather name="radio" size={s(24)} color={c.textMuted} />
                 )}
               </Pressable>
-              <Pressable onPress={() => go('stats')} style={{ padding: s(10) }}>
-                <Feather name="bar-chart-2" size={s(24)} color={c.textMuted} />
+              <Pressable
+                onPress={() => go('history')}
+                accessibilityRole="button"
+                accessibilityLabel={t.history}
+                hitSlop={headerActionHitSlop}
+                style={{ padding: headerActionPadding }}
+              >
+                <Feather name="book-open" size={s(24)} color={c.textMuted} />
               </Pressable>
-              <Pressable onPress={() => go('settings')} style={{ padding: s(10) }}>
+              <Pressable
+                onPress={() => go('settings')}
+                accessibilityRole="button"
+                accessibilityLabel={t.settings}
+                hitSlop={headerActionHitSlop}
+                style={{ padding: headerActionPadding }}
+              >
                 <Feather name="settings" size={s(24)} color={c.textMuted} />
               </Pressable>
             </View>

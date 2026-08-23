@@ -1,15 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Animated, Easing, Modal, Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
+import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { useGame } from '../state/GameContext';
 import { useNav } from '../nav/NavContext';
+import { usePrefs } from '../state/PrefsContext';
 import { Button, Card } from '../components/ui';
 import { Header } from '../components/Header';
 import { ScoreRing } from '../components/ScoreRing';
 import { SharedGame, cancelMyRequest, requestControl, sharedToMatch, subscribeGame } from '../firebase/sync';
 import { isFirebaseConfigured } from '../firebase/config';
+import { speakWinner } from '../announce/voice';
+import { initSounds, playWin } from '../sound/sounds';
 import { Match, Team, pointsToWin, teamTotal } from '../types';
 
 type Status = 'idle' | 'connecting' | 'live' | 'notfound' | 'error';
@@ -18,12 +23,16 @@ export function WatchScreen() {
   const { theme, s } = useTheme();
   const { t } = useI18n();
   const { liveUid, displayName, setDisplayName, adoptGame } = useGame();
-  const { go, pendingWatchCode, clearWatchCode } = useNav();
+  const { go, pendingWatchCode, clearWatchCode, openWatchHistory } = useNav();
+  const { watchWinnerAudio, setWatchWinnerAudio, voice } = usePrefs();
   const c = theme.colors;
 
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [game, setGame] = useState<SharedGame | null>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [requested, setRequested] = useState(false);
   const [denied, setDenied] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
@@ -35,14 +44,25 @@ export function WatchScreen() {
   const subGenRef = useRef(0);
   // Refs mirror state so the snapshot callback never reads stale values.
   const requestedRef = useRef(false);
+  const sawMyRequestRef = useRef(false);
   const autoFollowedRef = useRef(false);
   const liveUidRef = useRef(liveUid);
+  const watchWinnerAudioRef = useRef(watchWinnerAudio);
+  const voiceRef = useRef(voice);
+  const previousWinnerRef = useRef<string | null>(null);
   useEffect(() => {
     liveUidRef.current = liveUid;
   }, [liveUid]);
+  useEffect(() => {
+    watchWinnerAudioRef.current = watchWinnerAudio;
+  }, [watchWinnerAudio]);
+  useEffect(() => {
+    voiceRef.current = voice;
+  }, [voice]);
 
   const markRequested = (v: boolean) => {
     requestedRef.current = v;
+    if (!v) sawMyRequestRef.current = false;
     setRequested(v);
   };
 
@@ -71,6 +91,7 @@ export function WatchScreen() {
     markRequested(false);
     setDenied(false);
     setTimedOut(false);
+    previousWinnerRef.current = null;
   };
 
   const start = (override?: string) => {
@@ -96,6 +117,14 @@ export function WatchScreen() {
           setGame(null);
           return;
         }
+        if (watchWinnerAudioRef.current && g.winnerTeamId && previousWinnerRef.current !== g.winnerTeamId) {
+          const watchedMatch = sharedToMatch(g);
+          const winningTeamName = watchedMatch.teams.find((team) => team.id === g.winnerTeamId)?.name ?? '';
+          initSounds();
+          playWin();
+          if (winningTeamName) speakWinner(winningTeamName, voiceRef.current);
+        }
+        previousWinnerRef.current = g.winnerTeamId ?? null;
         const myUid = liveUidRef.current;
         // Approved to take over → adopt the game and jump into scoring.
         if (myUid && g.controllerId === myUid) {
@@ -107,7 +136,10 @@ export function WatchScreen() {
           return;
         }
         // Detect denial of my pending request.
-        if (requestedRef.current && (!g.pendingRequest || g.pendingRequest.uid !== myUid)) {
+        if (requestedRef.current && myUid && g.pendingRequest?.uid === myUid) {
+          sawMyRequestRef.current = true;
+        }
+        if (requestedRef.current && sawMyRequestRef.current && (!g.pendingRequest || g.pendingRequest.uid !== myUid)) {
           clearReqTimer();
           markRequested(false);
           setDenied(true);
@@ -127,6 +159,29 @@ export function WatchScreen() {
         if (subGenRef.current === myGen) setStatus('error');
       },
     );
+  };
+
+  const openScanner = async () => {
+    setScanError(null);
+    if (!permission?.granted) {
+      const result = await requestPermission();
+      if (!result.granted) {
+        setScanError(t.cameraPermissionBody);
+        return;
+      }
+    }
+    setScannerOpen(true);
+  };
+
+  const onBarcodeScanned = ({ data }: BarcodeScanningResult) => {
+    const scannedCode = parseWatchCode(data);
+    if (!scannedCode) {
+      setScanError(t.invalidQrCode);
+      return;
+    }
+    setScannerOpen(false);
+    setScanError(null);
+    start(scannedCode);
   };
 
   const onRequest = async () => {
@@ -176,7 +231,27 @@ export function WatchScreen() {
 
   return (
     <ScrollView contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }} keyboardShouldPersistTaps="handled">
-      <Header title={t.watchGame} />
+      <Header
+        title={t.watchGame}
+        right={
+          status === 'live' ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(4) }}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t.history}
+                onPress={() => {
+                  if (game) openWatchHistory(sharedToMatch(game));
+                }}
+                hitSlop={8}
+                style={{ padding: s(10) }}
+              >
+                <Feather name="book-open" size={s(24)} color={c.textMuted} />
+              </Pressable>
+              <WatchAudioToggle value={watchWinnerAudio} onChange={setWatchWinnerAudio} compact />
+            </View>
+          ) : undefined
+        }
+      />
 
       {/* Code entry */}
       {status !== 'live' && (
@@ -232,6 +307,18 @@ export function WatchScreen() {
             }}
           />
           <Button label={t.watch} onPress={() => start()} disabled={code.trim().length < 4} fullWidth />
+          <View style={{ height: s(10) }} />
+          <Button label={t.scanQrCode} onPress={openScanner} variant="secondary" fullWidth />
+          {!!scanError && (
+            <Text style={{ color: c.danger, fontSize: s(13), marginTop: s(10), textAlign: 'center' }}>
+              {scanError}
+            </Text>
+          )}
+
+          <WatchAudioToggle
+            value={watchWinnerAudio}
+            onChange={setWatchWinnerAudio}
+          />
 
           {status === 'connecting' && (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: s(16), gap: s(8) }}>
@@ -263,6 +350,48 @@ export function WatchScreen() {
           timedOut={timedOut}
         />
       )}
+
+      <Modal visible={scannerOpen} animationType="slide" onRequestClose={() => setScannerOpen(false)}>
+        <View style={{ flex: 1, backgroundColor: '#000' }}>
+          <CameraView
+            style={{ flex: 1 }}
+            facing="back"
+            barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+            onBarcodeScanned={onBarcodeScanned}
+          />
+          <LinearGradient
+            pointerEvents="box-none"
+            colors={['rgba(0,0,0,0.68)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.74)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, padding: s(22), justifyContent: 'space-between' }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: s(24) }}>
+              <Text style={{ color: '#fff', fontSize: s(20), fontWeight: '900' }}>{t.scanQrCode}</Text>
+              <Pressable onPress={() => setScannerOpen(false)} hitSlop={12} style={{ padding: s(8) }}>
+                <Feather name="x" size={s(26)} color="#fff" />
+              </Pressable>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <View
+                style={{
+                  width: s(238),
+                  height: s(238),
+                  borderRadius: s(22),
+                  borderWidth: 3,
+                  borderColor: c.primary,
+                  backgroundColor: 'rgba(0,0,0,0.08)',
+                }}
+              />
+              <Text style={{ color: '#fff', fontSize: s(15), fontWeight: '800', textAlign: 'center', marginTop: s(18) }}>
+                {t.scanQrHint}
+              </Text>
+            </View>
+            <View style={{ height: s(54) }} />
+          </LinearGradient>
+        </View>
+      </Modal>
+
     </ScrollView>
   );
 }
@@ -309,50 +438,23 @@ function LiveBoard({
           </Text>
         </View>
       ) : (
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: s(8), marginBottom: s(14) }}>
+        <View style={{ display: 'none', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: s(8), marginBottom: 0 }}>
           <View style={{ width: s(10), height: s(10), borderRadius: s(5), backgroundColor: c.danger }} />
           <Text style={{ color: c.danger, fontWeight: '900', fontSize: s(14), letterSpacing: 1 }}>{t.live}</Text>
           <Text style={{ color: c.textMuted, fontSize: s(13) }}>· {t.gameCode} {game.code}</Text>
         </View>
       )}
 
-      {/* Who is scoring + request-to-score */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: s(10),
-          backgroundColor: c.surface,
-          borderRadius: theme.radius + 4,
-          padding: s(14),
-          marginBottom: s(16),
-          borderWidth: 1.5,
-          borderColor: c.border,
-          overflow: 'hidden',
-          shadowColor: '#000',
-          shadowOpacity: 0.34,
-          shadowRadius: s(16),
-          shadowOffset: { width: 0, height: s(8) },
-          elevation: 9,
-        }}
-      >
-        <LinearGradient
-          colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0)', 'rgba(0,0,0,0.22)']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          pointerEvents="none"
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-        />
-        <Text style={{ flex: 1, color: c.text, fontSize: s(14), fontWeight: '700' }}>
-          {t.currentlyScoring.replace('{name}', game.controllerName ?? '')}
+      {!ended && !requested && (
+        <View style={{ marginBottom: s(12) }}>
+          <Button label={t.requestToScore} onPress={onRequest} fullWidth />
+        </View>
+      )}
+      {!ended && requested && (
+        <Text style={{ color: c.textMuted, fontSize: s(12), fontStyle: 'italic', textAlign: 'center', marginBottom: s(12) }}>
+          {t.waitingApproval}
         </Text>
-        {!ended &&
-          (requested ? (
-            <Text style={{ color: c.textMuted, fontSize: s(12), fontStyle: 'italic' }}>{t.waitingApproval}</Text>
-          ) : (
-            <Button label={t.requestToScore} onPress={onRequest} />
-          ))}
-      </View>
+      )}
       {denied && (
         <Text style={{ color: c.danger, fontSize: s(13), textAlign: 'center', marginTop: -s(8), marginBottom: s(14) }}>
           {t.requestDenied}
@@ -363,7 +465,6 @@ function LiveBoard({
           {t.requestTimedOut}
         </Text>
       )}
-
 
       {game.nextCode && finished && (
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: s(8), marginBottom: s(14), backgroundColor: c.surfaceAlt, borderRadius: theme.radius, padding: s(12), borderWidth: 1.5, borderColor: c.border, shadowColor: '#000', shadowOpacity: 0.24, shadowRadius: s(10), shadowOffset: { width: 0, height: s(5) }, elevation: 5, overflow: 'hidden' }}>
@@ -393,6 +494,76 @@ function LiveBoard({
       </View>
     </View>
   );
+}
+
+function WatchAudioToggle({
+  value,
+  onChange,
+  compact,
+}: {
+  value: boolean;
+  onChange: (value: boolean) => void;
+  compact?: boolean;
+}) {
+  const { theme, s } = useTheme();
+  const { t } = useI18n();
+  const c = theme.colors;
+  if (compact) {
+    return (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(6), marginLeft: s(4) }}>
+        <Text style={{ color: c.textMuted, fontSize: s(12), fontWeight: '900' }}>Alert</Text>
+        <Switch
+          value={value}
+          onValueChange={onChange}
+          trackColor={{ false: c.border, true: c.primary }}
+          thumbColor="#fff"
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: s(14),
+        marginBottom: 0,
+        padding: s(12),
+        borderRadius: theme.radius,
+        borderWidth: 1,
+        borderColor: c.border,
+        backgroundColor: c.surfaceAlt,
+      }}
+    >
+      <View style={{ flex: 1, paddingRight: s(10) }}>
+        <Text style={{ color: c.text, fontSize: s(14), fontWeight: '900' }}>{t.watchWinnerAudioTitle}</Text>
+        <Text style={{ color: c.textMuted, fontSize: s(12), marginTop: s(2), lineHeight: s(16) }}>
+          {t.watchWinnerAudioDesc}
+        </Text>
+      </View>
+      <Switch
+        value={value}
+        onValueChange={onChange}
+        trackColor={{ false: c.border, true: c.primary }}
+        thumbColor="#fff"
+      />
+    </View>
+  );
+}
+
+function parseWatchCode(value: string) {
+  const raw = value.trim();
+  const direct = raw.match(/^[A-Za-z0-9]{4,8}$/)?.[0];
+  if (direct) return direct.toUpperCase();
+  try {
+    const url = new URL(raw);
+    const code = url.searchParams.get('code') ?? url.pathname.match(/[A-Za-z0-9]{4,8}/)?.[0] ?? '';
+    return code ? code.toUpperCase() : null;
+  } catch {
+    const match = raw.match(/code=([A-Za-z0-9]{4,8})/i) ?? raw.match(/\/([A-Za-z0-9]{4,8})(?:\?|$)/);
+    return match?.[1]?.toUpperCase() ?? null;
+  }
 }
 
 function ReadOnlyTeam({
@@ -430,6 +601,7 @@ function ReadOnlyTeam({
         backgroundColor: c.surface,
         borderRadius: theme.radius + 4,
         padding: s(18),
+        minHeight: s(236),
         borderWidth: 1.5,
         borderColor: isWinner || leading ? color : c.border,
         overflow: 'hidden',
@@ -503,10 +675,9 @@ function ReadOnlyTeam({
         />
       </View>
 
-      {teamRounds.length > 0 && (
-        <>
-          <View style={{ height: 1, backgroundColor: c.border, marginVertical: s(14), opacity: 0.6 }} />
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: s(8) }}>
+      <View style={{ height: 1, backgroundColor: c.border, marginVertical: s(14), opacity: 0.6 }} />
+      {teamRounds.length > 0 ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: s(8), minHeight: s(38) }}>
             {teamRounds.map(({ r, n }) => (
               <View
                 key={r.id}
@@ -533,9 +704,34 @@ function ReadOnlyTeam({
                 <Text style={{ color: c.text, fontSize: s(15), fontWeight: '800' }}>+{r.points}</Text>
               </View>
             ))}
-          </View>
-        </>
+        </View>
+      ) : (
+        <WaitingForScores />
       )}
     </View>
+  );
+}
+
+function WaitingForScores() {
+  const { theme, s } = useTheme();
+  const scale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scale, { toValue: 1.045, duration: 520, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(scale, { toValue: 1, duration: 560, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [scale]);
+
+  return (
+    <Animated.View style={{ minHeight: s(38), justifyContent: 'center', transform: [{ scale }] }}>
+      <Text style={{ color: theme.colors.textMuted, fontSize: s(13), fontWeight: '800', textAlign: 'center' }}>
+        Waiting for scores...
+      </Text>
+    </Animated.View>
   );
 }

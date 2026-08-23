@@ -31,6 +31,7 @@
       --max: 1180px;
     }
     * { box-sizing: border-box; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
@@ -53,22 +54,29 @@
       background: rgba(10, 11, 10, 0.9);
       backdrop-filter: blur(18px);
     }
-    .nav-inner { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .nav-inner { min-height:72px; position:relative; display:flex; align-items:center; justify-content:space-between; gap:24px; }
     .brand { display: flex; align-items: center; gap: 12px; min-width: 0; font-weight: 900; }
     .brand img { width: 44px; height: 44px; border-radius: 8px; }
     .brand span { white-space: nowrap; }
-    .nav-links { display: flex; align-items: center; gap: 24px; color: var(--muted); font-weight: 700; }
+    .nav-links { position:absolute; left:50%; top:50%; display:flex; align-items:center; gap:20px; color:var(--muted); font-size:.78rem; font-weight:750; transform:translate(-50%,-50%); }
+    .nav-links a { min-height:44px; display:inline-flex; align-items:center; }
     .nav-links a:hover { color: var(--gold-2); }
+    .site-lang-toggle { display:inline-flex; margin-left:auto; padding:3px; border:1px solid var(--line); border-radius:10px; background:rgba(0,0,0,.22); }
+    .site-lang-toggle button { min-width:38px; min-height:34px; border:0; border-radius:7px; color:var(--muted); background:transparent; font:inherit; font-size:.72rem; font-weight:950; cursor:pointer; }
+    .site-lang-toggle button[aria-pressed="true"] { color:#171007; background:var(--gold-2); }
     .button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      min-height: 44px;
-      padding: 0 18px;
+      min-height:44px;
+      padding:8px 18px;
       border-radius: var(--radius);
       border: 1px solid var(--line);
       font-weight: 900;
+      white-space:normal;
+      line-height:1.2;
+      text-align:center;
       color: var(--text);
       background: var(--panel);
     }
@@ -79,39 +87,47 @@
       box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
     }
     .button.secondary { color: var(--text); background: rgba(255, 255, 255, 0.04); }
+    .button.follow { color: #171007; border-color: #e7c469; background: linear-gradient(180deg, var(--gold-2), var(--gold)); box-shadow: 0 12px 28px rgba(0,0,0,.3); }
     .button:hover { transform: translateY(-1px); }
     .hero {
       min-height: calc(100vh - 72px);
       display: grid;
       align-items: center;
-      padding: 46px 0 52px;
+      padding: 42px 0 34px;
       border-bottom: 1px solid rgba(215, 173, 85, 0.16);
     }
-    .hero-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr); gap: 46px; align-items: center; }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 10px;
-      border: 1px solid rgba(215, 173, 85, 0.38);
-      border-radius: 999px;
-      color: var(--gold-2);
-      background: rgba(215, 173, 85, 0.1);
-      font-size: 0.82rem;
-      font-weight: 900;
-    }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
-    h1 { margin: 22px 0 18px; max-width: 660px; font-size: clamp(2.7rem, 7vw, 5.7rem); line-height: 0.96; font-weight: 950; letter-spacing: 0; }
-    .lead { max-width: 570px; margin: 0 0 28px; color: #d8d0c2; font-size: 1.18rem; }
+    .hero-grid { display: grid; grid-template-columns: minmax(320px, 2fr) minmax(560px, 3fr); gap: 24px; align-items: center; }
+    .hero-grid > * { min-width: 0; }
+    h1 { margin: 0 0 16px; max-width: 480px; font-size: clamp(3.25rem, 4.45vw, 4rem); line-height: .98; font-weight: 950; letter-spacing: -.035em; }
+    .lead { max-width: 420px; margin: 0 0 26px; color: #d8d0c2; font-size: 1.05rem; }
     .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-    .trust-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 28px; max-width: 600px; }
-    .trust { border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius); padding: 12px; background: rgba(255, 255, 255, 0.04); color: var(--muted); font-size: 0.9rem; font-weight: 800; }
-    .trust b { display: block; color: var(--text); font-size: 1rem; }
-    .showcase { position: relative; min-height: 620px; display: grid; align-items: center; }
-    .screen-wall { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: center; }
-    .phone-shot { overflow: hidden; border-radius: 28px; border: 1px solid rgba(215, 173, 85, 0.24); background: #050505; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55); }
-    .phone-shot.tall { transform: translateY(42px); }
-    .phone-shot.main { transform: scale(1.04); border-color: rgba(241, 209, 123, 0.55); }
+    .trust-strip { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 14px; margin-top: 4px; }
+    .trust { min-height:68px; display:flex; align-items:center; gap:12px; min-width:0; overflow:hidden; border-radius:12px; padding:12px 16px; background:rgba(255,255,255,.035); color:var(--muted); font-size:.86rem; line-height:1.35; white-space:normal; }
+    .trust > span:last-child { min-width:0; overflow-wrap:anywhere; }
+    .trust-icon { flex: 0 0 36px; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; color: #171007; background: var(--gold); font-weight: 950; }
+    .trust b { color: var(--text); font-size: .98rem; }
+    .trust b::after { content: " — "; color: var(--muted); }
+    .showcase { position: relative; min-height: 610px; }
+    .screen-wall { position: relative; height: 610px; isolation: isolate; border-radius:32px; outline:0 solid transparent; outline-offset:8px; transition:outline-color 380ms ease,background-color 520ms ease; }
+    .screen-wall:focus-visible { outline:3px solid rgba(241,209,123,.5); }
+    .phone-shot { position: absolute; width: 36%; overflow: hidden; pointer-events:none; border-radius: 28px; border: 1px solid rgba(241,209,123,.34); background: #050505; box-shadow: 0 26px 58px rgba(0,0,0,.55); opacity:1; transition:transform 560ms cubic-bezier(.16,1,.3,1),box-shadow 560ms cubic-bezier(.16,1,.3,1),border-color 480ms ease,opacity 480ms ease; transform-origin:50% 72%; will-change:transform; }
+    .phone-shot.setup { left: 2%; top: 76px; z-index: 1; transform: rotate(-6deg); }
+    .phone-shot.home { right: 1%; top: 72px; z-index: 1; transform: rotate(6deg); }
+    .phone-shot.score { left: 32%; top: 12px; z-index: 3; width: 39%; border-color: rgba(241,209,123,.72); box-shadow: 0 34px 76px rgba(0,0,0,.72); }
+    @media (hover: hover) and (pointer: fine) {
+      .screen-wall:is(:hover,:focus-within) .phone-shot.setup { transform:translate(-3px,-7px) rotate(-5.5deg) scale(1.008); opacity:.96; box-shadow:0 32px 68px rgba(0,0,0,.62); }
+      .screen-wall:is(:hover,:focus-within) .phone-shot.home { transform:translate(3px,-7px) rotate(5.5deg) scale(1.008); opacity:.96; box-shadow:0 32px 68px rgba(0,0,0,.62); }
+      .screen-wall:is(:hover,:focus-within) .phone-shot.score { transform:translateY(-9px) scale(1.018); border-color:rgba(241,209,123,.9); box-shadow:0 42px 88px rgba(0,0,0,.78),0 0 30px rgba(215,173,85,.12); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .phone-shot { transition: none; }
+      .screen-wall:is(:hover,:focus-within) .phone-shot.setup { transform:rotate(-6deg); opacity:1; }
+      .screen-wall:is(:hover,:focus-within) .phone-shot.home { transform:rotate(6deg); opacity:1; }
+      .screen-wall:is(:hover,:focus-within) .phone-shot.score { transform:none; }
+      .board-style-icon { transition: none !important; }
+      .board-style-button.cycling .board-style-icon { transform: none; }
+    }
     .section { padding: 80px 0; }
     .section-header { max-width: 680px; margin-bottom: 30px; }
     .section-header.center { text-align: center; margin-left: auto; margin-right: auto; }
@@ -122,6 +138,7 @@
     .icon { width: 38px; height: 38px; display: grid; place-items: center; margin-bottom: 18px; border-radius: var(--radius); color: #1a1003; background: var(--gold); font-weight: 950; }
     .feature h3 { margin: 0 0 8px; font-size: 1.12rem; }
     .feature p { margin: 0; color: var(--muted); }
+    .legal-note { margin:18px 0 0; padding:12px 14px; border-left:3px solid var(--gold); border-radius:8px; color:var(--muted); background:rgba(215,173,85,.07); font-size:.86rem; line-height:1.5; }
     .split { display: grid; grid-template-columns: 0.82fr 1.18fr; gap: 44px; align-items: center; }
     .live-list { display: grid; gap: 12px; margin-top: 24px; }
     .live-step { display: grid; grid-template-columns: 40px 1fr; gap: 14px; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius); background: rgba(255, 255, 255, 0.04); }
@@ -143,27 +160,195 @@
     .foot { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
     .foot-links { display: flex; gap: 18px; flex-wrap: wrap; }
     .foot a:hover { color: var(--gold-2); }
+    dialog {
+      width: min(520px, calc(100% - 28px));
+      padding: 0;
+      border: 1px solid rgba(241, 209, 123, 0.42);
+      border-radius: 14px;
+      color: var(--text);
+      background: #111412;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.75);
+    }
+    dialog::backdrop { background: rgba(0, 0, 0, 0.76); backdrop-filter: blur(6px); }
+    .follow-panel { padding: 28px; }
+    .dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+    .dialog-head h2 { font-size: 1.8rem; }
+    .dialog-head p, .follow-help { color: var(--muted); margin: 8px 0 0; }
+    .close-button { min-width: 44px; min-height: 44px; border: 1px solid var(--line); border-radius: 50%; color: var(--text); background: rgba(255,255,255,.04); font-size: 1.4rem; cursor: pointer; }
+    .code-form { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 22px; }
+    .code-input { min-width: 0; height: 52px; padding: 0 14px; border: 1px solid var(--line); border-radius: var(--radius); color: var(--text); background: #090b09; font: inherit; font-size: 1.25rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+    .code-input:focus, .button:focus-visible, .close-button:focus-visible { outline: 3px solid rgba(241, 209, 123, .52); outline-offset: 3px; }
+    .form-error { min-height: 1.5em; margin: 8px 0 0; color: #ff8173; font-weight: 700; }
+    .live-loading { display: none; align-items: center; justify-content: center; gap: 10px; margin-top: 20px; color: var(--muted); font-weight: 800; }
+    .live-loading.active { display: flex; }
+    .spinner { width: 20px; height: 20px; border: 3px solid rgba(241,209,123,.24); border-top-color: var(--gold-2); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .live-page { --watch-bg:#000; --watch-surface:#101215; --watch-surface-hi:#1a1d21; --watch-primary:#d7a63d; --watch-primary-bright:#e3b757; --watch-danger:#aa463b; --watch-text:#f3ede0; --watch-muted:#9b978e; --watch-border:#33363b; min-height:100vh; padding:24px 0 120px; color:var(--watch-text); background:#000; }
+    .live-page[data-watch-theme="dark"] { --watch-bg:#040506; --watch-surface:#0d1013; --watch-surface-hi:#171b20; --watch-primary:#e4b452; --watch-primary-bright:#f1c46b; --watch-danger:#d34a3f; --watch-text:#f6f1e7; --watch-muted:#a6a19a; --watch-border:#343a42; background-image:url("img/themes/carbon-fiber.svg"); background-position:center; background-repeat:no-repeat; background-size:cover; }
+    .live-page[data-watch-theme="casino"] { --watch-bg:#04130d; --watch-surface:#0b2418; --watch-surface-hi:#123522; --watch-primary:#d6ae54; --watch-primary-bright:#e7c777; --watch-danger:#c9473f; --watch-text:#f5efe1; --watch-muted:#a9b9a8; --watch-border:#2b5a3c; background-image:repeating-linear-gradient(18deg,rgba(30,81,52,.34) 0 2px,transparent 2px 9px),repeating-linear-gradient(-24deg,rgba(46,105,67,.26) 0 2px,transparent 2px 11px),radial-gradient(circle at 50% 42%,rgba(31,122,69,.44),transparent 60%),radial-gradient(circle at 80% 10%,rgba(214,174,84,.18),transparent 55%); }
+    .live-page[data-watch-theme="cubano"] { --watch-bg:#0e1722; --watch-surface:#172230; --watch-surface-hi:#21303f; --watch-primary:#2e69b8; --watch-primary-bright:#6f9cda; --watch-danger:#d2515f; --watch-text:#f2f4f8; --watch-muted:#9fb0c0; --watch-border:#2a3a4a; background-image:url("img/themes/cuban-board.svg"),linear-gradient(160deg,#15273a,#0a121c); background-position:center top,center; background-repeat:no-repeat,no-repeat; background-size:100% auto,cover; }
+    .live-page[data-watch-theme="usa"] { --watch-bg:#0a0f1c; --watch-surface:#141b2c; --watch-surface-hi:#1e2740; --watch-primary:#4a66b5; --watch-primary-bright:#8297dc; --watch-danger:#cb4f5b; --watch-text:#f2f4f8; --watch-muted:#9fb0c0; --watch-border:#2a3450; background-image:url("img/themes/usa-board.svg"),linear-gradient(160deg,#121c33,#070b15); background-position:center top,center; background-repeat:no-repeat,no-repeat; background-size:100% auto,cover; }
+    .live-page[hidden] { display: none; }
+    .watch-shell { width: min(1120px, calc(100% - 28px)); margin: 0 auto; }
+    .watch-topbar { min-height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .back-button { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 12px; border: 0; border-radius: 10px; color: var(--text); background: rgba(255,255,255,.06); font: inherit; font-weight: 900; cursor: pointer; }
+    .watch-brand { display: flex; align-items: center; gap: 9px; color: var(--muted); font-weight: 900; }
+    .watch-brand img { width:56px; height:56px; border-radius:12px; }
+    .watch-actions { display:flex; align-items:center; gap:10px; }
+    .board-style-button { width:52px; height:52px; position:fixed; right:max(18px,env(safe-area-inset-right)); bottom:max(18px,env(safe-area-inset-bottom)); z-index:20; display:grid; place-items:center; padding:0; overflow:hidden; border:1px solid var(--watch-primary); border-radius:50%; color:#16100a; background:linear-gradient(135deg,rgba(255,255,255,.18),var(--watch-surface-hi),var(--watch-surface)); box-shadow:0 8px 14px rgba(0,0,0,.52),0 0 0 4px color-mix(in srgb,var(--watch-bg) 72%,transparent); cursor:pointer; }
+    .board-style-button::before { content:""; position:absolute; inset:5px 9px auto; height:14px; border-radius:12px; background:rgba(255,255,255,.13); }
+    .board-style-icon { width:32px; height:32px; z-index:1; display:grid; place-items:center; border:1px solid #f6d37b; border-radius:50%; background:var(--watch-primary); box-shadow:0 2px 5px color-mix(in srgb,var(--watch-primary) 30%,transparent); font-size:17px; font-weight:950; transition:transform .42s cubic-bezier(.22,.75,.2,1); }
+    .board-style-button.cycling .board-style-icon { transform:rotate(360deg); }
+    .board-style-name { position:fixed; right:max(16px,env(safe-area-inset-right)); bottom:calc(max(18px,env(safe-area-inset-bottom)) + 58px); z-index:20; max-width:130px; padding:4px 8px; border-radius:7px; color:var(--watch-text); background:color-mix(in srgb,var(--watch-surface) 90%,transparent); box-shadow:0 4px 12px rgba(0,0,0,.35); font-size:.7rem; font-weight:900; text-align:center; }
+    .lang-toggle { display:inline-flex; padding:3px; border:1px solid rgba(255,255,255,.1); border-radius:10px; background:rgba(0,0,0,.22); }
+    .lang-toggle button { min-width:38px; min-height:34px; border:0; border-radius:7px; color:var(--muted); background:transparent; font:inherit; font-size:.75rem; font-weight:950; cursor:pointer; }
+    .lang-toggle button[aria-pressed="true"] { color:#171007; background:var(--watch-primary-bright); }
+    .sound-button { min-width:42px; min-height:42px; border:1px solid rgba(255,255,255,.1); border-radius:10px; color:var(--watch-text); background:rgba(0,0,0,.22); font-size:1rem; cursor:pointer; }
+    .live-board { display: none; }
+    .live-board.ready { display: block; }
+    .live-meta { display:flex; align-items:center; justify-content:center; gap:10px; margin:4px 0 20px; color:var(--muted); font-size:1.05rem; font-weight:950; }
+    #live-code { color: var(--watch-primary-bright); font-size: 1.45rem; line-height: 1; letter-spacing: .18em; text-indent: .18em; }
+    .winner-celebration { display:flex; align-items:center; justify-content:center; gap:16px; margin:0 0 20px; padding:17px 20px; border:1px solid color-mix(in srgb,var(--watch-primary) 55%,transparent); border-radius:18px; background:linear-gradient(135deg,color-mix(in srgb,var(--watch-primary) 16%,var(--watch-surface)),var(--watch-surface)); box-shadow:0 18px 40px rgba(0,0,0,.35),0 0 30px color-mix(in srgb,var(--watch-primary) 12%,transparent); text-align:left; }
+    .winner-celebration[hidden] { display:none; }
+    .winner-cup { font-size:3.3rem; filter:drop-shadow(0 8px 10px rgba(0,0,0,.45)); }
+    .winner-kicker { display:block; color:var(--watch-primary-bright); font-size:.78rem; font-weight:950; letter-spacing:.12em; text-transform:uppercase; }
+    .winner-name { display:block; margin-top:2px; color:var(--watch-text); font-size:clamp(1.45rem,3vw,2rem); font-weight:950; }
+    .live-dot { width:11px; height:11px; border-radius:50%; background:var(--red); box-shadow:0 0 0 5px rgba(224,82,67,.12); }
+    .live-dot.ended { background: var(--muted); box-shadow: none; }
+    .score-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 20px; perspective: 1200px; }
+    .team-card { min-height: 306px; position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0,1fr) auto; grid-template-areas: "name score" "players score" "needed score" "history history"; align-items: center; column-gap: 24px; padding: 30px; overflow: hidden; border: 1px solid color-mix(in srgb,var(--watch-primary) 28%,transparent); border-radius: 22px; background: linear-gradient(145deg,var(--watch-surface-hi) 0%,var(--watch-surface) 48%,color-mix(in srgb,var(--watch-bg) 88%,#000) 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.1), inset 0 -18px 34px rgba(0,0,0,.3), 0 26px 54px rgba(0,0,0,.48), 0 4px 0 color-mix(in srgb,var(--watch-bg) 80%,#000); transform: translateZ(0); }
+    .team-card::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at 82% 28%,color-mix(in srgb,var(--watch-primary) 14%,transparent),transparent 32%),linear-gradient(115deg,rgba(255,255,255,.055),transparent 34%); }
+    #team-b-card { border-color:color-mix(in srgb,var(--watch-danger) 32%,transparent); }
+    #team-b-card::before { background:radial-gradient(circle at 82% 28%,color-mix(in srgb,var(--watch-danger) 16%,transparent),transparent 32%),linear-gradient(115deg,rgba(255,255,255,.05),transparent 34%); }
+    .team-card.winner { border-color: rgba(241,209,123,.82); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), inset 0 -18px 34px rgba(0,0,0,.3), 0 28px 60px rgba(0,0,0,.5), 0 0 28px rgba(241,209,123,.13), 0 4px 0 #060706; }
+    .team-name { grid-area: name; color: #fffdf5; font-size: 1.7rem; font-weight: 950; line-height: 1.15; text-shadow: 0 2px 3px rgba(0,0,0,.65); }
+    .team-score { grid-area: score; width: 162px; height: 162px; display: grid; place-items: center; margin: 0; border: 9px solid var(--watch-primary); border-radius: 50%; color:var(--watch-primary-bright); background:radial-gradient(circle at 38% 30%,var(--watch-surface-hi),color-mix(in srgb,var(--watch-bg) 90%,#000) 68%); box-shadow:inset 0 2px 2px rgba(255,255,255,.12),inset 0 -10px 18px rgba(0,0,0,.65),0 0 0 5px rgba(4,5,4,.9),0 0 0 7px color-mix(in srgb,var(--watch-primary) 24%,transparent),0 18px 28px rgba(0,0,0,.52),0 0 30px color-mix(in srgb,var(--watch-primary) 14%,transparent); font-size:4.65rem; line-height:1; font-weight:950; text-shadow:0 3px 4px rgba(0,0,0,.6); }
+    #team-b-score { border-color:var(--watch-danger); color:color-mix(in srgb,var(--watch-danger) 70%,#fff); box-shadow:inset 0 2px 2px rgba(255,255,255,.12),inset 0 -10px 18px rgba(0,0,0,.65),0 0 0 5px rgba(4,5,4,.9),0 0 0 7px color-mix(in srgb,var(--watch-danger) 22%,transparent),0 18px 28px rgba(0,0,0,.52),0 0 30px color-mix(in srgb,var(--watch-danger) 15%,transparent); }
+    .team-needed { grid-area:needed; color:var(--watch-primary-bright); font-size:1.05rem; font-weight:950; }
+    .team-players { grid-area: players; color: #c7c0b3; font-size: 1rem; }
+    .team-history { grid-area: history; min-height: 38px; display: flex; align-items: center; gap: 9px; overflow-x: auto; margin: 22px 0 0; padding: 17px 0 0; border-top: 1px solid rgba(255,255,255,.09); box-shadow: inset 0 1px 0 rgba(0,0,0,.35); list-style: none; scrollbar-width: thin; }
+    .team-history li { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; min-height: 30px; padding: 5px 9px; border-radius: 999px; color: var(--text); background: rgba(215,173,85,.11); font-size: .78rem; font-weight: 900; }
+    .team-history li::before { content:"+"; width:17px; height:17px; display:grid; place-items:center; border-radius:50%; color:#171007; background:var(--watch-primary); font-size:.68rem; }
+    #team-b-rounds li { background:color-mix(in srgb,var(--watch-danger) 14%,transparent); }
+    #team-b-rounds li::before { color:#fff; background:var(--watch-danger); }
+    .team-history .empty-history { color: var(--muted); background: transparent; font-weight: 700; }
+    .team-history .empty-history::before { display: none; }
+    .live-updated { margin:20px 0 0; color:var(--watch-text); text-align:center; font-size:1.05rem; font-weight:900; letter-spacing:.01em; text-shadow:0 2px 3px rgba(0,0,0,.55); }
+    .watch-share { max-width:360px; display:grid; grid-template-columns:1fr; justify-items:center; gap:12px; margin:22px auto 0; padding:18px; border-radius:16px; background:rgba(255,255,255,.035); text-align:center; }
+    .watch-qr { display: grid; place-items: center; padding: 8px; border-radius: 10px; background: #fff; }
+    .watch-qr canvas { display: block; width: 144px; height: 144px; }
+    .watch-share h2 { margin: 0 0 5px; font-size: 1.05rem; }
+    .watch-share p { margin:0; color:var(--muted); font-size:.86rem; line-height:1.45; }
+    .watch-share-code { display:block; margin-top:8px; color:var(--watch-primary-bright); font-weight:950; letter-spacing:.16em; }
+    body.watching { overflow-x: hidden; }
+    .nav-history { min-height:44px; padding:0 8px; border:0; color:var(--muted); background:transparent; font:inherit; font-size:.82rem; font-weight:800; cursor:pointer; }
+    .history-page { min-height:100vh; padding:24px 0 72px; background:#080a09; color:var(--text); }
+    .history-shell { width:min(1060px,calc(100% - 28px)); margin:auto; }
+    .history-head { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:24px; }
+    .history-title-group { flex:1; display:flex; align-items:center; gap:8px; min-width:0; }
+    .history-title { margin:0; font-size:clamp(2rem,5vw,3.4rem); }
+    .history-trophy { width:44px; height:44px; flex:0 0 44px; display:grid; place-items:center; border:0; border-radius:10px; color:var(--gold-2); background:transparent; font-size:1.25rem; cursor:pointer; }
+    .history-trophy:hover,.history-trophy:focus-visible { background:rgba(215,173,85,.12); outline:none; }
+    .history-tabs { display:flex; gap:8px; margin-bottom:18px; }
+    .history-tab { min-height:44px; padding:0 18px; border:1px solid var(--line); border-radius:10px; color:var(--text); background:#121612; font-weight:900; cursor:pointer; }
+    .history-tab[aria-selected="true"] { color:#171007; border-color:var(--gold-2); background:var(--gold); }
+    .history-state { padding:28px; border:1px solid var(--line); border-radius:16px; color:var(--muted); background:#111412; text-align:center; }
+    .history-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .history-match { width:100%; min-height:168px; padding:22px; border:1px solid rgba(215,173,85,.24); border-radius:18px; color:var(--text); background:linear-gradient(145deg,#1d211e 0%,#121512 52%,#090b09 100%); text-align:left; cursor:pointer; box-shadow:inset 0 1px 0 rgba(255,255,255,.09),inset 0 -16px 28px rgba(0,0,0,.25),0 18px 38px rgba(0,0,0,.38),0 3px 0 #050605; }
+    .history-match:hover,.history-match:focus-visible { border-color:rgba(215,173,85,.65); transform:translateY(-2px); }
+    .history-match-meta,.history-scoreline { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .history-match-meta { color:var(--muted); font-size:.82rem; }
+    .history-scoreline { margin:18px 0 12px; font-size:1.1rem; font-weight:900; }
+    .history-scoreline strong { display:inline-grid; min-width:68px; min-height:58px; place-items:center; margin-left:8px; padding:4px 12px; border:1px solid rgba(215,173,85,.42); border-radius:14px; color:var(--gold-2); background:linear-gradient(145deg,#20231f,#090b09); font-size:2.25rem; text-shadow:0 2px 4px #000; box-shadow:inset 0 2px 8px rgba(0,0,0,.7),0 6px 14px rgba(0,0,0,.3); }
+    .history-scoreline strong.history-score-winner { color:#ffd86c; border-color:rgba(255,216,108,.8); }
+    .history-scoreline strong.history-score-loser { color:#ed665a; border-color:rgba(237,102,90,.75); }
+    .history-scoreline strong.history-score-neutral { color:var(--text); border-color:rgba(255,255,255,.2); }
+    .history-team-stats { margin:0 0 18px; padding:16px 18px; border:1px solid rgba(215,173,85,.28); border-radius:16px; background:linear-gradient(145deg,#1b1f1c,#090b09); box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 14px 30px rgba(0,0,0,.32); }
+    .history-team-stats[hidden] { display:none; }
+    .history-team-stats-heading { margin:0 0 10px; color:var(--muted); font-size:.78rem; font-weight:950; letter-spacing:.08em; text-transform:uppercase; }
+    .history-team-stat-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto auto; align-items:center; gap:10px; padding:10px 0; border-top:1px solid rgba(255,255,255,.08); }
+    .history-team-stat-row:first-of-type { border-top:0; }
+    .history-team-stat-name { overflow:hidden; color:var(--text); font-weight:900; text-overflow:ellipsis; white-space:nowrap; }
+    .history-team-stat-metric { color:var(--muted); font-size:.82rem; font-weight:800; white-space:nowrap; }
+    .history-detail { margin-top:18px; padding:26px; border:1px solid rgba(215,173,85,.38); border-radius:18px; background:linear-gradient(145deg,#181c19,#0b0d0c); box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 18px 42px rgba(0,0,0,.4); }
+    .history-detail[hidden],.history-view[hidden] { display:none; }
+    .detail-rounds { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:16px; }
+    .detail-rounds div { padding:13px 15px; border:1px solid rgba(255,255,255,.07); border-radius:12px; background:linear-gradient(145deg,#171a18,#080a09); color:var(--muted); box-shadow:inset 0 1px 5px rgba(0,0,0,.65); }
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+    .stat-card { padding:20px; border:1px solid rgba(215,173,85,.22); border-radius:16px; background:linear-gradient(145deg,#1b1f1c,#0b0e0c); box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -12px 24px rgba(0,0,0,.24),0 14px 30px rgba(0,0,0,.32); }
+    .stat-card h3 { margin:0 0 8px; }
+    .stat-card strong { color:var(--gold-2); font-size:1.5rem; }
+    .history-section-label { margin:26px 0 10px; color:var(--muted); font-size:.8rem; font-weight:950; letter-spacing:.1em; text-transform:uppercase; }
+    .history-leaderboard { overflow:hidden; border:1px solid rgba(215,173,85,.28); border-radius:16px; background:linear-gradient(145deg,#1b1f1c,#090b09); box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 14px 30px rgba(0,0,0,.32); }
+    .history-leader { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.08); }
+    .history-leader:last-child { border-bottom:0; }
+    .history-rank { width:30px; height:30px; display:grid; place-items:center; border:1px solid var(--watch-primary); border-radius:50%; color:#171007; background:var(--gold-2); font-weight:950; box-shadow:0 4px 9px rgba(0,0,0,.35); }
+    .history-leader-name { overflow:hidden; color:var(--text); font-weight:900; text-overflow:ellipsis; white-space:nowrap; }
+    .history-leader-meta { display:block; margin-top:3px; color:var(--muted); font-size:.82rem; font-weight:700; }
+    .history-rivalry { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:10px; padding:15px; border:1px solid rgba(255,255,255,.09); border-radius:14px; background:linear-gradient(145deg,#161a17,#090b09); }
+    .history-rivalry span:last-child { text-align:right; }
+    .history-rivalry-score { color:var(--gold-2); font-size:1.15rem; font-weight:950; }
+    .history-key { word-break:break-all; color:var(--muted); font-size:.78rem; }
+    @media (max-width: 760px) {
+      .history-grid,.detail-rounds { grid-template-columns:1fr; }
+      .watch-brand img { width:52px; height:52px; }
+      .score-grid { grid-template-columns: 1fr; }
+      .team-card { min-height: 230px; column-gap: 14px; padding: 22px 18px; border-radius: 18px; }
+      .team-name { font-size: 1.4rem; }
+      .team-score { width: 126px; height: 126px; border-width: 7px; font-size: 3.45rem; }
+      .team-needed { font-size: .95rem; }
+      .team-players { font-size: .9rem; }
+      .team-history { margin-top: 17px; padding-top: 14px; }
+      .watch-qr canvas { width: 132px; height: 132px; }
+      .watch-topbar { flex-wrap:wrap; }
+      .watch-actions { order:3; width:100%; justify-content:space-between; }
+      .board-style-name { display:none; }
+      .winner-celebration { justify-content:flex-start; padding:14px 16px; }
+      .winner-cup { font-size:2.7rem; }
+    }
     @media (max-width: 980px) {
       .hero-grid, .split { grid-template-columns: 1fr; }
-      .showcase { min-height: auto; }
+      .hero-grid { gap: 18px; }
+      .showcase { min-height: 540px; }
+      .screen-wall { height: 540px; }
+      .trust-strip { grid-column: auto; grid-template-columns: 1fr; }
       .feature-grid, .themes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .nav-links { display: none; }
     }
     @media (max-width: 640px) {
-      .wrap { width: min(100% - 28px, var(--max)); }
-      .hero { padding-top: 32px; }
-      .screen-wall { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .phone-shot.tall, .phone-shot.main { transform: none; }
-      .feature-grid, .themes, .trust-strip, .gallery { grid-template-columns: 1fr; }
+      .wrap { width: min(calc(100% - 28px), var(--max)); }
+      .hero { padding: 34px 0 28px; }
+      .nav-inner { gap: 10px; }
+      .nav-inner > .button { min-height: 40px; padding: 0 11px; font-size: .78rem; }
+      #site-header [data-follow-open] { display:none; }
+      .brand { gap: 9px; font-size: .9rem; }
+      .brand img { width: 40px; height: 40px; }
+      h1 { max-width: 340px; font-size: clamp(2.25rem, 10vw, 2.625rem); line-height: 1; }
+      .lead { margin-bottom: 20px; }
+      .cta-row { display: grid; grid-template-columns: 1fr; max-width: 260px; }
+      .cta-row .button { width: 100%; }
+      .trust-strip { gap: 8px; margin-top: 8px; }
+      .trust { min-height: 54px; padding: 9px 11px; white-space: normal; }
+      .trust-icon { flex-basis: 32px; width: 32px; height: 32px; }
+      .showcase { min-height: 430px; }
+      .screen-wall { height: 430px; }
+      .phone-shot { width: 42%; border-radius: 20px; }
+      .phone-shot.setup { left: 0; top: 62px; }
+      .phone-shot.home { right: 0; top: 60px; }
+      .phone-shot.score { left: 29%; top: 10px; width: 44%; }
+      .feature-grid, .themes, .gallery { grid-template-columns: 1fr; }
       .privacy-band { display: block; }
       .privacy-band .button { margin-top: 16px; width: 100%; }
       .brand span { white-space: normal; }
+      .code-form { grid-template-columns: 1fr; }
+      .showcase { min-height: auto; }
+      .live-page { padding-top: 10px; }
     }
   </style>
 </head>
 <body>
-  <header class="nav">
+  <header class="nav" id="site-header">
     <div class="wrap nav-inner">
       <a class="brand" href="/">
         <img src="img/icon.png?v=social-club" alt="" />
@@ -174,33 +359,34 @@
         <a href="#live">Live sharing</a>
         <a href="#screens">Screens</a>
         <a href="/privacy/">Privacy</a>
+        <a href="/legal/" data-site-key="legal">Legal</a>
       </nav>
-      <a class="button primary" id="store-cta" href="#download">Get the app</a>
+      <div class="site-lang-toggle" role="group" aria-label="Website language"><button type="button" data-site-lang="en" aria-pressed="true">EN</button><button type="button" data-site-lang="es" aria-pressed="false">ES</button></div>
+      <button class="button follow" type="button" data-follow-open>Follow a game</button>
     </div>
   </header>
-  <main>
+  <main id="marketing-page">
     <section class="hero">
       <div class="wrap hero-grid">
         <div>
-          <span class="badge"><span class="dot"></span> Built for domino nights</span>
-          <h1>Score the match. Keep the club alive.</h1>
-          <p class="lead">Domino Social Club gives your table a clean scoreboard, live score sharing, match history, and four board styles. No sign-in. No ads. Just score your game.</p>
-          <div class="cta-row" id="download">
-            <a class="button primary" data-store="android" href="https://play.google.com/store/apps/details?id=com.yht.dominoparty" target="_blank" rel="noopener">Google Play</a>
-            <a class="button secondary" data-store="ios" href="https://apps.apple.com/app/id6793746031" target="_blank" rel="noopener">App Store</a>
-          </div>
-          <div class="trust-strip" aria-label="App highlights">
-            <div class="trust"><b>2 teams</b>Fast local scoring</div>
-            <div class="trust"><b>Live code</b>QR score following</div>
-            <div class="trust"><b>Private</b>No account or ads</div>
+          <h1>Score together. Follow live.</h1>
+          <p class="lead">Score every point. Let friends watch in real time.</p>
+	          <div class="cta-row" id="download">
+	            <button class="button follow" type="button" data-follow-open>Follow a game</button>
+	            <a class="button secondary" id="store-cta" href="https://play.google.com/store/apps/details?id=com.yht.dominoparty" target="_blank" rel="noopener">Get the app</a>
           </div>
         </div>
         <div class="showcase" aria-label="Domino Social Club app screenshots">
-          <div class="screen-wall">
-            <img class="phone-shot tall" src="img/screens/new-game.jpg" alt="Set up a Domino Social Club match" />
-            <img class="phone-shot main" src="img/screens/home.jpg" alt="Domino Social Club scoreboard home" />
-            <img class="phone-shot tall" src="img/screens/score-board.jpg" alt="Live dominoes score board" />
+          <div class="screen-wall" tabindex="0" aria-label="Domino Social Club app screen preview">
+            <img class="phone-shot setup" src="img/screens/new-game.jpg" alt="Set up a Domino Social Club match" />
+            <img class="phone-shot home" src="img/screens/home.jpg" alt="Domino Social Club home" />
+            <img class="phone-shot score" src="img/screens/score-board.jpg" alt="Active live dominoes scoreboard" />
           </div>
+        </div>
+        <div class="trust-strip" aria-label="App highlights">
+          <div class="trust"><span class="trust-icon">2</span><span><b>Two teams</b>Fast local scoring</span></div>
+          <div class="trust"><span class="trust-icon">●</span><span><b>Live sharing</b>Watch with a game code</span></div>
+          <div class="trust"><span class="trust-icon">✓</span><span><b>Private by default</b>No account or ads</span></div>
         </div>
       </div>
     </section>
@@ -216,6 +402,7 @@
           <article class="feature"><div class="icon">W</div><h3>Track wins</h3><p>Keep match history and remember the rivalries that keep coming back.</p></article>
           <article class="feature"><div class="icon">ES</div><h3>English and Spanish</h3><p>Switch language and table style from settings whenever you want.</p></article>
         </div>
+        <p class="legal-note" data-site-key="verifyNotice">Score and history tools are for convenience. Independently verify official scores, standings, and tournament records.</p>
       </div>
     </section>
     <section class="section" id="live">
@@ -270,11 +457,12 @@
       </div>
     </section>
   </main>
-  <footer>
+  <footer id="site-footer">
     <div class="wrap foot">
       <div class="brand"><img src="img/icon.png?v=social-club" alt="" /><span>Domino Social Club</span></div>
-      <div class="foot-links">
+	      <div class="foot-links">
         <a href="/privacy/">Privacy</a>
+        <a href="/legal/" data-site-key="legal">Legal</a>
         <a href="mailto:Yunierht@yahoo.com">Contact</a>
         <a href="https://play.google.com/store/apps/details?id=com.yht.dominoparty" target="_blank" rel="noopener">Google Play</a>
         <a href="https://apps.apple.com/app/id6793746031" target="_blank" rel="noopener">App Store</a>
@@ -282,32 +470,584 @@
       <div>Copyright 2026 YHT</div>
     </div>
   </footer>
+  <main class="live-page" id="live-page" hidden>
+    <div class="watch-shell">
+      <div class="watch-topbar">
+        <button class="back-button" type="button" id="watch-back" aria-label="Back to Domino Social Club home">← <span id="watch-back-text">Back</span></button>
+        <div class="watch-actions">
+          <button class="sound-button" type="button" id="watch-history" aria-label="Open match history">⌁ <span id="watch-history-text">History</span></button>
+          <button class="board-style-button" type="button" id="board-style-button" aria-label="Change appearance. Current: Boxed Dots"><span class="board-style-icon" aria-hidden="true">↻</span></button><span class="board-style-name" id="board-style-label" aria-live="polite">Boxed Dots</span>
+          <div class="lang-toggle" role="group" aria-label="Board language"><button type="button" data-watch-lang="en" aria-pressed="true">EN</button><button type="button" data-watch-lang="es" aria-pressed="false">ES</button></div>
+          <button class="sound-button" type="button" id="sound-toggle" aria-pressed="false" aria-label="Enable winner sound">🔇</button>
+        </div>
+        <div class="watch-brand"><img src="img/icon.png?v=social-club" alt="" /><span>Domino Social Club</span></div>
+      </div>
+      <div class="live-board" id="live-board" aria-live="polite">
+        <div class="live-meta"><span class="live-dot" id="live-dot"></span><span id="live-status">LIVE</span><span aria-hidden="true">·</span><span id="live-code"></span></div>
+        <div class="winner-celebration" id="winner-celebration" role="status" hidden><span class="winner-cup" aria-hidden="true">🏆</span><span><span class="winner-kicker" id="winner-kicker">Winner</span><span class="winner-name" id="winner-name"></span></span></div>
+        <div class="score-grid">
+          <section class="team-card" id="team-a-card"><div class="team-name" id="team-a-name"></div><div class="team-score" id="team-a-score">0</div><div class="team-needed" id="team-a-needed"></div><div class="team-players" id="team-a-players"></div><ol class="team-history" id="team-a-rounds" aria-label="Team A scoring rounds"></ol></section>
+          <section class="team-card" id="team-b-card"><div class="team-name" id="team-b-name"></div><div class="team-score" id="team-b-score">0</div><div class="team-needed" id="team-b-needed"></div><div class="team-players" id="team-b-players"></div><ol class="team-history" id="team-b-rounds" aria-label="Team B scoring rounds"></ol></section>
+        </div>
+        <section class="watch-share" aria-labelledby="watch-share-title">
+          <div class="watch-qr"><canvas id="watch-qr" width="176" height="176" role="img" aria-label="QR code to follow this game on the Domino Social Club website"></canvas></div>
+          <div><h2 id="watch-share-title">Share this live game</h2><p id="watch-share-copy">Scan to follow this scoreboard on another phone.</p></div>
+        </section>
+        <p class="live-updated" id="live-updated"></p>
+      </div>
+    </div>
+	  </main>
+	  <main class="history-page" id="history-page" hidden>
+	    <div class="history-shell">
+	      <div class="history-head">
+	        <button class="back-button" type="button" id="history-back">← <span id="history-back-text">Back</span></button>
+        <div class="history-title-group"><h1 class="history-title" id="history-title">History</h1><button class="history-trophy" type="button" id="history-stats-toggle" aria-pressed="true" aria-label="Hide history statistics">🏆</button></div>
+	        <div class="lang-toggle" role="group" aria-label="History language"><button type="button" data-history-lang="en" aria-pressed="true">EN</button><button type="button" data-history-lang="es" aria-pressed="false">ES</button></div>
+	      </div>
+      <div class="history-tabs" role="tablist"><button class="history-tab" id="history-tab" role="tab" aria-selected="true">Matches</button><button class="history-tab" id="stats-tab" role="tab" aria-selected="false">Statistics</button></div>
+      <p class="history-key" id="history-access-label"></p>
+      <section class="history-team-stats" id="history-team-stats" aria-live="polite"></section>
+	      <div class="history-state" id="history-loading">Loading history…</div>
+	      <div class="history-view" id="history-list-view" hidden><div class="history-grid" id="history-list"></div><section class="history-detail" id="history-detail" hidden></section></div>
+	      <div class="history-view" id="history-stats-view" hidden><div class="stats-grid" id="history-stats"></div></div>
+	      <p class="legal-note" id="history-verify-note">History and statistics are provided for convenience. Independently verify official scores, standings, and tournament records.</p>
+	    </div>
+	  </main>
+	  <dialog id="follow-dialog" aria-labelledby="follow-title" aria-describedby="follow-description">
+    <div class="follow-panel">
+      <div class="dialog-head">
+        <div>
+          <h2 id="follow-title">Follow a live game</h2>
+          <p id="follow-description">Enter the live code shown on the scorer's phone to watch the scoreboard update here.</p>
+        </div>
+        <button class="close-button" type="button" id="follow-close" aria-label="Close">&times;</button>
+      </div>
+      <form class="code-form" id="follow-form" novalidate>
+        <label class="sr-only" id="follow-code-label" for="follow-code">Live game code</label>
+        <input class="code-input" id="follow-code" name="code" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="6" placeholder="ABCD" aria-describedby="follow-error" />
+        <button class="button primary" id="watch-submit" type="submit">Watch live</button>
+      </form>
+      <p class="form-error" id="follow-error" role="alert"></p>
+      <div class="live-loading" id="live-loading" role="status"><span class="spinner" aria-hidden="true"></span><span id="live-loading-text">Connecting to the game…</span></div>
+    </div>
+	  </dialog>
+	  <dialog id="history-dialog" aria-labelledby="history-dialog-title">
+	    <div class="follow-panel">
+	      <div class="dialog-head"><div><h2 id="history-dialog-title">Open shared history</h2><p id="history-dialog-copy">Paste the private history key or link shared by the organizer.</p></div><button class="close-button" type="button" id="history-close" aria-label="Close">&times;</button></div>
+	      <form class="code-form" id="history-form" novalidate><label class="sr-only" for="history-key">Private history key</label><input class="code-input" id="history-key" autocomplete="off" maxlength="120" placeholder="History key or link" /><button class="button primary" id="history-submit" type="submit">Open history</button></form>
+	      <p class="form-error" id="history-error" role="alert"></p>
+	    </div>
+	  </dialog>
+  <audio id="winner-sound" src="/sounds/win.wav" preload="auto"></audio>
+  <script src="/live.js" defer></script>
   <script>
     (function () {
       var ua = navigator.userAgent || "";
       var isIPadOS = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
       var platform = /android/i.test(ua) ? "android" : /iPad|iPhone|iPod/i.test(ua) || isIPadOS ? "ios" : "";
-      var storeUrl = platform === "ios"
-        ? "https://apps.apple.com/app/id6793746031"
-        : platform === "android"
-          ? "https://play.google.com/store/apps/details?id=com.yht.dominoparty"
-          : "#download";
-      var storeLabel = platform === "ios" ? "Download on the App Store" : platform === "android" ? "Get it on Google Play" : "Get the app";
-      var cta = document.getElementById("store-cta");
-      cta.href = storeUrl;
-      cta.textContent = storeLabel;
+      var storeCta = document.getElementById("store-cta");
+      if (platform === "ios") storeCta.href = "https://apps.apple.com/app/id6793746031";
       if (platform) {
-        cta.target = "_blank";
-        cta.rel = "noopener";
         document.querySelectorAll("[data-store]").forEach(function (link) {
           var preferred = link.getAttribute("data-store") === platform;
           link.classList.toggle("primary", preferred);
           link.classList.toggle("secondary", !preferred);
         });
-        // Route based on the recipient's device. If navigation is blocked or
-        // fails, the fully rendered page remains available with both buttons.
-        window.location.replace(storeUrl);
       }
+
+      var dialog = document.getElementById("follow-dialog");
+      var codeInput = document.getElementById("follow-code");
+      var form = document.getElementById("follow-form");
+      var error = document.getElementById("follow-error");
+      var board = document.getElementById("live-board");
+      var loading = document.getElementById("live-loading");
+      var livePage = document.getElementById("live-page");
+      var siteHeader = document.getElementById("site-header");
+      var marketingPage = document.getElementById("marketing-page");
+      var siteFooter = document.getElementById("site-footer");
+      var historyPage = document.getElementById("history-page");
+      var historyDialog = document.getElementById("history-dialog");
+      var historyKeyInput = document.getElementById("history-key");
+      var historyRecords = [];
+      var activeHistorySpace = "";
+      var stopHistorySubscription = null;
+      var historyReturnToWatch = false;
+      var historyStatsVisible = true;
+      var localHistoryFixtureId = "LOCALHISTORYFIXTURE01";
+      var activeCode = "";
+      var currentGame = null;
+      var soundEnabled = false;
+      var playedWinners = {};
+      var winnerAudio = document.getElementById("winner-sound");
+      var watchLang = localStorage.getItem("domino-watch-lang") === "es" ? "es" : "en";
+      var themeOrder = ["carbon", "dark", "casino", "cubano", "usa"];
+      var themeNames = { carbon: "Boxed Dots", dark: "Carbon Fiber", casino: "Casino", cubano: "Cuban Board", usa: "USA Board" };
+      var themeNamesEs = { carbon: "Puntos en cuadros", dark: "Fibra de carbono", casino: "Casino", cubano: "Mesa Cubana", usa: "Mesa USA" };
+      function themeLabel(name) { return (watchLang === "es" ? themeNamesEs : themeNames)[name]; }
+      var boardStrings = {
+        en: {
+          back:"Back", backLabel:"Back to Domino Social Club home", boardStyle:"Board style", boardDesc:"Choose how this scoreboard looks on this device.", close:"Close",
+          live:"LIVE", final:"FINAL", ended:"BROADCAST ENDED", lost:"CONNECTION LOST", winner:"Winner", teamA:"Team A", teamB:"Team B", finalScore:"Final score", toWin:"to win", noRounds:"No scoring rounds yet", points:"points",
+          shareTitle:"Share this live game", shareCopy:"Scan to open this game in the Domino Social Club app.", target:"Target", updates:"Updates automatically", qrLabel:"QR code to open live game {code} in the Domino Social Club app",
+          followTitle:"Follow a live game", followDesc:"Enter the live code shown on the scorer's phone to watch the scoreboard update here.", liveCode:"Live game code", watchLive:"Watch live", connecting:"Connecting to the game…",
+          invalid:"Enter the 4–6 character code from the scorer's phone.", notFound:"No shared game was found with that code. Check the code and try again.", loadError:"The live game could not be loaded. Check your connection and try again.",
+          soundOn:"Mute winner sound", soundOff:"Enable winner sound", history:"History", historyForGame:"Match history", historyUnavailable:"This live game does not include a shared-history link. Ask the organizer for their private history link or key.", boxDesc:"Graphite dots and gold trim", carbonDesc:"Sport carbon weave", cueDesc:"Cuban-inspired board", usaDesc:"Stars and stripes board"
+        },
+        es: {
+          back:"Volver", backLabel:"Volver al inicio de Domino Social Club", boardStyle:"Estilo de mesa", boardDesc:"Elige cómo se ve este marcador en este dispositivo.", close:"Cerrar",
+          live:"EN VIVO", final:"FINAL", ended:"TRANSMISIÓN FINALIZADA", lost:"CONEXIÓN PERDIDA", winner:"Ganador", teamA:"Equipo A", teamB:"Equipo B", finalScore:"Puntuación final", toWin:"para ganar", noRounds:"Aún no hay rondas con puntos", points:"puntos",
+          shareTitle:"Comparte esta partida", shareCopy:"Escanea para abrir esta partida en la app Domino Social Club.", target:"Meta", updates:"Se actualiza automáticamente", qrLabel:"Código QR para abrir la partida en vivo {code} en la app Domino Social Club",
+          followTitle:"Sigue una partida en vivo", followDesc:"Ingresa el código que aparece en el teléfono de quien anota para ver el marcador aquí.", liveCode:"Código de partida", watchLive:"Ver en vivo", connecting:"Conectando con la partida…",
+          invalid:"Ingresa el código de 4 a 6 caracteres del teléfono de quien anota.", notFound:"No se encontró una partida compartida con ese código. Revísalo e inténtalo de nuevo.", loadError:"No se pudo cargar la partida en vivo. Revisa tu conexión e inténtalo de nuevo.",
+          soundOn:"Silenciar sonido de victoria", soundOff:"Activar sonido de victoria", history:"Historial", historyForGame:"Historial de la partida", historyUnavailable:"Esta partida en vivo no incluye un enlace de historial compartido. Pide al organizador su enlace privado o clave de historial.", boxDesc:"Puntos grafito y borde dorado", carbonDesc:"Trama deportiva de carbono", cueDesc:"Mesa inspirada en Cuba", usaDesc:"Mesa de barras y estrellas"
+        }
+      };
+      function S() { return boardStrings[watchLang]; }
+      function updateSoundButton() {
+        var button = document.getElementById("sound-toggle");
+        button.textContent = soundEnabled ? "🔊" : "🔇";
+        button.setAttribute("aria-pressed", String(soundEnabled));
+        button.setAttribute("aria-label", soundEnabled ? S().soundOn : S().soundOff);
+      }
+      function armWinnerSound() {
+        soundEnabled = true;
+        updateSoundButton();
+        winnerAudio.volume = 0;
+        var attempt = winnerAudio.play();
+        if (!attempt) return Promise.resolve();
+        return attempt.then(function () { winnerAudio.pause(); winnerAudio.currentTime = 0; winnerAudio.volume = 1; }).catch(function () { winnerAudio.volume = 1; });
+      }
+      function playWinnerOnce(game, code) {
+        if (!soundEnabled || !game.winnerTeamId) return;
+        var key = code + ":" + game.winnerTeamId + ":" + (game.finishedAt || "final");
+        if (playedWinners[key]) return;
+        playedWinners[key] = true;
+        var winningTeam = (game.teams || []).find(function (team) { return team.id === game.winnerTeamId; });
+        winnerAudio.currentTime = 0;
+        winnerAudio.volume = 1;
+        var attempt = winnerAudio.play();
+        if (attempt) attempt.catch(function () {});
+        if (winningTeam && winningTeam.name && "speechSynthesis" in window && "SpeechSynthesisUtterance" in window) {
+          try {
+            window.speechSynthesis.cancel();
+            var message = watchLang === "es" ? winningTeam.name + " ganó!" : winningTeam.name + " wins!";
+            var utterance = new SpeechSynthesisUtterance(message);
+            utterance.pitch = 1;
+            utterance.rate = 0.98;
+            utterance.lang = watchLang === "es" ? "es-US" : "en-US";
+            window.speechSynthesis.speak(utterance);
+          } catch (_) {}
+        }
+      }
+      function setWatchTheme(name, persist) {
+        if (!themeNames[name]) name = "carbon";
+        livePage.setAttribute("data-watch-theme", name);
+        document.getElementById("board-style-label").textContent = themeLabel(name);
+        document.getElementById("board-style-button").setAttribute("aria-label", S().boardStyle + ". " + themeLabel(name));
+        if (persist) localStorage.setItem("domino-watch-theme", name);
+      }
+      function cycleWatchTheme() {
+        var current = livePage.getAttribute("data-watch-theme") || "carbon";
+        var next = themeOrder[(themeOrder.indexOf(current) + 1) % themeOrder.length];
+        var button = document.getElementById("board-style-button");
+        button.classList.remove("cycling");
+        void button.offsetWidth;
+        button.classList.add("cycling");
+        setWatchTheme(next, true);
+        window.setTimeout(function () { button.classList.remove("cycling"); }, 440);
+      }
+      function applyWatchLanguage(persist) {
+        var s = S();
+        text("watch-back-text", s.back);
+        document.getElementById("watch-back").setAttribute("aria-label", s.backLabel);
+        var currentTheme = livePage.getAttribute("data-watch-theme") || "carbon";
+        text("board-style-label", themeLabel(currentTheme));
+        document.getElementById("board-style-button").setAttribute("aria-label", s.boardStyle + ". " + themeLabel(currentTheme));
+        text("follow-title", s.followTitle); text("follow-description", s.followDesc); text("follow-code-label", s.liveCode); text("watch-submit", s.watchLive); text("live-loading-text", s.connecting);
+        text("watch-share-title", s.shareTitle); text("watch-share-copy", s.shareCopy); text("winner-kicker", s.winner);
+        text("watch-history-text", s.history);
+        document.getElementById("watch-history").setAttribute("aria-label", s.historyForGame);
+        document.querySelectorAll(".close-button").forEach(function (button) { button.setAttribute("aria-label", s.close); });
+        document.querySelectorAll("[data-watch-lang]").forEach(function (button) { button.setAttribute("aria-pressed", String(button.getAttribute("data-watch-lang") === watchLang)); });
+        updateSoundButton();
+        if (persist) localStorage.setItem("domino-watch-lang", watchLang);
+        if (currentGame) renderGame(currentGame, activeCode);
+      }
+
+      function showWatchPage(code) {
+        var wasHidden = livePage.hidden;
+        if (dialog.open) dialog.close();
+        siteHeader.hidden = true;
+        marketingPage.hidden = true;
+        siteFooter.hidden = true;
+        livePage.hidden = false;
+        document.body.classList.add("watching");
+        if (wasHidden) window.scrollTo(0, 0);
+        if (wasHidden && !location.search.includes("previewScore=1")) history.pushState({ watching: true }, "", "#watch-" + code);
+      }
+      function showMarketingPage() {
+        window.stopDominoGameSubscription && window.stopDominoGameSubscription();
+        board.classList.remove("ready");
+        livePage.hidden = true;
+        historyPage.hidden = true;
+        siteHeader.hidden = false;
+        marketingPage.hidden = false;
+        siteFooter.hidden = false;
+        document.body.classList.remove("watching");
+        window.scrollTo(0, 0);
+      }
+
+      var historyStrings = {
+        en:{back:"Back",title:"History",matches:"Matches",stats:"Statistics",loading:"Loading history…",empty:"No completed cloud matches yet.",winner:"Winner",target:"Target",rounds:"rounds",players:"Players",played:"played",wins:"Wins",losses:"Losses",pollonas:"Pollonas",points:"points",teamA:"Team A",teamB:"Team B",hideStats:"Hide history statistics",showStats:"Show history statistics",leaderboard:"Leaderboard",rivalries:"Rivalries",clubHighlights:"Club highlights",mostWins:"Most wins",mostPoints:"Most points",topRivalry:"Top rivalry",access:"Private shared history",openTitle:"Open shared history",openCopy:"Paste the private history key or link shared by the organizer.",key:"Private history key",open:"Open history",invalid:"Enter a valid private history key or link.",error:"This history could not be loaded. Check the private link and your connection."},
+        es:{back:"Volver",title:"Historial",matches:"Partidas",stats:"Estadísticas",loading:"Cargando historial…",empty:"Aún no hay partidas terminadas en la nube.",winner:"Ganador",target:"Meta",rounds:"rondas",players:"Jugadores",played:"jugadas",wins:"Victorias",losses:"Derrotas",pollonas:"Pollonas",points:"puntos",teamA:"Equipo A",teamB:"Equipo B",hideStats:"Ocultar estadísticas del historial",showStats:"Mostrar estadísticas del historial",leaderboard:"Clasificación",rivalries:"Rivalidades",clubHighlights:"Momentos del club",mostWins:"Más victorias",mostPoints:"Más puntos",topRivalry:"Rivalidad principal",access:"Historial privado compartido",openTitle:"Abrir historial compartido",openCopy:"Pega la clave privada o el enlace compartido por el organizador.",key:"Clave privada del historial",open:"Abrir historial",invalid:"Ingresa una clave privada o enlace válido.",error:"No se pudo cargar este historial. Revisa el enlace privado y tu conexión."}
+      };
+      function HS(){ return historyStrings[watchLang]; }
+      function esc(value){ return String(value == null ? "" : value).replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch];}); }
+      function recordTotals(record){
+        if (Array.isArray(record.totals) && record.totals.length === 2) return record.totals.map(Number);
+        return (record.teams || []).slice(0,2).map(function(team){return (record.rounds || []).reduce(function(sum,round){return sum+(round.winnerTeamId===team.id?Number(round.points||0):0);},0);});
+      }
+      function historyTeamName(team,index,s){ return String(team&&team.name||"").trim() || (index===0?s.teamA:s.teamB); }
+      function historyScoreClass(record,team,index,totals){
+        var winnerId=record.winnerTeamId;
+        if(!winnerId || !team || !teamsCompleted(record)) return "history-score-neutral";
+        return team.id===winnerId ? "history-score-winner" : "history-score-loser";
+      }
+      function teamsCompleted(record){ return !!(record.finishedAt!=null && record.winnerTeamId); }
+      function renderFollowedTeamStats(){
+        var panel=document.getElementById("history-team-stats"), s=HS();
+        if(!historyReturnToWatch){panel.hidden=true;panel.textContent="";return;}
+        var rows={};
+        historyRecords.forEach(function(record){
+          var teams=record.teams||[], totals=recordTotals(record), finished=teamsCompleted(record), winner=record.winnerTeamId;
+          teams.forEach(function(team,index){
+            var key=String(team.id||index), row=rows[key]||(rows[key]={name:historyTeamName(team,index,s),wins:0,losses:0,given:0,received:0});
+            if(finished){
+              if(team.id===winner) row.wins++; else row.losses++;
+              if(Number(totals[index]||0)===0){
+                var winningIndex=teams.findIndex(function(item){return item.id===winner;});
+                if(winningIndex>=0 && Number(totals[winningIndex]||0)>0){row.received++;rows[String(teams[winningIndex].id||winningIndex)] = rows[String(teams[winningIndex].id||winningIndex)] || {name:historyTeamName(teams[winningIndex],winningIndex,s),wins:0,losses:0,given:0,received:0};rows[String(teams[winningIndex].id||winningIndex)].given++;}
+              }
+            }
+          });
+        });
+        var html='<p class="history-team-stats-heading">'+s.wins+' / '+s.losses+' / '+s.pollonas+'</p>';
+        html+=Object.keys(rows).map(function(key){var row=rows[key];return '<div class="history-team-stat-row"><span class="history-team-stat-name">'+esc(row.name)+'</span><span class="history-team-stat-metric">'+s.wins+': '+row.wins+'</span><span class="history-team-stat-metric">'+s.losses+': '+row.losses+'</span><span class="history-team-stat-metric">('+row.given+'–'+row.received+')</span></div>';}).join("");
+        panel.innerHTML=html; panel.hidden=!historyStatsVisible;
+      }
+      function renderHistoryDetail(record){
+        var s=HS(), teams=record.teams||[], totals=recordTotals(record), winner=teams.find(function(team){return team.id===record.winnerTeamId;});
+        var rounds=(record.rounds||[]).map(function(round,index){var team=teams.find(function(item){return item.id===round.winnerTeamId;});return '<div><b>#'+(index+1)+' · '+esc(team?team.name:"")+'</b><br>'+Number(round.points||0)+' '+s.points+'</div>';}).join("");
+        var players=teams.map(function(team){return '<div><b>'+esc(team.name||"")+'</b><br>'+esc((team.players||[]).filter(Boolean).join(" · ")||"—")+'</div>';}).join("");
+        document.getElementById("history-detail").innerHTML='<button class="back-button" type="button" id="history-detail-back">← '+s.matches+'</button><div class="history-match-meta"><span>'+s.winner+': <b>'+esc(winner?historyTeamName(winner,teams.indexOf(winner),s):"—")+'</b></span><span>'+new Date(Number(record.finishedAt||record.createdAt)).toLocaleString(watchLang==="es"?"es":"en")+'</span></div><div class="history-scoreline"><span>'+esc(historyTeamName(teams[0],0,s))+' <strong class="'+historyScoreClass(record,teams[0],0,totals)+'">'+Number(totals[0]||0)+'</strong></span><span>'+esc(historyTeamName(teams[1],1,s))+' <strong class="'+historyScoreClass(record,teams[1],1,totals)+'">'+Number(totals[1]||0)+'</strong></span></div><p>'+s.target+': '+Number(record.targetScore||0)+' · '+(record.rounds||[]).length+' '+s.rounds+' · '+esc(record.boardTheme||"")+'</p><p class="history-section-label">'+s.players+'</p><div class="detail-rounds">'+players+'</div><p class="history-section-label">'+s.rounds+'</p><div class="detail-rounds">'+rounds+'</div>';
+        document.getElementById("history-list").hidden=true;
+        document.getElementById("history-detail").hidden=false;
+        document.getElementById("history-detail-back").addEventListener("click",function(){document.getElementById("history-detail").hidden=true;document.getElementById("history-list").hidden=false;});
+      }
+      function renderHistory(){
+        var s=HS(), list=document.getElementById("history-list");
+        list.hidden=false; list.textContent="";
+        if(!historyRecords.length){list.innerHTML='<div class="history-state">'+s.empty+'</div>';return;}
+        historyRecords.forEach(function(record){
+          var teams=record.teams||[], totals=recordTotals(record), winner=teams.find(function(team){return team.id===record.winnerTeamId;});
+          var button=document.createElement("button"); button.type="button"; button.className="history-match";
+          button.innerHTML='<div class="history-match-meta"><span>'+s.winner+': '+esc(winner?historyTeamName(winner,teams.indexOf(winner),s):"—")+'</span><span>'+new Date(Number(record.finishedAt||record.createdAt)).toLocaleDateString(watchLang==="es"?"es":"en")+'</span></div><div class="history-scoreline"><span>'+esc(historyTeamName(teams[0],0,s))+' <strong class="'+historyScoreClass(record,teams[0],0,totals)+'">'+Number(totals[0]||0)+'</strong></span><span>'+esc(historyTeamName(teams[1],1,s))+' <strong class="'+historyScoreClass(record,teams[1],1,totals)+'">'+Number(totals[1]||0)+'</strong></span></div>';
+          button.addEventListener("click",function(){renderHistoryDetail(record);}); list.appendChild(button);
+        });
+      }
+      function renderHistoryStats(){
+        var s=HS(), teams={}, rivalries={};
+        historyRecords.forEach(function(record){
+          var pair=record.teams||[], totals=recordTotals(record);
+          pair.forEach(function(team,index){
+            var key=String(team.name||"").trim().toLowerCase()||String(team.id||index);
+            if(!teams[key]) teams[key]={name:team.name||"—",played:0,wins:0,losses:0,points:0};
+            var row=teams[key]; row.played++; row.points+=Number(totals[index]||0);
+            if(record.winnerTeamId===team.id) row.wins++; else row.losses++;
+          });
+          if(pair.length>=2){
+            var left=String(pair[0].name||pair[0].id||"A"), right=String(pair[1].name||pair[1].id||"B");
+            var ordered=[left,right].sort(), key=ordered.join("\u0000");
+            if(!rivalries[key]) rivalries[key]={a:ordered[0],b:ordered[1],aWins:0,bWins:0,total:0};
+            var rivalry=rivalries[key]; rivalry.total++;
+            var winner=pair.find(function(team){return team.id===record.winnerTeamId;});
+            if(winner){ if(String(winner.name||winner.id)===rivalry.a) rivalry.aWins++; else rivalry.bWins++; }
+          }
+        });
+        var rows=Object.values(teams).sort(function(a,b){return b.wins-a.wins||b.points-a.points||a.name.localeCompare(b.name);});
+        var rivalryRows=Object.values(rivalries).sort(function(a,b){return b.total-a.total;});
+        if(!rows.length){document.getElementById("history-stats").innerHTML='<div class="history-state">'+s.empty+'</div>';return;}
+        var mostWins=rows[0], mostPoints=rows.slice().sort(function(a,b){return b.points-a.points;})[0], topRivalry=rivalryRows[0];
+        var highlights='<p class="history-section-label">'+s.clubHighlights+'</p><div class="stats-grid">'
+          +'<article class="stat-card"><h3>'+s.mostWins+'</h3><strong>'+esc(mostWins.name)+'</strong><p>'+mostWins.wins+' '+s.wins+' · '+mostWins.played+' '+s.played+'</p></article>'
+          +'<article class="stat-card"><h3>'+s.mostPoints+'</h3><strong>'+esc(mostPoints.name)+'</strong><p>'+mostPoints.points+' '+s.points+'</p></article>'
+          +(topRivalry?'<article class="stat-card"><h3>'+s.topRivalry+'</h3><strong>'+esc(topRivalry.a)+' – '+esc(topRivalry.b)+'</strong><p>'+topRivalry.total+' '+s.played+'</p></article>':'')+'</div>';
+        var leaderboard='<p class="history-section-label">'+s.leaderboard+'</p><div class="history-leaderboard">'+rows.map(function(row,index){var pct=row.played?Math.round(row.wins/row.played*100):0;return '<div class="history-leader"><span class="history-rank">'+(index+1)+'</span><span><b class="history-leader-name">'+esc(row.name)+'</b><span class="history-leader-meta">'+row.wins+'–'+row.losses+' · '+pct+'%</span></span><b>'+row.points+' '+s.points+'</b></div>';}).join('')+'</div>';
+        var rivalryHtml=rivalryRows.length?'<p class="history-section-label">'+s.rivalries+'</p><div class="stats-grid">'+rivalryRows.map(function(row){return '<article class="history-rivalry"><span>'+esc(row.a)+'</span><b class="history-rivalry-score">'+row.aWins+'–'+row.bWins+'</b><span>'+esc(row.b)+'</span></article>';}).join('')+'</div>':'';
+        document.getElementById("history-stats").innerHTML=highlights+leaderboard+rivalryHtml;
+      }
+      function applyHistoryLanguage(){
+        var s=HS(); text("history-back-text",s.back);text("history-title",s.title);text("history-tab",s.matches);text("stats-tab",s.stats);text("history-dialog-title",s.openTitle);text("history-dialog-copy",s.openCopy);text("history-submit",s.open);document.querySelector('label[for="history-key"]').textContent=s.key;historyKeyInput.placeholder=s.key;document.getElementById("history-access-label").textContent=activeHistorySpace?s.access+" · "+activeHistorySpace:"";var toggle=document.getElementById("history-stats-toggle");toggle.setAttribute("aria-pressed",String(historyStatsVisible));toggle.setAttribute("aria-label",historyStatsVisible?s.hideStats:s.showStats);document.querySelectorAll("[data-history-lang]").forEach(function(button){button.setAttribute("aria-pressed",String(button.dataset.historyLang===watchLang));});renderHistory();renderHistoryStats();renderFollowedTeamStats();
+      }
+      function showHistoryPage(spaceId, fromWatch){
+        historyReturnToWatch=!!fromWatch;
+        historyStatsVisible=true;
+        document.querySelector(".history-tabs").hidden=false;
+        if ((location.hostname === "127.0.0.1" || location.hostname === "localhost") && spaceId === localHistoryFixtureId) { showLocalHistoryPreview(historyReturnToWatch); return; }
+        activeHistorySpace=spaceId; if(dialog.open)dialog.close();if(historyDialog.open)historyDialog.close();siteHeader.hidden=true;marketingPage.hidden=true;siteFooter.hidden=true;livePage.hidden=true;historyPage.hidden=false;document.body.classList.remove("watching");document.getElementById("history-loading").hidden=false;document.getElementById("history-list-view").hidden=true;document.getElementById("history-stats-view").hidden=true;applyHistoryLanguage();if(stopHistorySubscription)stopHistorySubscription();window.subscribeToDominoHistory(spaceId,function(records){historyRecords=records;document.getElementById("history-loading").hidden=true;document.getElementById("history-list-view").hidden=false;renderHistory();renderHistoryStats();},function(){document.getElementById("history-loading").textContent=HS().error;}).then(function(stop){stopHistorySubscription=stop;});window.scrollTo(0,0);
+      }
+      function parseHistoryKey(value){try{var url=new URL(value);value=url.searchParams.get("history")||"";}catch(_){}value=String(value||"").trim();return /^[A-Za-z0-9]{16,32}$/.test(value)?value:"";}
+
+      function text(id, value) { document.getElementById(id).textContent = value; }
+      function teamTotal(game, teamId) {
+        return (game.rounds || []).reduce(function (sum, round) {
+          return sum + (round.winnerTeamId === teamId ? Number(round.points || 0) : 0);
+        }, 0);
+      }
+      function completedWinner(game) {
+        if (game.finishedAt == null || !game.winnerTeamId) return null;
+        return (game.teams || []).find(function (team) { return team.id === game.winnerTeamId; }) || null;
+      }
+      function renderGame(game, code) {
+        currentGame = game;
+        var s = S();
+        var teams = game.teams || [];
+        if (teams.length < 2) throw new Error("Invalid game data");
+        var a = teams[0], b = teams[1];
+        var totalA = teamTotal(game, a.id), totalB = teamTotal(game, b.id);
+        var ended = game.live === false;
+        var winner = completedWinner(game);
+        var isFinal = !!winner;
+        text("live-status", s.live);
+        text("live-code", code);
+        document.getElementById("live-dot").classList.remove("ended");
+        [["a", a, totalA], ["b", b, totalB]].forEach(function (entry) {
+          var key = entry[0], team = entry[1], total = entry[2];
+          text("team-" + key + "-name", team.name || (key === "a" ? s.teamA : s.teamB));
+          text("team-" + key + "-score", String(total));
+          text("team-" + key + "-needed", isFinal ? (game.winnerTeamId === team.id ? s.winner : s.finalScore) : Math.max(0, Number(game.targetScore || 0) - total) + " " + s.toWin);
+          text("team-" + key + "-players", (team.players || []).filter(Boolean).join(" · "));
+          document.getElementById("team-" + key + "-card").classList.toggle("winner", isFinal && game.winnerTeamId === team.id);
+        });
+        [["a", a], ["b", b]].forEach(function (entry) {
+          var list = document.getElementById("team-" + entry[0] + "-rounds");
+          list.setAttribute("aria-label", (entry[1].name || (entry[0] === "a" ? s.teamA : s.teamB)) + " " + s.points);
+          var teamRounds = (game.rounds || []).filter(function (round) { return round.winnerTeamId === entry[1].id; }).slice(-8).reverse();
+          list.textContent = "";
+          if (!teamRounds.length) {
+            var empty = document.createElement("li");
+            empty.className = "empty-history";
+            empty.textContent = s.noRounds;
+            list.appendChild(empty);
+          } else {
+            teamRounds.forEach(function (round) {
+              var item = document.createElement("li");
+              item.textContent = Number(round.points || 0) + " " + s.points;
+              list.appendChild(item);
+            });
+          }
+        });
+        text("live-updated", s.target + " " + game.targetScore + " · " + s.updates);
+        // The existing /join/ handoff opens the native watch route
+        // (dominoparty://watch?code=…) and retains its platform store fallback.
+        var watchUrl = "https://dominoparty.com/join/?code=" + encodeURIComponent(code);
+        document.getElementById("watch-qr").setAttribute("aria-label", s.qrLabel.replace("{code}", code));
+        window.renderDominoWatchQr(document.getElementById("watch-qr"), watchUrl).catch(function () {});
+        document.getElementById("winner-celebration").hidden = !winner;
+        text("winner-name", winner ? winner.name : "");
+        if (winner) playWinnerOnce(game, code);
+        loading.classList.remove("active");
+        showWatchPage(code);
+        board.classList.add("ready");
+        if (game.nextCode && isFinal && game.nextCode !== activeCode) {
+          activeCode = game.nextCode;
+          codeInput.value = activeCode;
+          window.subscribeToDominoGame(activeCode, handleGame, handleError);
+        }
+      }
+      function handleGame(game) {
+        if (!game) {
+          loading.classList.remove("active");
+          board.classList.remove("ready");
+          error.textContent = S().notFound;
+          return;
+        }
+        try { renderGame(game, activeCode); } catch (_) { handleError(); }
+      }
+      function handleError() {
+        loading.classList.remove("active");
+        if (livePage.hidden) {
+          board.classList.remove("ready");
+          error.textContent = S().loadError;
+        }
+      }
+
+      function historySpaceForLiveGame(){
+        var fromGame=currentGame&&parseHistoryKey(currentGame.historySpaceId||currentGame.historyKey||"");
+        return fromGame||activeHistorySpace||"";
+      }
+      function followedGameRecord(){
+        if(!currentGame) return null;
+        var teams=currentGame.teams||[];
+        return {
+          id:activeCode||currentGame.code||"live-game", sourceMatchId:activeCode||currentGame.code||"live-game",
+          teams:teams, rounds:currentGame.rounds||[], targetScore:currentGame.targetScore||0,
+          winnerTeamId:currentGame.winnerTeamId||null, createdAt:currentGame.createdAt||Date.now(),
+          finishedAt:currentGame.finishedAt||currentGame.updatedAt||Date.now(), boardTheme:livePage.getAttribute("data-watch-theme")||"carbon",
+          totals:teams.slice(0,2).map(function(team){return teamTotal(currentGame,team.id);})
+        };
+      }
+      function showFollowedGameHistory(){
+        var record=followedGameRecord();
+        if(!record) return;
+        historyReturnToWatch=true; historyStatsVisible=true; historyRecords=[record]; activeHistorySpace="";
+        if(dialog.open) dialog.close(); siteHeader.hidden=true; marketingPage.hidden=true; siteFooter.hidden=true; livePage.hidden=true; historyPage.hidden=false;
+        document.getElementById("history-loading").hidden=true; document.getElementById("history-list-view").hidden=false; document.getElementById("history-stats-view").hidden=true; document.querySelector(".history-tabs").hidden=true;
+        applyHistoryLanguage(); window.scrollTo(0,0);
+      }
+
+      document.querySelectorAll("[data-follow-open]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          dialog.showModal();
+          codeInput.focus();
+        });
+      });
+      document.getElementById("watch-history").addEventListener("click",showFollowedGameHistory);
+      document.getElementById("history-stats-toggle").addEventListener("click",function(){historyStatsVisible=!historyStatsVisible;applyHistoryLanguage();});
+      document.getElementById("history-close").addEventListener("click",function(){historyDialog.close();});
+      historyDialog.addEventListener("click",function(event){if(event.target===historyDialog)historyDialog.close();});
+      document.getElementById("history-form").addEventListener("submit",function(event){event.preventDefault();var space=parseHistoryKey(historyKeyInput.value);if(!space){document.getElementById("history-error").textContent=HS().invalid;return;}activeHistorySpace=space;history.replaceState({history:true},"","?watch="+encodeURIComponent(activeCode||"")+"&history="+encodeURIComponent(space));showHistoryPage(space,!livePage.hidden);});
+      document.getElementById("history-back").addEventListener("click",function(){if(stopHistorySubscription)stopHistorySubscription();if(historyReturnToWatch&&currentGame&&activeCode){historyPage.hidden=true;showWatchPage(activeCode);return;}history.replaceState({},"","/");showMarketingPage();});
+      document.getElementById("history-tab").addEventListener("click",function(){this.setAttribute("aria-selected","true");document.getElementById("stats-tab").setAttribute("aria-selected","false");document.getElementById("history-detail").hidden=true;document.getElementById("history-list-view").hidden=false;document.getElementById("history-stats-view").hidden=true;});
+      document.getElementById("stats-tab").addEventListener("click",function(){this.setAttribute("aria-selected","true");document.getElementById("history-tab").setAttribute("aria-selected","false");document.getElementById("history-detail").hidden=true;document.getElementById("history-list-view").hidden=true;document.getElementById("history-stats-view").hidden=false;});
+      document.querySelectorAll("[data-history-lang]").forEach(function(button){button.addEventListener("click",function(){watchLang=button.dataset.historyLang;localStorage.setItem("domino-watch-lang",watchLang);applyHistoryLanguage();applySiteLanguage(watchLang,false);});});
+      document.getElementById("follow-close").addEventListener("click", function () { dialog.close(); });
+      dialog.addEventListener("click", function (event) {
+        if (event.target === dialog) dialog.close();
+      });
+      codeInput.addEventListener("input", function () {
+        codeInput.value = codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+        error.textContent = "";
+      });
+      document.getElementById("board-style-button").addEventListener("click", cycleWatchTheme);
+      document.querySelectorAll("[data-watch-lang]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          watchLang = button.getAttribute("data-watch-lang");
+          applyWatchLanguage(true);
+          applySiteLanguage(watchLang, false);
+        });
+      });
+      document.getElementById("sound-toggle").addEventListener("click", function () {
+        if (soundEnabled) {
+          soundEnabled = false;
+          winnerAudio.pause();
+          updateSoundButton();
+        } else {
+          armWinnerSound().then(function () { if (currentGame) playWinnerOnce(currentGame, activeCode); });
+        }
+      });
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var code = codeInput.value.trim();
+        if (code.length < 4) {
+          board.classList.remove("ready");
+          error.textContent = S().invalid;
+          codeInput.focus();
+          return;
+        }
+        activeCode = code;
+        armWinnerSound();
+        error.textContent = "";
+        board.classList.remove("ready");
+        loading.classList.add("active");
+        window.subscribeToDominoGame(code, handleGame, handleError);
+      });
+      document.getElementById("watch-back").addEventListener("click", function () {
+        if (history.state && history.state.watching) history.back();
+        else showMarketingPage();
+      });
+      window.addEventListener("popstate", function () {
+        if (!livePage.hidden) showMarketingPage();
+      });
+
+      var siteSpanish = {
+        "Score":"Puntuación","Live sharing":"Compartir en vivo","Screens":"Pantallas","Privacy":"Privacidad","Legal":"Legal","History":"Historial","Follow a game":"Seguir una partida","Score together. Follow live.":"Anoten juntos. Sigan en vivo.","Score every point. Let friends watch in real time.":"Anota cada punto y deja que tus amigos sigan la partida en tiempo real.","Get the app":"Obtener la app","Two teams":"Dos equipos","Fast local scoring":"Puntuación local rápida","Watch with a game code":"Mira con un código de partida","Private by default":"Privado por defecto","No account or ads":"Sin cuenta ni anuncios",
+        "A scoreboard made for the way dominoes is actually played.":"Un marcador hecho para la forma en que realmente se juega dominó.","Two teams, four players, custom targets, round history, and big score rings that make the table easy to read from across the room.":"Dos equipos, cuatro jugadores, metas personalizadas, historial de rondas y puntuaciones grandes que se leen desde cualquier lugar.","Tap in points":"Anota los puntos","Add each round quickly, then edit a hand if the table changes its mind.":"Añade cada ronda rápidamente y corrige una mano cuando sea necesario.","Share live":"Comparte en vivo","Start a broadcast and show a QR code so friends can follow the score.":"Inicia una transmisión y muestra un QR para que otros sigan la puntuación.","Track wins":"Registra victorias","Keep match history and remember the rivalries that keep coming back.":"Guarda el historial y recuerda las rivalidades que siempre regresan.","English and Spanish":"Inglés y español","Switch language and table style from settings whenever you want.":"Cambia el idioma y el estilo de mesa cuando quieras.",
+        "One scorer. Everyone watching live.":"Una persona anota. Todos siguen en vivo.","Live sharing is built for family tables, tournament corners, and anyone waiting on the next hand.":"El seguimiento en vivo está hecho para mesas familiares, torneos y quienes esperan la próxima mano.","Start broadcasting":"Inicia la transmisión","The app creates a short code and QR for that match.":"La app crea un código corto y un QR para la partida.","Friends scan":"Tus amigos escanean","They follow score changes from their own phones in real time.":"Siguen los cambios desde sus teléfonos en tiempo real.","Stop when done":"Detén al terminar","Keep the match local, private, and under your control.":"Mantén la partida local, privada y bajo tu control.",
+        "Designed like a dark domino table.":"Diseñado como una mesa oscura de dominó.","Gold controls, red and green scoring moments, and real match screens that stay readable while the game gets loud.":"Controles dorados, momentos rojos y verdes, y pantallas legibles aun cuando sube el ruido.","Home":"Inicio","New match":"Nueva partida","Score board":"Marcador","Live QR":"QR en vivo","Settings":"Ajustes","Choose the board.":"Elige la mesa.","Switch the table look to match the night.":"Cambia el aspecto de la mesa para cada noche.","Graphite boxes, gold and red accents.":"Cuadros grafito con detalles dorados y rojos.","Deep black table texture.":"Textura de mesa negra profunda.","Green felt and warm buttons.":"Fieltro verde y botones cálidos.","Blue, red, and classic table energy.":"Azul, rojo y la energía clásica de la mesa.","No account. No ads.":"Sin cuenta. Sin anuncios.","Game data stays on your device unless you choose to share a live match. Live sharing uses Firebase only for app functionality.":"Los datos permanecen en tu dispositivo salvo que compartas una partida en vivo. Firebase se usa solo para esa función.","Read privacy policy":"Leer política de privacidad","Contact":"Contacto","Score and history tools are for convenience. Independently verify official scores, standings, and tournament records.":"Las herramientas de puntuación e historial son prácticas, pero verifica independientemente los resultados, posiciones y registros oficiales de torneos."
+      };
+      var siteSpanishAttrs = { "Main navigation":"Navegación principal", "Website language":"Idioma del sitio web", "Domino Social Club app screenshots":"Capturas de la aplicación Domino Social Club", "Domino Social Club app screen preview":"Vista previa de pantallas de Domino Social Club", "App highlights":"Funciones destacadas", "Set up a Domino Social Club match":"Configurar una partida de Domino Social Club", "Domino Social Club home":"Inicio de Domino Social Club", "Active live dominoes scoreboard":"Marcador activo de dominó en vivo", "QR code screen for sharing a live game":"Pantalla de código QR para compartir una partida en vivo", "Home screen":"Pantalla de inicio", "New match screen":"Pantalla de nueva partida", "Score board screen":"Pantalla del marcador", "Share score screen":"Pantalla para compartir la puntuación", "Settings screen":"Pantalla de ajustes" };
+      var siteAttrItems = [];
+      [siteHeader, marketingPage, siteFooter].forEach(function (root) { root.querySelectorAll("[aria-label],[alt]").forEach(function (element) { ["aria-label","alt"].forEach(function (attr) { var value = element.getAttribute(attr); if (siteSpanishAttrs[value]) siteAttrItems.push({ element: element, attr: attr, en: value }); }); }); });
+      var siteTextNodes = [];
+      [siteHeader, marketingPage, siteFooter].forEach(function (root) {
+        var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        var node; while ((node = walker.nextNode())) { var key = node.nodeValue.trim(); if (siteSpanish[key]) siteTextNodes.push({ node: node, en: key }); }
+      });
+      function applySiteLanguage(lang, persist) {
+        document.documentElement.lang = lang;
+        siteTextNodes.forEach(function (item) { item.node.nodeValue = item.node.nodeValue.replace(item.node.nodeValue.trim(), lang === "es" ? siteSpanish[item.en] : item.en); });
+        siteAttrItems.forEach(function (item) { item.element.setAttribute(item.attr, lang === "es" ? siteSpanishAttrs[item.en] : item.en); });
+        document.querySelectorAll("[data-site-lang]").forEach(function (button) { button.setAttribute("aria-pressed", String(button.dataset.siteLang === lang)); });
+        if (persist) localStorage.setItem("domino-watch-lang", lang);
+      }
+      document.querySelectorAll("[data-site-lang]").forEach(function (button) { button.addEventListener("click", function () { watchLang = button.dataset.siteLang; applySiteLanguage(watchLang, true); applyWatchLanguage(true); applyHistoryLanguage(); }); });
+
+      setWatchTheme(localStorage.getItem("domino-watch-theme") || "carbon", false);
+      applyWatchLanguage(false);
+      applySiteLanguage(watchLang, false);
+
+      function showLocalHistoryPreview(fromWatch) {
+        historyReturnToWatch=!!fromWatch;
+        activeHistorySpace = localHistoryFixtureId;
+        historyRecords = [
+          { id:"preview-1",sourceMatchId:"preview-1",teams:[{id:"a",name:"Team Gold",players:["Mia","Luis"]},{id:"b",name:"Team Red",players:["Ana","Carlos"]}],rounds:[{id:"r1",winnerTeamId:"a",points:35},{id:"r2",winnerTeamId:"b",points:20},{id:"r3",winnerTeamId:"a",points:75}],totals:[110,20],targetScore:100,winnerTeamId:"a",createdAt:1776560400000,finishedAt:1776563100000,boardTheme:"Carbon Fiber" },
+          { id:"preview-2",sourceMatchId:"preview-2",teams:[{id:"c",name:"Los Primos",players:["Raúl","José"]},{id:"d",name:"Club Centro",players:["Elena","Sol"]}],rounds:[{id:"r1",winnerTeamId:"d",points:40},{id:"r2",winnerTeamId:"c",points:25},{id:"r3",winnerTeamId:"d",points:65}],totals:[25,105],targetScore:100,winnerTeamId:"d",createdAt:1776474000000,finishedAt:1776477000000,boardTheme:"Casino" }
+        ];
+        siteHeader.hidden=true;marketingPage.hidden=true;siteFooter.hidden=true;livePage.hidden=true;historyPage.hidden=false;
+        document.getElementById("history-loading").hidden=true;document.getElementById("history-list-view").hidden=false;document.getElementById("history-stats-view").hidden=true;
+        applyHistoryLanguage();
+      }
+
+      window.addEventListener("load", function () {
+        if ((location.hostname === "127.0.0.1" || location.hostname === "localhost") && new URLSearchParams(location.search).get("previewHistory") === "1" && new URLSearchParams(location.search).get("previewScore") !== "1") {
+          showLocalHistoryPreview();
+          return;
+        }
+        // Local-only sample state used to review the full-window scoreboard design.
+        if ((location.hostname === "127.0.0.1" || location.hostname === "localhost") && new URLSearchParams(location.search).get("previewScore") === "1") {
+          activeCode = "A7K9";
+          var previewWinner = new URLSearchParams(location.search).get("previewWinner") === "1";
+          renderGame({
+            code: activeCode, live: true, controllerName: "Yunier", targetScore: 100,
+            teams: [
+              { id: "a", name: "Team Gold", players: ["Mia", "Luis"] },
+              { id: "b", name: "Team Red", players: ["Ana", "Carlos"] }
+            ],
+            rounds: [
+              { id: "1", winnerTeamId: "a", points: 15 },
+              { id: "2", winnerTeamId: "b", points: 22 },
+              { id: "3", winnerTeamId: "a", points: 40 }
+            ].concat(previewWinner ? [{ id: "4", winnerTeamId: "a", points: 50 }] : []),
+            winnerTeamId: previewWinner ? "a" : null,
+            finishedAt: previewWinner ? 1776643200000 : null
+          }, activeCode);
+        } else {
+          var params=new URLSearchParams(location.search);
+          var linkedHistory = parseHistoryKey(params.get("history") || "");
+          var linkedCode = (params.get("watch") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+          if (linkedCode.length >= 4) {
+            activeHistorySpace=linkedHistory;
+            activeCode = linkedCode;
+            codeInput.value = linkedCode;
+            dialog.showModal();
+            loading.classList.add("active");
+            window.subscribeToDominoGame(linkedCode, handleGame, handleError);
+          } else if (linkedHistory) {
+            showHistoryPage(linkedHistory,false);
+          }
+        }
+      });
     })();
   </script>
 </body>

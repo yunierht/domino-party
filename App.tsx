@@ -21,11 +21,12 @@ import { HistoryScreen } from './src/screens/HistoryScreen';
 import { StatsScreen } from './src/screens/StatsScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { WatchScreen } from './src/screens/WatchScreen';
+import { WatchHistoryScreen } from './src/screens/WatchHistoryScreen';
 import { HowToScreen } from './src/screens/HowToScreen';
 import { PrivacyScreen } from './src/screens/PrivacyScreen';
 
 function Router() {
-  const { screen } = useNav();
+  const { screen, watchHistory } = useNav();
   switch (screen) {
     case 'home':
       return <HomeScreen />;
@@ -35,6 +36,15 @@ function Router() {
       return <GameScreen />;
     case 'history':
       return <HistoryScreen />;
+    case 'watchHistory':
+      return watchHistory ? (
+        <WatchHistoryScreen
+          fallback={watchHistory.fallback}
+          historySpaceId={watchHistory.historySpaceId}
+        />
+      ) : (
+        <HistoryScreen matches={[]} readOnly />
+      );
     case 'stats':
       return <StatsScreen />;
     case 'settings':

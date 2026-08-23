@@ -23,7 +23,7 @@ export function NewMatchScreen() {
   const [a2, setA2] = useState('');
   const [b1, setB1] = useState('');
   const [b2, setB2] = useState('');
-  const [target, setTarget] = useState<number>(150);
+  const [target, setTarget] = useState<number>(100);
   const [customMode, setCustomMode] = useState(false);
   const [customText, setCustomText] = useState('');
   const [error, setError] = useState('');

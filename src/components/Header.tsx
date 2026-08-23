@@ -9,12 +9,15 @@ export function Header({
   showBack = true,
   right,
   onTitlePress,
+  showTitleEditHint = true,
 }: {
   title: string;
   showBack?: boolean;
   right?: React.ReactNode;
-  /** When set, the title becomes tappable (shows an edit hint). */
+  /** When set, the title becomes tappable. */
   onTitlePress?: () => void;
+  /** Set false when the tappable title should not show a pencil hint. */
+  showTitleEditHint?: boolean;
 }) {
   const { theme, s } = useTheme();
   const { back, canGoBack } = useNav();
@@ -46,7 +49,7 @@ export function Header({
         <Pressable
           onPress={onTitlePress}
           hitSlop={8}
-          style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: s(7) }}
+          style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: s(7) }}
         >
           <Text
             style={{ color: c.text, fontSize: s(22), fontWeight: '800', fontFamily: theme.fontFamily, flexShrink: 1 }}
@@ -54,7 +57,7 @@ export function Header({
           >
             {title}
           </Text>
-          <Feather name="edit-2" size={s(15)} color={c.textMuted} />
+          {showTitleEditHint && <Feather name="edit-2" size={s(15)} color={c.textMuted} />}
         </Pressable>
       ) : (
         <Text

@@ -28,6 +28,10 @@ export interface Match {
   winnerTeamId: string | null;
   /** Live-share code if this match is being broadcast to spectators. */
   shareCode?: string;
+  /** Read-only history collection shared with spectators of this match. */
+  historySpaceId?: string;
+  /** Anonymous uid that owns the shared history collection. */
+  sharedHostId?: string;
 }
 
 // ---- Derived helpers -------------------------------------------------------

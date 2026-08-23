@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="dots" width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="6.5" cy="6.5" r="2.3" fill="#30353f"/></pattern>
+    <pattern id="hex" width="244" height="211" patternUnits="userSpaceOnUse"><path d="M61 2h122l59 103-59 104H61L2 105Z" fill="none" stroke="#363c49" stroke-width="2.5"/></pattern>
+    <radialGradient id="gold" cx="76%" cy="12%" r="82%"><stop stop-color="#d7a63d" stop-opacity=".12"/><stop offset="1" stop-color="#d7a63d" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1200" height="900" fill="#08090c"/><rect width="1200" height="900" fill="url(#dots)"/><rect width="1200" height="900" fill="url(#hex)" opacity=".85"/><rect width="1200" height="900" fill="url(#gold)"/>
+</svg>
