@@ -1,0 +1,18 @@
+{
+  "tool": "built-in image_gen",
+  "prompt": "prompt.txt",
+  "references": {
+    "yuni": "assets/computer-opponent-yuni-seated-v2.png",
+    "yoi": "assets/computer-opponent-yoi-seated-v2.png",
+    "diego": "assets/computer-opponent-yase-seated-v1.png",
+    "lucia": "assets/computer-opponent-chuchi-seated-v2.png"
+  },
+  "mapping": {
+    "diego": "Yase",
+    "lucia": "Chuchi"
+  },
+  "frames": "Nine generated poses per new rival; 12 timed steps including holds. Andy retains approved assets and sequence.",
+  "extraction": "Cell extraction, head translation registration, alpha preservation and removal of tiny disconnected neighboring-cell remnants. No face warping or crossfade.",
+  "limitations": "Discrete sprite poses have small expression and body differences. Bottle-to-cupholder alignment is approximate. Only green beer uses full animation; other drinks fade on rival victory. Alex is not animated.",
+  "verification": "Integrated browser captures at 390x844 use seeded final-hand scenarios that complete through the real engine. All 12 steps observed, no duplicate table bottle or result dialog during animation. Actual-device verification remains pending."
+}

@@ -12,11 +12,10 @@ export function scheduleDrinkGiftExpiry(gift: DrinkGift, finished: boolean, redu
 }
 
 /** Capture the drink present at this result once; a later invitation belongs to the next hand. */
-export function claimOpponentDrinkExpiry(result: Result | null, matchFinished: boolean, gift: DrinkGift, seen: WeakSet<Result>, andyWon = false): DrinkGift {
+export function claimOpponentDrinkExpiry(result: Result | null, gift: DrinkGift, seen: WeakSet<Result>): DrinkGift {
   if (!result || seen.has(result)) return null;
-  const eligible = result.winner === 'human' || matchFinished || (andyWon && gift?.drinkId === 'heineken');
-  if (!eligible && !andyWon) return null;
-  // Consume the event even without a compatible drink: a later invitation must survive.
+  // A drink stays through losses/ties, even at match end. Capture a win once,
+  // including wins without a drink, so later invitations belong to the next hand.
   seen.add(result);
-  return eligible ? gift : null;
+  return result.winner === 'computer' ? gift : null;
 }

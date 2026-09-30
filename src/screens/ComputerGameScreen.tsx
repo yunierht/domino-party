@@ -3,7 +3,7 @@ import { Animated, AppState, BackHandler, Image, Modal, PanResponder, Platform, 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
-import { AndyDrinkingAvatar } from '../computer/AndyDrinkingAvatar';
+import { OpponentDrinkingAvatar } from '../computer/OpponentDrinkingAvatar';
 import { useBoardCamera } from '../computer/useBoardCamera';
 import { VictoryDrink, VictoryBeerBadge } from '../computer/VictoryDrink';
 import { DrinkChoices, DrinkInviteButton } from '../computer/DrinkGift';
@@ -62,7 +62,7 @@ function Avatar({ computer = false, active = false, small = false }: { computer?
 export function ComputerGameScreen() {
   const windowSize = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const { game, setGame, start, opponentId, setOpponentId, drinkGift, drinkExpiring, andyDrink, cancelOpponentConsumption, setDrinkGift, victoryGift, deliveryGift, dismissVictoryGift, finishVictoryGift, expireVictoryGift } = useComputerGame();
+  const { game, setGame, start, opponentId, setOpponentId, drinkGift, drinkExpiring, opponentDrink, cancelOpponentConsumption, setDrinkGift, victoryGift, deliveryGift, dismissVictoryGift, finishVictoryGift, expireVictoryGift } = useComputerGame();
   useEffect(() => () => { dismissVictoryGift(); cancelOpponentConsumption(); }, [dismissVictoryGift, cancelOpponentConsumption]);
   const opponent = OPPONENTS.find(item => item.id === opponentId) ?? OPPONENTS[0];
   const { lang, t } = useI18n();
@@ -228,6 +228,7 @@ export function ComputerGameScreen() {
     setSelected(null); cancelDrag();
   };
   const nextRound = () => {
+    if (opponentDrink) return;
     if (game && matchWinner(game)) dismissVictoryGift();
     cancelDrag(); setSelected(null); setShowResult(false);
     if (game && matchWinner(game)) setDrinkGift(null);
@@ -282,7 +283,7 @@ export function ComputerGameScreen() {
       </Pressable>
     </View>
     <View style={{ flex: 1 }}>
-      <DominoTableBackground opponentHeight={opponentHeight} gift={andyDrink ? null : drinkGift} es={es} finished={drinkExpiring} />
+      <DominoTableBackground opponentHeight={opponentHeight} gift={opponentDrink ? null : drinkGift} es={es} finished={drinkExpiring} />
       <View style={{ height: opponentHeight, flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 12, gap: 6 }}>
         <Pressable accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }}
           style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14, minHeight: 44, justifyContent: 'center', backgroundColor: '#102820', borderWidth: 1, borderColor: C.line, borderRadius: 12, padding: 8 }}>
@@ -291,7 +292,7 @@ export function ComputerGameScreen() {
             <Feather name="users" size={14} color={C.goldLight} accessible={false} />
           </View>
         </Pressable>
-        {opponentId === 'rafael' ? <AndyDrinkingAvatar gift={andyDrink} source={opponent.image} height={opponentHeight} es={es} /> : <Image source={opponent.image} resizeMode="contain"
+        {opponentId !== 'alex' ? <OpponentDrinkingAvatar opponentId={opponentId} name={opponent.name} gift={opponentDrink} source={opponent.image} height={opponentHeight} es={es} /> : <Image source={opponent.image} resizeMode="contain"
           accessibilityLabel={es ? 'Avatar del rival virtual' : 'Virtual opponent avatar'}
           style={{ flex: 1, minWidth: 0, height: opponentHeight }} />}
         <View style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14 }}>
@@ -359,7 +360,7 @@ export function ComputerGameScreen() {
         })}
       </View>
       <View testID="below-hand-notice" style={{ height: 64, justifyContent: 'center' }}>
-        {game.result ? <Action label={winner ? text.again : text.next} onPress={nextRound} /> : humanTurn && !hasMove(game) ?
+        {game.result ? <Action label={winner ? text.again : text.next} onPress={nextRound} disabled={!!opponentDrink} /> : humanTurn && !hasMove(game) ?
           <Action label={game.stock.length ? `${text.draw} · ${game.stock.length}` : text.pass} onPress={() => setGame(current => current ? drawOrPass(current, 'human') : current)} /> :
           selectedTile ? <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
             {legalEnds(game, 'human', selectedTile).map(end => <Action key={end} subtle label={`${end === 'left' ? text.left : text.right} · ${end === 'left' ? game.board[0]?.a : game.board[game.board.length - 1]?.b}`} onPress={() => place(selectedTile.id, end)} />)}
@@ -399,7 +400,7 @@ export function ComputerGameScreen() {
     <Dialog visible={showOpponents} title={es ? 'Tu rival' : 'Your opponent'} onClose={() => setShowOpponents(false)} closeLabel={text.cancel}>
       {opponentPicker}
     </Dialog>
-    <Dialog visible={showResult && !andyDrink && !(winner && victoryGift) && !!game.result && !showRules && !showMenu && !showRestart && !showDrinks} title={winner ? (es ? 'Fin de partida' : 'Match complete') : (es ? 'Fin de ronda' : 'Round complete')} onClose={() => setShowResult(false)} closeLabel={es ? 'Ver mesa' : 'View table'}>
+    <Dialog visible={showResult && !opponentDrink && !(winner && victoryGift) && !!game.result && !showRules && !showMenu && !showRestart && !showDrinks} title={winner ? (es ? 'Fin de partida' : 'Match complete') : (es ? 'Fin de ronda' : 'Round complete')} onClose={() => setShowResult(false)} closeLabel={es ? 'Ver mesa' : 'View table'}>
       <View style={{ alignItems: 'center', gap: 14, paddingVertical: 10 }}>
         <Feather name="award" size={38} color={C.gold} />
         <Text style={{ color: C.ivory, fontSize: 22, textAlign: 'center', lineHeight: 30 }}>{resultTitle}</Text>
@@ -407,7 +408,7 @@ export function ComputerGameScreen() {
         <Text style={{ color: C.muted, fontSize: 12 }}>{winsMode ? (es ? 'victorias' : 'wins') : game.result?.blocked ? text.blocked : text.points}</Text>
         <View style={{ flexDirection: 'row', gap: 5, flexWrap: 'wrap', justifyContent: 'center', marginVertical: 12 }}>{game.hands.computer.map(tile => <DominoTile key={tile.id} a={tile.a} b={tile.b} size={22} />)}</View>
       </View>
-      <Action label={winner ? text.again : text.next} onPress={nextRound} />
+      <Action label={winner ? text.again : text.next} onPress={nextRound} disabled={!!opponentDrink} />
     </Dialog>
   </View>;
 }
