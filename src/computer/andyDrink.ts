@@ -1,6 +1,6 @@
 import type { Result } from './engine';
 import type { DrinkGift } from './drinks';
-export const ANDY_DRINK_DURATIONS = [650,180,180,180,180,220,420,500,240,250,220,1000];
+export const ANDY_DRINK_DURATIONS = [400,220,250,240,240,500,350,220,220,220,200,600];
 export const ANDY_DRINK_MS = ANDY_DRINK_DURATIONS.reduce((a,b)=>a+b,0);
 export function canAndyDrink(opponentId: string, gift: DrinkGift, result: Result | null, reduced: boolean) {
   return !reduced && opponentId === 'rafael' && gift?.drinkId === 'heineken' && result?.winner === 'computer';
