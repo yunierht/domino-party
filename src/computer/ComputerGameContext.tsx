@@ -4,6 +4,7 @@ import { useReducedMotion } from './DrinkGift';
 import { claimOpponentDrinkExpiry, scheduleDrinkGiftExpiry } from './drinkGiftLifecycle';
 import { canOpponentDrink, OPPONENT_DRINK_MS } from './opponentDrink';
 import type { DrinkGift } from './drinks';
+import { normalizeDrinkGift } from './drinks';
 import { claimVictoryGift, clearVictoryGift, VictoryGift } from './victoryGift';
 import { OPPONENTS } from './opponents';
 import type { OpponentId } from './opponents';
@@ -38,6 +39,9 @@ export function ComputerGameProvider({ children }: { children: React.ReactNode }
   const seenDrinkResults = useRef(new WeakSet<Result>());
   const [game, setGame] = useState<Game | null>(null);
   const reducedMotion = useReducedMotion();
+  useEffect(() => {
+    if (drinkGift && !normalizeDrinkGift(drinkGift)) setDrinkGift(null);
+  }, [drinkGift]);
   useEffect(() => {
     const captured = claimOpponentDrinkExpiry(game?.result ?? null, drinkGift, seenDrinkResults.current);
     if (captured) { drinkEvent.current = { actor: opponentId, result: game?.result ?? null }; setExpiringDrink(captured); }

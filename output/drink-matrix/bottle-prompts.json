@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Nubo",
+    "prompt": "Use case: product-mockup. Production game sprite, one freestanding realistic illustrated fictional beer bottle. deep emerald green longneck glass bottle, warm ivory rectangular label with dark plum engraved fern fronds, copper thin border, original circular interlocking-leaf emblem, hand-lettered serif Nubo centered, tiny decorative print. No star, no red emblem, no oval or shield. Exact prominent name text \"Nubo\". Elaborate original label print, never blank labels. Own fictional design; no official logos or imitation of existing label layouts. Single upright open uncapped bottle front view, whole bottle neck and bottom visible with generous margins. Smooth premium semi-realistic game illustration, crisp realistic glass reflections, liquid and printed paper texture. Transparent background, no floor, no shadow outside bottle, no other objects, no watermark, no duplicate bottle. Bottle centered, occupies 85 percent height. Output portrait 1024x1536.",
+    "asset": "assets/drinks-v2/nubo.png",
+    "tool": "built-in image_gen"
+  },
+  {
+    "name": "Duna",
+    "prompt": "Use case: product-mockup. Production game sprite, one freestanding realistic illustrated fictional beer bottle. clear glass subtly tapered longneck bottle with golden beer, terracotta rectangular paper label, pale cream woodcut rising-sun and curved breeze-line illustration, elegant cream Duna lettering, miniature print and a teal neck band. No crown, no blue-and-white branding. Exact prominent name text \"Duna\". Elaborate original label print, never blank labels. Own fictional design; no official logos or imitation of existing label layouts. Single upright open uncapped bottle front view, whole bottle neck and bottom visible with generous margins. Smooth premium semi-realistic game illustration, crisp realistic glass reflections, liquid and printed paper texture. Transparent background, no floor, no shadow outside bottle, no other objects, no watermark, no duplicate bottle. Bottle centered, occupies 85 percent height. Output portrait 1024x1536.",
+    "asset": "assets/drinks-v2/duna.png",
+    "tool": "built-in image_gen"
+  },
+  {
+    "name": "Orbe",
+    "prompt": "Use case: product-mockup. Production game sprite, one freestanding realistic illustrated fictional beer bottle. rich amber brown bottle with gently rounded shoulders, dark charcoal wrap label, copper Art Deco geometric arches and bespoke amber droplet emblem, copper Orbe serif lettering with small ornamental brewery print. No shield, no red label, no heraldry. Exact prominent name text \"Orbe\". Elaborate original label print, never blank labels. Own fictional design; no official logos or imitation of existing label layouts. Single upright open uncapped bottle front view, whole bottle neck and bottom visible with generous margins. Smooth premium semi-realistic game illustration, crisp realistic glass reflections, liquid and printed paper texture. Transparent background, no floor, no shadow outside bottle, no other objects, no watermark, no duplicate bottle. Bottle centered, occupies 85 percent height. Output portrait 1024x1536.",
+    "asset": "assets/drinks-v2/orbe.png",
+    "tool": "built-in image_gen"
+  },
+  {
+    "name": "Milo",
+    "prompt": "Use case: product-mockup. Production game sprite, one freestanding realistic illustrated fictional beer bottle. clear slim longneck bottle with very pale gold beer, matte pale-aqua rectangular label with coral geometric reed illustration, charcoal modern Milo letters and fine tiny decorative print, silver neck band. No can, no navy script, no existing brand graphics. Exact prominent name text \"Milo\". Elaborate original label print, never blank labels. Own fictional design; no official logos or imitation of existing label layouts. Single upright open uncapped bottle front view, whole bottle neck and bottom visible with generous margins. Smooth premium semi-realistic game illustration, crisp realistic glass reflections, liquid and printed paper texture. Transparent background, no floor, no shadow outside bottle, no other objects, no watermark, no duplicate bottle. Bottle centered, occupies 85 percent height. Output portrait 1024x1536.",
+    "asset": "assets/drinks-v2/milo.png",
+    "tool": "built-in image_gen"
+  }
+]

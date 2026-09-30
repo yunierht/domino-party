@@ -16,13 +16,11 @@ export function useReducedMotion() {
 
 const DRINK_IMAGES = {
   margarita: require('../../assets/drink-margarita-v1.png'),
-  martini: require('../../assets/drink-martini-v1.png'),
   daiquiri: require('../../assets/drink-daiquiri-v1.png'),
-  heineken: require('../../assets/beer-green-v1.png'),
-  corona: require('../../assets/beer-gold-v1.png'),
-  stella: require('../../assets/beer-classic-v1.png'),
-  budweiser: require('../../assets/beer-red-v1.png'),
-  miller: require('../../assets/beer-silver-v1.png'),
+  heineken: require('../../assets/drinks-v2/nubo.png'),
+  corona: require('../../assets/drinks-v2/duna.png'),
+  stella: require('../../assets/drinks-v2/orbe.png'),
+  miller: require('../../assets/drinks-v2/milo.png'),
 };
 /** Original generic product illustrations, without official logos. */
 export function DrinkIllustration({ id, height = 54 }: { id: DrinkId; height?: number }) {
@@ -85,7 +83,8 @@ export function TableDrinkGift({ gift, width, height, es, bottleHeight, finished
     return () => drop.stopAnimation();
   }, [gift, reduced, drop]);
   if (!gift) return null;
-  const name = DRINKS.find(beer => beer.id === gift.drinkId)!.name;
+  const name = DRINKS.find(beer => beer.id === gift.drinkId)?.name;
+  if (!name) return null;
   return <Animated.View testID="opponent-drink" pointerEvents="none" accessibilityLiveRegion="polite" accessibilityLabel={`${name} · ${es ? 'Regalo virtual' : 'Virtual gift'}`}
     style={{ position: 'absolute', opacity, left: width * 60 / 400 - bottleHeight * 0.35, top: height * 14 / 600 - bottleHeight + 6, transform: [{ translateY: drop }] }}>
     <DrinkIllustration id={gift.drinkId} height={bottleHeight} />
