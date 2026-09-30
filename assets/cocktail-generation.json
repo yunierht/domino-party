@@ -1,0 +1,18 @@
+{
+  "tool": "image_gen (built-in)",
+  "designs": [
+    [
+      "margarita",
+      "classic wide stepped margarita stemmed glass filled with pale lime cocktail, salted rim and small lime wheel"
+    ],
+    [
+      "martini",
+      "iconic V-shaped martini stemmed glass with clear pale cocktail and one green olive on a short pick"
+    ],
+    [
+      "daiquiri",
+      "elegant rounded coupe stemmed glass with pale golden lime daiquiri, delicate small lime twist"
+    ]
+  ],
+  "promptTemplate": "Photorealistic product cutout for a small mobile game virtual drink gift: one [design]. Original image, no brands, no words, no logos. Realistic transparent glass, visible rim, convincing reflections, liquid and soft studio highlights. Upright frontal view, complete rim, stem and foot, centered portrait composition, object fills 90 percent of frame. Truly transparent background, no scenery, no surface or cast floor shadow. Crisp recognizable silhouette at small size, no extra objects."
+}

@@ -3,6 +3,8 @@ import { AppState, BackHandler, Image, Modal, PanResponder, Platform, Pressable,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
+import { DrinkChoices, DrinkInviteButton } from '../computer/DrinkGift';
+import type { DrinkId } from '../computer/drinks';
 import { DominoTableBackground } from '../computer/DominoTableBackground';
 import { useComputerGame } from '../computer/ComputerGameContext';
 import { COMPUTER_STRINGS } from '../computer/strings';
@@ -55,7 +57,7 @@ function Avatar({ computer = false, active = false, small = false }: { computer?
 export function ComputerGameScreen() {
   const windowSize = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const { game, setGame, start, opponentId, setOpponentId } = useComputerGame();
+  const { game, setGame, start, opponentId, setOpponentId, drinkGift, setDrinkGift } = useComputerGame();
   const opponent = OPPONENTS.find(item => item.id === opponentId) ?? OPPONENTS[0];
   const { lang, t } = useI18n();
   const { back } = useNav();
@@ -67,6 +69,8 @@ export function ComputerGameScreen() {
   const [winTarget, setWinTarget] = useState(3);
   const [selected, setSelected] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
+  const [showDrinks, setShowDrinks] = useState(false);
+  const drinkSelectionLock = useRef(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showRestart, setShowRestart] = useState(false);
   const [showOpponents, setShowOpponents] = useState(false);
@@ -114,21 +118,21 @@ export function ComputerGameScreen() {
     return () => { subscription.remove(); androidBack.remove(); };
   }, [back]);
   useEffect(() => {
-    if (!game || game.result || game.turn !== 'computer' || !appActive || showRules || showOpponents || showMenu || showRestart) return;
+    if (!game || game.result || game.turn !== 'computer' || !appActive || showRules || showOpponents || showMenu || showRestart || showDrinks) return;
     const timer = setTimeout(() => setGame(current => current ? computerStep(current) : current), 850);
     return () => clearTimeout(timer);
-  }, [game, appActive, setGame, showRules, showOpponents, showMenu, showRestart]);
+  }, [game, appActive, setGame, showRules, showOpponents, showMenu, showRestart, showDrinks]);
   useEffect(() => { setSelected(null); cancelDrag(); }, [game?.round, game?.turn]);
   useEffect(() => { setShowResult(!!game?.result); }, [game?.result]);
   useEffect(() => {
     setTurnReminder(false);
     setShowTurnHelp(false);
-    if (!game || game.result || game.turn !== 'human' || !appActive || showRules || showOpponents || showMenu || showRestart) return;
+    if (!game || game.result || game.turn !== 'human' || !appActive || showRules || showOpponents || showMenu || showRestart || showDrinks) return;
     setShowTurnHelp(true);
     const helpTimer = setTimeout(() => setShowTurnHelp(false), 5000);
     const timer = setTimeout(() => setTurnReminder(true), 8000);
     return () => { clearTimeout(timer); clearTimeout(helpTimer); };
-  }, [game, appActive, showRules, showOpponents, showMenu, showRestart]);
+  }, [game, appActive, showRules, showOpponents, showMenu, showRestart, showDrinks]);
 
   const header = <View style={{ height: compact ? 48 : 58, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: C.line }}>
     <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Volver' : 'Back'} onPress={back}
@@ -216,9 +220,17 @@ export function ComputerGameScreen() {
   };
   const nextRound = () => {
     cancelDrag(); setSelected(null); setShowResult(false);
+    if (game && matchWinner(game)) setDrinkGift(null);
     setGame(current => current ? deal(current.playerName, current.target, Math.random, matchWinner(current) ? undefined : current, current.scoringMode) : current);
   };
+  const chooseDrink = (drinkId: DrinkId) => {
+    if (drinkSelectionLock.current) return;
+    drinkSelectionLock.current = true;
+    setDrinkGift(current => ({ drinkId, sequence: (current?.sequence ?? 0) + 1 }));
+    setShowDrinks(false);
+  };
   const confirmRestart = () => {
+    setDrinkGift(null); setShowDrinks(false);
     cancelDrag(); setSelected(null); setShowResult(false); setShowTurnHelp(false); setTurnReminder(false);
     setShowRules(false); setShowOpponents(false); setShowMenu(false); setShowRestart(false);
     setTablePan({ x: 0, y: 0 }); panRef.current = { x: 0, y: 0 }; panStart.current = { x: 0, y: 0 };
@@ -259,7 +271,7 @@ export function ComputerGameScreen() {
       </Pressable>
     </View>
     <View style={{ flex: 1 }}>
-      <DominoTableBackground opponentHeight={opponentHeight} />
+      <DominoTableBackground opponentHeight={opponentHeight} gift={drinkGift} es={es} finished={!!game.result && !!matchWinner(game)} />
       <View style={{ height: opponentHeight, flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 12, gap: 6 }}>
         <Pressable accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }}
           style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14, minHeight: 44, justifyContent: 'center', backgroundColor: '#102820', borderWidth: 1, borderColor: C.line, borderRadius: 12, padding: 8 }}>
@@ -271,8 +283,9 @@ export function ComputerGameScreen() {
         <Image source={opponent.image} resizeMode="contain"
           accessibilityLabel={es ? 'Avatar del rival virtual' : 'Virtual opponent avatar'}
           style={{ flex: 1, minWidth: 0, height: opponentHeight }} />
-        <View testID="stock-info" style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><Feather name="layers" color={C.muted} size={12} /><Text style={{ flexShrink: 1, color: C.muted, fontSize: 10 }}>{text.stock} · {game.stock.length}</Text></View>
+        <View style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14 }}>
+
+          <DrinkInviteButton es={es} compact={compact} active={appActive && !showDrinks && !showMenu && !showRestart && !showRules && !showOpponents} onPress={() => { cancelDrag(); drinkSelectionLock.current = false; setShowDrinks(true); }} />
         </View>
       </View>
       <View style={{ alignItems: 'center', height: 25, justifyContent: 'center' }}>
@@ -304,6 +317,7 @@ export function ComputerGameScreen() {
     <View style={{ paddingHorizontal: 12, paddingBottom: 2 }}>
       <View style={{ height: compact ? 30 : 35, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Avatar active={humanTurn} small /><Text numberOfLines={1} style={{ flex: 1, color: C.ivory, fontSize: 12, fontWeight: '600' }}>{game.playerName}</Text>
+        <View testID="stock-info" style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Feather name="layers" color={C.muted} size={11} /><Text style={{ color: C.muted, fontSize: 10 }}>{text.stock} · {game.stock.length}</Text></View>
         <Text style={{ color: C.muted, fontSize: 10 }}>{game.hands.human.length} {text.tiles}</Text>
       </View>
       <View testID="player-hand" style={{ height: (handSize * 2 + 26) * handRows, width: (handSize + 10) * handColumns + (handColumns - 1) * 2 + 4,
@@ -348,6 +362,11 @@ export function ComputerGameScreen() {
       <DominoTile a={drag.tile.a} b={drag.tile.b} size={handSize} vertical selected />
     </View>}
     {rules}
+    <Dialog visible={showDrinks} title={es ? 'Invita una bebida' : 'Treat your opponent'} onClose={() => setShowDrinks(false)} closeLabel={text.cancel}>
+      <DrinkChoices es={es} choose={chooseDrink} />
+      <View style={{ height: 14 }} />
+      <Action label={text.cancel} subtle onPress={() => setShowDrinks(false)} />
+    </Dialog>
     <Dialog visible={showMenu} title={es ? 'Menú de partida' : 'Game menu'} onClose={() => setShowMenu(false)} closeLabel={text.cancel}>
       <Action label={text.showRules} onPress={() => { setShowMenu(false); setShowRules(true); }} />
       <View style={{ height: 12 }} />
@@ -362,7 +381,7 @@ export function ComputerGameScreen() {
     <Dialog visible={showOpponents} title={es ? 'Tu rival' : 'Your opponent'} onClose={() => setShowOpponents(false)} closeLabel={text.cancel}>
       {opponentPicker}
     </Dialog>
-    <Dialog visible={showResult && !!game.result && !showRules && !showMenu && !showRestart} title={es ? 'Fin de ronda' : 'Round complete'} onClose={() => setShowResult(false)} closeLabel={es ? 'Ver mesa' : 'View table'}>
+    <Dialog visible={showResult && !!game.result && !showRules && !showMenu && !showRestart && !showDrinks} title={es ? 'Fin de ronda' : 'Round complete'} onClose={() => setShowResult(false)} closeLabel={es ? 'Ver mesa' : 'View table'}>
       <View style={{ alignItems: 'center', gap: 14, paddingVertical: 10 }}>
         <Feather name="award" size={38} color={C.gold} />
         <Text style={{ color: C.ivory, fontSize: 22, textAlign: 'center', lineHeight: 30 }}>{resultTitle}</Text>

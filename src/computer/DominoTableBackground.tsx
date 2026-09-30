@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { TableDrinkGift } from './DrinkGift';
+import type { DrinkGift } from './drinks';
 import { View } from 'react-native';
 import Svg, { Defs, Ellipse, G, LinearGradient, Path, Stop } from 'react-native-svg';
 
 /** Original full lower-table perspective, with two decorative upper cup holders. */
-export function DominoTableBackground({ opponentHeight }: { opponentHeight: number }) {
-  return <View pointerEvents="none" accessible={false} style={{ position: 'absolute', top: opponentHeight - 15, bottom: -70, left: -35, right: -35 }}>
+export function DominoTableBackground({ opponentHeight, gift, es, finished }: { opponentHeight: number; gift: DrinkGift; es: boolean; finished: boolean }) {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  return <View pointerEvents="none" accessible={false} onLayout={({ nativeEvent: { layout } }) => setSize({ width: layout.width, height: layout.height })} style={{ position: 'absolute', top: opponentHeight - 15, bottom: -70, left: -35, right: -35 }}>
     <Svg width="100%" height="100%" viewBox="0 0 400 600" preserveAspectRatio="none">
       <Defs>
         <LinearGradient id="felt" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor="#102C28" /><Stop offset="0.55" stopColor="#245F4C" /><Stop offset="1" stopColor="#34735B" /></LinearGradient>
@@ -24,5 +27,6 @@ export function DominoTableBackground({ opponentHeight }: { opponentHeight: numb
         <Path d={`M${x - 7} 17 Q${x} 21 ${x + 7} 17`} fill="none" stroke="#737963" strokeWidth="0.7" opacity="0.6" />
       </G>)}
     </Svg>
+    {size.width > 0 && <TableDrinkGift finished={finished} gift={gift} bottleHeight={Math.min(54, Math.max(30, opponentHeight - 70))} width={size.width} height={size.height} es={es} />}
   </View>;
 }

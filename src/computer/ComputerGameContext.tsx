@@ -1,8 +1,13 @@
-import React, { createContext, useContext, useState } from 'react';
-import { deal, Game, ScoringMode } from './engine';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { deal, Game, ScoringMode, matchWinner } from './engine';
+import { useReducedMotion } from './DrinkGift';
+import { scheduleDrinkGiftExpiry } from './drinkGiftLifecycle';
+import type { DrinkGift } from './drinks';
 import type { OpponentId } from './opponents';
 
 const Context = createContext<{
+  drinkGift: DrinkGift;
+  setDrinkGift: React.Dispatch<React.SetStateAction<DrinkGift>>;
   game: Game | null;
   setGame: React.Dispatch<React.SetStateAction<Game | null>>;
   start: (name: string, target: number, mode?: ScoringMode) => void;
@@ -12,9 +17,13 @@ const Context = createContext<{
 
 /** Keeps the offline game alive while navigating between screens. */
 export function ComputerGameProvider({ children }: { children: React.ReactNode }) {
+  const [drinkGift, setDrinkGift] = useState<DrinkGift>(null);
   const [game, setGame] = useState<Game | null>(null);
+  const reducedMotion = useReducedMotion();
+  const finished = !!game?.result && !!matchWinner(game);
+  useEffect(() => scheduleDrinkGiftExpiry(drinkGift, finished, reducedMotion, setDrinkGift), [drinkGift, finished, reducedMotion]);
   const [opponentId, setOpponentId] = useState<OpponentId>('rafael');
-  return <Context.Provider value={{ game, setGame, opponentId, setOpponentId, start: (name, target, mode) => setGame(deal(name, target, Math.random, undefined, mode)) }}>
+  return <Context.Provider value={{ drinkGift, setDrinkGift, game, setGame, opponentId, setOpponentId, start: (name, target, mode) => { setDrinkGift(null); setGame(deal(name, target, Math.random, undefined, mode)); } }}>
     {children}
   </Context.Provider>;
 }

@@ -1,0 +1,26 @@
+{
+  "tool": "image_gen (built-in)",
+  "designs": [
+    [
+      "green",
+      "emerald green glass beer bottle, small silver cap, ivory blank label with thin red accents"
+    ],
+    [
+      "gold",
+      "clear glass beer bottle filled with golden pale beer, silver cap, small ivory blank label with navy blue accents"
+    ],
+    [
+      "classic",
+      "dark olive green glass beer bottle, gold cap, cream blank label edged in burgundy"
+    ],
+    [
+      "red",
+      "red aluminum beer can with a broad clean ivory panel and brushed silver top"
+    ],
+    [
+      "silver",
+      "brushed silver aluminum light beer can with deep navy blue bands and a small white panel"
+    ]
+  ],
+  "promptTemplate": "Photorealistic premium product cutout for a tiny mobile domino game beer gift. One single [design]. Original generic packaging, absolutely no letters, text, brand names, logos or trademark symbols. Realistic glass or metal texture, subtle condensation droplets, convincing highlights, volume and soft studio light. Upright front-facing, slight top visibility, full object including cap and base, centered tall object fills 90 percent of portrait frame, no floor shadow or environment, actual transparent background. Keep silhouette clean and readable at 50 pixels tall."
+}
