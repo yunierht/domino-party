@@ -14,6 +14,7 @@ import { ScoreRing } from '../components/ScoreRing';
 import { Match, Team, teamTotal } from '../types';
 import { ThemeName } from '../theme/themes';
 import { useComputerGame } from '../computer/ComputerGameContext';
+import { useReducedMotion } from '../computer/DrinkGift';
 import { COMPUTER_STRINGS } from '../computer/strings';
 
 const HOME_THEME_ORDER: ThemeName[] = ['carbon', 'dark', 'casino', 'cubano', 'usa'];
@@ -210,25 +211,28 @@ function ResumeMatchCard({
   const { t } = useI18n();
   const c = theme.colors;
   const attention = useRef(new Animated.Value(1)).current;
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
+    attention.setValue(1);
+    if (reducedMotion) return;
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(attention, { toValue: 1.025, duration: 260, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.timing(attention, { toValue: 1, duration: 280, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+        Animated.timing(attention, { toValue: 1.025, duration: 260, easing: Easing.out(Easing.quad), useNativeDriver: true, isInteraction: false }),
+        Animated.timing(attention, { toValue: 1, duration: 280, easing: Easing.in(Easing.quad), useNativeDriver: true, isInteraction: false }),
         Animated.delay(1500),
       ]),
     );
     loop.start();
-    return () => loop.stop();
-  }, [attention]);
+    return () => { loop.stop(); attention.setValue(1); };
+  }, [attention, reducedMotion]);
 
   const scoreA = teamTotal(match, match.teams[0].id);
   const scoreB = teamTotal(match, match.teams[1].id);
 
   return (
     <View style={{ marginBottom: s(18), paddingVertical: s(3) }}>
-      <Animated.View style={{ transform: [{ scale: attention }] }}>
+      <View>
         <Card style={{ borderColor: c.primary }}>
           <LinearGradient
             colors={[c.primary, 'rgba(0,0,0,0)']}
@@ -267,16 +271,16 @@ function ResumeMatchCard({
             />
           </Pressable>
           <View style={{ marginTop: s(16), flexDirection: 'row', gap: s(10) }}>
-            <View style={{ flex: 1 }}>
+            <Animated.View testID="resume-button-pulse" style={{ flex: 1, transform: [{ scale: attention }] }}>
               <Button label={t.resumeShort} onPress={onResume} fullWidth />
-            </View>
+            </Animated.View>
             <View style={{ flex: 1 }}>
               <Button label={t.matchShort} onPress={onNewMatch} fullWidth />
             </View>
           </View>
           {children}
         </Card>
-      </Animated.View>
+      </View>
     </View>
   );
 }
