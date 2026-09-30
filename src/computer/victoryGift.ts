@@ -6,5 +6,10 @@ export type VictoryGift = { drinkId: DrinkId; opponentName: string };
 export function claimVictoryGift(result: Result | null, seen: WeakSet<Result>, opponentName: string): VictoryGift | null {
   if (!result || result.winner !== 'human' || seen.has(result)) return null;
   seen.add(result);
-  return { drinkId: 'margarita', opponentName };
+  return { drinkId: 'heineken', opponentName };
+}
+
+/** Stale animation completions cannot dismiss a newer hand's reward. */
+export function clearVictoryGift(current: VictoryGift | null, completed: VictoryGift) {
+  return current === completed ? null : current;
 }

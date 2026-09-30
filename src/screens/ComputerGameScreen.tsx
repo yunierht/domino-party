@@ -3,7 +3,7 @@ import { AppState, BackHandler, Image, Modal, PanResponder, Platform, Pressable,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
-import { VictoryDrink } from '../computer/VictoryDrink';
+import { VictoryDrink, VictoryBeerBadge } from '../computer/VictoryDrink';
 import { DrinkChoices, DrinkInviteButton } from '../computer/DrinkGift';
 import type { DrinkId } from '../computer/drinks';
 import { DominoTableBackground } from '../computer/DominoTableBackground';
@@ -58,7 +58,7 @@ function Avatar({ computer = false, active = false, small = false }: { computer?
 export function ComputerGameScreen() {
   const windowSize = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const { game, setGame, start, opponentId, setOpponentId, drinkGift, setDrinkGift, victoryGift, dismissVictoryGift } = useComputerGame();
+  const { game, setGame, start, opponentId, setOpponentId, drinkGift, setDrinkGift, victoryGift, deliveryGift, dismissVictoryGift, finishVictoryGift, expireVictoryGift } = useComputerGame();
   useEffect(() => () => dismissVictoryGift(), [dismissVictoryGift]);
   const opponent = OPPONENTS.find(item => item.id === opponentId) ?? OPPONENTS[0];
   const { lang, t } = useI18n();
@@ -125,7 +125,7 @@ export function ComputerGameScreen() {
     return () => clearTimeout(timer);
   }, [game, appActive, setGame, showRules, showOpponents, showMenu, showRestart, showDrinks]);
   useEffect(() => { setSelected(null); cancelDrag(); }, [game?.round, game?.turn]);
-  useEffect(() => { setShowResult(!!game?.result); }, [game?.result]);
+  useEffect(() => { setShowResult(!!game?.result && game.result.winner !== 'human'); }, [game?.result]);
   useEffect(() => {
     setTurnReminder(false);
     setShowTurnHelp(false);
@@ -221,7 +221,7 @@ export function ComputerGameScreen() {
     setSelected(null); cancelDrag();
   };
   const nextRound = () => {
-    dismissVictoryGift();
+    if (game && matchWinner(game)) dismissVictoryGift();
     cancelDrag(); setSelected(null); setShowResult(false);
     if (game && matchWinner(game)) setDrinkGift(null);
     setGame(current => current ? deal(current.playerName, current.target, Math.random, matchWinner(current) ? undefined : current, current.scoringMode) : current);
@@ -319,9 +319,8 @@ export function ComputerGameScreen() {
         </Pressable>
       </View>
     <View style={{ paddingHorizontal: 12, paddingBottom: 2 }}>
-      {victoryGift && !showResult && <VictoryDrink gift={victoryGift} es={es} tray onClose={dismissVictoryGift} />}
       <View style={{ height: compact ? 30 : 35, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Avatar active={humanTurn} small /><Text numberOfLines={1} style={{ flex: 1, color: C.ivory, fontSize: 12, fontWeight: '600' }}>{game.playerName}</Text>
+        <Avatar active={humanTurn} small />{victoryGift && !deliveryGift && <View testID="human-beer" accessibilityLabel={es ? `Cerveza de ${victoryGift.opponentName}` : `Beer from ${victoryGift.opponentName}`}><VictoryBeerBadge gift={victoryGift} finished={!!game.result && !!winner} onExpire={expireVictoryGift} /></View>}<Text numberOfLines={1} style={{ flex: 1, color: C.ivory, fontSize: 12, fontWeight: '600' }}>{game.playerName}</Text>
         <View testID="stock-info" style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Feather name="layers" color={C.muted} size={11} /><Text style={{ color: C.muted, fontSize: 10 }}>{text.stock} · {game.stock.length}</Text></View>
         <Text style={{ color: C.muted, fontSize: 10 }}>{game.hands.human.length} {text.tiles}</Text>
       </View>
@@ -383,10 +382,11 @@ export function ComputerGameScreen() {
       <View style={{ height: 12 }} />
       <Action label={es ? 'Reiniciar' : 'Restart'} onPress={confirmRestart} />
     </Dialog>
+    {deliveryGift && <VictoryDrink gift={deliveryGift} es={es} height={usableHeight} startY={opponentHeight + 35} onComplete={finishVictoryGift} />}
     <Dialog visible={showOpponents} title={es ? 'Tu rival' : 'Your opponent'} onClose={() => setShowOpponents(false)} closeLabel={text.cancel}>
       {opponentPicker}
     </Dialog>
-    <Dialog visible={showResult && !!game.result && !showRules && !showMenu && !showRestart && !showDrinks} title={winner ? (es ? 'Fin de partida' : 'Match complete') : (es ? 'Fin de ronda' : 'Round complete')} onClose={() => setShowResult(false)} closeLabel={es ? 'Ver mesa' : 'View table'}>
+    <Dialog visible={showResult && !(winner && victoryGift) && !!game.result && !showRules && !showMenu && !showRestart && !showDrinks} title={winner ? (es ? 'Fin de partida' : 'Match complete') : (es ? 'Fin de ronda' : 'Round complete')} onClose={() => setShowResult(false)} closeLabel={es ? 'Ver mesa' : 'View table'}>
       <View style={{ alignItems: 'center', gap: 14, paddingVertical: 10 }}>
         <Feather name="award" size={38} color={C.gold} />
         <Text style={{ color: C.ivory, fontSize: 22, textAlign: 'center', lineHeight: 30 }}>{resultTitle}</Text>
@@ -394,11 +394,6 @@ export function ComputerGameScreen() {
         <Text style={{ color: C.muted, fontSize: 12 }}>{winsMode ? (es ? 'victorias' : 'wins') : game.result?.blocked ? text.blocked : text.points}</Text>
         <View style={{ flexDirection: 'row', gap: 5, flexWrap: 'wrap', justifyContent: 'center', marginVertical: 12 }}>{game.hands.computer.map(tile => <DominoTile key={tile.id} a={tile.a} b={tile.b} size={22} />)}</View>
       </View>
-      {victoryGift && <>
-        <VictoryDrink gift={victoryGift} es={es} />
-        <Action label={es ? 'Ver mi bebida' : 'View my drink'} subtle onPress={() => setShowResult(false)} />
-        <View style={{ height: 10 }} />
-      </>}
       <Action label={winner ? text.again : text.next} onPress={nextRound} />
     </Dialog>
   </View>;

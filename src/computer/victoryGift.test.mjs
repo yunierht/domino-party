@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { claimVictoryGift } from './victoryGift.ts';
+import { claimVictoryGift, clearVictoryGift } from './victoryGift.ts';
 import { deal, play, matchWinner, restartMatch } from './engine.ts';
 function win(mode, player = 'human', previous) {
   const game = deal('Player', 3, () => 0.3, previous, mode);
@@ -17,7 +17,7 @@ test('every successive winning hand earns one gift, including final match hand',
       game=win(mode,'human',game);
       assert.equal(game.round,round);
       assert.equal(matchWinner(game),round===3?'human':null);
-      assert.deepEqual(claimVictoryGift(game.result,seen,'Chuchi'),{drinkId:'margarita',opponentName:'Chuchi'});
+      assert.deepEqual(claimVictoryGift(game.result,seen,'Chuchi'),{drinkId:'heineken',opponentName:'Chuchi'});
       assert.equal(claimVictoryGift(game.result,seen,'Chuchi'),null);
       assert.equal(claimVictoryGift({...game}.result,seen,'Another rival'),null);
     }
@@ -38,4 +38,11 @@ test('dismissed hand stays consumed; new hand and restart allow a new reward', (
   assert.equal(claimVictoryGift(reset.result,seen,'Chuchi'),null);
   assert.equal(claimVictoryGift(first.result,seen,'Chuchi'),null);
   assert.ok(claimVictoryGift(win('wins').result,seen,'Chuchi'));
+});
+
+test('old completion cannot clear a replacement reward or revive a dismissed gift', () => {
+ const old={drinkId:'heineken',opponentName:'Andy'}, next={drinkId:'heineken',opponentName:'Chuchi'};
+ assert.equal(clearVictoryGift(next,old),next);
+ assert.equal(clearVictoryGift(null,old),null);
+ assert.equal(clearVictoryGift(old,old),null);
 });

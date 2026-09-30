@@ -1,32 +1,63 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Easing, Pressable, Text, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Animated, Easing, Text, View } from 'react-native';
 import { DrinkIllustration, useReducedMotion } from './DrinkGift';
 import type { VictoryGift } from './victoryGift';
 import { TABLE as C } from './tableTheme';
 
-export function VictoryDrink({ gift, es, tray = false, onClose }: { gift: VictoryGift; es: boolean; tray?: boolean; onClose?: () => void }) {
+/** Automatic delivery above the table, shrinking before docking beside the player. */
+export function VictoryDrink({ gift, es, height, startY, onComplete }: {
+  gift: VictoryGift; es: boolean; height: number; startY: number; onComplete: (gift: VictoryGift) => void;
+}) {
   const reduced = useReducedMotion();
-  const slide = useRef(new Animated.Value(0)).current;
+  const travel = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(1)).current;
+  const size = useRef(new Animated.Value(1)).current;
+  const landingY = Math.max(startY + 100, height * 0.69 - 90);
   useEffect(() => {
-    slide.stopAnimation();
-    if (reduced || !tray) { slide.setValue(0); return; }
-    slide.setValue(-32);
-    Animated.timing(slide, { toValue: 0, duration: 650, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
-    return () => slide.stopAnimation();
-  }, [gift, reduced, tray, slide]);
-  return <View testID={tray ? 'victory-drink-tray' : 'victory-drink-card'} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 14, borderWidth: 1, borderColor: C.gold,
-    backgroundColor: '#173A30', padding: 10, marginBottom: 10, minHeight: 78, overflow: 'hidden' }}>
-    <Animated.View style={{ transform: [{ translateY: slide }], alignItems: 'center', width: 44 }}>
-      <DrinkIllustration id={gift.drinkId} height={54} />
-      {tray && <View style={{ height: 3, width: 42, borderRadius: 12, backgroundColor: '#9D8658' }} />}
+    let active = true;
+    travel.setValue(reduced ? 1 : 0); opacity.setValue(1); size.setValue(1);
+    const animation = Animated.sequence([
+      ...(reduced ? [Animated.delay(1400)] : [
+        Animated.timing(travel, { toValue: 1.04, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(travel, { toValue: 1, duration: 200, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      ]),
+      Animated.delay(1200),
+      Animated.parallel([
+        Animated.timing(opacity, { toValue: 0, duration: 600, useNativeDriver: true }),
+        Animated.timing(size, { toValue: reduced ? 1 : 0.28, duration: 600, useNativeDriver: true }),
+      ]),
+    ]);
+    animation.start(({ finished }) => { if (active && finished) onComplete(gift); });
+    return () => { active = false; animation.stop(); };
+  }, [gift, reduced, travel, opacity, size, onComplete]);
+  return <View pointerEvents="none" testID="victory-delivery" style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, zIndex: 100 }}>
+    <Animated.View testID="victory-beer" style={{ position: 'absolute', alignSelf: 'center', top: startY, opacity,
+      transform: [{ translateY: travel.interpolate({ inputRange: [0, 1], outputRange: [0, landingY - startY] }) },
+        { rotate: travel.interpolate({ inputRange: [0, 0.65, 1], outputRange: ['-12deg', '7deg', '0deg'] }) }, { scale: size }] }}>
+      <DrinkIllustration id={gift.drinkId} height={100} />
     </Animated.View>
-    <View style={{ flex: 1 }} accessibilityLiveRegion="polite">
-      <Text style={{ color: C.goldLight, fontWeight: '600', fontSize: 13 }}>{es ? `Bien jugado. ${gift.opponentName} te invita` : `Well played. ${gift.opponentName}'s treat`}</Text>
-      <Text style={{ color: C.muted, fontSize: 11, marginTop: 5 }}>{es ? 'Una margarita virtual por esta mano ganada.' : 'A virtual margarita for your winning hand.'}</Text>
-    </View>
-    {onClose && <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Cerrar regalo' : 'Dismiss gift'} onPress={onClose} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
-      <Feather name="x" size={18} color={C.muted} />
-    </Pressable>}
+    <Animated.View style={{ position: 'absolute', top: landingY + 108, left: 18, right: 18, alignItems: 'center', opacity }} accessibilityLiveRegion="polite">
+      <Text style={{ color: C.goldLight, backgroundColor: '#102F25EE', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 9, fontSize: 14, fontWeight: '600', textAlign: 'center' }}>
+        {es ? `${gift.opponentName} te invitó una cerveza` : `${gift.opponentName} bought you a drink`}
+      </Text>
+    </Animated.View>
   </View>;
+}
+
+/** Received beer survives hands and fades only after the complete match. */
+export function VictoryBeerBadge({ gift, finished, onExpire }: { gift: VictoryGift; finished: boolean; onExpire: (gift: VictoryGift) => void }) {
+  const reduced = useReducedMotion();
+  const opacity = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    let active = true;
+    opacity.setValue(1);
+    if (!finished) return;
+    const animation = Animated.sequence([
+      Animated.delay(900),
+      Animated.timing(opacity, { toValue: 0, duration: reduced ? 0 : 600, useNativeDriver: true }),
+    ]);
+    animation.start(({ finished: done }) => { if (active && done) onExpire(gift); });
+    return () => { active = false; animation.stop(); };
+  }, [gift, finished, reduced, opacity, onExpire]);
+  return <Animated.View style={{ opacity }}><DrinkIllustration id={gift.drinkId} height={28} /></Animated.View>;
 }
