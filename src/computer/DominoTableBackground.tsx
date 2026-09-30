@@ -1,41 +1,27 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View } from 'react-native';
-import Svg, { Defs, Ellipse, G, LinearGradient, Path, RadialGradient, Stop } from 'react-native-svg';
+import Svg, { Defs, Ellipse, G, LinearGradient, Path, Stop } from 'react-native-svg';
 
-/** Decorative table only: the board keeps its own layout and touch surface. */
-export function DominoTableBackground() {
-  const [size, setSize] = useState({ width: 390, height: 400 });
-  const { width: w, height: h } = size;
-  const outline = `M24 2 H${w - 24} Q${w - 3} 2 ${w - 3} 23 V${h - 24} Q${w - 3} ${h - 5} ${w - 24} ${h - 5} H24 Q3 ${h - 5} 3 ${h - 24} V23 Q3 2 24 2 Z`;
-  return <View pointerEvents="none" accessible={false} style={{ position: 'absolute', inset: 0 }}
-    onLayout={({ nativeEvent: { layout } }) => { if (layout.width > 0 && layout.height > 0) setSize({ width: layout.width, height: layout.height }); }}>
-    <Svg width="100%" height="100%" viewBox={`0 0 ${w} ${h}`}>
+/** Original full lower-table perspective, with two decorative upper cup holders. */
+export function DominoTableBackground({ opponentHeight }: { opponentHeight: number }) {
+  return <View pointerEvents="none" accessible={false} style={{ position: 'absolute', top: opponentHeight - 15, bottom: -70, left: -35, right: -35 }}>
+    <Svg width="100%" height="100%" viewBox="0 0 400 600" preserveAspectRatio="none">
       <Defs>
-        <LinearGradient id="table-wood" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#A87B45" /><Stop offset="0.28" stopColor="#62432B" />
-          <Stop offset="0.65" stopColor="#8E633B" /><Stop offset="1" stopColor="#35271C" />
-        </LinearGradient>
-        <RadialGradient id="table-felt" cx="50%" cy="42%" rx="70%" ry="75%">
-          <Stop offset="0" stopColor="#28634F" /><Stop offset="0.7" stopColor="#1A493A" /><Stop offset="1" stopColor="#0E2D26" />
-        </RadialGradient>
-        <LinearGradient id="cup-rim" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor="#C8B78E" /><Stop offset="0.45" stopColor="#615A47" /><Stop offset="1" stopColor="#B2A17D" />
-        </LinearGradient>
-        <LinearGradient id="cup-well" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor="#010706" /><Stop offset="1" stopColor="#26312A" />
-        </LinearGradient>
+        <LinearGradient id="felt" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor="#102C28" /><Stop offset="0.55" stopColor="#245F4C" /><Stop offset="1" stopColor="#34735B" /></LinearGradient>
+        <LinearGradient id="rail" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor="#A18A5D" /><Stop offset="0.15" stopColor="#6F5839" /><Stop offset="0.5" stopColor="#403C2C" /><Stop offset="1" stopColor="#151D17" /></LinearGradient>
+        <LinearGradient id="cup-rim" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor="#D2BF91" /><Stop offset="0.5" stopColor="#625B48" /><Stop offset="1" stopColor="#AF9C74" /></LinearGradient>
+        <LinearGradient id="cup-well" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor="#010706" /><Stop offset="1" stopColor="#26312A" /></LinearGradient>
       </Defs>
-      <Path d={outline} fill="#020A08" transform="translate(0 4)" />
-      <Path d={outline} fill="url(#table-wood)" stroke="#BF9860" strokeWidth="1" />
-      <Path d={`M35 10 H${w - 35} Q${w - 11} 10 ${w - 11} 35 V${h - 37} Q${w - 11} ${h - 14} ${w - 35} ${h - 14} H35 Q11 ${h - 14} 11 ${h - 37} V35 Q11 10 35 10 Z`}
-        fill="url(#table-felt)" stroke="#17241B" strokeWidth="3" />
-      <Path d={`M42 6 H${w - 42} M7 42 V${h - 44} M${w - 7} 42 V${h - 44} M42 ${h - 9} H${w - 42}`}
-        stroke="#D3AB71" strokeWidth="0.7" opacity="0.4" fill="none" />
-      {[[22, 17], [w - 22, 17], [22, h - 23], [w - 22, h - 23]].map(([x, y], i) => <G key={i}>
-        <Ellipse cx={x} cy={y + 2} rx={16} ry={12} fill="#241B12" opacity="0.8" />
-        <Ellipse cx={x} cy={y} rx={15} ry={11} fill="url(#cup-rim)" stroke="#D1B983" strokeWidth="0.6" />
-        <Ellipse cx={x} cy={y} rx={11.5} ry={8} fill="url(#cup-well)" stroke="#141B15" strokeWidth="1.5" />
-        <Path d={`M${x - 8} ${y + 4} Q${x} ${y + 9} ${x + 8} ${y + 4}`} fill="none" stroke="#68715C" strokeWidth="0.8" opacity="0.65" />
+      <Path d="M48 7 Q200 -2 352 7 L399 560 Q400 588 376 596 L24 596 Q0 588 1 560 Z" fill="#020C09" />
+      <Path d="M48 3 Q200 -6 352 3 L399 550 Q400 578 376 584 L24 584 Q0 578 1 550 Z" fill="url(#rail)" stroke="#A48D5D" strokeWidth="1" />
+      <Path d="M54 14 Q200 5 346 14 L387 547 Q390 562 371 566 L29 566 Q10 562 13 547 Z" fill="url(#felt)" stroke="#88936B" strokeWidth="1.5" />
+      <Path d="M56 17 Q200 8 344 17 L384 546" fill="none" stroke="#061C15" strokeWidth="2" opacity="0.45" />
+      <Path d="M66 5 Q200 -1 334 5" fill="none" stroke="#E0C88F" strokeWidth="0.9" opacity="0.6" />
+      {[60, 340].map(x => <G key={x}>
+        <Ellipse cx={x} cy={17} rx={14} ry={9.5} fill="#1A180F" opacity="0.8" />
+        <Ellipse cx={x} cy={14} rx={13} ry={8.5} fill="url(#cup-rim)" stroke="#CAB582" strokeWidth="0.6" />
+        <Ellipse cx={x} cy={14} rx={10} ry={6.3} fill="url(#cup-well)" stroke="#101A13" strokeWidth="1.2" />
+        <Path d={`M${x - 7} 17 Q${x} 21 ${x + 7} 17`} fill="none" stroke="#737963" strokeWidth="0.7" opacity="0.6" />
       </G>)}
     </Svg>
   </View>;

@@ -259,6 +259,7 @@ export function ComputerGameScreen() {
       </Pressable>
     </View>
     <View style={{ flex: 1 }}>
+      <DominoTableBackground opponentHeight={opponentHeight} />
       <View style={{ height: opponentHeight, flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 12, gap: 6 }}>
         <Pressable accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }}
           style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14, minHeight: 44, justifyContent: 'center', backgroundColor: '#102820', borderWidth: 1, borderColor: C.line, borderRadius: 12, padding: 8 }}>
@@ -274,8 +275,6 @@ export function ComputerGameScreen() {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><Feather name="layers" color={C.muted} size={12} /><Text style={{ flexShrink: 1, color: C.muted, fontSize: 10 }}>{text.stock} · {game.stock.length}</Text></View>
         </View>
       </View>
-      <View style={{ flex: 1 }}>
-      <DominoTableBackground />
       <View style={{ alignItems: 'center', height: 25, justifyContent: 'center' }}>
         <View>
           <View style={{ flexDirection: 'row', gap: 3 }}>
@@ -301,7 +300,6 @@ export function ComputerGameScreen() {
           style={{ position: 'absolute', right: 0, top: 0, minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: C.surface, borderRadius: 12 }}>
           <Feather name="maximize" size={18} color={C.gold} />
         </Pressable>
-      </View>
       </View>
     <View style={{ paddingHorizontal: 12, paddingBottom: 2 }}>
       <View style={{ height: compact ? 30 : 35, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
