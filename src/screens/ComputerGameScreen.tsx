@@ -273,7 +273,10 @@ export function ComputerGameScreen() {
       <View style={{ height: opponentHeight, flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 12, gap: 6 }}>
         <Pressable accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }}
           style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14, minHeight: 44, justifyContent: 'center', backgroundColor: '#102820', borderWidth: 1, borderColor: C.line, borderRadius: 12, padding: 8 }}>
-          <Text style={{ color: C.goldLight, fontSize: 10, fontWeight: '600' }}>{opponent.name} ⌄</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Text numberOfLines={1} style={{ flexShrink: 1, color: C.goldLight, fontSize: 10, fontWeight: '600' }}>{opponent.name}</Text>
+            <Feather name="users" size={14} color={C.goldLight} accessible={false} />
+          </View>
         </Pressable>
         <Image source={opponent.image} resizeMode="contain"
           accessibilityLabel={es ? 'Avatar del rival virtual' : 'Virtual opponent avatar'}
