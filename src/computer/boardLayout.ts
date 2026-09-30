@@ -98,12 +98,17 @@ export function chainSlot(offset: number, metrics: ReturnType<typeof boardMetric
   const p = points.get(offset)!;
   return { ...p, x: metrics.width / 2 + p.x * scale, y: metrics.height / 2 + p.y * scale * 0.86, scale };
 }
-/** Drop only inside an available end's highlighted slot; never auto-pick another end. */
+/** Keep the highlighted drop zone, then choose the spatially nearest legal end.
+ * Camera inversion preserves distances; exact ties consistently favor the left end.
+ */
 export function resolveDrop(point: Point, targets: { end: End; point: Point }[], metrics: ReturnType<typeof boardMetrics>): End | null {
-  const hits = targets.filter(target => Math.abs(point.x - target.point.x) <= metrics.stepX / 2 &&
+  const inside = targets.some(target => Math.abs(point.x - target.point.x) <= metrics.stepX / 2 &&
     Math.abs(point.y - target.point.y) <= metrics.stepY / 2);
-  hits.sort((a, b) => Math.hypot(point.x - a.point.x, point.y - a.point.y) - Math.hypot(point.x - b.point.x, point.y - b.point.y));
-  return hits[0]?.end ?? null;
+  if (!inside) return null;
+  return [...targets].sort((a, b) => {
+    const distance = Math.hypot(point.x - a.point.x, point.y - a.point.y) - Math.hypot(point.x - b.point.x, point.y - b.point.y);
+    return distance || (a.end === b.end ? 0 : a.end === 'left' ? -1 : 1);
+  })[0]?.end ?? null;
 }
 
 export interface BoardCamera { x: number; y: number; scale: number }

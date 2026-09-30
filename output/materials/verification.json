@@ -1,0 +1,26 @@
+{
+  "visual": [
+    "390x844",
+    "375x667"
+  ],
+  "drag": "Real browser pointer drag of 2/5 legal at both ends: release at right placed 5/2 at right; release at left placed 5/2 at left. Tap still displays side choices.",
+  "tests": 53,
+  "typeScript": "passed",
+  "physicalDevice": false,
+  "fixtureRemoved": true,
+  "expo": {
+    "link": "exp://192.168.1.194:8081",
+    "checks": [
+      {
+        "platform": "ios",
+        "manifest": 200,
+        "bundle": 200
+      },
+      {
+        "platform": "android",
+        "manifest": 200,
+        "bundle": 200
+      }
+    ]
+  }
+}
