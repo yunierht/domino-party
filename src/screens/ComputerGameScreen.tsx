@@ -292,7 +292,7 @@ export function ComputerGameScreen() {
             <Feather name="users" size={14} color={C.goldLight} accessible={false} />
           </View>
         </Pressable>
-        {opponentId !== 'alex' ? <OpponentDrinkingAvatar opponentId={opponentId} name={opponent.name} gift={opponentDrink} source={opponent.image} height={opponentHeight} es={es} /> : <Image source={opponent.image} resizeMode="contain"
+        {opponentId !== 'alex' ? <OpponentDrinkingAvatar opponentId={opponentId} name={opponent.name} gift={opponentDrink} invitation={drinkGift} source={opponent.image} height={opponentHeight} es={es} /> : <Image source={opponent.image} resizeMode="contain"
           accessibilityLabel={es ? 'Avatar del rival virtual' : 'Virtual opponent avatar'}
           style={{ flex: 1, minWidth: 0, height: opponentHeight }} />}
         <View style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14 }}>
@@ -400,7 +400,7 @@ export function ComputerGameScreen() {
     <Dialog visible={showOpponents} title={es ? 'Tu rival' : 'Your opponent'} onClose={() => setShowOpponents(false)} closeLabel={text.cancel}>
       {opponentPicker}
     </Dialog>
-    <Dialog visible={showResult && !opponentDrink && !(winner && victoryGift) && !!game.result && !showRules && !showMenu && !showRestart && !showDrinks} title={winner ? (es ? 'Fin de partida' : 'Match complete') : (es ? 'Fin de ronda' : 'Round complete')} onClose={() => setShowResult(false)} closeLabel={es ? 'Ver mesa' : 'View table'}>
+    <Dialog visible={showResult && !opponentDrink && !(winner && victoryGift) && !!game.result && !showRules && !showMenu && !showRestart && !showDrinks && !showOpponents} title={winner ? (es ? 'Fin de partida' : 'Match complete') : (es ? 'Fin de ronda' : 'Round complete')} onClose={() => setShowResult(false)} closeLabel={es ? 'Ver mesa' : 'View table'}>
       <View style={{ alignItems: 'center', gap: 14, paddingVertical: 10 }}>
         <Feather name="award" size={38} color={C.gold} />
         <Text style={{ color: C.ivory, fontSize: 22, textAlign: 'center', lineHeight: 30 }}>{resultTitle}</Text>

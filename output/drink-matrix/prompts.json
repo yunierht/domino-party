@@ -1,0 +1,332 @@
+[
+  {
+    "key": "yuni-nubo",
+    "actor": "yuni",
+    "drink": "heineken",
+    "slug": "nubo",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yuni. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Nubo, deep emerald green longneck glass bottle, warm ivory rectangular label with dark plum engraved fern fronds, copper thin border, original circular interlocking-leaf emblem, hand-lettered serif Nubo centered, tiny decorative print. No star, no red emblem, no oval or shield. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/yuni/source.png",
+      "assets/drinks-v2/nubo.png"
+    ]
+  },
+  {
+    "key": "yuni-duna",
+    "actor": "yuni",
+    "drink": "corona",
+    "slug": "duna",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yuni. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Duna, clear glass subtly tapered longneck bottle with golden beer, terracotta rectangular paper label, pale cream woodcut rising-sun and curved breeze-line illustration, elegant cream Duna lettering, miniature print and a teal neck band. No crown, no blue-and-white branding. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/yuni/source.png",
+      "assets/drinks-v2/duna.png"
+    ]
+  },
+  {
+    "key": "yuni-orbe",
+    "actor": "yuni",
+    "drink": "stella",
+    "slug": "orbe",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yuni. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Orbe, rich amber brown bottle with gently rounded shoulders, dark charcoal wrap label, copper Art Deco geometric arches and bespoke amber droplet emblem, copper Orbe serif lettering with small ornamental brewery print. No shield, no red label, no heraldry. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/yuni/source.png",
+      "assets/drinks-v2/orbe.png"
+    ]
+  },
+  {
+    "key": "yuni-milo",
+    "actor": "yuni",
+    "drink": "miller",
+    "slug": "milo",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yuni. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Milo, clear slim longneck bottle with very pale gold beer, matte pale-aqua rectangular label with coral geometric reed illustration, charcoal modern Milo letters and fine tiny decorative print, silver neck band. No can, no navy script, no existing brand graphics. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/yuni/source.png",
+      "assets/drinks-v2/milo.png"
+    ]
+  },
+  {
+    "key": "yuni-margarita",
+    "actor": "yuni",
+    "drink": "margarita",
+    "slug": "margarita",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yuni. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Margarita, transparent wide stepped-bowl stemmed margarita glass with pale lime iced drink, salt rim and lime wheel garnish. Grip the STEM with thumb and fingers, keeping bowl visible; gently tilt glass so near rim touches lips, do NOT treat glass as bottle. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Change right-hand grip and arm poses appropriately for the STEMMED GLASS. Fingers visibly wrap around stem with correct occlusion.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/yuni/source.png",
+      "assets/drink-margarita-v1.png"
+    ]
+  },
+  {
+    "key": "yuni-daiquiri",
+    "actor": "yuni",
+    "drink": "daiquiri",
+    "slug": "daiquiri",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yuni. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Daiquiri, transparent rounded shallow coupe cocktail glass, slender stem, pale yellow drink and lime peel curl. Grip STEM with thumb and fingers, keeping bowl visible; near rim touches lips during gentle sipping tilt, do NOT treat glass as bottle. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Change right-hand grip and arm poses appropriately for the STEMMED GLASS. Fingers visibly wrap around stem with correct occlusion.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/yuni/source.png",
+      "assets/drink-daiquiri-v1.png"
+    ]
+  },
+  {
+    "key": "yoi-nubo",
+    "actor": "yoi",
+    "drink": "heineken",
+    "slug": "nubo",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yoi. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Nubo, deep emerald green longneck glass bottle, warm ivory rectangular label with dark plum engraved fern fronds, copper thin border, original circular interlocking-leaf emblem, hand-lettered serif Nubo centered, tiny decorative print. No star, no red emblem, no oval or shield. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/yoi/source.png",
+      "assets/drinks-v2/nubo.png"
+    ]
+  },
+  {
+    "key": "yoi-duna",
+    "actor": "yoi",
+    "drink": "corona",
+    "slug": "duna",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yoi. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Duna, clear glass subtly tapered longneck bottle with golden beer, terracotta rectangular paper label, pale cream woodcut rising-sun and curved breeze-line illustration, elegant cream Duna lettering, miniature print and a teal neck band. No crown, no blue-and-white branding. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/yoi/source.png",
+      "assets/drinks-v2/duna.png"
+    ]
+  },
+  {
+    "key": "yoi-orbe",
+    "actor": "yoi",
+    "drink": "stella",
+    "slug": "orbe",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yoi. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Orbe, rich amber brown bottle with gently rounded shoulders, dark charcoal wrap label, copper Art Deco geometric arches and bespoke amber droplet emblem, copper Orbe serif lettering with small ornamental brewery print. No shield, no red label, no heraldry. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/yoi/source.png",
+      "assets/drinks-v2/orbe.png"
+    ]
+  },
+  {
+    "key": "yoi-milo",
+    "actor": "yoi",
+    "drink": "miller",
+    "slug": "milo",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yoi. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Milo, clear slim longneck bottle with very pale gold beer, matte pale-aqua rectangular label with coral geometric reed illustration, charcoal modern Milo letters and fine tiny decorative print, silver neck band. No can, no navy script, no existing brand graphics. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/yoi/source.png",
+      "assets/drinks-v2/milo.png"
+    ]
+  },
+  {
+    "key": "yoi-margarita",
+    "actor": "yoi",
+    "drink": "margarita",
+    "slug": "margarita",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yoi. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Margarita, transparent wide stepped-bowl stemmed margarita glass with pale lime iced drink, salt rim and lime wheel garnish. Grip the STEM with thumb and fingers, keeping bowl visible; gently tilt glass so near rim touches lips, do NOT treat glass as bottle. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Change right-hand grip and arm poses appropriately for the STEMMED GLASS. Fingers visibly wrap around stem with correct occlusion.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/yoi/source.png",
+      "assets/drink-margarita-v1.png"
+    ]
+  },
+  {
+    "key": "yoi-daiquiri",
+    "actor": "yoi",
+    "drink": "daiquiri",
+    "slug": "daiquiri",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yoi. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Daiquiri, transparent rounded shallow coupe cocktail glass, slender stem, pale yellow drink and lime peel curl. Grip STEM with thumb and fingers, keeping bowl visible; near rim touches lips during gentle sipping tilt, do NOT treat glass as bottle. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Change right-hand grip and arm poses appropriately for the STEMMED GLASS. Fingers visibly wrap around stem with correct occlusion.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/yoi/source.png",
+      "assets/drink-daiquiri-v1.png"
+    ]
+  },
+  {
+    "key": "diego-nubo",
+    "actor": "diego",
+    "drink": "heineken",
+    "slug": "nubo",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yase. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Nubo, deep emerald green longneck glass bottle, warm ivory rectangular label with dark plum engraved fern fronds, copper thin border, original circular interlocking-leaf emblem, hand-lettered serif Nubo centered, tiny decorative print. No star, no red emblem, no oval or shield. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/diego/source.png",
+      "assets/drinks-v2/nubo.png"
+    ]
+  },
+  {
+    "key": "diego-duna",
+    "actor": "diego",
+    "drink": "corona",
+    "slug": "duna",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yase. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Duna, clear glass subtly tapered longneck bottle with golden beer, terracotta rectangular paper label, pale cream woodcut rising-sun and curved breeze-line illustration, elegant cream Duna lettering, miniature print and a teal neck band. No crown, no blue-and-white branding. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/diego/source.png",
+      "assets/drinks-v2/duna.png"
+    ]
+  },
+  {
+    "key": "diego-orbe",
+    "actor": "diego",
+    "drink": "stella",
+    "slug": "orbe",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yase. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Orbe, rich amber brown bottle with gently rounded shoulders, dark charcoal wrap label, copper Art Deco geometric arches and bespoke amber droplet emblem, copper Orbe serif lettering with small ornamental brewery print. No shield, no red label, no heraldry. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/diego/source.png",
+      "assets/drinks-v2/orbe.png"
+    ]
+  },
+  {
+    "key": "diego-milo",
+    "actor": "diego",
+    "drink": "miller",
+    "slug": "milo",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yase. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Milo, clear slim longneck bottle with very pale gold beer, matte pale-aqua rectangular label with coral geometric reed illustration, charcoal modern Milo letters and fine tiny decorative print, silver neck band. No can, no navy script, no existing brand graphics. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/diego/source.png",
+      "assets/drinks-v2/milo.png"
+    ]
+  },
+  {
+    "key": "diego-margarita",
+    "actor": "diego",
+    "drink": "margarita",
+    "slug": "margarita",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yase. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Margarita, transparent wide stepped-bowl stemmed margarita glass with pale lime iced drink, salt rim and lime wheel garnish. Grip the STEM with thumb and fingers, keeping bowl visible; gently tilt glass so near rim touches lips, do NOT treat glass as bottle. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Change right-hand grip and arm poses appropriately for the STEMMED GLASS. Fingers visibly wrap around stem with correct occlusion.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/diego/source.png",
+      "assets/drink-margarita-v1.png"
+    ]
+  },
+  {
+    "key": "diego-daiquiri",
+    "actor": "diego",
+    "drink": "daiquiri",
+    "slug": "daiquiri",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Yase. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Daiquiri, transparent rounded shallow coupe cocktail glass, slender stem, pale yellow drink and lime peel curl. Grip STEM with thumb and fingers, keeping bowl visible; near rim touches lips during gentle sipping tilt, do NOT treat glass as bottle. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Change right-hand grip and arm poses appropriately for the STEMMED GLASS. Fingers visibly wrap around stem with correct occlusion.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/diego/source.png",
+      "assets/drink-daiquiri-v1.png"
+    ]
+  },
+  {
+    "key": "rafael-nubo",
+    "actor": "rafael",
+    "drink": "heineken",
+    "slug": "nubo",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Andy. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Nubo, deep emerald green longneck glass bottle, warm ivory rectangular label with dark plum engraved fern fronds, copper thin border, original circular interlocking-leaf emblem, hand-lettered serif Nubo centered, tiny decorative print. No star, no red emblem, no oval or shield. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "assets/computer-opponent-andy-seated-v1.png",
+      "assets/drinks-v2/nubo.png"
+    ]
+  },
+  {
+    "key": "rafael-duna",
+    "actor": "rafael",
+    "drink": "corona",
+    "slug": "duna",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Andy. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Duna, clear glass subtly tapered longneck bottle with golden beer, terracotta rectangular paper label, pale cream woodcut rising-sun and curved breeze-line illustration, elegant cream Duna lettering, miniature print and a teal neck band. No crown, no blue-and-white branding. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "assets/computer-opponent-andy-seated-v1.png",
+      "assets/drinks-v2/duna.png"
+    ]
+  },
+  {
+    "key": "rafael-orbe",
+    "actor": "rafael",
+    "drink": "stella",
+    "slug": "orbe",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Andy. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Orbe, rich amber brown bottle with gently rounded shoulders, dark charcoal wrap label, copper Art Deco geometric arches and bespoke amber droplet emblem, copper Orbe serif lettering with small ornamental brewery print. No shield, no red label, no heraldry. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "assets/computer-opponent-andy-seated-v1.png",
+      "assets/drinks-v2/orbe.png"
+    ]
+  },
+  {
+    "key": "rafael-milo",
+    "actor": "rafael",
+    "drink": "miller",
+    "slug": "milo",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Andy. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Milo, clear slim longneck bottle with very pale gold beer, matte pale-aqua rectangular label with coral geometric reed illustration, charcoal modern Milo letters and fine tiny decorative print, silver neck band. No can, no navy script, no existing brand graphics. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "assets/computer-opponent-andy-seated-v1.png",
+      "assets/drinks-v2/milo.png"
+    ]
+  },
+  {
+    "key": "rafael-margarita",
+    "actor": "rafael",
+    "drink": "margarita",
+    "slug": "margarita",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Andy. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Margarita, transparent wide stepped-bowl stemmed margarita glass with pale lime iced drink, salt rim and lime wheel garnish. Grip the STEM with thumb and fingers, keeping bowl visible; gently tilt glass so near rim touches lips, do NOT treat glass as bottle. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Change right-hand grip and arm poses appropriately for the STEMMED GLASS. Fingers visibly wrap around stem with correct occlusion.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "assets/computer-opponent-andy-seated-v1.png",
+      "assets/drink-margarita-v1.png"
+    ]
+  },
+  {
+    "key": "rafael-daiquiri",
+    "actor": "rafael",
+    "drink": "daiquiri",
+    "slug": "daiquiri",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Andy. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Daiquiri, transparent rounded shallow coupe cocktail glass, slender stem, pale yellow drink and lime peel curl. Grip STEM with thumb and fingers, keeping bowl visible; near rim touches lips during gentle sipping tilt, do NOT treat glass as bottle. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Change right-hand grip and arm poses appropriately for the STEMMED GLASS. Fingers visibly wrap around stem with correct occlusion.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "assets/computer-opponent-andy-seated-v1.png",
+      "assets/drink-daiquiri-v1.png"
+    ]
+  },
+  {
+    "key": "lucia-nubo",
+    "actor": "lucia",
+    "drink": "heineken",
+    "slug": "nubo",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Chuchi. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Nubo, deep emerald green longneck glass bottle, warm ivory rectangular label with dark plum engraved fern fronds, copper thin border, original circular interlocking-leaf emblem, hand-lettered serif Nubo centered, tiny decorative print. No star, no red emblem, no oval or shield. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/lucia/source.png",
+      "assets/drinks-v2/nubo.png"
+    ]
+  },
+  {
+    "key": "lucia-duna",
+    "actor": "lucia",
+    "drink": "corona",
+    "slug": "duna",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Chuchi. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Duna, clear glass subtly tapered longneck bottle with golden beer, terracotta rectangular paper label, pale cream woodcut rising-sun and curved breeze-line illustration, elegant cream Duna lettering, miniature print and a teal neck band. No crown, no blue-and-white branding. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/lucia/source.png",
+      "assets/drinks-v2/duna.png"
+    ]
+  },
+  {
+    "key": "lucia-orbe",
+    "actor": "lucia",
+    "drink": "stella",
+    "slug": "orbe",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Chuchi. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Orbe, rich amber brown bottle with gently rounded shoulders, dark charcoal wrap label, copper Art Deco geometric arches and bespoke amber droplet emblem, copper Orbe serif lettering with small ornamental brewery print. No shield, no red label, no heraldry. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/lucia/source.png",
+      "assets/drinks-v2/orbe.png"
+    ]
+  },
+  {
+    "key": "lucia-milo",
+    "actor": "lucia",
+    "drink": "miller",
+    "slug": "milo",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Chuchi. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Milo, clear slim longneck bottle with very pale gold beer, matte pale-aqua rectangular label with coral geometric reed illustration, charcoal modern Milo letters and fine tiny decorative print, silver neck band. No can, no navy script, no existing brand graphics. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Bottle hand grip with fingers naturally in FRONT of the bottle. Keep elaborate fictional label partly visible, never a blank cream label. Uncapped.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/lucia/source.png",
+      "assets/drinks-v2/milo.png"
+    ]
+  },
+  {
+    "key": "lucia-margarita",
+    "actor": "lucia",
+    "drink": "margarita",
+    "slug": "margarita",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Chuchi. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Margarita, transparent wide stepped-bowl stemmed margarita glass with pale lime iced drink, salt rim and lime wheel garnish. Grip the STEM with thumb and fingers, keeping bowl visible; gently tilt glass so near rim touches lips, do NOT treat glass as bottle. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Change right-hand grip and arm poses appropriately for the STEMMED GLASS. Fingers visibly wrap around stem with correct occlusion.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/lucia/source.png",
+      "assets/drink-margarita-v1.png"
+    ]
+  },
+  {
+    "key": "lucia-daiquiri",
+    "actor": "lucia",
+    "drink": "daiquiri",
+    "slug": "daiquiri",
+    "prompt": "Use case: identity-preserve. Asset: transparent photographic animation sprite sheet for adult avatar Chuchi. Input 1 is identity, clothing and (where present) 9-pose choreography reference. Input 2 is the exact beverage design to use: Daiquiri, transparent rounded shallow coupe cocktail glass, slender stem, pale yellow drink and lime peel curl. Grip STEM with thumb and fingers, keeping bowl visible; near rim touches lips during gentle sipping tilt, do NOT treat glass as bottle. Replace ALL old beverage appearances with this beverage, same container, colors, label design and name as input 2; no old labels, no other drink. Change right-hand grip and arm poses appropriately for the STEMMED GLASS. Fingers visibly wrap around stem with correct occlusion.\nProduce ONE strict 3 columns by 3 rows sprite sheet, NINE chronological poses left-right then top-bottom, landscape 1536x1024. Equal wide cells, generous transparent gutters (at least 12 px). Each COMPLETE head, torso, hands and FULL elbows contained in its cell; never clip any elbow or hand. Same face, age, accessories, hair, clothes, lighting, body size and torso position throughout. Right arm (viewer LEFT) lifts drink while other forearm rests.\nFrames: 1 resting with selected drink standing viewer-left; 2 grasp drink; 3 lift near lower chest; 4 approach lips; 5 container opening touches lips, start sip; 6 sustained sip with natural slight tilt; 7 lower to chest; 8 lower drink down viewer-left; 9 empty hands back in original resting pose, NO drink. Empty surroundings, TRUE transparent alpha background, no table/chair/backdrop/shadows between cells, no grid lines or text outside labels. Head center x50%, head top y6%, forearms near y88% of EACH cell. Only required drinking motion changes. No body morphing, extra limbs, duplicated bottles, severed hands or submerged face. Preserve identity precisely.",
+    "refs": [
+      "output/opponent-drinks/lucia/source.png",
+      "assets/drink-daiquiri-v1.png"
+    ]
+  }
+]

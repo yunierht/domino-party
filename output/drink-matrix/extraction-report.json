@@ -1,0 +1,332 @@
+[
+  {
+    "key": "yuni-nubo",
+    "frames": 9,
+    "rows": [
+      0,
+      358,
+      699,
+      1024
+    ],
+    "source": "exec-09b40793-bd3b-4b87-87b5-f1269e668b7b.png"
+  },
+  {
+    "key": "yuni-duna",
+    "frames": 9,
+    "rows": [
+      0,
+      365,
+      706,
+      1024
+    ],
+    "source": "exec-69a4dac6-683d-42d1-bb7d-3b0fa3f4e59f.png"
+  },
+  {
+    "key": "yuni-orbe",
+    "frames": 9,
+    "rows": [
+      0,
+      362,
+      697,
+      1024
+    ],
+    "source": "exec-902eeeaf-02a5-4547-be39-afa7f78191f5.png"
+  },
+  {
+    "key": "yuni-milo",
+    "frames": 9,
+    "rows": [
+      0,
+      357,
+      699,
+      1024
+    ],
+    "source": "exec-e9f5a7ba-df44-4f30-bbe8-d66ad03a5fc6.png"
+  },
+  {
+    "key": "yuni-margarita",
+    "frames": 9,
+    "rows": [
+      0,
+      354,
+      697,
+      1024
+    ],
+    "source": "exec-0e68347a-2675-4884-b8e3-1583672f729e.png"
+  },
+  {
+    "key": "yuni-daiquiri",
+    "frames": 9,
+    "rows": [
+      0,
+      350,
+      693,
+      1024
+    ],
+    "source": "exec-143da95b-fa1f-4557-8c12-a2519da9c3ea.png"
+  },
+  {
+    "key": "yoi-nubo",
+    "frames": 9,
+    "rows": [
+      0,
+      347,
+      687,
+      1024
+    ],
+    "source": "exec-86f208a5-97f3-459e-b9ec-8f4caa5e3cd1.png"
+  },
+  {
+    "key": "yoi-duna",
+    "frames": 9,
+    "rows": [
+      0,
+      341,
+      688,
+      1024
+    ],
+    "source": "exec-53aada6e-cc5b-4155-b785-3d73e44d2af6.png"
+  },
+  {
+    "key": "yoi-orbe",
+    "frames": 9,
+    "rows": [
+      0,
+      348,
+      694,
+      1024
+    ],
+    "source": "exec-c2fcf299-7ba5-4228-9266-47fcc18c65b1.png"
+  },
+  {
+    "key": "yoi-milo",
+    "frames": 9,
+    "rows": [
+      0,
+      342,
+      684,
+      1024
+    ],
+    "source": "exec-be9d8fdf-0b6a-4368-8870-b20a88d97f04.png"
+  },
+  {
+    "key": "yoi-margarita",
+    "frames": 9,
+    "rows": [
+      0,
+      341,
+      684,
+      1024
+    ],
+    "source": "exec-525e5012-c549-4357-92b9-f2b6a844c6e7.png"
+  },
+  {
+    "key": "yoi-daiquiri",
+    "frames": 9,
+    "rows": [
+      0,
+      341,
+      687,
+      1024
+    ],
+    "source": "exec-b81e7783-213b-4024-b84c-433e883f519c.png"
+  },
+  {
+    "key": "diego-nubo",
+    "frames": 9,
+    "rows": [
+      0,
+      339,
+      681,
+      1024
+    ],
+    "source": "exec-8a94db2d-9fd6-4e62-8259-644288d93739.png"
+  },
+  {
+    "key": "diego-duna",
+    "frames": 9,
+    "rows": [
+      0,
+      343,
+      681,
+      1024
+    ],
+    "source": "exec-d7359274-4ca2-489c-babe-7bc2efaacf38.png"
+  },
+  {
+    "key": "diego-orbe",
+    "frames": 9,
+    "rows": [
+      0,
+      340,
+      681,
+      1024
+    ],
+    "source": "exec-ca9d1785-3d85-4455-9139-38960e2f91c4.png"
+  },
+  {
+    "key": "diego-milo",
+    "frames": 9,
+    "rows": [
+      0,
+      339,
+      681,
+      1024
+    ],
+    "source": "exec-6906bea3-8cc2-47ee-9122-c9772251b11b.png"
+  },
+  {
+    "key": "diego-margarita",
+    "frames": 9,
+    "rows": [
+      0,
+      339,
+      680,
+      1024
+    ],
+    "source": "exec-914f4e71-1dc3-41ca-9d2f-3ae4d6f6a611.png"
+  },
+  {
+    "key": "diego-daiquiri",
+    "frames": 9,
+    "rows": [
+      0,
+      341,
+      683,
+      1024
+    ],
+    "source": "exec-e8f5a51c-96da-4b6c-95c0-6aa13a65c54c.png"
+  },
+  {
+    "key": "rafael-nubo",
+    "frames": 9,
+    "rows": [
+      0,
+      349,
+      688,
+      1024
+    ],
+    "source": "exec-e7c93301-7b13-429e-9128-52915e8e56dd.png"
+  },
+  {
+    "key": "rafael-duna",
+    "frames": 9,
+    "rows": [
+      0,
+      352,
+      691,
+      1024
+    ],
+    "source": "exec-f46c967c-4766-400c-8d2f-4f0245cef881.png"
+  },
+  {
+    "key": "rafael-orbe",
+    "frames": 9,
+    "rows": [
+      0,
+      339,
+      682,
+      1024
+    ],
+    "source": "exec-f84c1a42-959f-47aa-b554-2c7f30af0cad.png"
+  },
+  {
+    "key": "rafael-milo",
+    "frames": 9,
+    "rows": [
+      0,
+      353,
+      697,
+      1024
+    ],
+    "source": "exec-ba6fabfc-18dd-41bd-bc9e-93687a851fd7.png"
+  },
+  {
+    "key": "rafael-margarita",
+    "frames": 9,
+    "rows": [
+      0,
+      344,
+      683,
+      1024
+    ],
+    "source": "exec-5339eeca-8711-4b2f-933a-b286a6acf449.png"
+  },
+  {
+    "key": "rafael-daiquiri",
+    "frames": 9,
+    "rows": [
+      0,
+      343,
+      674,
+      1024
+    ],
+    "source": "exec-8e542562-f885-4c48-a5d8-06aef9357f58.png"
+  },
+  {
+    "key": "lucia-nubo",
+    "frames": 9,
+    "rows": [
+      0,
+      363,
+      709,
+      1024
+    ],
+    "source": "exec-be5af47a-2b8c-4d9d-ab9d-d6b63dfa912e.png"
+  },
+  {
+    "key": "lucia-duna",
+    "frames": 9,
+    "rows": [
+      0,
+      361,
+      705,
+      1024
+    ],
+    "source": "exec-561cffea-aca0-4f8c-9945-a4c10d1ab508.png"
+  },
+  {
+    "key": "lucia-orbe",
+    "frames": 9,
+    "rows": [
+      0,
+      375,
+      712,
+      1024
+    ],
+    "source": "exec-d34be759-b64c-40de-89c7-9b5523b32b58.png"
+  },
+  {
+    "key": "lucia-milo",
+    "frames": 9,
+    "rows": [
+      0,
+      348,
+      691,
+      1024
+    ],
+    "source": "exec-f4ce3703-1bab-4a63-8536-d49b3f17f485.png"
+  },
+  {
+    "key": "lucia-margarita",
+    "frames": 9,
+    "rows": [
+      0,
+      346,
+      691,
+      1024
+    ],
+    "source": "exec-c7f11f17-6ce1-4277-b5a9-167fda07cab1.png"
+  },
+  {
+    "key": "lucia-daiquiri",
+    "frames": 9,
+    "rows": [
+      0,
+      352,
+      693,
+      1024
+    ],
+    "source": "exec-3fc071e8-4845-4a40-b862-d1c61cd83bae.png"
+  }
+]

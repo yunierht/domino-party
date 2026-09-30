@@ -1,0 +1,1095 @@
+{
+  "matrix": [
+    {
+      "key": "yoi-margarita-final",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yoi drinks Margarita"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 63,
+      "correctSource": true
+    },
+    {
+      "key": "yuni-nubo",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yuni drinks Nubo"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 63,
+      "correctSource": true
+    },
+    {
+      "key": "yuni-duna",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yuni drinks Duna"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 61,
+      "correctSource": true
+    },
+    {
+      "key": "yuni-orbe",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yuni drinks Orbe"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 68,
+      "correctSource": true
+    },
+    {
+      "key": "yuni-milo",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yuni drinks Milo"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 64,
+      "correctSource": true
+    },
+    {
+      "key": "yuni-margarita",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yuni drinks Margarita"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 66,
+      "correctSource": true
+    },
+    {
+      "key": "yuni-daiquiri",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yuni drinks Daiquiri"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 69,
+      "correctSource": true
+    },
+    {
+      "key": "yoi-nubo",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yoi drinks Nubo"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 61,
+      "correctSource": true
+    },
+    {
+      "key": "yoi-duna",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yoi drinks Duna"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 67,
+      "correctSource": true
+    },
+    {
+      "key": "yoi-orbe",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yoi drinks Orbe"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 61,
+      "correctSource": true
+    },
+    {
+      "key": "yoi-milo",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yoi drinks Milo"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 64,
+      "correctSource": true
+    },
+    {
+      "key": "yoi-daiquiri",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yoi drinks Daiquiri"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 62,
+      "correctSource": true
+    },
+    {
+      "key": "yase-nubo",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yase drinks Nubo"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 60,
+      "correctSource": true
+    },
+    {
+      "key": "yase-duna",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yase drinks Duna"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 63,
+      "correctSource": true
+    },
+    {
+      "key": "yase-orbe",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yase drinks Orbe"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 62,
+      "correctSource": true
+    },
+    {
+      "key": "yase-milo",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yase drinks Milo"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 67,
+      "correctSource": true
+    },
+    {
+      "key": "yase-margarita",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yase drinks Margarita"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 64,
+      "correctSource": true
+    },
+    {
+      "key": "yase-daiquiri",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Yase drinks Daiquiri"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 62,
+      "correctSource": true
+    },
+    {
+      "key": "andy-nubo",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Andy drinks Nubo"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 61,
+      "correctSource": true
+    },
+    {
+      "key": "andy-duna",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Andy drinks Duna"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 65,
+      "correctSource": true
+    },
+    {
+      "key": "andy-orbe",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Andy drinks Orbe"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 63,
+      "correctSource": true
+    },
+    {
+      "key": "andy-milo",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Andy drinks Milo"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 65,
+      "correctSource": true
+    },
+    {
+      "key": "andy-margarita",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Andy drinks Margarita"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 71,
+      "correctSource": true
+    },
+    {
+      "key": "andy-daiquiri",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Andy drinks Daiquiri"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 58,
+      "correctSource": true
+    },
+    {
+      "key": "chuchi-nubo",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Chuchi drinks Nubo"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 65,
+      "correctSource": true
+    },
+    {
+      "key": "chuchi-duna",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Chuchi drinks Duna"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 62,
+      "correctSource": true
+    },
+    {
+      "key": "chuchi-orbe",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Chuchi drinks Orbe"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 68,
+      "correctSource": true
+    },
+    {
+      "key": "chuchi-milo",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Chuchi drinks Milo"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 64,
+      "correctSource": true
+    },
+    {
+      "key": "chuchi-margarita",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Chuchi drinks Margarita"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 61,
+      "correctSource": true
+    },
+    {
+      "key": "chuchi-daiquiri",
+      "poses": [
+        "opponent-pose-0",
+        "opponent-pose-1",
+        "opponent-pose-2",
+        "opponent-pose-3",
+        "opponent-pose-4",
+        "opponent-pose-5",
+        "opponent-pose-6",
+        "opponent-pose-7",
+        "opponent-pose-8",
+        "opponent-pose-9",
+        "opponent-pose-10",
+        "opponent-pose-11"
+      ],
+      "actors": [
+        "Chuchi drinks Daiquiri"
+      ],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 63,
+      "correctSource": true
+    }
+  ],
+  "browserUniqueCases": 30,
+  "browserViewport": "390x844",
+  "assets": 270,
+  "opaqueBoundaryContacts": [],
+  "safety": {
+    "replacementResult": {
+      "key": "replacement-margarita-duna",
+      "poses": [],
+      "actors": [],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": true,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 68
+    },
+    "rivalResult": {
+      "key": "rival-change",
+      "poses": [],
+      "actors": [],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 71
+    },
+    "unmountResult": {
+      "key": "unmount-resume",
+      "poses": [],
+      "actors": [],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": true,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 67
+    },
+    "resetResult": {
+      "key": "restart",
+      "poses": [],
+      "actors": [],
+      "loaded": true,
+      "wrongOverlap": false,
+      "end": {
+        "actor": null,
+        "cup": false,
+        "dialog": false,
+        "loaded": null,
+        "pose": null,
+        "scrollY": 0,
+        "source": null
+      },
+      "samples": 71
+    },
+    "lossAndNextRound": "Daiquiri preserved; human victory Nubo preserved"
+  },
+  "method": "Actual UI actions in local React Native Web with temporary deterministic near-end game fixture; fixture removed afterward. Native device not tested.",
+  "generatedBy": "Built-in imagegen; prompts.json and sources.json contain prompt and source provenance",
+  "automatedTests": 48,
+  "nativeBundleChecks": [
+    {
+      "platform": "ios",
+      "manifest": 200,
+      "bundle": 200,
+      "bytes": 8391386
+    },
+    {
+      "platform": "android",
+      "manifest": 200,
+      "bundle": 200,
+      "bytes": 8400139
+    }
+  ],
+  "runtimePngBytes": 50154317,
+  "typeScript": "passed",
+  "fixtureRemoved": true,
+  "pointerSafety": "Avatar pointerEvents=none prevents transparent frame padding from intercepting the rival button. Result dialog waits while opponent picker is open. Verified with mid-animation rival change.",
+  "limitations": [
+    "No physical iOS/Android device validation",
+    "Reduced motion and ties verified with automated policy/timer tests; not OS/device UI",
+    "Timing captures use a temporary deterministic game fixture, removed from production source"
+  ]
+}
