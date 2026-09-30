@@ -13,7 +13,6 @@ import { DemoMatch } from '../components/DemoMatch';
 import { ScoreRing } from '../components/ScoreRing';
 import { Match, Team, teamTotal } from '../types';
 import { ThemeName } from '../theme/themes';
-import { useComputerGame } from '../computer/ComputerGameContext';
 import { useReducedMotion } from '../computer/DrinkGift';
 import { COMPUTER_STRINGS } from '../computer/strings';
 
@@ -22,7 +21,6 @@ const HOME_THEME_ORDER: ThemeName[] = ['carbon', 'dark', 'casino', 'cubano', 'us
 export function HomeScreen() {
   const { theme, s } = useTheme();
   const { t, lang } = useI18n();
-  const { game: computerGame } = useComputerGame();
   const { go } = useNav();
   const { currentMatch } = useGame();
   const { height } = useWindowDimensions();
@@ -67,9 +65,6 @@ export function HomeScreen() {
         </Text>
         <Button label={lang === 'es' ? 'Jugar dominó' : 'Play Dominos'}
           onPress={() => go('computerGame')} variant="secondary" fullWidth />
-        {computerGame && <Text style={{ color: c.textMuted, fontSize: s(13), marginTop: s(8) }}>
-          {COMPUTER_STRINGS[lang].resume}
-        </Text>}
       </Card>
       </ScrollView>
       <View testID="home-appearance-footer" style={{ height: s(76) }}>
