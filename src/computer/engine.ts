@@ -16,6 +16,7 @@ export interface Game {
   stock: Tile[];
   board: Tile[];
   openingId: string | null;
+  openingRule: 'highest' | 'winner';
   turn: Player;
   passes: number;
   result: Result | null;
@@ -33,11 +34,16 @@ export function openingMove(hands: Record<Player, Tile[]>) {
   }
   return best;
 }
+/** A winner opens freely; first hands and hands after a tie keep the ranked opening. */
+export function requiredOpening(game: Game) {
+  return !game.board.length && game.openingRule !== 'winner' ? openingMove(game.hands) : null;
+}
 /** Opening eligibility is a rule, independent of endpoint geometry. */
 export function legalEnds(game: Game, player: Player, tile: Tile): End[] {
   if (game.result || game.turn !== player) return [];
   if (!game.board.length) {
-    const opening = openingMove(game.hands);
+    if (game.openingRule === 'winner') return ['right'];
+    const opening = requiredOpening(game);
     return opening?.player === player && opening.tile.id === tile.id ? ['right'] : [];
   }
   return endsFor(tile, game.board);
@@ -52,6 +58,8 @@ export function deal(playerName: string, target: number, random = Math.random, p
   }
   const round = previous ? previous.round + 1 : 1;
   const hands = { human: deck.slice(0, 7), computer: deck.slice(7, 14) };
+  const winner = previous?.result?.winner;
+  const starter = winner === 'human' || winner === 'computer' ? winner : null;
   return {
     playerName, target: Math.max(1, Math.floor(target) || 100), round,
     scores: previous ? { ...previous.scores } : { human: 0, computer: 0 },
@@ -59,7 +67,8 @@ export function deal(playerName: string, target: number, random = Math.random, p
     scoringMode,
     scoringTargets: { points: 100, wins: 3, ...previous?.scoringTargets, [scoringMode]: Math.max(1, Math.floor(target) || 100) },
     hands,
-    stock: deck.slice(14), board: [], openingId: null, turn: openingMove(hands)!.player,
+    stock: deck.slice(14), board: [], openingId: null, turn: starter ?? openingMove(hands)!.player,
+    openingRule: starter ? 'winner' : 'highest',
     passes: 0, result: null, last: null,
   };
 }
@@ -124,10 +133,6 @@ export function drawOrPass(game: Game, player: Player): Game {
 
 /** Strategy sees only its own hand and the public chain, never the user's tiles. */
 export function chooseMove(hand: Tile[], board: Tile[]): { id: string; end: End } | null {
-  if (!board.length) {
-    const opening = openingMove({ human: hand, computer: [] });
-    return opening ? { id: opening.tile.id, end: 'right' } : null;
-  }
   let best: { id: string; end: End; value: number } | null = null;
   for (const tile of hand) for (const end of endsFor(tile, board)) {
     const support = hand.filter(t => t.id !== tile.id && (t.a === tile.a || t.b === tile.a || t.a === tile.b || t.b === tile.b)).length;
@@ -138,6 +143,7 @@ export function chooseMove(hand: Tile[], board: Tile[]): { id: string; end: End 
 }
 export function computerStep(game: Game): Game {
   if (game.turn !== 'computer' || game.result) return game;
-  const move = chooseMove(game.hands.computer, game.board);
+  const opening = requiredOpening(game);
+  const move = opening ? { id: opening.tile.id, end: 'right' as End } : chooseMove(game.hands.computer, game.board);
   return move ? play(game, 'computer', move.id, move.end) : drawOrPass(game, 'computer');
 }

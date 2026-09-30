@@ -12,7 +12,7 @@ import { DominoTableBackground } from '../computer/DominoTableBackground';
 import { useComputerGame } from '../computer/ComputerGameContext';
 import { COMPUTER_STRINGS } from '../computer/strings';
 import { OPPONENTS } from '../computer/opponents';
-import { computerStep, restartMatch, deal, drawOrPass, End, legalEnds, openingMove, hasMove, matchWinner, play, Tile } from '../computer/engine';
+import { computerStep, restartMatch, deal, drawOrPass, End, legalEnds, requiredOpening, hasMove, matchWinner, play, Tile } from '../computer/engine';
 import { DominoTile } from '../computer/DominoTile';
 import { DraggableDomino } from '../computer/DraggableDomino';
 import { AnchoredBoard } from '../computer/AnchoredBoard';
@@ -215,8 +215,8 @@ export function ComputerGameScreen() {
   const labelFor = (player: 'human' | 'computer') => player === 'human' ? game.playerName : opponent.name;
   const activeTile = drag?.tile ?? selectedTile;
   const available = humanTurn && activeTile ? legalEnds(game, 'human', activeTile) : [];
-  const opening = !game.board.length ? openingMove(game.hands) : null;
-  const openingLabel = opening ? `${labelFor(opening.player)} ${es ? 'abre con' : 'opens with'} ${opening.tile.a} · ${opening.tile.b}` : text.open;
+  const opening = requiredOpening(game);
+  const openingLabel = opening ? `${labelFor(opening.player)} ${es ? 'abre con' : 'opens with'} ${opening.tile.a} · ${opening.tile.b}` : game.openingRule === 'winner' ? `${labelFor(game.turn)} ${text.openFreely}` : text.open;
   const offsets = endpointOffsets(game.board, game.openingId);
   const targets = available.map(end => ({ end, point: slot(offsets[end], metrics) }));
   const hitEnd = (point: Point) => tableOrigin.current ? resolveDrop(screenToBoard({ x: point.x - tableOrigin.current.x, y: point.y - tableOrigin.current.y }, tableSize, metrics, camera.current.current), targets, metrics) : null;
@@ -336,7 +336,6 @@ export function ComputerGameScreen() {
         </View>
         <View style={{ flex: 1 }} />
         <View testID="stock-info" style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Feather name="layers" color={C.muted} size={11} /><Text style={{ color: C.muted, fontSize: 10 }}>{text.stock} · {game.stock.length}</Text></View>
-        <Text style={{ color: C.muted, fontSize: 10 }}>{game.hands.human.length} {text.tiles}</Text>
       </View>
       <View testID="player-hand" style={{ height: (handSize * 2 + 26) * handRows, width: (handSize + 10) * handColumns + (handColumns - 1) * 2 + 4,
         alignSelf: 'center', flexDirection: 'row', flexWrap: handRows === 1 ? 'nowrap' : 'wrap', columnGap: 2, rowGap: 4, justifyContent: 'center', alignItems: 'center', alignContent: 'center' }}>
