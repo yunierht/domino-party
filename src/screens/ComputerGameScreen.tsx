@@ -3,6 +3,7 @@ import { Animated, AppState, BackHandler, Image, Modal, PanResponder, Platform, 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
+import { AndyDrinkingAvatar } from '../computer/AndyDrinkingAvatar';
 import { useBoardCamera } from '../computer/useBoardCamera';
 import { VictoryDrink, VictoryBeerBadge } from '../computer/VictoryDrink';
 import { DrinkChoices, DrinkInviteButton } from '../computer/DrinkGift';
@@ -61,8 +62,8 @@ function Avatar({ computer = false, active = false, small = false }: { computer?
 export function ComputerGameScreen() {
   const windowSize = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const { game, setGame, start, opponentId, setOpponentId, drinkGift, drinkExpiring, setDrinkGift, victoryGift, deliveryGift, dismissVictoryGift, finishVictoryGift, expireVictoryGift } = useComputerGame();
-  useEffect(() => () => dismissVictoryGift(), [dismissVictoryGift]);
+  const { game, setGame, start, opponentId, setOpponentId, drinkGift, drinkExpiring, andyDrink, cancelOpponentConsumption, setDrinkGift, victoryGift, deliveryGift, dismissVictoryGift, finishVictoryGift, expireVictoryGift } = useComputerGame();
+  useEffect(() => () => { dismissVictoryGift(); cancelOpponentConsumption(); }, [dismissVictoryGift, cancelOpponentConsumption]);
   const opponent = OPPONENTS.find(item => item.id === opponentId) ?? OPPONENTS[0];
   const { lang, t } = useI18n();
   const { back } = useNav();
@@ -281,7 +282,7 @@ export function ComputerGameScreen() {
       </Pressable>
     </View>
     <View style={{ flex: 1 }}>
-      <DominoTableBackground opponentHeight={opponentHeight} gift={drinkGift} es={es} finished={drinkExpiring} />
+      <DominoTableBackground opponentHeight={opponentHeight} gift={andyDrink ? null : drinkGift} es={es} finished={drinkExpiring} />
       <View style={{ height: opponentHeight, flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 12, gap: 6 }}>
         <Pressable accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }}
           style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14, minHeight: 44, justifyContent: 'center', backgroundColor: '#102820', borderWidth: 1, borderColor: C.line, borderRadius: 12, padding: 8 }}>
@@ -290,9 +291,9 @@ export function ComputerGameScreen() {
             <Feather name="users" size={14} color={C.goldLight} accessible={false} />
           </View>
         </Pressable>
-        <Image source={opponent.image} resizeMode="contain"
+        {opponentId === 'rafael' ? <AndyDrinkingAvatar gift={andyDrink} source={opponent.image} height={opponentHeight} es={es} /> : <Image source={opponent.image} resizeMode="contain"
           accessibilityLabel={es ? 'Avatar del rival virtual' : 'Virtual opponent avatar'}
-          style={{ flex: 1, minWidth: 0, height: opponentHeight }} />
+          style={{ flex: 1, minWidth: 0, height: opponentHeight }} />}
         <View style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14 }}>
 
           <DrinkInviteButton es={es} compact={compact} active={appActive && !showDrinks && !showMenu && !showRestart && !showRules && !showOpponents} onPress={() => { cancelDrag(); drinkSelectionLock.current = false; setShowDrinks(true); }} />
