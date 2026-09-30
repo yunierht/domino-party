@@ -50,7 +50,7 @@ export function DraggableDomino(props: Props) {
     onPanResponderTerminate: () => latest.current.onCancel(),
   })).current;
   const { tile, enabled, selected, revealed, size = 29, dragging = false } = props;
-  return <View {...responder.panHandlers} accessible accessibilityRole="button" aria-disabled={!enabled}
+  return <View {...responder.panHandlers} pointerEvents={enabled ? 'auto' : 'none'} accessible accessibilityRole="button" aria-disabled={!enabled}
     accessibilityLabel={`${tile.a} / ${tile.b}`} accessibilityState={{ disabled: !enabled, selected }}
     onAccessibilityTap={() => enabled && props.onTap()}
     // Keyboard users retain the same tap-to-place route on web.

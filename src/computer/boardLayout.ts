@@ -98,17 +98,21 @@ export function chainSlot(offset: number, metrics: ReturnType<typeof boardMetric
   const p = points.get(offset)!;
   return { ...p, x: metrics.width / 2 + p.x * scale, y: metrics.height / 2 + p.y * scale * 0.86, scale };
 }
-/** Keep the highlighted drop zone, then choose the spatially nearest legal end.
- * Camera inversion preserves distances; exact ties consistently favor the left end.
- */
-export function resolveDrop(point: Point, targets: { end: End; point: Point }[], metrics: ReturnType<typeof boardMetrics>): End | null {
-  const inside = targets.some(target => Math.abs(point.x - target.point.x) <= metrics.stepX / 2 &&
-    Math.abs(point.y - target.point.y) <= metrics.stepY / 2);
-  if (!inside) return null;
+/** Nearest legal end anywhere in the board; exact ties consistently favor left. */
+export function resolveDrop(point: Point, targets: { end: End; point: Point }[], metrics: { width: number; height: number }): End | null {
+  if (!Number.isFinite(point.x) || !Number.isFinite(point.y) || point.x < 0 || point.y < 0 || point.x > metrics.width || point.y > metrics.height) return null;
   return [...targets].sort((a, b) => {
     const distance = Math.hypot(point.x - a.point.x, point.y - a.point.y) - Math.hypot(point.x - b.point.x, point.y - b.point.y);
     return distance || (a.end === b.end ? 0 : a.end === 'left' ? -1 : 1);
   })[0]?.end ?? null;
+}
+
+/** Compare in viewport pixels so pan/zoom never change the valid drop surface. */
+export function resolveScreenDrop(point: Point, targets: { end: End; point: Point }[], viewport: { width: number; height: number }, canvas: { width: number; height: number }, camera: BoardCamera): End | null {
+  return resolveDrop(point, targets.map(target => ({ end: target.end, point: {
+    x: viewport.width / 2 + camera.x + (target.point.x - canvas.width / 2) * camera.scale,
+    y: viewport.height / 2 + camera.y + (target.point.y - canvas.height / 2) * camera.scale,
+  } })), viewport);
 }
 
 export interface BoardCamera { x: number; y: number; scale: number }

@@ -123,14 +123,14 @@ test('all possible branch slots remain inside the fixed table without overlappin
     }
   }
 });
-test('drop selects the actual allowed end and rejects the table or wrong end', () => {
+test('drop selects the nearest legal end anywhere on the board and rejects outside', () => {
   const m = boardMetrics(320);
   const left = { end: 'left', point: slot(-1, m) };
   const right = { end: 'right', point: slot(1, m) };
   assert.equal(resolveDrop(left.point, [left, right], m), 'left');
   assert.equal(resolveDrop(right.point, [left, right], m), 'right');
-  assert.equal(resolveDrop(left.point, [right], m), null);
-  assert.equal(resolveDrop(slot(0, m), [left, right], m), null);
+  assert.equal(resolveDrop(left.point, [right], m), 'right');
+  assert.equal(resolveDrop(slot(0, m), [left, right], m), 'left');
   assert.equal(resolveDrop({ x: -10, y: -10 }, [left, right], m), null);
 });
 test('responsive table fits both regular and perpendicular double tiles', () => {

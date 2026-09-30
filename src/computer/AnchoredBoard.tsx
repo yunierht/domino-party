@@ -37,6 +37,7 @@ export function AnchoredBoard({ board, openingId, metrics, available, hovered, l
       const value = !board.length ? '+' : end === 'left' ? board[0].a : board[board.length - 1].b;
       const label = !board.length ? openLabel : `${end === 'left' ? leftLabel : rightLabel} ${value}`;
       return <Pressable key={end} testID={`drop-${end}`} accessibilityRole="button" accessibilityLabel={label}
+        pointerEvents={enabled ? 'auto' : 'none'}
         accessibilityState={{ disabled: !enabled }} disabled={!enabled} onPress={() => onEnd(end)}
         style={{ position: 'absolute', left: p.x - metrics.stepX / 2, top: p.y - metrics.stepY / 2,
           width: metrics.stepX, height: metrics.stepY, alignItems: 'center', justifyContent: 'center', borderRadius: 8,

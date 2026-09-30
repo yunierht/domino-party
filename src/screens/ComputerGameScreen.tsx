@@ -16,7 +16,7 @@ import { computerStep, restartMatch, deal, drawOrPass, End, legalEnds, requiredO
 import { DominoTile } from '../computer/DominoTile';
 import { DraggableDomino } from '../computer/DraggableDomino';
 import { AnchoredBoard } from '../computer/AnchoredBoard';
-import { chainMetrics, endpointOffsets, Point, resolveDrop, chainSlot, screenToBoard } from '../computer/boardLayout';
+import { chainMetrics, endpointOffsets, Point, resolveScreenDrop, chainSlot } from '../computer/boardLayout';
 import { TABLE as C } from '../computer/tableTheme';
 import { handLayout } from '../computer/handLayout';
 import { useI18n } from '../i18n/I18nContext';
@@ -218,7 +218,7 @@ export function ComputerGameScreen() {
   const openingLabel = opening ? `${labelFor(opening.player)} ${es ? 'abre con' : 'opens with'} ${opening.tile.a} · ${opening.tile.b}` : game.openingRule === 'winner' ? `${labelFor(game.turn)} ${text.openFreely}` : text.open;
   const offsets = endpointOffsets(game.board, game.openingId);
   const targets = available.map(end => ({ end, point: slot(offsets[end], metrics) }));
-  const hitEnd = (point: Point) => tableOrigin.current ? resolveDrop(screenToBoard({ x: point.x - tableOrigin.current.x, y: point.y - tableOrigin.current.y }, tableSize, metrics, camera.current.current), targets, metrics) : null;
+  const hitEnd = (point: Point) => tableOrigin.current ? resolveScreenDrop({ x: point.x - tableOrigin.current.x, y: point.y - tableOrigin.current.y }, targets, tableSize, metrics, camera.current.current) : null;
   const hovered = drag ? hitEnd(drag.point) : null;
   const last = game.last;
   const lastText = last ? `${labelFor(last.player)} ${last.kind === 'draw' ? text.drew : last.kind === 'pass' ? text.passed : `${text.played} ${last.tile?.a} · ${last.tile?.b}`}` : '';
@@ -360,7 +360,7 @@ export function ComputerGameScreen() {
               if (!enabled) { cancelDrag(); return; }
               const origin = tableOrigin.current;
               const allowed = legalEnds(game, 'human', tile).map(end => ({ end, point: slot(offsets[end], metrics) }));
-              const end = origin ? resolveDrop(screenToBoard({ x: point.x - origin.x, y: point.y - origin.y }, tableSize, metrics, camera.current.current), allowed, metrics) : null;
+              const end = origin ? resolveScreenDrop({ x: point.x - origin.x, y: point.y - origin.y }, allowed, tableSize, metrics, camera.current.current) : null;
               if (end) place(tile.id, end); else cancelDrag();
             }} />;
         })}

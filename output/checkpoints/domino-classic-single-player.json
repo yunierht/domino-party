@@ -1,0 +1,65 @@
+{
+  "name": "Domino Classic — Single Player",
+  "tag": "domino-classic-single-player-candidate",
+  "status": "Provisional local candidate; not published",
+  "includes": [
+    "Single player game and existing rules/scoring",
+    "Realistic tile bevels, depth and soft shadows; textured illuminated table",
+    "Drop anywhere in playing surface chooses nearest legal end, including only one legal end; outside cancels",
+    "Large remaining opponent tiles after each hand, no added messages; terminal state blocks play",
+    "Six-drink catalog and 30 opponent animations; Home fixes"
+  ],
+  "validation": {
+    "tests": 54,
+    "typeScript": "passed",
+    "diffCheck": "passed",
+    "browser": [
+      "375x667 and 390x844 visual inspection",
+      "Real pointer drops near both legal ends",
+      "Single legal end: release beside illegal end places legally",
+      "Outside playing surface: release cancels",
+      "Temporary deterministic fixtures removed"
+    ],
+    "expo": {
+      "status": "packager-status:running",
+      "url": "exp://192.168.1.194:8081",
+      "results": [
+        {
+          "platform": "ios",
+          "manifest": 200,
+          "bundle": 200
+        },
+        {
+          "platform": "android",
+          "manifest": 200,
+          "bundle": 200
+        }
+      ]
+    },
+    "logoScriptSyntax": "passed"
+  },
+  "pending": [
+    "Physical phone acceptance test",
+    "Distribution build, signing and App Store validation have not been performed"
+  ],
+  "protectedCheckpoint": "app-despues-de-anadir-chuchi",
+  "protectedCommit": "60832caaa02109de025481f9638bcfac14721515",
+  "publication": {
+    "push": false,
+    "deploy": false,
+    "storeUpload": false,
+    "appIdentityChanged": false
+  },
+  "additionalCodeSaved": {
+    "files": [
+      "scripts/fix-double-nine-logo.js",
+      "src/screens/TradingDashboardScreen.tsx"
+    ],
+    "note": "Previously untracked code saved as requested. Trading screen is not referenced by current navigation. Logo regeneration script was syntax-checked but not executed. No new feature activated."
+  },
+  "backup": {
+    "localRepository": "C:/Development/Dominos Codex Pro",
+    "remote": "https://github.com/yunierht/domino-party.git",
+    "pushed": false
+  }
+}
