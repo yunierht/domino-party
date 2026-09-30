@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { deal, Game, ScoringMode, matchWinner, Result } from './engine';
 import { useReducedMotion } from './DrinkGift';
-import { scheduleDrinkGiftExpiry } from './drinkGiftLifecycle';
+import { claimOpponentDrinkExpiry, scheduleDrinkGiftExpiry } from './drinkGiftLifecycle';
 import type { DrinkGift } from './drinks';
 import { claimVictoryGift, clearVictoryGift, VictoryGift } from './victoryGift';
 import { OPPONENTS } from './opponents';
@@ -14,6 +14,7 @@ const Context = createContext<{
   finishVictoryGift: (gift: VictoryGift) => void;
   expireVictoryGift: (gift: VictoryGift) => void;
   drinkGift: DrinkGift;
+  drinkExpiring: boolean;
   setDrinkGift: React.Dispatch<React.SetStateAction<DrinkGift>>;
   game: Game | null;
   setGame: React.Dispatch<React.SetStateAction<Game | null>>;
@@ -28,10 +29,22 @@ export function ComputerGameProvider({ children }: { children: React.ReactNode }
   const [victoryGift, setVictoryGift] = useState<VictoryGift | null>(null);
   const seenVictories = useRef(new WeakSet<Result>());
   const [drinkGift, setDrinkGift] = useState<DrinkGift>(null);
+  const [expiringDrink, setExpiringDrink] = useState<DrinkGift>(null);
+  const seenDrinkResults = useRef(new WeakSet<Result>());
   const [game, setGame] = useState<Game | null>(null);
   const reducedMotion = useReducedMotion();
   const finished = !!game?.result && !!matchWinner(game);
-  useEffect(() => scheduleDrinkGiftExpiry(drinkGift, finished, reducedMotion, setDrinkGift), [drinkGift, finished, reducedMotion]);
+  useEffect(() => {
+    const captured = claimOpponentDrinkExpiry(game?.result ?? null, finished, drinkGift, seenDrinkResults.current);
+    if (captured) setExpiringDrink(captured);
+  }, [game?.result, finished, drinkGift]);
+  useEffect(() => {
+    if (expiringDrink && expiringDrink !== drinkGift) { setExpiringDrink(null); return; }
+    return scheduleDrinkGiftExpiry(expiringDrink, true, reducedMotion, change => {
+      setDrinkGift(change);
+      setExpiringDrink(current => current === expiringDrink ? null : current);
+    });
+  }, [expiringDrink, drinkGift, reducedMotion]);
   const [opponentId, setOpponentId] = useState<OpponentId>('rafael');
   useEffect(() => {
     if (!game) { setVictoryGift(null); setDeliveryGift(null); return; }
@@ -42,7 +55,7 @@ export function ComputerGameProvider({ children }: { children: React.ReactNode }
   const dismissVictoryGift = React.useCallback(() => { setVictoryGift(null); setDeliveryGift(null); }, []);
   const finishVictoryGift = React.useCallback((gift: VictoryGift) => setDeliveryGift(current => clearVictoryGift(current, gift)), []);
   const expireVictoryGift = React.useCallback((gift: VictoryGift) => setVictoryGift(current => clearVictoryGift(current, gift)), []);
-  return <Context.Provider value={{ expireVictoryGift, deliveryGift, finishVictoryGift, victoryGift, dismissVictoryGift, drinkGift, setDrinkGift, game, setGame, opponentId, setOpponentId, start: (name, target, mode) => { setDeliveryGift(null); setVictoryGift(null); setDrinkGift(null); setGame(deal(name, target, Math.random, undefined, mode)); } }}>
+  return <Context.Provider value={{ drinkExpiring: !!drinkGift && drinkGift === expiringDrink, expireVictoryGift, deliveryGift, finishVictoryGift, victoryGift, dismissVictoryGift, drinkGift, setDrinkGift, game, setGame, opponentId, setOpponentId, start: (name, target, mode) => { setExpiringDrink(null); setDeliveryGift(null); setVictoryGift(null); setDrinkGift(null); setGame(deal(name, target, Math.random, undefined, mode)); } }}>
     {children}
   </Context.Provider>;
 }

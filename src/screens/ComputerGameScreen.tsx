@@ -61,7 +61,7 @@ function Avatar({ computer = false, active = false, small = false }: { computer?
 export function ComputerGameScreen() {
   const windowSize = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const { game, setGame, start, opponentId, setOpponentId, drinkGift, setDrinkGift, victoryGift, deliveryGift, dismissVictoryGift, finishVictoryGift, expireVictoryGift } = useComputerGame();
+  const { game, setGame, start, opponentId, setOpponentId, drinkGift, drinkExpiring, setDrinkGift, victoryGift, deliveryGift, dismissVictoryGift, finishVictoryGift, expireVictoryGift } = useComputerGame();
   useEffect(() => () => dismissVictoryGift(), [dismissVictoryGift]);
   const opponent = OPPONENTS.find(item => item.id === opponentId) ?? OPPONENTS[0];
   const { lang, t } = useI18n();
@@ -281,7 +281,7 @@ export function ComputerGameScreen() {
       </Pressable>
     </View>
     <View style={{ flex: 1 }}>
-      <DominoTableBackground opponentHeight={opponentHeight} gift={drinkGift} es={es} finished={!!game.result && !!matchWinner(game)} />
+      <DominoTableBackground opponentHeight={opponentHeight} gift={drinkGift} es={es} finished={drinkExpiring} />
       <View style={{ height: opponentHeight, flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 12, gap: 6 }}>
         <Pressable accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }}
           style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14, minHeight: 44, justifyContent: 'center', backgroundColor: '#102820', borderWidth: 1, borderColor: C.line, borderRadius: 12, padding: 8 }}>

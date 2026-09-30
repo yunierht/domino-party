@@ -86,7 +86,7 @@ export function TableDrinkGift({ gift, width, height, es, bottleHeight, finished
   }, [gift, reduced, drop]);
   if (!gift) return null;
   const name = DRINKS.find(beer => beer.id === gift.drinkId)!.name;
-  return <Animated.View pointerEvents="none" accessibilityLiveRegion="polite" accessibilityLabel={`${name} · ${es ? 'Regalo virtual' : 'Virtual gift'}`}
+  return <Animated.View testID="opponent-drink" pointerEvents="none" accessibilityLiveRegion="polite" accessibilityLabel={`${name} · ${es ? 'Regalo virtual' : 'Virtual gift'}`}
     style={{ position: 'absolute', opacity, left: width * 60 / 400 - bottleHeight * 0.35, top: height * 14 / 600 - bottleHeight + 6, transform: [{ translateY: drop }] }}>
     <DrinkIllustration id={gift.drinkId} height={bottleHeight} />
   </Animated.View>;
