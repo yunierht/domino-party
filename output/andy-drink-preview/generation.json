@@ -12,5 +12,5 @@
     "No actual cupholder pickup registration against the game scene yet.",
     "Only Andy with a generic green beer bottle; not other opponents or cocktails."
   ],
-  "integration": "Integrated as a user-authorized test: Andy (rafael), Heineken only, when the human wins a hand. Other opponents/drinks and reduced motion use the existing fallback. Known quality limitations accepted for testing."
+  "integration": "Integrated as a user-authorized test: Andy (rafael), Heineken only, when Andy wins a hand. Other opponents/drinks and reduced motion use the existing fallback. Known quality limitations accepted for testing."
 }

@@ -3,7 +3,7 @@ import type { DrinkGift } from './drinks';
 export const ANDY_DRINK_DURATIONS = [650,180,180,180,180,220,420,500,240,250,220,1000];
 export const ANDY_DRINK_MS = ANDY_DRINK_DURATIONS.reduce((a,b)=>a+b,0);
 export function canAndyDrink(opponentId: string, gift: DrinkGift, result: Result | null, reduced: boolean) {
-  return !reduced && opponentId === 'rafael' && gift?.drinkId === 'heineken' && result?.winner === 'human';
+  return !reduced && opponentId === 'rafael' && gift?.drinkId === 'heineken' && result?.winner === 'computer';
 }
 /** All frame callbacks are cancelled on replacement, navigation or reset. */
 export function scheduleAndyFrames(show: (index: number) => void) {

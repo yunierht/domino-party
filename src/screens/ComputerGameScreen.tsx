@@ -400,7 +400,7 @@ export function ComputerGameScreen() {
     <Dialog visible={showOpponents} title={es ? 'Tu rival' : 'Your opponent'} onClose={() => setShowOpponents(false)} closeLabel={text.cancel}>
       {opponentPicker}
     </Dialog>
-    <Dialog visible={showResult && !(winner && victoryGift) && !!game.result && !showRules && !showMenu && !showRestart && !showDrinks} title={winner ? (es ? 'Fin de partida' : 'Match complete') : (es ? 'Fin de ronda' : 'Round complete')} onClose={() => setShowResult(false)} closeLabel={es ? 'Ver mesa' : 'View table'}>
+    <Dialog visible={showResult && !andyDrink && !(winner && victoryGift) && !!game.result && !showRules && !showMenu && !showRestart && !showDrinks} title={winner ? (es ? 'Fin de partida' : 'Match complete') : (es ? 'Fin de ronda' : 'Round complete')} onClose={() => setShowResult(false)} closeLabel={es ? 'Ver mesa' : 'View table'}>
       <View style={{ alignItems: 'center', gap: 14, paddingVertical: 10 }}>
         <Feather name="award" size={38} color={C.gold} />
         <Text style={{ color: C.ivory, fontSize: 22, textAlign: 'center', lineHeight: 30 }}>{resultTitle}</Text>

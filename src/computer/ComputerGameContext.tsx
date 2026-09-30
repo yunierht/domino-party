@@ -40,7 +40,7 @@ export function ComputerGameProvider({ children }: { children: React.ReactNode }
   const reducedMotion = useReducedMotion();
   const finished = !!game?.result && !!matchWinner(game);
   useEffect(() => {
-    const captured = claimOpponentDrinkExpiry(game?.result ?? null, finished, drinkGift, seenDrinkResults.current);
+    const captured = claimOpponentDrinkExpiry(game?.result ?? null, finished, drinkGift, seenDrinkResults.current, opponentId === 'rafael' && game?.result?.winner === 'computer');
     if (captured) { drinkEvent.current = { actor: opponentId, result: game?.result ?? null }; setExpiringDrink(captured); }
   }, [game?.result, finished, drinkGift, opponentId]);
   const andyDrink = expiringDrink === drinkGift && drinkEvent.current.actor === opponentId && canAndyDrink(opponentId, drinkGift, game?.result ?? null, reducedMotion) ? expiringDrink : null;
