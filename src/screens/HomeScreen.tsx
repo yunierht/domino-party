@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, ScrollView, Text, View } from 'react-native';
+import { Animated, Easing, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme/ThemeContext';
@@ -24,6 +24,7 @@ export function HomeScreen() {
   const { game: computerGame } = useComputerGame();
   const { go } = useNav();
   const { currentMatch } = useGame();
+  const { height } = useWindowDimensions();
   const c = theme.colors;
 
   const activeMatch =
@@ -35,11 +36,12 @@ export function HomeScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
-        contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingHorizontal: s(20), paddingTop: s(8), paddingBottom: s(12) }}
         showsVerticalScrollIndicator={false}
       >
       {/* Top bar with menu button */}
-      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: s(2) }}>
+      <View style={{ position: 'absolute', top: s(8), right: s(20), zIndex: 1 }}>
         <Pressable onPress={() => setMenuOpen(true)} hitSlop={12} style={{ padding: s(6) }}>
           <Feather name="menu" size={s(26)} color={c.text} />
         </Pressable>
@@ -48,7 +50,7 @@ export function HomeScreen() {
       <Menu visible={menuOpen} onClose={() => setMenuOpen(false)} />
 
       {/* Logo */}
-      <Logo spinTrigger={logoSpin} />
+      <Logo spinTrigger={logoSpin} height={height < 700 ? 140 : 170} />
 
       {activeMatch ? (
         <ResumeMatchCard match={activeMatch} onResume={() => go('game')} onNewMatch={() => go('newMatch')}>
@@ -69,7 +71,9 @@ export function HomeScreen() {
         </Text>}
       </Card>
       </ScrollView>
-      <AppearanceSpinner onSpin={() => setLogoSpin((n) => n + 1)} />
+      <View testID="home-appearance-footer" style={{ height: s(76) }}>
+        <AppearanceSpinner onSpin={() => setLogoSpin((n) => n + 1)} />
+      </View>
     </View>
   );
 }
@@ -119,7 +123,7 @@ function AppearanceSpinner({ onSpin }: { onSpin: () => void }) {
       style={({ pressed }) => ({
         position: 'absolute',
         right: s(18),
-        bottom: s(18),
+        bottom: s(12),
         shadowColor: '#000',
         shadowOpacity: pressed ? 0.24 : 0.38,
         shadowRadius: pressed ? s(8) : s(14),

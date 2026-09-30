@@ -8,7 +8,7 @@ import { useTheme } from '../theme/ThemeContext';
  * (e.g. tapping the YHT signature) makes it spin three times with a bounce
  * and a tiny haptic buzz.
  */
-export function Logo({ spinTrigger = 0 }: { spinTrigger?: number }) {
+export function Logo({ spinTrigger = 0, height = 205 }: { spinTrigger?: number; height?: number }) {
   const { s } = useTheme();
   const spin = useRef(new Animated.Value(0)).current;
   const bounce = useRef(new Animated.Value(1)).current;
@@ -48,7 +48,7 @@ export function Logo({ spinTrigger = 0 }: { spinTrigger?: number }) {
     <View style={{ alignItems: 'center', marginTop: s(4), marginBottom: s(10) }}>
       <Animated.Image
         source={require('../../assets/social-club-logo.png')}
-        style={{ width: '100%', height: s(205), transform: [{ rotate }, { scale: dip }, { scale: bounce }] }}
+        style={{ width: '100%', height: s(height), transform: [{ rotate }, { scale: dip }, { scale: bounce }] }}
         resizeMode="contain"
       />
     </View>
