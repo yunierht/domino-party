@@ -23,7 +23,7 @@ const SCRIPT: { team: 0 | 1; points: number }[] = [
  * target, a winner is crowned with a heartbeat, then it resets and loops —
  * a wordless 3-second preview of what the app feels like.
  */
-export function DemoMatch({ onNewMatch }: { onNewMatch: () => void }) {
+export function DemoMatch({ onNewMatch, children }: { onNewMatch: () => void; children?: React.ReactNode }) {
   const { theme, s } = useTheme();
   const { t } = useI18n();
   const c = theme.colors;
@@ -81,21 +81,19 @@ export function DemoMatch({ onNewMatch }: { onNewMatch: () => void }) {
   const dangerB = winner === null && lead === 1 && toWinB <= TARGET * 0.25;
 
   return (
-    <Pressable
-      onPress={onNewMatch}
-      style={({ pressed }) => ({ opacity: pressed ? 0.92 : 1, marginBottom: s(16) })}
-    >
+    <View style={{ marginBottom: s(16) }}>
       <Card style={{ paddingVertical: s(18) }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
+        <Pressable onPress={onNewMatch} accessibilityRole="button" accessibilityLabel={t.newMatch} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
           <DemoSide name={`${t.team} A`} score={a} color={c.teamA} caption={String(toWinA)} pulse={dangerA} win={winner === 0} />
           <Text style={{ color: c.textMuted, fontWeight: '800', fontSize: s(16) }}>{t.vs}</Text>
           <DemoSide name={`${t.team} B`} score={b} color={c.teamB} caption={String(toWinB)} pulse={dangerB} win={winner === 1} />
-        </View>
+        </Pressable>
         <View style={{ marginTop: s(16) }}>
           <Button label={t.newMatch} onPress={onNewMatch} fullWidth />
         </View>
+        {children}
       </Card>
-    </Pressable>
+    </View>
   );
 }
 

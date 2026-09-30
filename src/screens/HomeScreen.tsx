@@ -23,7 +23,7 @@ export function HomeScreen() {
   const { t, lang } = useI18n();
   const { game: computerGame } = useComputerGame();
   const { go } = useNav();
-  const { currentMatch, matches } = useGame();
+  const { currentMatch } = useGame();
   const c = theme.colors;
 
   const activeMatch =
@@ -50,34 +50,40 @@ export function HomeScreen() {
       {/* Logo */}
       <Logo spinTrigger={logoSpin} />
 
-      {/* Active match resume card */}
       {activeMatch ? (
-        <>
-          <ResumeMatchCard
-            match={activeMatch}
-            onResume={() => go('game')}
-            onNewMatch={() => go('newMatch')}
-          />
-        </>
+        <ResumeMatchCard match={activeMatch} onResume={() => go('game')} onNewMatch={() => go('newMatch')}>
+          <HomeMatchActions />
+        </ResumeMatchCard>
       ) : (
-        <DemoMatch onNewMatch={() => go('newMatch')} />
+        <DemoMatch onNewMatch={() => go('newMatch')}><HomeMatchActions /></DemoMatch>
       )}
 
-      <Button label={computerGame ? COMPUTER_STRINGS[lang].resume : COMPUTER_STRINGS[lang].title}
-        onPress={() => go('computerGame')} fullWidth />
-      <View style={{ height: s(12) }} />
-      <Button label={t.watchGame} onPress={() => go('watch')} variant="secondary" fullWidth />
-      <View style={{ height: s(12) }} />
-      <Button
-        label={`${t.history}${matches.length ? `  (${matches.length})` : ''}`}
-        onPress={() => go('history')}
-        variant="secondary"
-        fullWidth
-      />
+      <Card>
+        <Text accessibilityRole="header" style={{ color: c.text, fontSize: s(20), fontWeight: '800', marginBottom: s(14) }}>
+          {COMPUTER_STRINGS[lang].title}
+        </Text>
+        <Button label={lang === 'es' ? 'Jugar dominó' : 'Play Dominos'}
+          onPress={() => go('computerGame')} variant="secondary" fullWidth />
+        {computerGame && <Text style={{ color: c.textMuted, fontSize: s(13), marginTop: s(8) }}>
+          {COMPUTER_STRINGS[lang].resume}
+        </Text>}
+      </Card>
       </ScrollView>
       <AppearanceSpinner onSpin={() => setLogoSpin((n) => n + 1)} />
     </View>
   );
+}
+
+function HomeMatchActions() {
+  const { s } = useTheme();
+  const { t } = useI18n();
+  const { go } = useNav();
+  const { matches } = useGame();
+  return <View style={{ gap: s(12), marginTop: s(12) }}>
+    <Button label={t.watchGame} onPress={() => go('watch')} variant="secondary" fullWidth />
+    <Button label={`${t.history}${matches.length ? `  (${matches.length})` : ''}`}
+      onPress={() => go('history')} variant="secondary" fullWidth />
+  </View>;
 }
 
 function AppearanceSpinner({ onSpin }: { onSpin: () => void }) {
@@ -189,10 +195,12 @@ function ResumeMatchCard({
   match,
   onResume,
   onNewMatch,
+  children,
 }: {
   match: Match;
   onResume: () => void;
   onNewMatch: () => void;
+  children?: React.ReactNode;
 }) {
   const { theme, s } = useTheme();
   const { t } = useI18n();
@@ -215,16 +223,7 @@ function ResumeMatchCard({
   const scoreB = teamTotal(match, match.teams[1].id);
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={t.resumeMatch}
-      onPress={onResume}
-      style={({ pressed }) => ({
-        marginBottom: s(18),
-        paddingVertical: s(3),
-        opacity: pressed ? 0.88 : 1,
-      })}
-    >
+    <View style={{ marginBottom: s(18), paddingVertical: s(3) }}>
       <Animated.View style={{ transform: [{ scale: attention }] }}>
         <Card style={{ borderColor: c.primary }}>
           <LinearGradient
@@ -245,7 +244,7 @@ function ResumeMatchCard({
               backgroundColor: 'rgba(255,255,255,0.13)',
             }}
           />
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t.resumeMatch} onPress={onResume} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <HomeScoreSide
               team={match.teams[0]}
               score={scoreA}
@@ -262,18 +261,19 @@ function ResumeMatchCard({
               color={c.teamB}
               alignRight
             />
-          </View>
+          </Pressable>
           <View style={{ marginTop: s(16), flexDirection: 'row', gap: s(10) }}>
-            <View style={{ flex: 1 }} pointerEvents="none">
+            <View style={{ flex: 1 }}>
               <Button label={t.resumeShort} onPress={onResume} fullWidth />
             </View>
             <View style={{ flex: 1 }}>
               <Button label={t.matchShort} onPress={onNewMatch} fullWidth />
             </View>
           </View>
+          {children}
         </Card>
       </Animated.View>
-    </Pressable>
+    </View>
   );
 }
 
