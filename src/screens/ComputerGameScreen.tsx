@@ -80,7 +80,6 @@ export function ComputerGameScreen() {
   const [showMenu, setShowMenu] = useState(false);
   const [showRestart, setShowRestart] = useState(false);
   const [showOpponents, setShowOpponents] = useState(false);
-  const [showResult, setShowResult] = useState(false);
   const [turnReminder, setTurnReminder] = useState(false);
   const [showTurnHelp, setShowTurnHelp] = useState(false);
   const [appActive, setAppActive] = useState(AppState.currentState === 'active');
@@ -131,8 +130,7 @@ export function ComputerGameScreen() {
     const timer = setTimeout(() => setGame(current => current ? computerStep(current) : current), 850);
     return () => clearTimeout(timer);
   }, [game, appActive, setGame, showRules, showOpponents, showMenu, showRestart, showDrinks]);
-  useEffect(() => { setSelected(null); cancelDrag(); }, [game?.round, game?.turn]);
-  useEffect(() => { setShowResult(!!game?.result && game.result.winner !== 'human'); }, [game?.result]);
+  useEffect(() => { setSelected(null); cancelDrag(); }, [game?.round, game?.turn, game?.result]);
   useEffect(() => {
     setTurnReminder(false);
     setShowTurnHelp(false);
@@ -210,6 +208,7 @@ export function ComputerGameScreen() {
   </View>;
 
   const humanTurn = game.turn === 'human' && !game.result;
+  const revealOpponent = !!game.result && !opponentDrink && game.hands.computer.length > 0;
   const selectedTile = game.hands.human.find(tile => tile.id === selected);
   const winner = matchWinner(game);
   const labelFor = (player: 'human' | 'computer') => player === 'human' ? game.playerName : opponent.name;
@@ -230,7 +229,7 @@ export function ComputerGameScreen() {
   const nextRound = () => {
     if (opponentDrink) return;
     if (game && matchWinner(game)) dismissVictoryGift();
-    cancelDrag(); setSelected(null); setShowResult(false);
+    cancelDrag(); setSelected(null);
     if (game && matchWinner(game)) setDrinkGift(null);
     setGame(current => current ? deal(current.playerName, current.target, Math.random, matchWinner(current) ? undefined : current, current.scoringMode) : current);
   };
@@ -243,7 +242,7 @@ export function ComputerGameScreen() {
   const confirmRestart = () => {
     dismissVictoryGift();
     setDrinkGift(null); setShowDrinks(false);
-    cancelDrag(); setSelected(null); setShowResult(false); setShowTurnHelp(false); setTurnReminder(false);
+    cancelDrag(); setSelected(null); setShowTurnHelp(false); setTurnReminder(false);
     setShowRules(false); setShowOpponents(false); setShowMenu(false); setShowRestart(false);
     camera.center();
     setGame(current => current ? restartMatch(current) : current);
@@ -300,14 +299,19 @@ export function ComputerGameScreen() {
           <DrinkInviteButton es={es} compact={compact} active={appActive && !showDrinks && !showMenu && !showRestart && !showRules && !showOpponents} onPress={() => { cancelDrag(); drinkSelectionLock.current = false; setShowDrinks(true); }} />
         </View>
       </View>
-      <View style={{ alignItems: 'center', height: 25, justifyContent: 'center' }}>
+      {revealOpponent ? <View testID="round-reveal" style={{ paddingVertical: 8 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator testID="revealed-opponent-tiles"
+          contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 5, gap: 6, minWidth: '100%', justifyContent: game.hands.computer.length * (compact ? 50 : 54) <= panelWidth - 24 ? 'center' : 'flex-start', alignItems: 'center' }}>
+          {game.hands.computer.map(tile => <DominoTile key={tile.id} a={tile.a} b={tile.b} size={compact ? 40 : 44} vertical />)}
+        </ScrollView>
+      </View> : <View testID="hidden-opponent-hand" style={{ alignItems: 'center', height: 25, justifyContent: 'center' }}>
         <View>
           <View style={{ flexDirection: 'row', gap: 3 }}>
             {game.hands.computer.slice(0, 10).map(tile => <View key={tile.id} style={{ width: 12, height: 21, borderRadius: 2, borderWidth: 1, borderColor: '#D5CAB0', backgroundColor: '#8E9A7C' }} />)}
             <Text style={{ color: C.muted, fontSize: 10, marginLeft: 3 }}>{game.hands.computer.length}</Text>
           </View>
         </View>
-      </View>
+      </View>}
       <View ref={tableRef} collapsable={false} testID="playing-surface" {...tablePanResponder.panHandlers}
         onLayout={event => { const { width, height } = event.nativeEvent.layout; if (width > 0 && height > 0) setTableSize({ width, height }); }}
         style={{ flex: 1, marginHorizontal: 12, minHeight: 80, overflow: 'hidden' }}>
@@ -344,14 +348,16 @@ export function ComputerGameScreen() {
           const ends = legalEnds(game, 'human', tile);
           const enabled = humanTurn && ends.length > 0;
           return <DraggableDomino key={tile.id} tile={tile} size={handSize} enabled={enabled && !showRules} selected={selected === tile.id} revealed={!!game.result} dragging={drag?.tile.id === tile.id}
-            onTap={() => ends.length === 1 ? place(tile.id, ends[0]) : setSelected(tile.id)} onCancel={cancelDrag}
+            onTap={() => { if (enabled) { if (ends.length === 1) place(tile.id, ends[0]); else setSelected(tile.id); } }} onCancel={cancelDrag}
             onDrag={point => {
+              if (!enabled) { cancelDrag(); return; }
               if (!dragId.current) { camera.begin(); dragId.current = tile.id; setSelected(null);
                 rootRef.current?.measureInWindow((x, y) => { rootOrigin.current = { x, y }; });
                 tableRef.current?.measureInWindow((x, y) => { tableOrigin.current = { x, y }; }); }
               setDrag({ tile, point });
             }}
             onDrop={point => {
+              if (!enabled) { cancelDrag(); return; }
               const origin = tableOrigin.current;
               const allowed = legalEnds(game, 'human', tile).map(end => ({ end, point: slot(offsets[end], metrics) }));
               const end = origin ? resolveDrop(screenToBoard({ x: point.x - origin.x, y: point.y - origin.y }, tableSize, metrics, camera.current.current), allowed, metrics) : null;
@@ -400,15 +406,6 @@ export function ComputerGameScreen() {
     <Dialog visible={showOpponents} title={es ? 'Tu rival' : 'Your opponent'} onClose={() => setShowOpponents(false)} closeLabel={text.cancel}>
       {opponentPicker}
     </Dialog>
-    <Dialog visible={showResult && !opponentDrink && !(winner && victoryGift) && !!game.result && !showRules && !showMenu && !showRestart && !showDrinks && !showOpponents} title={winner ? (es ? 'Fin de partida' : 'Match complete') : (es ? 'Fin de ronda' : 'Round complete')} onClose={() => setShowResult(false)} closeLabel={es ? 'Ver mesa' : 'View table'}>
-      <View style={{ alignItems: 'center', gap: 14, paddingVertical: 10 }}>
-        <Feather name="award" size={38} color={C.gold} />
-        <Text style={{ color: C.ivory, fontSize: 22, textAlign: 'center', lineHeight: 30 }}>{resultTitle}</Text>
-        <Text style={{ color: C.goldLight, fontSize: 50, fontWeight: '300' }}>+{winsMode ? (game.result?.winner === 'tie' ? 0 : 1) : game.result?.points ?? 0}</Text>
-        <Text style={{ color: C.muted, fontSize: 12 }}>{winsMode ? (es ? 'victorias' : 'wins') : game.result?.blocked ? text.blocked : text.points}</Text>
-        <View style={{ flexDirection: 'row', gap: 5, flexWrap: 'wrap', justifyContent: 'center', marginVertical: 12 }}>{game.hands.computer.map(tile => <DominoTile key={tile.id} a={tile.a} b={tile.b} size={22} />)}</View>
-      </View>
-      <Action label={winner ? text.again : text.next} onPress={nextRound} disabled={!!opponentDrink} />
-    </Dialog>
+
   </View>;
 }

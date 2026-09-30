@@ -1,0 +1,66 @@
+{
+  "method": "Actual browser UI with temporary deterministic near-finish games; 390x844 and 375x667; no physical device test",
+  "evidence": [
+    {
+      "case": "active",
+      "revealed": 0
+    },
+    {
+      "case": "tie",
+      "revealedTile": "2 / 3",
+      "noAddedText": true
+    },
+    {
+      "case": "next-round",
+      "revealed": 0,
+      "hidden": 1
+    },
+    {
+      "case": "human",
+      "tiles": "revealed-opponent-tiles",
+      "extraText": ""
+    },
+    {
+      "case": "blocked-wins",
+      "extraText": "",
+      "disabled": "true"
+    },
+    {
+      "case": "large",
+      "extraText": ""
+    },
+    {
+      "case": "drinking",
+      "reveal": 0
+    },
+    {
+      "case": "empty-final",
+      "reveal": 0,
+      "emptyMessage": 0,
+      "again": 1,
+      "disabled": "true"
+    },
+    {
+      "case": "terminal-keyboard",
+      "attemptRejectedAsDisabled": true
+    }
+  ],
+  "fixtureRemoved": true,
+  "scope": "Reveal only remaining opponent tiles after every completed hand; no extra text or empty-hand message. Existing footer result and continuation controls retained; result overlay removed.",
+  "tests": {
+    "passed": 51,
+    "typeScript": "passed",
+    "nativeBundles": [
+      {
+        "platform": "ios",
+        "manifest": 200,
+        "bundle": 200
+      },
+      {
+        "platform": "android",
+        "manifest": 200,
+        "bundle": 200
+      }
+    ]
+  }
+}
