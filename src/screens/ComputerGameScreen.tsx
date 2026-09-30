@@ -3,7 +3,7 @@ import { AppState, BackHandler, Image, Modal, PanResponder, Platform, Pressable,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
-import Svg, { Defs, LinearGradient as SvgGradient, Stop, Path } from 'react-native-svg';
+import { DominoTableBackground } from '../computer/DominoTableBackground';
 import { useComputerGame } from '../computer/ComputerGameContext';
 import { COMPUTER_STRINGS } from '../computer/strings';
 import { OPPONENTS } from '../computer/opponents';
@@ -259,17 +259,6 @@ export function ComputerGameScreen() {
       </Pressable>
     </View>
     <View style={{ flex: 1 }}>
-      <View pointerEvents="none" style={{ position: 'absolute', top: opponentHeight - 15, bottom: -70, left: -35, right: -35 }}>
-      <Svg width="100%" height="100%" viewBox="0 0 400 600" preserveAspectRatio="none">
-        <Defs>
-          <SvgGradient id="felt" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor="#102C28" /><Stop offset="0.55" stopColor="#245F4C" /><Stop offset="1" stopColor="#34735B" /></SvgGradient>
-          <SvgGradient id="rail" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor="#8B7850" /><Stop offset="0.5" stopColor="#403C2C" /><Stop offset="1" stopColor="#151D17" /></SvgGradient>
-        </Defs>
-        <Path d="M48 7 Q200 -2 352 7 L399 560 Q400 588 376 596 L24 596 Q0 588 1 560 Z" fill="#020C09" />
-        <Path d="M48 3 Q200 -6 352 3 L399 550 Q400 578 376 584 L24 584 Q0 578 1 550 Z" fill="url(#rail)" stroke="#A48D5D" strokeWidth="1" />
-        <Path d="M54 14 Q200 5 346 14 L387 547 Q390 562 371 566 L29 566 Q10 562 13 547 Z" fill="url(#felt)" stroke="#88936B" strokeWidth="1.5" />
-      </Svg>
-      </View>
       <View style={{ height: opponentHeight, flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 12, gap: 6 }}>
         <Pressable accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }}
           style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14, minHeight: 44, justifyContent: 'center', backgroundColor: '#102820', borderWidth: 1, borderColor: C.line, borderRadius: 12, padding: 8 }}>
@@ -285,6 +274,8 @@ export function ComputerGameScreen() {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><Feather name="layers" color={C.muted} size={12} /><Text style={{ flexShrink: 1, color: C.muted, fontSize: 10 }}>{text.stock} · {game.stock.length}</Text></View>
         </View>
       </View>
+      <View style={{ flex: 1 }}>
+      <DominoTableBackground />
       <View style={{ alignItems: 'center', height: 25, justifyContent: 'center' }}>
         <View>
           <View style={{ flexDirection: 'row', gap: 3 }}>
@@ -310,6 +301,7 @@ export function ComputerGameScreen() {
           style={{ position: 'absolute', right: 0, top: 0, minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: C.surface, borderRadius: 12 }}>
           <Feather name="maximize" size={18} color={C.gold} />
         </Pressable>
+      </View>
       </View>
     <View style={{ paddingHorizontal: 12, paddingBottom: 2 }}>
       <View style={{ height: compact ? 30 : 35, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
