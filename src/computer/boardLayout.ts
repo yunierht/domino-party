@@ -105,3 +105,40 @@ export function resolveDrop(point: Point, targets: { end: End; point: Point }[],
   hits.sort((a, b) => Math.hypot(point.x - a.point.x, point.y - a.point.y) - Math.hypot(point.x - b.point.x, point.y - b.point.y));
   return hits[0]?.end ?? null;
 }
+
+export interface BoardCamera { x: number; y: number; scale: number }
+export interface ChainBounds { left: number; top: number; right: number; bottom: number }
+/** Rendered tile edges plus playable end slots, in virtual-canvas coordinates. */
+export function chainBounds(board: Tile[], openingId: string | null, metrics: ReturnType<typeof chainMetrics>): ChainBounds {
+  const anchor = Math.max(0, board.findIndex(tile => tile.id === openingId));
+  const boxes = board.map((_, index) => {
+    const p = chainSlot(index - anchor, metrics, board, openingId);
+    return { x: p.x, y: p.y, w: p.width * p.scale + 4, h: p.height * p.scale * 0.86 + 4 };
+  });
+  const ends = endpointOffsets(board, openingId);
+  for (const end of board.length ? ['left', 'right'] as const : ['right'] as const) {
+    const p = chainSlot(ends[end], metrics, board, openingId);
+    boxes.push({ x: p.x, y: p.y, w: metrics.stepX, h: metrics.stepY });
+  }
+  return { left: Math.min(...boxes.map(p => p.x - p.w / 2)), right: Math.max(...boxes.map(p => p.x + p.w / 2)),
+    top: Math.min(...boxes.map(p => p.y - p.h / 2)), bottom: Math.max(...boxes.map(p => p.y + p.h / 2)) };
+}
+/** Largest readable fit, with a small dead zone and no zoom-in while a chain grows. */
+export function fitBoardCamera(bounds: ChainBounds, viewport: { width: number; height: number }, canvas: { width: number; height: number }, current: BoardCamera, reset = false): BoardCamera {
+  const margin = Math.min(22, Math.max(6, Math.min(viewport.width, viewport.height) * 0.06));
+  const scale = Math.min(1, (viewport.width - margin * 2) / Math.max(1, bounds.right - bounds.left),
+    (viewport.height - margin * 2) / Math.max(1, bounds.bottom - bounds.top), reset ? 1 : current.scale);
+  const centerX = (bounds.left + bounds.right) / 2 - canvas.width / 2;
+  const centerY = (bounds.top + bounds.bottom) / 2 - canvas.height / 2;
+  const fits = viewport.width / 2 + current.x + (bounds.left - canvas.width / 2) * current.scale >= margin &&
+    viewport.width / 2 + current.x + (bounds.right - canvas.width / 2) * current.scale <= viewport.width - margin &&
+    viewport.height / 2 + current.y + (bounds.top - canvas.height / 2) * current.scale >= margin &&
+    viewport.height / 2 + current.y + (bounds.bottom - canvas.height / 2) * current.scale <= viewport.height - margin;
+  if (!reset && fits && Math.abs(current.x + centerX * scale) < 18 && Math.abs(current.y + centerY * scale) < 18) return current;
+  return { x: -centerX * scale, y: -centerY * scale, scale };
+}
+/** Invert the very same camera used for rendering before resolving a drag target. */
+export function screenToBoard(point: Point, viewport: { width: number; height: number }, canvas: { width: number; height: number }, camera: BoardCamera): Point {
+  return { x: canvas.width / 2 + (point.x - viewport.width / 2 - camera.x) / camera.scale,
+    y: canvas.height / 2 + (point.y - viewport.height / 2 - camera.y) / camera.scale };
+}

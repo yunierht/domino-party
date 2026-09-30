@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AppState, BackHandler, Image, Modal, PanResponder, Platform, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import { Animated, AppState, BackHandler, Image, Modal, PanResponder, Platform, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
+import { useBoardCamera } from '../computer/useBoardCamera';
 import { VictoryDrink, VictoryBeerBadge } from '../computer/VictoryDrink';
 import { DrinkChoices, DrinkInviteButton } from '../computer/DrinkGift';
 import type { DrinkId } from '../computer/drinks';
@@ -14,11 +15,13 @@ import { computerStep, restartMatch, deal, drawOrPass, End, legalEnds, openingMo
 import { DominoTile } from '../computer/DominoTile';
 import { DraggableDomino } from '../computer/DraggableDomino';
 import { AnchoredBoard } from '../computer/AnchoredBoard';
-import { chainMetrics, endpointOffsets, Point, resolveDrop, chainSlot } from '../computer/boardLayout';
+import { chainMetrics, endpointOffsets, Point, resolveDrop, chainSlot, screenToBoard } from '../computer/boardLayout';
 import { TABLE as C } from '../computer/tableTheme';
 import { handLayout } from '../computer/handLayout';
 import { useI18n } from '../i18n/I18nContext';
 import { useNav } from '../nav/NavContext';
+
+const EMPTY_BOARD: Tile[] = [];
 
 function Action({ label, onPress, subtle = false, disabled = false }: {
   label: string; onPress: () => void; subtle?: boolean; disabled?: boolean;
@@ -83,6 +86,12 @@ export function ComputerGameScreen() {
   const [panelWidth, setPanelWidth] = useState(390);
   const [tableSize, setTableSize] = useState({ width: 340, height: 360 });
   const rootRef = useRef<View>(null);
+  const beerDockRef = useRef<View>(null);
+  const [beerDock, setBeerDock] = useState<Point | null>(null);
+  const measureBeerDock = () => {
+    rootRef.current?.measureInWindow((rootX, rootY) => beerDockRef.current?.measureInWindow((x, y, width, height) => setBeerDock({ x: x - rootX + width / 2, y: y - rootY + height / 2 })));
+  };
+  useEffect(() => { const frame = requestAnimationFrame(measureBeerDock); return () => cancelAnimationFrame(frame); }, [victoryGift, windowSize.width, windowSize.height]);
   const tableRef = useRef<View>(null);
   const rootOrigin = useRef<Point>({ x: 0, y: 0 });
   const tableOrigin = useRef<Point | null>(null);
@@ -90,26 +99,23 @@ export function ComputerGameScreen() {
   const dragId = useRef<string | null>(null);
   // A fixed virtual canvas keeps tile size independent of hand, stock and chain length.
   const metrics = chainMetrics(2048, 4096);
-  const [tablePan, setTablePan] = useState({ x: 0, y: 0 });
-  const panRef = useRef(tablePan);
-  panRef.current = tablePan;
-  const panStart = useRef(tablePan);
+  const camera = useBoardCamera(game?.board ?? EMPTY_BOARD, game?.openingId ?? null, tableSize.width, tableSize.height);
+  const cameraRef = useRef(camera); cameraRef.current = camera;
+  const panStart = useRef({ x: 0, y: 0 });
   const tablePanResponder = useRef(PanResponder.create({
     onMoveShouldSetPanResponder: (_event, gesture) => !dragId.current && Math.hypot(gesture.dx, gesture.dy) > 6,
-    onPanResponderGrant: () => { panStart.current = panRef.current; },
-    onPanResponderMove: (_event, gesture) => setTablePan({
-      x: Math.max(-900, Math.min(900, panStart.current.x + gesture.dx)),
-      y: Math.max(-1800, Math.min(1800, panStart.current.y + gesture.dy)),
-    }),
+    onPanResponderGrant: () => { cameraRef.current.begin(); panStart.current = { ...cameraRef.current.current.current }; },
+    onPanResponderMove: (_event, gesture) => cameraRef.current.pan(panStart.current.x + gesture.dx, panStart.current.y + gesture.dy),
+    onPanResponderRelease: () => cameraRef.current.end(),
+    onPanResponderTerminate: () => cameraRef.current.end(),
   })).current;
-  useEffect(() => { setTablePan({ x: 0, y: 0 }); }, [game?.round]);
   const slot = (offset: number, size: typeof metrics) => chainSlot(offset, size, game?.board ?? [], game?.openingId ?? null);
   const usableHeight = windowSize.height - insets.top - insets.bottom;
   const compact = usableHeight < 720;
   const opponentHeight = compact ? 105 : Math.min(165, usableHeight * 0.20);
   const { columns: handColumns, rows: handRows, size: handSize } = handLayout(
     game?.hands.human.length ?? 7, Math.min(panelWidth, windowSize.width) - 24, Math.max(110, usableHeight - opponentHeight - 294));
-  const cancelDrag = () => { dragId.current = null; tableOrigin.current = null; setDrag(null); };
+  const cancelDrag = () => { if (dragId.current) camera.end(); dragId.current = null; tableOrigin.current = null; setDrag(null); };
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', state => {
@@ -212,7 +218,7 @@ export function ComputerGameScreen() {
   const openingLabel = opening ? `${labelFor(opening.player)} ${es ? 'abre con' : 'opens with'} ${opening.tile.a} · ${opening.tile.b}` : text.open;
   const offsets = endpointOffsets(game.board, game.openingId);
   const targets = available.map(end => ({ end, point: slot(offsets[end], metrics) }));
-  const hitEnd = (point: Point) => tableOrigin.current ? resolveDrop({ x: point.x - tableOrigin.current.x, y: point.y - tableOrigin.current.y }, targets, metrics) : null;
+  const hitEnd = (point: Point) => tableOrigin.current ? resolveDrop(screenToBoard({ x: point.x - tableOrigin.current.x, y: point.y - tableOrigin.current.y }, tableSize, metrics, camera.current.current), targets, metrics) : null;
   const hovered = drag ? hitEnd(drag.point) : null;
   const last = game.last;
   const lastText = last ? `${labelFor(last.player)} ${last.kind === 'draw' ? text.drew : last.kind === 'pass' ? text.passed : `${text.played} ${last.tile?.a} · ${last.tile?.b}`}` : '';
@@ -237,7 +243,7 @@ export function ComputerGameScreen() {
     setDrinkGift(null); setShowDrinks(false);
     cancelDrag(); setSelected(null); setShowResult(false); setShowTurnHelp(false); setTurnReminder(false);
     setShowRules(false); setShowOpponents(false); setShowMenu(false); setShowRestart(false);
-    setTablePan({ x: 0, y: 0 }); panRef.current = { x: 0, y: 0 }; panStart.current = { x: 0, y: 0 };
+    camera.center();
     setGame(current => current ? restartMatch(current) : current);
   };
   const resultTitle = game.result ? winner ? `${labelFor(winner)} ${text.wonMatch}` : game.result.winner === 'tie' ? text.tie : `${labelFor(game.result.winner)} ${text.wonRound}` : '';
@@ -300,27 +306,34 @@ export function ComputerGameScreen() {
           </View>
         </View>
       </View>
-      <View testID="playing-surface" {...tablePanResponder.panHandlers}
+      <View ref={tableRef} collapsable={false} testID="playing-surface" {...tablePanResponder.panHandlers}
         onLayout={event => { const { width, height } = event.nativeEvent.layout; if (width > 0 && height > 0) setTableSize({ width, height }); }}
         style={{ flex: 1, marginHorizontal: 12, minHeight: 80, overflow: 'hidden' }}>
         <View pointerEvents="none" style={{ position: 'absolute', top: '21%', left: 0, right: 0, alignItems: 'center', opacity: 0.11 }}>
           <Feather name="grid" size={28} color="#D5DDB7" /><Text style={{ color: '#D5DDB7', fontSize: 9, letterSpacing: 4, marginTop: 9 }}>SOCIAL CLUB</Text>
         </View>
-        <View ref={tableRef} collapsable={Platform.OS === 'web' ? undefined : false} style={{ position: 'absolute',
-          left: (tableSize.width - metrics.width) / 2 + tablePan.x, top: (tableSize.height - metrics.height) / 2 + tablePan.y,
-          width: metrics.width, height: metrics.height }}>
+        <Animated.View style={{ position: 'absolute',
+          left: (tableSize.width - metrics.width) / 2, top: (tableSize.height - metrics.height) / 2,
+          width: metrics.width, height: metrics.height, transform: [{ translateX: camera.values.x }, { translateY: camera.values.y }, { scale: camera.values.scale }] }}>
         <AnchoredBoard board={game.board} openingId={game.openingId} metrics={metrics} available={available}
           hovered={hovered} leftLabel={text.left} rightLabel={text.right} openLabel={openingLabel}
           onEnd={end => { if (activeTile) place(activeTile.id, end); }} />
-        </View>
-        <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Centrar mesa' : 'Center table'} onPress={() => setTablePan({ x: 0, y: 0 })}
+        </Animated.View>
+        <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Centrar mesa' : 'Center table'} onPress={camera.center}
           style={{ position: 'absolute', right: 0, top: 0, minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: C.surface, borderRadius: 12 }}>
           <Feather name="maximize" size={18} color={C.gold} />
         </Pressable>
       </View>
     <View style={{ paddingHorizontal: 12, paddingBottom: 2 }}>
       <View style={{ height: compact ? 30 : 35, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Avatar active={humanTurn} small />{victoryGift && !deliveryGift && <View testID="human-beer" accessibilityLabel={es ? `Cerveza de ${victoryGift.opponentName}` : `Beer from ${victoryGift.opponentName}`}><VictoryBeerBadge gift={victoryGift} finished={!!game.result && !!winner} onExpire={expireVictoryGift} /></View>}<Text numberOfLines={1} style={{ flex: 1, color: C.ivory, fontSize: 12, fontWeight: '600' }}>{game.playerName}</Text>
+        <Avatar active={humanTurn} small />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1 }}>
+          <Text numberOfLines={1} style={{ flexShrink: 1, color: C.ivory, fontSize: 12, fontWeight: '600' }}>{game.playerName}</Text>
+          {victoryGift && <View ref={beerDockRef} collapsable={false} onLayout={measureBeerDock} testID="human-beer" style={{ width: 20, height: 28 }} accessibilityLabel={es ? `Cerveza de ${victoryGift.opponentName}` : `Beer from ${victoryGift.opponentName}`}>
+            {!deliveryGift && <VictoryBeerBadge gift={victoryGift} finished={!!game.result && !!winner} onExpire={expireVictoryGift} />}
+          </View>}
+        </View>
+        <View style={{ flex: 1 }} />
         <View testID="stock-info" style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Feather name="layers" color={C.muted} size={11} /><Text style={{ color: C.muted, fontSize: 10 }}>{text.stock} · {game.stock.length}</Text></View>
         <Text style={{ color: C.muted, fontSize: 10 }}>{game.hands.human.length} {text.tiles}</Text>
       </View>
@@ -332,7 +345,7 @@ export function ComputerGameScreen() {
           return <DraggableDomino key={tile.id} tile={tile} size={handSize} enabled={enabled && !showRules} selected={selected === tile.id} revealed={!!game.result} dragging={drag?.tile.id === tile.id}
             onTap={() => ends.length === 1 ? place(tile.id, ends[0]) : setSelected(tile.id)} onCancel={cancelDrag}
             onDrag={point => {
-              if (!dragId.current) { dragId.current = tile.id; setSelected(null);
+              if (!dragId.current) { camera.begin(); dragId.current = tile.id; setSelected(null);
                 rootRef.current?.measureInWindow((x, y) => { rootOrigin.current = { x, y }; });
                 tableRef.current?.measureInWindow((x, y) => { tableOrigin.current = { x, y }; }); }
               setDrag({ tile, point });
@@ -340,7 +353,7 @@ export function ComputerGameScreen() {
             onDrop={point => {
               const origin = tableOrigin.current;
               const allowed = legalEnds(game, 'human', tile).map(end => ({ end, point: slot(offsets[end], metrics) }));
-              const end = origin ? resolveDrop({ x: point.x - origin.x, y: point.y - origin.y }, allowed, metrics) : null;
+              const end = origin ? resolveDrop(screenToBoard({ x: point.x - origin.x, y: point.y - origin.y }, tableSize, metrics, camera.current.current), allowed, metrics) : null;
               if (end) place(tile.id, end); else cancelDrag();
             }} />;
         })}
@@ -382,7 +395,7 @@ export function ComputerGameScreen() {
       <View style={{ height: 12 }} />
       <Action label={es ? 'Reiniciar' : 'Restart'} onPress={confirmRestart} />
     </Dialog>
-    {deliveryGift && <VictoryDrink gift={deliveryGift} es={es} height={usableHeight} startY={opponentHeight + 35} onComplete={finishVictoryGift} />}
+    {deliveryGift && <VictoryDrink gift={deliveryGift} es={es} height={usableHeight} width={windowSize.width} destination={beerDock} startY={opponentHeight + 35} onComplete={finishVictoryGift} />}
     <Dialog visible={showOpponents} title={es ? 'Tu rival' : 'Your opponent'} onClose={() => setShowOpponents(false)} closeLabel={text.cancel}>
       {opponentPicker}
     </Dialog>
