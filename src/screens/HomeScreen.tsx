@@ -50,7 +50,7 @@ export function HomeScreen() {
       <Menu visible={menuOpen} onClose={() => setMenuOpen(false)} />
 
       {/* Logo */}
-      <Logo spinTrigger={logoSpin} height={height < 700 ? 140 : 170} />
+      <Logo spinTrigger={logoSpin} height={height < 700 ? 155 : 190} />
 
       {activeMatch ? (
         <ResumeMatchCard match={activeMatch} onResume={() => go('game')} onNewMatch={() => go('newMatch')}>
