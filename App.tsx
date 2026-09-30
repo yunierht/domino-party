@@ -24,6 +24,8 @@ import { WatchScreen } from './src/screens/WatchScreen';
 import { WatchHistoryScreen } from './src/screens/WatchHistoryScreen';
 import { HowToScreen } from './src/screens/HowToScreen';
 import { PrivacyScreen } from './src/screens/PrivacyScreen';
+import { ComputerGameScreen } from './src/screens/ComputerGameScreen';
+import { ComputerGameProvider } from './src/computer/ComputerGameContext';
 
 function Router() {
   const { screen, watchHistory } = useNav();
@@ -34,6 +36,8 @@ function Router() {
       return <NewMatchScreen />;
     case 'game':
       return <GameScreen />;
+    case 'computerGame':
+      return <ComputerGameScreen />;
     case 'history':
       return <HistoryScreen />;
     case 'watchHistory':
@@ -63,7 +67,8 @@ function Router() {
 function AppShell() {
   const { theme, ready } = useTheme();
   const { loaded } = useGame();
-  const { openWatch } = useNav();
+  const { openWatch, screen } = useNav();
+  const computerTable = screen === 'computerGame';
   const tilt = useTilt(18);
 
   // Open a shared game when the app is launched/opened from a link
@@ -84,9 +89,9 @@ function AppShell() {
   if (!ready || !loaded) return <FullScreenLoader />;
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.bg }}>
-      <StatusBar style={theme.dark ? 'light' : 'dark'} />
-      <Background theme={theme} tiltX={tilt.x} tiltY={tilt.y} />
+    <View style={{ flex: 1, backgroundColor: computerTable ? '#081D1B' : theme.colors.bg }}>
+      <StatusBar style={computerTable || theme.dark ? 'light' : 'dark'} />
+      {!computerTable && <Background theme={theme} tiltX={tilt.x} tiltY={tilt.y} />}
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <Router />
       </SafeAreaView>
@@ -103,7 +108,9 @@ export default function App() {
           <PrefsProvider>
           <GameProvider>
             <NavProvider>
+              <ComputerGameProvider>
               <AppShell />
+              </ComputerGameProvider>
             </NavProvider>
           </GameProvider>
           </PrefsProvider>

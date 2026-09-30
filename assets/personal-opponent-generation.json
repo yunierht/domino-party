@@ -1,0 +1,13 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "file": "computer-opponent-yuni-v1.png",
+      "prompt": "Create a fully clothed, family-friendly domino game avatar portrait of ONLY the adult man on the left in the reference photograph. Preserve his recognizable face, broad smile, full salt-and-pepper beard, dark sunglasses and black baseball cap. Head and shoulders only, plain dark crew-neck shirt, no cap or shirt logos. Friendly semi-realistic polished game illustration, frontal view, entire cap and head visible, dark forest green #081D1B studio background, warm light. Landscape 3:2. No text, no other person, no hands. The photograph is the identity reference; replace background as described."
+    },
+    {
+      "file": "computer-opponent-yoi-v1.png",
+      "prompt": "Create a fully clothed, family-friendly domino game avatar portrait of ONLY the adult woman on the right in the reference photograph. Preserve her face, smile, long straight brown hair and dark sunglasses with gold detail. Head and shoulders only, wearing a modest dark green high-neck sweater covering chest and shoulders entirely. Friendly semi-realistic game illustration, frontal view, head fully visible, dark forest green studio background, warm light. Landscape 3:2. No text, no other person, no hands, no logos. The photograph is the identity reference; replace outfit and background as described."
+    }
+  ]
+}

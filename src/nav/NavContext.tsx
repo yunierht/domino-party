@@ -5,6 +5,7 @@ export type ScreenName =
   | 'home'
   | 'newMatch'
   | 'game'
+  | 'computerGame'
   | 'history'
   | 'stats'
   | 'settings'

@@ -1,0 +1,8 @@
+{
+  "tool": "built-in image_gen",
+  "files": [
+    "computer-opponent-yuni-seated-v2.png",
+    "computer-opponent-yoi-seated-v2.png"
+  ],
+  "prompt": "Edit this game avatar into a wider waist-up view of the SAME person seated directly opposite the player at a domino table. Preserve face, hair, sunglasses, clothing, and any cap exactly. Pull camera back: full head near upper center, head occupies only 30 percent of image height; visible shoulders, torso, both bent elbows and forearms. Both relaxed hands rest along the very bottom edge on a thin dark green table surface. Table is at chest-to-waist level and continues beyond lower frame, as seen by the player across it. Dark forest green studio backdrop. Landscape 3:2. Modest fully clothed friendly game illustration, natural anatomy, no text, no extra people or moving hand overlay. This is a seated opponent, NOT a close-up headshot."
+}

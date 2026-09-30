@@ -1,0 +1,6 @@
+{
+  "tool": "image_gen (built-in)",
+  "source": "computer-opponent-chuchi-seated-v1.png",
+  "output": "computer-opponent-chuchi-seated-v2.png",
+  "prompt": "Edit the original transparent cutout supplied. Make ONLY a tiny natural slimming of the soft tissue directly underneath his chin (papada). Everything else unchanged. CRITICAL: preserve the original clean cutout transparency exactly, no glow, no blur around silhouette, no backdrop at all. Keep original face, apparent age, shirt, hands, framing and realistic style. This is a transparent mobile-game sprite, not a portrait with a background. Output PNG with completely transparent empty surroundings and opaque subject."
+}

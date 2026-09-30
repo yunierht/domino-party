@@ -13,12 +13,15 @@ import { DemoMatch } from '../components/DemoMatch';
 import { ScoreRing } from '../components/ScoreRing';
 import { Match, Team, teamTotal } from '../types';
 import { ThemeName } from '../theme/themes';
+import { useComputerGame } from '../computer/ComputerGameContext';
+import { COMPUTER_STRINGS } from '../computer/strings';
 
 const HOME_THEME_ORDER: ThemeName[] = ['carbon', 'dark', 'casino', 'cubano', 'usa'];
 
 export function HomeScreen() {
   const { theme, s } = useTheme();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const { game: computerGame } = useComputerGame();
   const { go } = useNav();
   const { currentMatch, matches } = useGame();
   const c = theme.colors;
@@ -60,6 +63,9 @@ export function HomeScreen() {
         <DemoMatch onNewMatch={() => go('newMatch')} />
       )}
 
+      <Button label={computerGame ? COMPUTER_STRINGS[lang].resume : COMPUTER_STRINGS[lang].title}
+        onPress={() => go('computerGame')} fullWidth />
+      <View style={{ height: s(12) }} />
       <Button label={t.watchGame} onPress={() => go('watch')} variant="secondary" fullWidth />
       <View style={{ height: s(12) }} />
       <Button

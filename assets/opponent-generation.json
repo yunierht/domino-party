@@ -1,0 +1,17 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "file": "computer-opponent-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: production mobile domino game opponent character, transparent PNG cutout. Create an original friendly mature Caribbean man, short salt-and-pepper curly hair, neatly trimmed beard, warm attentive smile, cream linen shirt with sleeves rolled up and dark green waistcoat, seated directly opposite the viewer at a domino table. Premium polished semi-realistic 3D game art, elegant warm light, believable anatomy. Waist-up frontal composition including both forearms and natural hands resting at the bottom on an invisible tabletop. Entire head and both elbows inside frame. Hands spaced apart with empty center, no domino tiles, no furniture, no background, no text, no logos. Wide 3:2 composition, character occupies most of canvas, genuine transparent background. He is a fictional computer opponent, not a real person. No hat, no apron. Render one finished character asset, not a UI mockup."
+    },
+    {
+      "file": "computer-opponent-diego-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: mobile domino game opponent portrait. One original friendly adult Latino man aged about 28, short dark wavy hair, clean shaven, warm confident smile, burgundy casual linen shirt. Premium polished semi-realistic 3D game character. Frontal waist-up view directly facing the player, forearms resting on unseen table, hands at bottom corners and clear space between them. Entire head and elbows visible. Wide 3:2 composition. Dark deep forest-green studio background #081D1B with subtle warm rim light. No tabletop, no domino tiles, no text, no logos. Single fictional character, no animated hand overlay. Match elegant green and ivory domino social club game aesthetic."
+    },
+    {
+      "file": "computer-opponent-lucia-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: mobile domino game opponent portrait. One original friendly adult Latina woman aged about 28, shoulder-length dark curly hair, warm attentive smile, elegant teal casual blouse with sleeves to elbows. Premium polished semi-realistic 3D game character. Frontal waist-up view directly facing the player, forearms resting on unseen table, hands at bottom corners and clear space between them. Entire head and elbows visible. Wide 3:2 composition. Dark deep forest-green studio background #081D1B with subtle warm rim light. No domino tiles, no tabletop prop, no text, no logos. Single fictional character. Match elegant green and ivory domino social club game aesthetic. Natural proportions and nonsexual everyday clothing."
+    }
+  ]
+}
