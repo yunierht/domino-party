@@ -5,16 +5,11 @@ import { claimOpponentDrinkExpiry, scheduleDrinkGiftExpiry } from './drinkGiftLi
 import { canOpponentDrink, OPPONENT_DRINK_MS } from './opponentDrink';
 import type { DrinkGift } from './drinks';
 import { normalizeDrinkGift } from './drinks';
-import { claimVictoryGift, clearVictoryGift, VictoryGift } from './victoryGift';
 import { OPPONENTS } from './opponents';
 import type { OpponentId } from './opponents';
+import { loadJSON, saveJSON } from '../storage/storage';
 
 const Context = createContext<{
-  victoryGift: VictoryGift | null;
-  deliveryGift: VictoryGift | null;
-  dismissVictoryGift: () => void;
-  finishVictoryGift: (gift: VictoryGift) => void;
-  expireVictoryGift: (gift: VictoryGift) => void;
   drinkGift: DrinkGift;
   drinkExpiring: boolean;
   opponentDrink: DrinkGift;
@@ -29,12 +24,25 @@ const Context = createContext<{
 
 /** Keeps the offline game alive while navigating between screens. */
 export function ComputerGameProvider({ children }: { children: React.ReactNode }) {
-  const [deliveryGift, setDeliveryGift] = useState<VictoryGift | null>(null);
-  const [victoryGift, setVictoryGift] = useState<VictoryGift | null>(null);
-  const seenVictories = useRef(new WeakSet<Result>());
   const [drinkGift, setDrinkGift] = useState<DrinkGift>(null);
   const [expiringDrink, setExpiringDrink] = useState<DrinkGift>(null);
-  const [opponentId, setOpponentId] = useState<OpponentId>('rafael');
+  const [opponentId, updateOpponentId] = useState<OpponentId>('yuni');
+  const opponentChosen = useRef(false);
+  const [opponentLoaded, setOpponentLoaded] = useState(false);
+  const opponentWrites = useRef(Promise.resolve());
+  const setOpponentId: React.Dispatch<React.SetStateAction<OpponentId>> = React.useCallback(value => {
+    opponentChosen.current = true;
+    updateOpponentId(value);
+  }, []);
+  useEffect(() => {
+    loadJSON<unknown>('dominoes:computerOpponent', null).then(saved => {
+      if (!opponentChosen.current && OPPONENTS.some(item => item.id === saved)) updateOpponentId(saved as OpponentId);
+      setOpponentLoaded(true);
+    });
+  }, []);
+  useEffect(() => {
+    if (opponentLoaded) opponentWrites.current = opponentWrites.current.then(() => saveJSON('dominoes:computerOpponent', opponentId));
+  }, [opponentId, opponentLoaded]);
   const drinkEvent = useRef<{ actor: OpponentId; result: Result | null }>({ actor: opponentId, result: null });
   const seenDrinkResults = useRef(new WeakSet<Result>());
   const [game, setGame] = useState<Game | null>(null);
@@ -63,16 +71,7 @@ export function ComputerGameProvider({ children }: { children: React.ReactNode }
     if(captured)setDrinkGift(current=>current===captured?null:current);
     setExpiringDrink(null);
   }, []);
-  useEffect(() => {
-    if (!game) { setVictoryGift(null); setDeliveryGift(null); return; }
-    if (!game.result) { setDeliveryGift(null); return; }
-    const claimed = claimVictoryGift(game.result, seenVictories.current, OPPONENTS.find(item => item.id === opponentId)?.name ?? 'Opponent');
-    if (claimed) { setVictoryGift(claimed); setDeliveryGift(claimed); }
-  }, [game, opponentId]);
-  const dismissVictoryGift = React.useCallback(() => { setVictoryGift(null); setDeliveryGift(null); }, []);
-  const finishVictoryGift = React.useCallback((gift: VictoryGift) => setDeliveryGift(current => clearVictoryGift(current, gift)), []);
-  const expireVictoryGift = React.useCallback((gift: VictoryGift) => setVictoryGift(current => clearVictoryGift(current, gift)), []);
-  return <Context.Provider value={{ opponentDrink, cancelOpponentConsumption, drinkExpiring: !!drinkGift && drinkGift === expiringDrink, expireVictoryGift, deliveryGift, finishVictoryGift, victoryGift, dismissVictoryGift, drinkGift, setDrinkGift, game, setGame, opponentId, setOpponentId, start: (name, target, mode) => { setExpiringDrink(null); setDeliveryGift(null); setVictoryGift(null); setDrinkGift(null); setGame(deal(name, target, Math.random, undefined, mode)); } }}>
+  return <Context.Provider value={{ opponentDrink, cancelOpponentConsumption, drinkExpiring: !!drinkGift && drinkGift === expiringDrink, drinkGift, setDrinkGift, game, setGame, opponentId, setOpponentId, start: (name, target, mode) => { setExpiringDrink(null); setDrinkGift(null); setGame(deal(name, target, Math.random, undefined, mode)); } }}>
     {children}
   </Context.Provider>;
 }

@@ -1,0 +1,6 @@
+Active tile sound: Seca (option 4 of the v2 list), selected by user.
+Exact copy of sample 09-sutil-seca-v2.wav, not option 13 Caida suave.
+Original synthesized/processed audio. 160 ms, PCM 16-bit mono 44100 Hz.
+SHA256 c1b25446c5cb9362d56da3618df7ad1228db6a6e30a21a55e0dbe2a0bf9b0774.
+Reproduce with scripts/make-dry-contact.py, which verifies source and output hashes before writing.
+Other generators target earlier variants and do not overwrite this approved asset.

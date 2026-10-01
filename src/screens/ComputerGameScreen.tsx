@@ -5,7 +5,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { OpponentDrinkingAvatar } from '../computer/OpponentDrinkingAvatar';
 import { useBoardCamera } from '../computer/useBoardCamera';
-import { VictoryDrink, VictoryBeerBadge } from '../computer/VictoryDrink';
 import { DrinkChoices, DrinkInviteButton } from '../computer/DrinkGift';
 import type { DrinkId } from '../computer/drinks';
 import { DominoTableBackground } from '../computer/DominoTableBackground';
@@ -21,6 +20,12 @@ import { TABLE as C } from '../computer/tableTheme';
 import { handLayout } from '../computer/handLayout';
 import { useI18n } from '../i18n/I18nContext';
 import { useNav } from '../nav/NavContext';
+
+import { TableSettings } from '../computer/TableSettings';
+import { BoneyardOverlay } from '../computer/BoneyardOverlay';
+import { usePrefs } from '../state/PrefsContext';
+import { useTableMusic } from '../sound/useTableMusic';
+import { traceTileContact } from '../sound/sounds';
 
 const EMPTY_BOARD: Tile[] = [];
 
@@ -60,10 +65,16 @@ function Avatar({ computer = false, active = false, small = false }: { computer?
 }
 
 export function ComputerGameScreen() {
+  const { matchingTiles, tableMusic, ready: prefsReady } = usePrefs();
+  useTableMusic(prefsReady && tableMusic);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showStock, setShowStock] = useState(false);
+  const humanHandRef = useRef<View>(null);
+  const computerHandRef = useRef<View>(null);
   const windowSize = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const { game, setGame, start, opponentId, setOpponentId, drinkGift, drinkExpiring, opponentDrink, cancelOpponentConsumption, setDrinkGift, victoryGift, deliveryGift, dismissVictoryGift, finishVictoryGift, expireVictoryGift } = useComputerGame();
-  useEffect(() => () => { dismissVictoryGift(); cancelOpponentConsumption(); }, [dismissVictoryGift, cancelOpponentConsumption]);
+  const { game, setGame, start, opponentId, setOpponentId, drinkGift, drinkExpiring, opponentDrink, cancelOpponentConsumption, setDrinkGift } = useComputerGame();
+  useEffect(() => () => { cancelOpponentConsumption(); }, [cancelOpponentConsumption]);
   const opponent = OPPONENTS.find(item => item.id === opponentId) ?? OPPONENTS[0];
   const { lang, t } = useI18n();
   const { back } = useNav();
@@ -86,12 +97,6 @@ export function ComputerGameScreen() {
   const [panelWidth, setPanelWidth] = useState(390);
   const [tableSize, setTableSize] = useState({ width: 340, height: 360 });
   const rootRef = useRef<View>(null);
-  const beerDockRef = useRef<View>(null);
-  const [beerDock, setBeerDock] = useState<Point | null>(null);
-  const measureBeerDock = () => {
-    rootRef.current?.measureInWindow((rootX, rootY) => beerDockRef.current?.measureInWindow((x, y, width, height) => setBeerDock({ x: x - rootX + width / 2, y: y - rootY + height / 2 })));
-  };
-  useEffect(() => { const frame = requestAnimationFrame(measureBeerDock); return () => cancelAnimationFrame(frame); }, [victoryGift, windowSize.width, windowSize.height]);
   const tableRef = useRef<View>(null);
   const rootOrigin = useRef<Point>({ x: 0, y: 0 });
   const tableOrigin = useRef<Point | null>(null);
@@ -116,33 +121,39 @@ export function ComputerGameScreen() {
   const { columns: handColumns, rows: handRows, size: handSize } = handLayout(
     game?.hands.human.length ?? 7, Math.min(panelWidth, windowSize.width) - 24, Math.max(110, usableHeight - opponentHeight - 294));
   const cancelDrag = () => { if (dragId.current) camera.end(); dragId.current = null; tableOrigin.current = null; setDrag(null); };
+  const mandatoryDraw = useRef(false);
+  mandatoryDraw.current = !!(showStock && game && !game.result && game.stock.length && !hasMove(game));
+  const leaveTable = () => { if (!mandatoryDraw.current) back(); };
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', state => {
       setAppActive(state === 'active');
       if (state !== 'active') cancelDrag();
     });
-    const androidBack = BackHandler.addEventListener('hardwareBackPress', () => { back(); return true; });
+    const androidBack = BackHandler.addEventListener('hardwareBackPress', () => { if (!mandatoryDraw.current) back(); return true; });
     return () => { subscription.remove(); androidBack.remove(); };
   }, [back]);
   useEffect(() => {
-    if (!game || game.result || game.turn !== 'computer' || !appActive || showRules || showOpponents || showMenu || showRestart || showDrinks) return;
-    const timer = setTimeout(() => setGame(current => current ? computerStep(current) : current), 850);
+    if (!game || game.result || game.turn !== 'computer' || showStock || !appActive || showSettings || showRules || showOpponents || showMenu || showRestart || showDrinks) return;
+    const timer = setTimeout(() => {
+      if (!hasMove(game) && game.stock.length) setShowStock(true);
+      else setGame(current => current === game ? computerStep(current) : current);
+    }, 850);
     return () => clearTimeout(timer);
-  }, [game, appActive, setGame, showRules, showOpponents, showMenu, showRestart, showDrinks]);
+  }, [game, showSettings, appActive, setGame, showRules, showOpponents, showMenu, showRestart, showDrinks, showStock]);
   useEffect(() => { setSelected(null); cancelDrag(); }, [game?.round, game?.turn, game?.result]);
   useEffect(() => {
     setTurnReminder(false);
     setShowTurnHelp(false);
-    if (!game || game.result || game.turn !== 'human' || !appActive || showRules || showOpponents || showMenu || showRestart || showDrinks) return;
+    if (!game || game.result || game.turn !== 'human' || !appActive || showSettings || showRules || showOpponents || showMenu || showRestart || showDrinks) return;
     setShowTurnHelp(true);
     const helpTimer = setTimeout(() => setShowTurnHelp(false), 5000);
     const timer = setTimeout(() => setTurnReminder(true), 8000);
     return () => { clearTimeout(timer); clearTimeout(helpTimer); };
-  }, [game, appActive, showRules, showOpponents, showMenu, showRestart, showDrinks]);
+  }, [game, showSettings, appActive, showRules, showOpponents, showMenu, showRestart, showDrinks]);
 
   const header = <View style={{ height: compact ? 48 : 58, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: C.line }}>
-    <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Volver' : 'Back'} onPress={back}
+    <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Volver' : 'Back'} onPress={leaveTable}
       style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}><Feather name="arrow-left" size={20} color={C.ivory} /></Pressable>
     <View style={{ flex: 1, alignItems: 'center' }}>
       <Text style={{ color: C.ivory, fontSize: 17, letterSpacing: 4, fontWeight: '600' }}>DOMINO</Text>
@@ -207,10 +218,11 @@ export function ComputerGameScreen() {
     {rules}
   </View>;
 
-  const humanTurn = game.turn === 'human' && !game.result;
+  const humanTurn = game.turn === 'human' && !game.result && !showStock && !showSettings;
   const revealOpponent = !!game.result && !opponentDrink && game.hands.computer.length > 0;
   const selectedTile = game.hands.human.find(tile => tile.id === selected);
   const winner = matchWinner(game);
+  const winningTileVisible = !!(game.result && !game.result.blocked && game.last?.kind === 'play');
   const labelFor = (player: 'human' | 'computer') => player === 'human' ? game.playerName : opponent.name;
   const activeTile = drag?.tile ?? selectedTile;
   const available = humanTurn && activeTile ? legalEnds(game, 'human', activeTile) : [];
@@ -227,8 +239,9 @@ export function ComputerGameScreen() {
     setSelected(null); cancelDrag();
   };
   const nextRound = () => {
+    traceTileContact('next-round-action', { round: game.round, boardCount: game.board.length, winner: game.result?.winner, matchComplete: !!matchWinner(game), waitingForDrink: !!opponentDrink });
     if (opponentDrink) return;
-    if (game && matchWinner(game)) dismissVictoryGift();
+    setShowStock(false);
     cancelDrag(); setSelected(null);
     if (game && matchWinner(game)) setDrinkGift(null);
     setGame(current => current ? deal(current.playerName, current.target, Math.random, matchWinner(current) ? undefined : current, current.scoringMode) : current);
@@ -240,7 +253,8 @@ export function ComputerGameScreen() {
     setShowDrinks(false);
   };
   const confirmRestart = () => {
-    dismissVictoryGift();
+    traceTileContact('restart-action', { round: game.round, boardCount: game.board.length });
+    setShowStock(false);
     setDrinkGift(null); setShowDrinks(false);
     cancelDrag(); setSelected(null); setShowTurnHelp(false); setTurnReminder(false);
     setShowRules(false); setShowOpponents(false); setShowMenu(false); setShowRestart(false);
@@ -249,11 +263,11 @@ export function ComputerGameScreen() {
   };
   const resultTitle = game.result ? winner ? `${labelFor(winner)} ${text.wonMatch}` : game.result.winner === 'tie' ? text.tie : `${labelFor(game.result.winner)} ${text.wonRound}` : '';
   const humanPrompt = !hasMove(game) ? (game.stock.length ? text.draw : text.pass) : es ? 'Coloca una ficha' : 'Play a tile';
-  const turnLabel = game.result ? resultTitle : humanTurn
+  const turnLabel = game.result ? resultTitle : game.turn === 'human'
     ? `${turnReminder ? (es ? 'Seguimos esperando tu jugada' : 'Waiting for your move') : text.yourTurn} · ${humanPrompt}` : text.thinking;
   const hasAction = !!game.result || (humanTurn && !hasMove(game)) || !!selectedTile;
   const noticeDetail = humanTurn && showTurnHelp && hasMove(game)
-    ? (es ? 'Arrastra al extremo iluminado · Toca para jugar' : 'Drag to a glowing end · Tap to play') : lastText || openingLabel;
+    ? (es ? (matchingTiles ? 'Arrastra al extremo iluminado · Toca para jugar' : 'Arrastra a la mesa · Toca para jugar') : (matchingTiles ? 'Drag to a glowing end · Tap to play' : 'Drag onto the table · Tap to play')) : lastText || openingLabel;
   const winsMode = game.scoringMode === 'wins';
   const tally = winsMode ? game.wins : game.scores;
   const toggleScoring = () => {
@@ -262,7 +276,7 @@ export function ComputerGameScreen() {
   };
   return <View key="computer-table" ref={rootRef} collapsable={Platform.OS === 'web' ? undefined : false} onLayout={event => { setPanelWidth(event.nativeEvent.layout.width); cancelDrag(); }} style={{ flex: 1, minHeight: 0, backgroundColor: C.background, overflow: 'hidden' }}>
     <View testID="game-toolbar" style={{ height: 48, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: C.line, gap: 4 }}>
-      <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Volver' : 'Back'} onPress={back} style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}>
+      <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Volver' : 'Back'} onPress={leaveTable} style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}>
         <Feather name="arrow-left" size={20} color={C.ivory} />
       </Pressable>
       <View testID="human-score" style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -304,7 +318,7 @@ export function ComputerGameScreen() {
           contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 5, gap: 6, minWidth: '100%', justifyContent: game.hands.computer.length * (compact ? 50 : 54) <= panelWidth - 24 ? 'center' : 'flex-start', alignItems: 'center' }}>
           {game.hands.computer.map(tile => <DominoTile key={tile.id} a={tile.a} b={tile.b} size={compact ? 40 : 44} vertical />)}
         </ScrollView>
-      </View> : <View testID="hidden-opponent-hand" style={{ alignItems: 'center', height: 25, justifyContent: 'center' }}>
+      </View> : <View ref={computerHandRef} collapsable={false} testID="hidden-opponent-hand" style={{ alignItems: 'center', height: 25, justifyContent: 'center' }}>
         <View>
           <View style={{ flexDirection: 'row', gap: 3 }}>
             {game.hands.computer.slice(0, 10).map(tile => <View key={tile.id} style={{ width: 12, height: 21, borderRadius: 2, borderWidth: 1, borderColor: '#D5CAB0', backgroundColor: '#8E9A7C' }} />)}
@@ -314,14 +328,18 @@ export function ComputerGameScreen() {
       </View>}
       <View ref={tableRef} collapsable={false} testID="playing-surface" {...tablePanResponder.panHandlers}
         onLayout={event => { const { width, height } = event.nativeEvent.layout; if (width > 0 && height > 0) setTableSize({ width, height }); }}
-        style={{ flex: 1, marginHorizontal: 12, minHeight: 80, overflow: 'hidden' }}>
+        // The winning tile stays in the camera's coordinate space. Lift this
+        // sibling above the revealed opponent hand and let its flight overflow.
+        style={{ flex: 1, marginHorizontal: 12, minHeight: 80,
+          overflow: winningTileVisible ? 'visible' : 'hidden',
+          zIndex: winningTileVisible ? 20 : 0, elevation: winningTileVisible ? 20 : 0 }}>
         <View pointerEvents="none" style={{ position: 'absolute', top: '21%', left: 0, right: 0, alignItems: 'center', opacity: 0.11 }}>
           <Feather name="grid" size={28} color="#D5DDB7" /><Text style={{ color: '#D5DDB7', fontSize: 9, letterSpacing: 4, marginTop: 9 }}>SOCIAL CLUB</Text>
         </View>
-        <Animated.View style={{ position: 'absolute',
+        <Animated.View pointerEvents="box-none" style={{ position: 'absolute',
           left: (tableSize.width - metrics.width) / 2, top: (tableSize.height - metrics.height) / 2,
           width: metrics.width, height: metrics.height, transform: [{ translateX: camera.values.x }, { translateY: camera.values.y }, { scale: camera.values.scale }] }}>
-        <AnchoredBoard board={game.board} openingId={game.openingId} metrics={metrics} available={available}
+        <AnchoredBoard contactContext={{ round: game.round, actor: game.last?.player, turn: game.turn, lastKind: game.last?.kind }} showMatching={matchingTiles} key={game.round} winningId={game.result && !game.result.blocked && game.last?.kind === 'play' ? game.last.tile?.id : null} arrivingId={game.last?.kind === 'play' ? game.last.tile?.id : null} board={game.board} openingId={game.openingId} metrics={metrics} available={available}
           hovered={hovered} leftLabel={text.left} rightLabel={text.right} openLabel={openingLabel}
           onEnd={end => { if (activeTile) place(activeTile.id, end); }} />
         </Animated.View>
@@ -335,20 +353,18 @@ export function ComputerGameScreen() {
         <Avatar active={humanTurn} small />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1 }}>
           <Text numberOfLines={1} style={{ flexShrink: 1, color: C.ivory, fontSize: 12, fontWeight: '600' }}>{game.playerName}</Text>
-          {victoryGift && <View ref={beerDockRef} collapsable={false} onLayout={measureBeerDock} testID="human-beer" style={{ width: 20, height: 28 }} accessibilityLabel={es ? `Cerveza de ${victoryGift.opponentName}` : `Beer from ${victoryGift.opponentName}`}>
-            {!deliveryGift && <VictoryBeerBadge gift={victoryGift} finished={!!game.result && !!winner} onExpire={expireVictoryGift} />}
-          </View>}
+
         </View>
         <View style={{ flex: 1 }} />
         <View testID="stock-info" style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Feather name="layers" color={C.muted} size={11} /><Text style={{ color: C.muted, fontSize: 10 }}>{text.stock} · {game.stock.length}</Text></View>
       </View>
-      <View testID="player-hand" style={{ height: (handSize * 2 + 26) * handRows, width: (handSize + 10) * handColumns + (handColumns - 1) * 2 + 4,
+      <View ref={humanHandRef} collapsable={false} testID="player-hand" style={{ height: (handSize * 2 + 26) * handRows, width: (handSize + 10) * handColumns + (handColumns - 1) * 2 + 4,
         alignSelf: 'center', flexDirection: 'row', flexWrap: handRows === 1 ? 'nowrap' : 'wrap', columnGap: 2, rowGap: 4, justifyContent: 'center', alignItems: 'center', alignContent: 'center' }}>
         {game.hands.human.map(tile => {
           const ends = legalEnds(game, 'human', tile);
           const enabled = humanTurn && ends.length > 0;
           return <DraggableDomino key={tile.id} tile={tile} size={handSize} enabled={enabled && !showRules} selected={selected === tile.id} revealed={!!game.result} dragging={drag?.tile.id === tile.id}
-            onTap={() => { if (enabled) { if (ends.length === 1) place(tile.id, ends[0]); else setSelected(tile.id); } }} onCancel={cancelDrag}
+            onTap={() => { if (enabled) { if (ends.length === 1 || game.hands.human.length === 1) place(tile.id, ends[0]); else setSelected(tile.id); } }} onCancel={cancelDrag}
             onDrag={point => {
               if (!enabled) { cancelDrag(); return; }
               if (!dragId.current) { camera.begin(); dragId.current = tile.id; setSelected(null);
@@ -367,7 +383,7 @@ export function ComputerGameScreen() {
       </View>
       <View testID="below-hand-notice" style={{ height: 64, justifyContent: 'center' }}>
         {game.result ? <Action label={winner ? text.again : text.next} onPress={nextRound} disabled={!!opponentDrink} /> : humanTurn && !hasMove(game) ?
-          <Action label={game.stock.length ? `${text.draw} · ${game.stock.length}` : text.pass} onPress={() => setGame(current => current ? drawOrPass(current, 'human') : current)} /> :
+          <Action label={game.stock.length ? `${text.draw} · ${game.stock.length}` : text.pass} onPress={() => game.stock.length ? setShowStock(true) : setGame(current => current ? drawOrPass(current, 'human') : current)} /> :
           selectedTile ? <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
             {legalEnds(game, 'human', selectedTile).map(end => <Action key={end} subtle label={`${end === 'left' ? text.left : text.right} · ${end === 'left' ? game.board[0]?.a : game.board[game.board.length - 1]?.b}`} onPress={() => place(selectedTile.id, end)} />)}
             <Pressable accessibilityRole="button" accessibilityLabel={text.cancel} onPress={() => setSelected(null)} style={{ padding: 10 }}><Feather name="x" size={18} color={C.muted} /></Pressable>
@@ -385,6 +401,14 @@ export function ComputerGameScreen() {
       left: drag.point.x - rootOrigin.current.x - (handSize + 4) / 2, top: drag.point.y - rootOrigin.current.y - handSize - 2, opacity: 0.95 }}>
       <DominoTile a={drag.tile.a} b={drag.tile.b} size={handSize} vertical selected />
     </View>}
+    <BoneyardOverlay key={game.round} active={appActive} visible={showStock && !game.result && game.stock.length > 0 && !hasMove(game)} game={game} es={es}
+      destination={game.turn === 'human' ? humanHandRef : computerHandRef}
+      onDraw={index => {
+        const next = drawOrPass(game, game.turn, index);
+        setGame(current => current === game ? next : current);
+        setShowStock(!next.result && next.stock.length > 0 && !hasMove(next));
+      }} />
+    <TableSettings visible={showSettings} es={es} onClose={() => setShowSettings(false)} />
     {rules}
     <Dialog visible={showDrinks} title={es ? 'Invita una bebida' : 'Treat your opponent'} onClose={() => setShowDrinks(false)} closeLabel={text.cancel}>
       <DrinkChoices es={es} choose={chooseDrink} />
@@ -392,6 +416,8 @@ export function ComputerGameScreen() {
       <Action label={text.cancel} subtle onPress={() => setShowDrinks(false)} />
     </Dialog>
     <Dialog visible={showMenu} title={es ? 'Menú de partida' : 'Game menu'} onClose={() => setShowMenu(false)} closeLabel={text.cancel}>
+      <Action label={es ? 'Ajustes' : 'Settings'} onPress={() => { setShowMenu(false); setShowSettings(true); }} />
+      <View style={{ height: 12 }} />
       <Action label={text.showRules} onPress={() => { setShowMenu(false); setShowRules(true); }} />
       <View style={{ height: 12 }} />
       <Action label={es ? 'Reiniciar partida' : 'Restart game'} onPress={() => { setShowMenu(false); setShowRestart(true); }} />
@@ -402,7 +428,6 @@ export function ComputerGameScreen() {
       <View style={{ height: 12 }} />
       <Action label={es ? 'Reiniciar' : 'Restart'} onPress={confirmRestart} />
     </Dialog>
-    {deliveryGift && <VictoryDrink gift={deliveryGift} es={es} height={usableHeight} width={windowSize.width} destination={beerDock} startY={opponentHeight + 35} onComplete={finishVictoryGift} />}
     <Dialog visible={showOpponents} title={es ? 'Tu rival' : 'Your opponent'} onClose={() => setShowOpponents(false)} closeLabel={text.cancel}>
       {opponentPicker}
     </Dialog>

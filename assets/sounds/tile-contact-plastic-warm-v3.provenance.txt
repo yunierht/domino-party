@@ -1,0 +1,7 @@
+Active table-contact sample: user-selected option 12, plastico madera calida V3.
+Exact copy of 12-plastico-madera-calida-v3.wav, with no additional processing.
+SHA256: df7dda04356c60a21effa475e5e3a3ae074b36149a281917f59fb0efcba8f035
+Reproduce: scripts/make-plastic-warm-contact.py (Python + NumPy).
+Original deterministic synthesis; uses assets/sounds/tile-wood-contact-warm.wav.
+160 ms, PCM 16-bit mono, 44100 Hz. Runtime volume remains 1.
+Supersedes Seca option 09 as the active table contact.

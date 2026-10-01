@@ -14,6 +14,8 @@ export interface Game {
   scoringTargets: Record<ScoringMode, number>;
   hands: Record<Player, Tile[]>;
   stock: Tile[];
+  /** Original boneyard positions, retained until the next deal. */
+  stockSlots: string[];
   board: Tile[];
   openingId: string | null;
   openingRule: 'highest' | 'winner';
@@ -67,7 +69,7 @@ export function deal(playerName: string, target: number, random = Math.random, p
     scoringMode,
     scoringTargets: { points: 100, wins: 3, ...previous?.scoringTargets, [scoringMode]: Math.max(1, Math.floor(target) || 100) },
     hands,
-    stock: deck.slice(14), board: [], openingId: null, turn: starter ?? openingMove(hands)!.player,
+    stock: deck.slice(14), stockSlots: deck.slice(14).map(tile => tile.id), board: [], openingId: null, turn: starter ?? openingMove(hands)!.player,
     openingRule: starter ? 'winner' : 'highest',
     passes: 0, result: null, last: null,
   };
@@ -119,11 +121,12 @@ export function play(game: Game, player: Player, id: string, end: End): Game {
   };
   return next.hands[player].length ? next : finish(next, player, false);
 }
-export function drawOrPass(game: Game, player: Player): Game {
+export function drawOrPass(game: Game, player: Player, stockIndex = 0): Game {
   if (game.result || game.turn !== player || hasMove(game)) return game;
+  if (game.stock.length && (!Number.isInteger(stockIndex) || stockIndex < 0 || stockIndex >= game.stock.length)) return game;
   if (game.stock.length) return { ...game,
-    stock: game.stock.slice(1), hands: { ...game.hands, [player]: [...game.hands[player], game.stock[0]] },
-    passes: 0, last: { player, kind: 'draw' },
+    stock: game.stock.filter((_, index) => index !== stockIndex), hands: { ...game.hands, [player]: [...game.hands[player], game.stock[stockIndex]] },
+    passes: 0, last: { player, kind: 'draw', tile: game.stock[stockIndex] },
   };
   const next = { ...game, turn: other(player), passes: game.passes + 1, last: { player, kind: 'pass' as const } };
   if (next.passes < 2) return next;

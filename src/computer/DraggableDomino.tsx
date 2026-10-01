@@ -3,6 +3,8 @@ import { PanResponder, Platform, View } from 'react-native';
 import { DominoTile } from './DominoTile';
 import type { Tile } from './engine';
 import type { Point } from './boardLayout';
+import { usePrefs } from '../state/PrefsContext';
+import * as Haptics from 'expo-haptics';
 
 interface Props {
   tile: Tile;
@@ -23,6 +25,11 @@ function windowPoint(x: number, y: number): Point {
 }
 /** One responder owns the whole gesture, even when the finger leaves the hand. */
 export function DraggableDomino(props: Props) {
+  const { vibration, matchingTiles } = usePrefs();
+  const feedback = useRef({ vibration }); feedback.current = { vibration };
+  const selectFeedback = () => {
+    if (feedback.current.vibration) Haptics.selectionAsync().catch(() => {});
+  };
   const latest = useRef(props);
   latest.current = props;
   const moved = useRef(false);
@@ -32,6 +39,7 @@ export function DraggableDomino(props: Props) {
     onPanResponderGrant: event => {
       if (!latest.current.enabled) { latest.current.onCancel(); return; }
       moved.current = false;
+      selectFeedback();
       latest.current.onDrag(windowPoint(event.nativeEvent.pageX, event.nativeEvent.pageY));
     },
     onPanResponderMove: (_event, gesture) => {
@@ -52,15 +60,15 @@ export function DraggableDomino(props: Props) {
   const { tile, enabled, selected, revealed, size = 29, dragging = false } = props;
   return <View {...responder.panHandlers} pointerEvents={enabled ? 'auto' : 'none'} accessible accessibilityRole="button" aria-disabled={!enabled}
     accessibilityLabel={`${tile.a} / ${tile.b}`} accessibilityState={{ disabled: !enabled, selected }}
-    onAccessibilityTap={() => enabled && props.onTap()}
+    onAccessibilityTap={() => { if (enabled) { selectFeedback(); props.onTap(); } }}
     // Keyboard users retain the same tap-to-place route on web.
     {...({ tabIndex: enabled ? 0 : -1, onKeyDown: (event: { key: string; preventDefault: () => void }) => {
-      if (enabled && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); props.onTap(); }
+      if (enabled && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectFeedback(); props.onTap(); }
     } } as object)}
     style={{ borderRadius: 7, borderWidth: 1, padding: 2, borderColor: selected ? '#E8C781' : 'transparent',
       backgroundColor: selected ? 'rgba(216,185,120,0.12)' : 'transparent',
-      transform: [{ translateY: selected ? -5 : 0 }], opacity: dragging ? 0.2 : enabled || revealed ? 1 : 0.82 }}>
+      transform: [{ translateY: selected ? -5 : 0 }], opacity: dragging ? 0.2 : !matchingTiles || enabled || revealed ? 1 : 0.82 }}>
     <DominoTile a={tile.a} b={tile.b} size={size} vertical selected={selected} />
-    <View style={{ width: 4, height: 4, borderRadius: 2, alignSelf: 'center', marginTop: 5, backgroundColor: enabled ? '#D8B978' : 'transparent' }} />
+    <View style={{ width: 4, height: 4, borderRadius: 2, alignSelf: 'center', marginTop: 5, backgroundColor: matchingTiles && enabled ? '#D8B978' : 'transparent' }} />
   </View>;
 }

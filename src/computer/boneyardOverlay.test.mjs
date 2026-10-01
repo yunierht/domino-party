@@ -1,0 +1,31 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import React from 'react';
+import {create,act} from 'react-test-renderer';
+import ts from 'typescript';
+globalThis.IS_REACT_ACT_ENVIRONMENT=true;
+for(const reduced of [false,true]) test(`tray retains exit, continuous draws, reversal and cancellation; reduced=${reduced}`,async()=>{
+ const animations=[];
+ class Value {constructor(n){this.n=n;}}
+ const deps={react:React,'react-native':{useWindowDimensions:()=>({width:400}),Easing:{cubic:0,inOut:x=>x},Animated:{Value,timing:(value,config)=>{const a={value,config,start(cb){this.cb=cb;},stop(){this.stopped=true;}};animations.push(a);return a;}}},'./DrinkGift':{useReducedMotion:()=>reduced},'./BoneyardPanel':{BoneyardPanel:p=>React.createElement('Panel',p)}};
+ const mod={exports:{}};const code=ts.transpileModule(readFileSync(new URL('./BoneyardOverlay.tsx',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React,esModuleInterop:true}}).outputText;
+ new Function('require','module','exports',code)(id=>deps[id],mod,mod.exports);
+ let r;let game={stock:[1,2,3]};const props=visible=>({visible,game});
+ await act(()=>{r=create(React.createElement(mod.exports.BoneyardOverlay,props(false)));});assert.equal(animations.length,0);assert.equal(r.toJSON(),null);
+ await act(()=>r.update(React.createElement(mod.exports.BoneyardOverlay,props(true))));
+ assert.equal(r.root.findByType('Panel').props.interactive,false);assert.equal(animations[0].config.toValue,1);assert.equal(animations[0].config.duration,reduced?100:360);
+ assert.equal(r.root.findByType('Panel').props.slideDistance,reduced?0:400);
+ await act(()=>animations[0].cb({finished:true}));assert.equal(r.root.findByType('Panel').props.interactive,true);
+ await act(()=>r.update(React.createElement(mod.exports.BoneyardOverlay,{...props(true),active:false})));assert.equal(r.root.findByType('Panel').props.interactive,false);assert.equal(animations.length,1,'background must not dismiss tray');
+ await act(()=>r.update(React.createElement(mod.exports.BoneyardOverlay,props(true))));assert.equal(r.root.findByType('Panel').props.interactive,true);
+ game={stock:[1,3]};await act(()=>r.update(React.createElement(mod.exports.BoneyardOverlay,props(true))));assert.equal(animations.length,1,'drawing again must not replay entrance');
+ await act(()=>r.update(React.createElement(mod.exports.BoneyardOverlay,props(false))));assert.equal(r.root.findByType('Panel').props.interactive,false);assert.equal(animations[1].config.toValue,0);assert.equal(animations[1].config.duration,reduced?100:440);
+ await act(()=>r.update(React.createElement(mod.exports.BoneyardOverlay,props(true))));assert.equal(animations[1].stopped,true);assert.equal(animations[2].value,animations[1].value);
+ await act(()=>animations[1].cb({finished:true}));assert.equal(r.root.findAllByType('Panel').length,1,'stale exit cannot unmount reopened tray');
+ await act(()=>animations[2].cb({finished:true}));
+ await act(()=>r.update(React.createElement(mod.exports.BoneyardOverlay,props(false))));
+ await act(()=>animations[3].cb({finished:true}));assert.equal(r.toJSON(),null);
+ await act(()=>r.update(React.createElement(mod.exports.BoneyardOverlay,props(true))));await act(()=>r.unmount());assert.equal(animations.at(-1).stopped,true);
+ await act(()=>animations.at(-1).cb({finished:true}));
+});
