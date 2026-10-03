@@ -6,6 +6,8 @@ export type ScreenName =
   | 'newMatch'
   | 'game'
   | 'computerGame'
+  | 'pokerLobby'
+  | 'blackjackLobby'
   | 'history'
   | 'stats'
   | 'settings'

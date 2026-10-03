@@ -1,13 +1,27 @@
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 import { Platform } from 'react-native';
+import { createPlacementAudio } from './placementAudio';
+import { CONTACT_IMPACT_MS } from './contactTiming';
+
+let placementAudio: ReturnType<typeof createPlacementAudio> | undefined;
+function placementPool() {
+  return placementAudio ??= createPlacementAudio({android:Platform.OS==='android',configure:configureAudio,impactMs:CONTACT_IMPACT_MS,trace:traceTileContact,create:index=>{
+    const sources=[require('../../assets/sounds/tile-contact-cycle-1.wav'),require('../../assets/sounds/tile-contact-cycle-2.wav'),require('../../assets/sounds/tile-contact-cycle-3.wav'),require('../../assets/sounds/tile-contact-cycle-4.wav'),require('../../assets/sounds/tile-contact-final-first-v1.wav')];
+    return createAudioPlayer(sources[index],{downloadFirst:true,updateInterval:25,keepAudioSessionActive:true});
+  }});
+}
+export function preparePlacementAudio(){return placementPool().prepare();}
+export function reservePlacementContact(context:Record<string,unknown>={}){return placementPool().reserve(context.winning===true,context);}
 
 // Tiny SFX layer over expo-audio. Players are created once and replayed by
 // seeking back to the start, so rapid scoring taps don't pile up instances.
 
 let tap: AudioPlayer | null = null;
 let win: AudioPlayer | null = null;
-let tileContact: AudioPlayer | null = null;
-let preparedContact: AudioPlayer | null = null;
+const contacts: (AudioPlayer | null)[] = [null, null, null, null];
+let nextContactIndex: number | null = null;
+let finalContact: AudioPlayer | null = null;
+const preparedContacts = new Set<AudioPlayer>();
 let preparingContact: Promise<void> | null = null;
 type ContactState = 'loading' | 'started' | 'failed';
 const contactLog: { time: number; stage: string }[] = [];
@@ -30,13 +44,25 @@ function configureAudio() {
   // documented mixing default. Short contacts should not acquire that focus.
   return audioMode ??= setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: false, interruptionMode: 'mixWithOthers' }).catch(error => { audioMode = null; throw error; });
 }
+function ensureFinalContact() {
+  return finalContact ??= createAudioPlayer(require('../../assets/sounds/tile-contact-final-first-v1.wav'), { downloadFirst: true, updateInterval: 50, keepAudioSessionActive: true });
+}
+
+function contactIndex() {
+  return nextContactIndex ??= Math.floor(Math.random() * 4);
+}
 function ensureContact() {
-  if (!tileContact) {
-    traceTileContact('player-create');
-    tileContact = createAudioPlayer(require('../../assets/sounds/tile-contact-plastic-warm-v3.wav'), { downloadFirst: true, updateInterval: 50, keepAudioSessionActive: true });
-    tileContact.volume = 1; // Level is baked into the waveform, not attenuated twice.
+  const index = contactIndex();
+  if (!contacts[index]) {
+    const sources = [
+      require('../../assets/sounds/tile-contact-cycle-1.wav'),
+      require('../../assets/sounds/tile-contact-cycle-2.wav'),
+      require('../../assets/sounds/tile-contact-cycle-3.wav'),
+      require('../../assets/sounds/tile-contact-cycle-4.wav'),
+    ];
+    contacts[index] = createAudioPlayer(sources[index], { downloadFirst: true, updateInterval: 50, keepAudioSessionActive: true });
   }
-  return tileContact;
+  return contacts[index]!;
 }
 
 /** Exercise Android's first playback silently on the SAME player used at landing.
@@ -48,7 +74,7 @@ export function prepareTileContact(): Promise<void> {
   if (preparingContact) return preparingContact;
   let player: AudioPlayer;
   try { player = ensureContact(); } catch { return Promise.resolve(); }
-  if (preparedContact === player) return Promise.resolve();
+  if (preparedContacts.has(player)) return Promise.resolve();
   preparingContact = new Promise<void>(resolve => {
     let configured = false, started = false, done = false;
     let loaded = player.isLoaded || player.duration > 0;
@@ -58,7 +84,7 @@ export function prepareTileContact(): Promise<void> {
       done = true;
       clearTimeout(timer); subscription?.remove();
       try { player.pause(); } catch { /* unavailable audio must not block play */ }
-      if (success) preparedContact = player;
+      if (success) preparedContacts.add(player);
       traceTileContact('prepare-end', { playerId: player.id, success, muted: player.muted });
       resolve();
     };
@@ -106,7 +132,7 @@ export function initSounds() {
   }
 }
 
-/** Original contact calibrated to the user-provided real-table reference; one trigger at completed landing. */
+/** User-selected real-table contact (see asset provenance); one trigger at completed landing. */
 export function playTileContact(context: Record<string, unknown> = {}) {
   // A boneyard contact must not unmute an in-flight silent preparation.
   if (preparingContact) { void preparingContact.then(() => playTileContact(context)); return; }
@@ -118,7 +144,9 @@ export function playTileContact(context: Record<string, unknown> = {}) {
   trace('request', { idleMs });
   reportContact('loading', 'contact requested');
   try {
-    const player = ensureContact();
+    const selectedIndex = context.winning === true ? null : contactIndex();
+    const player = context.winning === true ? ensureFinalContact() : ensureContact();
+    if (selectedIndex !== null) nextContactIndex = null;
     player.volume = 1;
     player.muted = false;
     let heardProgress = false; let playIssued = false;
@@ -157,7 +185,7 @@ export function playTileContact(context: Record<string, unknown> = {}) {
       if (id === attempt && !heardProgress) {
         reportContact('failed', loaded ? 'loaded but no playback progress' : 'asset did not load');
         // Do not keep a failed native player indefinitely; next test retries loading.
-        if (!loaded) { player.remove(); tileContact = null; }
+        if (!loaded) { player.remove(); if (context.winning === true) finalContact = null; else if (selectedIndex !== null) { contacts[selectedIndex] = null; preparedContacts.delete(player); } }
       }
     }, 4000);
     void configureAudio().then(() => {
@@ -194,4 +222,52 @@ export function playTap() {
 export function playWin() {
   if (!ready) initSounds();
   trigger(win);
+}
+
+/** One cancellable sound for the entire deal; never consumes placement variation. */
+export function playRoundDeal(): () => void {
+  let cancelled = false, configured = false, started = false;
+  let player: AudioPlayer | null = null;
+  let subscription: { remove(): void } | undefined;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const stop = () => {
+    if (cancelled) return;
+    cancelled = true; clearTimeout(timeout); subscription?.remove();
+    try { player?.pause(); player?.remove(); } catch { /* already disposed */ }
+  };
+  try {
+    player = createAudioPlayer(require('../../assets/sounds/round-deal-v1.wav'), { downloadFirst: true });
+    const start = () => {
+      if (cancelled || started || !configured || !player || !(player.isLoaded || player.duration > 0)) return;
+      started = true; player.volume = 1; player.play();
+    };
+    subscription = player.addListener('playbackStatusUpdate', status => { if (status.didJustFinish) stop(); else start(); });
+    void configureAudio().then(() => { configured = true; start(); }).catch(stop);
+    timeout = setTimeout(stop, 2500);
+  } catch { stop(); }
+  return stop;
+}
+
+/** Approved single card excerpt; cancelled when its deal is interrupted. */
+export function playCardDeal(): () => void {
+  let cancelled = false, configured = false, started = false;
+  let player: AudioPlayer | null = null;
+  let subscription: { remove(): void } | undefined;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const stop = () => {
+    if (cancelled) return;
+    cancelled = true; clearTimeout(timeout); subscription?.remove();
+    try { player?.pause(); player?.remove(); } catch { /* already disposed */ }
+  };
+  try {
+    player = createAudioPlayer(require('../../assets/sounds/poker-card-deal-v1.wav'), { downloadFirst: true });
+    const start = () => {
+      if (cancelled || started || !configured || !player || !(player.isLoaded || player.duration > 0)) return;
+      started = true; player.volume = 1; player.play();
+    };
+    subscription = player.addListener('playbackStatusUpdate', status => { if (status.didJustFinish) stop(); else start(); });
+    void configureAudio().then(() => { configured = true; start(); }).catch(stop);
+    timeout = setTimeout(stop, 1500);
+  } catch { stop(); }
+  return stop;
 }

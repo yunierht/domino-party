@@ -14,7 +14,7 @@ import { ScoreRing } from '../components/ScoreRing';
 import { Match, Team, teamTotal } from '../types';
 import { ThemeName } from '../theme/themes';
 import { useReducedMotion } from '../computer/DrinkGift';
-import { COMPUTER_STRINGS } from '../computer/strings';
+import { useTableGame } from '../poker/TableGameContext';
 
 const HOME_THEME_ORDER: ThemeName[] = ['carbon', 'dark', 'casino', 'cubano', 'usa'];
 
@@ -23,6 +23,7 @@ export function HomeScreen() {
   const { t, lang } = useI18n();
   const { go } = useNav();
   const { currentMatch } = useGame();
+  const { enterMode } = useTableGame();
   const { height } = useWindowDimensions();
   const c = theme.colors;
 
@@ -60,14 +61,17 @@ export function HomeScreen() {
       )}
 
       <Card>
-        <Text accessibilityRole="header" style={{ color: c.text, fontSize: s(20), fontWeight: '800', marginBottom: s(14) }}>
-          {COMPUTER_STRINGS[lang].title}
-        </Text>
-        <Button label={lang === 'es' ? 'Jugar dominó' : 'Play Dominos'}
-          onPress={() => go('computerGame')} variant="secondary" fullWidth />
+        <View style={{gap:s(10)}}>
+        <Button label={lang === 'es' ? 'Jugar dominó' : 'Play Dominoes'}
+          onPress={() => {enterMode('domino');go('computerGame');}} variant="secondary" fullWidth />
+        <Button label={lang === 'es' ? 'Jugar póker' : 'Play Poker'}
+          onPress={() => go('pokerLobby')} variant="secondary" fullWidth />
+        <Button label={lang === 'es' ? 'Jugar Blackjack' : 'Play Blackjack'}
+          onPress={() => go('blackjackLobby')} variant="secondary" fullWidth />
+        </View>
       </Card>
       </ScrollView>
-      <View testID="home-appearance-footer" style={{ height: s(76) }}>
+      <View testID="home-appearance-header" pointerEvents="box-none" style={{position:'absolute',top:s(8),left:s(18),zIndex:5}}>
         <AppearanceSpinner onSpin={() => setLogoSpin((n) => n + 1)} />
       </View>
     </View>
@@ -76,13 +80,13 @@ export function HomeScreen() {
 
 function HomeMatchActions() {
   const { s } = useTheme();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { go } = useNav();
   const { matches } = useGame();
-  return <View style={{ gap: s(12), marginTop: s(12) }}>
-    <Button label={t.watchGame} onPress={() => go('watch')} variant="secondary" fullWidth />
-    <Button label={`${t.history}${matches.length ? `  (${matches.length})` : ''}`}
-      onPress={() => go('history')} variant="secondary" fullWidth />
+  return <View style={{ flexDirection:'row', gap: s(10), marginTop: s(12) }}>
+    <View style={{flex:1}}><Button singleLine label={lang === 'es' ? 'Ver partida' : 'Watch'} onPress={() => go('watch')} variant="secondary" fullWidth /></View>
+    <View style={{flex:1}}><Button singleLine label={`${t.history}${matches.length ? `  (${matches.length})` : ''}`}
+      onPress={() => go('history')} variant="secondary" fullWidth /></View>
   </View>;
 }
 
@@ -117,9 +121,7 @@ function AppearanceSpinner({ onSpin }: { onSpin: () => void }) {
       onPress={cycleTheme}
       hitSlop={10}
       style={({ pressed }) => ({
-        position: 'absolute',
-        right: s(18),
-        bottom: s(12),
+        alignSelf: 'flex-start',
         shadowColor: '#000',
         shadowOpacity: pressed ? 0.24 : 0.38,
         shadowRadius: pressed ? s(8) : s(14),

@@ -11,6 +11,7 @@ const REST: Partial<Record<OpponentId, ImageSourcePropType>> = {
   yoi: require('../../assets/opponent-drinks/yoi/pose-09.png'),
   diego: require('../../assets/opponent-drinks/diego/pose-09.png'),
   lucia: require('../../assets/opponent-drinks/lucia/pose-09.png'),
+  rigo: require('../../assets/opponent-drinks-v2/rigo/nubo/pose-09.png'),
 };
 const SEQUENCE = [0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 8, 8] as const;
 const restStyle = { position: 'absolute' as const, left: '-14%' as const, top: '-4%' as const, width: '128%' as const, height: '110%' as const };
@@ -37,7 +38,7 @@ export function OpponentDrinkingAvatar({ opponentId, name, gift, invitation, sou
   return <View pointerEvents="none" style={{ flex: 1, minWidth: 0, height }} testID={animating ? 'opponent-drinking' : 'opponent-resting'}
     accessibilityLabel={animating ? (es ? `${name} bebe ${beverage}` : `${name} drinks ${beverage}`) : (es ? 'Avatar del rival virtual' : 'Virtual opponent avatar')}>
     <Image source={REST[opponentId] ?? source} resizeMode="contain"
-      style={[REST[opponentId] ? restStyle : { position: 'absolute', width: '100%', height: '100%' }, { opacity: animating ? 0 : 1 }]} />
+      style={[opponentId === 'rigo' ? poseStyle : REST[opponentId] ? restStyle : { position: 'absolute', width: '100%', height: '100%' }, { opacity: animating ? 0 : 1 }]} />
     {poses && SEQUENCE.map((pose, index) => <Image key={`${selected?.drinkId ?? 'heineken'}-${index}`} source={poses[pose]}
       resizeMode="contain" accessible={false} fadeDuration={0} testID={`opponent-pose-${index}`}
       style={[poseStyle, { opacity: animating && frame === index ? 1 : 0 }]} />)}

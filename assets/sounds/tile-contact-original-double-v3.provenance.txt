@@ -1,0 +1,9 @@
+User-selected option 3: domino stone on the table, Millavsb (Freesound), via Pixabay.
+Source: https://pixabay.com/sound-effects/film-special-effects-domino-stone-on-the-table-87997/
+License: Pixabay Content License; https://pixabay.com/service/license-summary/
+Downloaded 2026-10-03 using the page download control. Integrated game effect, not standalone redistribution.
+Original MP3 SHA256: df1a185960f6a2c747f4da31991fe0599802e84675e40b6eaa878adb6a4e4321
+Output WAV SHA256: a3cc474b3323c2c85ce19eca80042e71a4daba94e476aa44616dd895f3f11f08
+Processing: exact PCM slice of original MP3 after decoding; 7.430s to 8.050s; original stereo 24000Hz PCM16. No gain, fades, mono conversion, resampling, pitch change or synthesis.
+Reproduce: decode full source MP3 with ffmpeg -i SOURCE.mp3 -c:a pcm_s16le decoded.wav; preserve channels/rate; copy PCM frames 178320:193200 verbatim into output WAV.
+Supersedes warm synthetic sample for runtime contact; previous asset retained. One existing landing trigger, mute and silent Android preparation retained.

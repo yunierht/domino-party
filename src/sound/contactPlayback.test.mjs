@@ -1,20 +1,20 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import ts from 'typescript';
 for(const ended of [false,true]) for(const loaded of [false,true])test(`contact plays once after mode setup, loaded=${loaded}, ended=${ended}`,async()=>{
  const calls=[];let resolve;let statusCallback;const player={remove(){},addListener:(_,cb)=>{statusCallback=cb;return {remove(){}};},isLoaded:loaded,duration:ended?.16:0,volume:0,seekTo:async()=>calls.push('seek'),play:()=>calls.push('play')};
- const deps={'react-native':{Platform:{OS:'android'}},'expo-audio':{createAudioPlayer:src=>{if(src==='tap')throw Error('unrelated tap unavailable');return player;},setAudioModeAsync:mode=>{assert.equal(mode.interruptionMode,'mixWithOthers','cold contact must not request transient Android audio focus');return new Promise(r=>resolve=r);}},'../../assets/sounds/tile-contact-plastic-warm-v3.wav':'contact','../../assets/sounds/tap.wav':'tap'};
+ const deps={'react-native':{Platform:{OS:'android'}},'expo-audio':{createAudioPlayer:src=>{if(src==='tap')throw Error('unrelated tap unavailable');return player;},setAudioModeAsync:mode=>{assert.equal(mode.interruptionMode,'mixWithOthers','cold contact must not request transient Android audio focus');return new Promise(r=>resolve=r);}},'../../assets/sounds/tile-contact-cycle-1.wav':'contact','../../assets/sounds/tile-contact-cycle-2.wav':'contact','../../assets/sounds/tile-contact-cycle-3.wav':'contact','../../assets/sounds/tile-contact-cycle-4.wav':'contact','../../assets/sounds/tap.wav':'tap'};
  const code=ts.transpileModule(readFileSync(new URL('./sounds.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;const m={exports:{}};new Function('require','module','exports','__DEV__',code)(id=>deps[id],m,m.exports,false);
  m.exports.initSounds();m.exports.playTileContact();assert.deepEqual(calls,[]);resolve();await new Promise(r=>setImmediate(r));if(!loaded&&!ended){assert.deepEqual(calls,[]);player.isLoaded=true;statusCallback({isLoaded:true,currentTime:0});await new Promise(r=>setImmediate(r));}assert.deepEqual(calls,['seek','play']);statusCallback({isLoaded:true,currentTime:.1});assert.equal(player.volume,1);player.isLoaded=false;player.duration=.16;m.exports.playTileContact();await new Promise(r=>setImmediate(r));assert.deepEqual(calls,['seek','play','seek','play'],'completed Android clip must rewind and play again');statusCallback({isLoaded:true,currentTime:.1});
 });
 test('cold load completed before listener attaches is rechecked after audio mode',async()=>{
  const calls=[];let resolve;const player={isLoaded:false,duration:0,volume:0,remove(){},addListener(){this.isLoaded=true;return {remove(){}};},seekTo:async()=>calls.push('seek'),play:()=>calls.push('play')};
- const deps={'react-native':{Platform:{OS:'android'}},'expo-audio':{createAudioPlayer:()=>player,setAudioModeAsync:mode=>{assert.equal(mode.interruptionMode,'mixWithOthers','cold contact must not request transient Android audio focus');return new Promise(r=>resolve=r);}},'../../assets/sounds/tile-contact-plastic-warm-v3.wav':'contact'};
+ const deps={'react-native':{Platform:{OS:'android'}},'expo-audio':{createAudioPlayer:()=>player,setAudioModeAsync:mode=>{assert.equal(mode.interruptionMode,'mixWithOthers','cold contact must not request transient Android audio focus');return new Promise(r=>resolve=r);}},'../../assets/sounds/tile-contact-cycle-1.wav':'contact','../../assets/sounds/tile-contact-cycle-2.wav':'contact','../../assets/sounds/tile-contact-cycle-3.wav':'contact','../../assets/sounds/tile-contact-cycle-4.wav':'contact'};
  const code=ts.transpileModule(readFileSync(new URL('./sounds.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;const m={exports:{}};new Function('require','module','exports','__DEV__',code)(id=>deps[id],m,m.exports,false);m.exports.playTileContact();assert.deepEqual(calls,[]);resolve();await new Promise(r=>setImmediate(r));assert.deepEqual(calls,['seek','play']);
 });
 for (const loadedInitially of [true, false]) test(`Android prepares once in silence before any contact, loaded=${loadedInitially}`, async()=>{
  const calls=[];const listeners=new Set();let modeResolve;
  const player={id:'same-player',isLoaded:loadedInitially,duration:loadedInitially?.16:0,muted:false,volume:1,remove(){},pause(){calls.push(['pause',this.muted,this.volume]);},addListener(_,cb){listeners.add(cb);return {remove:()=>listeners.delete(cb)};},seekTo:async()=>calls.push(['seek']),play(){calls.push(['play',this.muted,this.volume]);}};
  const emit=status=>{for(const cb of [...listeners])cb(status);};
- const deps={'react-native':{Platform:{OS:'android'}},'expo-audio':{createAudioPlayer:()=>player,setAudioModeAsync:()=>new Promise(r=>modeResolve=r)},'../../assets/sounds/tile-contact-plastic-warm-v3.wav':'contact'};
+ const deps={'react-native':{Platform:{OS:'android'}},'expo-audio':{createAudioPlayer:()=>player,setAudioModeAsync:()=>new Promise(r=>modeResolve=r)},'../../assets/sounds/tile-contact-cycle-1.wav':'contact','../../assets/sounds/tile-contact-cycle-2.wav':'contact','../../assets/sounds/tile-contact-cycle-3.wav':'contact','../../assets/sounds/tile-contact-cycle-4.wav':'contact'};
  const code=ts.transpileModule(readFileSync(new URL('./sounds.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;const m={exports:{}};new Function('require','module','exports','__DEV__',code)(id=>deps[id],m,m.exports,false);
  const prepared=m.exports.prepareTileContact();assert.equal(m.exports.prepareTileContact(),prepared,'concurrent mounts share preparation');assert.deepEqual(calls,[]);modeResolve();await new Promise(r=>setImmediate(r));
  if(!loadedInitially){assert.deepEqual(calls,[]);player.isLoaded=true;player.duration=.16;emit({isLoaded:true,currentTime:0});}
@@ -25,4 +25,34 @@ for (const loadedInitially of [true, false]) test(`Android prepares once in sile
  assert.deepEqual(calls,[['play',true,0],['pause',true,0],['seek'],['play',false,1]]);
  emit({isLoaded:true,currentTime:.04});await m.exports.prepareTileContact();assert.equal(calls.length,4,'new round reuses prepared player');
  m.exports.playTileContact();await new Promise(r=>setImmediate(r));assert.deepEqual(calls.slice(-2),[['seek'],['play',false,1]]);emit({isLoaded:true,currentTime:.04});
+});
+
+test('winning landing selects its own impact and ordinary landing keeps approved contact', async()=>{
+ const played=[];
+ const deps={'react-native':{Platform:{OS:'android'}},'expo-audio':{setAudioModeAsync:async()=>{},createAudioPlayer:src=>({isLoaded:true,duration:.8,volume:1,addListener:()=>({remove(){}}),seekTo:async()=>{},play:()=>played.push(src)})},'../../assets/sounds/tile-contact-cycle-1.wav':'normal','../../assets/sounds/tile-contact-cycle-2.wav':'normal','../../assets/sounds/tile-contact-cycle-3.wav':'normal','../../assets/sounds/tile-contact-cycle-4.wav':'normal','../../assets/sounds/tile-contact-final-first-v1.wav':'final'};
+ const code=ts.transpileModule(readFileSync(new URL('./sounds.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
+ const m={exports:{}};new Function('require','module','exports','__DEV__',code)(id=>deps[id],m,m.exports,false);
+ m.exports.playTileContact({winning:true});await new Promise(r=>setImmediate(r));
+ m.exports.playTileContact({winning:false});await new Promise(r=>setImmediate(r));
+ assert.deepEqual(played,['final','normal']);
+});
+
+test('original hits follow random draws; final impact does not consume a draw', async()=>{
+ const played=[];
+ const deps={'react-native':{Platform:{OS:'ios'}},'expo-audio':{setAudioModeAsync:async()=>{},createAudioPlayer:src=>({isLoaded:true,duration:.8,addListener:()=>({remove(){}}),seekTo:async()=>{},play:()=>played.push(src)})},'../../assets/sounds/tile-contact-final-first-v1.wav':'final'};
+ for(let i=1;i<=4;i++)deps[`../../assets/sounds/tile-contact-cycle-${i}.wav`]=i;
+ const code=ts.transpileModule(readFileSync(new URL('./sounds.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
+ const draws=[.8,.1,.55,.3,.8]; const randomMath=Object.create(Math); randomMath.random=()=>draws.shift();
+ const m={exports:{}};new Function('require','module','exports','__DEV__','Math',code)(id=>deps[id],m,m.exports,false,randomMath);
+ for(const winning of [false,false,true,false,false,false]){m.exports.playTileContact({winning});await new Promise(r=>setImmediate(r));}
+ assert.deepEqual(played,[4,1,'final',3,2,4]);
+});
+
+test('cancelled deal cannot start after delayed audio configuration',async()=>{
+ let resolve;const calls=[];const player={isLoaded:true,duration:1.6,addListener:()=>({remove(){}}),play:()=>calls.push('play'),pause:()=>calls.push('pause'),remove:()=>calls.push('remove')};
+ const deps={'react-native':{Platform:{OS:'android'}},'expo-audio':{setAudioModeAsync:()=>new Promise(r=>resolve=r),createAudioPlayer:()=>player}};
+ const code=ts.transpileModule(readFileSync(new URL('./sounds.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
+ const m={exports:{}};new Function('require','module','exports','__DEV__',code)(id=>deps[id],m,m.exports,false);
+ const stop=m.exports.playRoundDeal();stop();resolve();await new Promise(r=>setImmediate(r));
+ assert.deepEqual(calls,['pause','remove']);
 });

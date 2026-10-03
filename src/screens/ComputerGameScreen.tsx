@@ -11,10 +11,14 @@ import { DominoTableBackground } from '../computer/DominoTableBackground';
 import { useComputerGame } from '../computer/ComputerGameContext';
 import { COMPUTER_STRINGS } from '../computer/strings';
 import { OPPONENTS } from '../computer/opponents';
-import { computerStep, restartMatch, deal, drawOrPass, End, legalEnds, requiredOpening, hasMove, matchWinner, play, Tile } from '../computer/engine';
+import { OpponentChoices, OpponentCarousel } from '../computer/OpponentChoices';
+import { restartMatch, deal, drawOrPass, End, legalEnds, requiredOpening, hasMove, matchWinner, play, Tile } from '../computer/engine';
 import { DominoTile } from '../computer/DominoTile';
+import { GameSwitchButton, useTableGame } from '../poker/TableGameContext';
+import { DealtTile, useRoundDeal } from '../computer/RoundDeal';
 import { DraggableDomino } from '../computer/DraggableDomino';
 import { AnchoredBoard } from '../computer/AnchoredBoard';
+import { usePresentedTurn } from '../computer/usePresentedTurn';
 import { chainMetrics, endpointOffsets, Point, resolveScreenDrop, chainSlot } from '../computer/boardLayout';
 import { TABLE as C } from '../computer/tableTheme';
 import { handLayout } from '../computer/handLayout';
@@ -25,7 +29,7 @@ import { TableSettings } from '../computer/TableSettings';
 import { BoneyardOverlay } from '../computer/BoneyardOverlay';
 import { usePrefs } from '../state/PrefsContext';
 import { useTableMusic } from '../sound/useTableMusic';
-import { traceTileContact } from '../sound/sounds';
+import { traceTileContact, preparePlacementAudio } from '../sound/sounds';
 
 const EMPTY_BOARD: Tile[] = [];
 
@@ -65,8 +69,18 @@ function Avatar({ computer = false, active = false, small = false }: { computer?
 }
 
 export function ComputerGameScreen() {
-  const { matchingTiles, tableMusic, ready: prefsReady } = usePrefs();
+  const {switchTarget}=useTableGame();
+  const { matchingTiles, tableMusic, tileSound, ready: prefsReady } = usePrefs();
   useTableMusic(prefsReady && tableMusic);
+  const [placementReady, setPlacementReady] = useState(false);
+  useEffect(() => {
+    let active = true;
+    setPlacementReady(false);
+    if (!prefsReady) return () => { active = false; };
+    if (!tileSound) setPlacementReady(true);
+    else void preparePlacementAudio().then(() => { if (active) setPlacementReady(true); }).catch(() => { if (active) setPlacementReady(true); });
+    return () => { active = false; };
+  }, [prefsReady, tileSound]);
   const [showSettings, setShowSettings] = useState(false);
   const [showStock, setShowStock] = useState(false);
   const humanHandRef = useRef<View>(null);
@@ -94,6 +108,7 @@ export function ComputerGameScreen() {
   const [turnReminder, setTurnReminder] = useState(false);
   const [showTurnHelp, setShowTurnHelp] = useState(false);
   const [appActive, setAppActive] = useState(AppState.currentState === 'active');
+  const dealPresentation = useRoundDeal(game, prefsReady, appActive && !showSettings && !showRules && !showMenu && !showRestart && !showOpponents && !showDrinks, tileSound);
   const [panelWidth, setPanelWidth] = useState(390);
   const [tableSize, setTableSize] = useState({ width: 340, height: 360 });
   const rootRef = useRef<View>(null);
@@ -133,14 +148,8 @@ export function ComputerGameScreen() {
     const androidBack = BackHandler.addEventListener('hardwareBackPress', () => { if (!mandatoryDraw.current) back(); return true; });
     return () => { subscription.remove(); androidBack.remove(); };
   }, [back]);
-  useEffect(() => {
-    if (!game || game.result || game.turn !== 'computer' || showStock || !appActive || showSettings || showRules || showOpponents || showMenu || showRestart || showDrinks) return;
-    const timer = setTimeout(() => {
-      if (!hasMove(game) && game.stock.length) setShowStock(true);
-      else setGame(current => current === game ? computerStep(current) : current);
-    }, 850);
-    return () => clearTimeout(timer);
-  }, [game, showSettings, appActive, setGame, showRules, showOpponents, showMenu, showRestart, showDrinks, showStock]);
+  const presentation = usePresentedTurn({game, opponentId, setGame, onDraw: () => setShowStock(true),
+    paused: !placementReady || !!switchTarget || dealPresentation.dealing || showStock || !appActive || showSettings || showRules || showOpponents || showMenu || showRestart || showDrinks});
   useEffect(() => { setSelected(null); cancelDrag(); }, [game?.round, game?.turn, game?.result]);
   useEffect(() => {
     setTurnReminder(false);
@@ -174,15 +183,8 @@ export function ComputerGameScreen() {
 
   const opponentPicker = <View>
     <Text style={{ color: C.gold, fontSize: 12, marginBottom: 12 }}>{es ? 'ELIGE TU RIVAL' : 'CHOOSE YOUR OPPONENT'}</Text>
-    <ScrollView testID="opponent-carousel" horizontal showsHorizontalScrollIndicator snapToInterval={124} decelerationRate="fast" keyboardShouldPersistTaps="handled" contentContainerStyle={{ gap: 8, paddingBottom: 8 }}>
-      {OPPONENTS.map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={item.name}
-        accessibilityState={{ selected: item.id === opponentId }} onPress={() => { setOpponentId(item.id); setShowOpponents(false); }}
-        style={{ width: 116, overflow: 'hidden', borderRadius: 12, borderWidth: 2, borderColor: item.id === opponentId ? C.gold : C.line, backgroundColor: C.surface }}>
-        <Image source={item.image} resizeMode="cover" style={{ width: '100%', height: 90 }} />
-        <Text style={{ color: C.ivory, textAlign: 'center', fontWeight: '600', fontSize: 13, marginVertical: 8 }}>{item.name}</Text>
-      </Pressable>)}
-    </ScrollView>
-    <Text style={{ color: C.gold, fontSize: 11, marginTop: 4 }}>{es ? 'Desliza para ver más rivales →' : 'Swipe for more opponents →'}</Text>
+    {game ? <OpponentChoices selected={opponentId} onSelect={id => { setOpponentId(id); setShowOpponents(false); }} />
+      : <OpponentCarousel selected={opponentId} onSelect={setOpponentId} es={es} />}
   </View>;
 
   if (!game) return <View style={{ flex: 1, backgroundColor: C.background }}>
@@ -218,7 +220,7 @@ export function ComputerGameScreen() {
     {rules}
   </View>;
 
-  const humanTurn = game.turn === 'human' && !game.result && !showStock && !showSettings;
+  const humanTurn = placementReady && presentation.presented && !switchTarget && !dealPresentation.dealing && game.turn === 'human' && !game.result && !showStock && !showSettings;
   const revealOpponent = !!game.result && !opponentDrink && game.hands.computer.length > 0;
   const selectedTile = game.hands.human.find(tile => tile.id === selected);
   const winner = matchWinner(game);
@@ -235,7 +237,8 @@ export function ComputerGameScreen() {
   const last = game.last;
   const lastText = last ? `${labelFor(last.player)} ${last.kind === 'draw' ? text.drew : last.kind === 'pass' ? text.passed : `${text.played} ${last.tile?.a} · ${last.tile?.b}`}` : '';
   const place = (id: string, end: End) => {
-    setGame(current => current ? play(current, 'human', id, end) : current);
+    if (!humanTurn) return;
+    setGame(current => current === game ? play(current, 'human', id, end) : current);
     setSelected(null); cancelDrag();
   };
   const nextRound = () => {
@@ -263,7 +266,7 @@ export function ComputerGameScreen() {
   };
   const resultTitle = game.result ? winner ? `${labelFor(winner)} ${text.wonMatch}` : game.result.winner === 'tie' ? text.tie : `${labelFor(game.result.winner)} ${text.wonRound}` : '';
   const humanPrompt = !hasMove(game) ? (game.stock.length ? text.draw : text.pass) : es ? 'Coloca una ficha' : 'Play a tile';
-  const turnLabel = game.result ? resultTitle : game.turn === 'human'
+  const turnLabel = !placementReady ? (es ? 'Preparando sonidos…' : 'Preparing sounds…') : dealPresentation.dealing ? (es ? 'Repartiendo fichas…' : 'Dealing tiles…') : game.result ? resultTitle : game.turn === 'human'
     ? `${turnReminder ? (es ? 'Seguimos esperando tu jugada' : 'Waiting for your move') : text.yourTurn} · ${humanPrompt}` : text.thinking;
   const hasAction = !!game.result || (humanTurn && !hasMove(game)) || !!selectedTile;
   const noticeDetail = humanTurn && showTurnHelp && hasMove(game)
@@ -291,23 +294,22 @@ export function ComputerGameScreen() {
         <Text style={{ minWidth: 24, textAlign: 'right', color: C.goldLight, fontWeight: '700', fontSize: 18 }}>{tally.computer}</Text>
         <Text numberOfLines={1} style={{ flex: 1, textAlign: 'left', color: C.ivory, fontSize: 13 }}>{opponent.name}</Text>
       </View>
+      <Pressable accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }}
+          style={{ width: 70, flexShrink: 1, alignSelf: 'flex-start', minHeight: 36, justifyContent: 'center', backgroundColor: '#102820', borderWidth: 1, borderColor: C.line, borderRadius: 12, padding: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Text numberOfLines={1} style={{ flexShrink: 1, color: C.goldLight, fontSize: 10, fontWeight: '600' }}>{opponent.name}</Text>
+            <Feather name="users" size={14} color={C.goldLight} accessible={false} />
+          </View>
+        </Pressable>
       <Pressable testID="game-menu" accessibilityRole="button" accessibilityLabel={es ? 'Menú de partida' : 'Game menu'} onPress={() => { cancelDrag(); setShowMenu(true); }} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
         <Feather name="more-vertical" size={19} color={C.gold} />
       </Pressable>
     </View>
     <View style={{ flex: 1 }}>
       <DominoTableBackground opponentHeight={opponentHeight} gift={opponentDrink ? null : drinkGift} es={es} finished={drinkExpiring} />
-      <View style={{ height: opponentHeight, flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 12, gap: 6 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }}
-          style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14, minHeight: 44, justifyContent: 'center', backgroundColor: '#102820', borderWidth: 1, borderColor: C.line, borderRadius: 12, padding: 8 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Text numberOfLines={1} style={{ flexShrink: 1, color: C.goldLight, fontSize: 10, fontWeight: '600' }}>{opponent.name}</Text>
-            <Feather name="users" size={14} color={C.goldLight} accessible={false} />
-          </View>
-        </Pressable>
-        {opponentId !== 'alex' ? <OpponentDrinkingAvatar opponentId={opponentId} name={opponent.name} gift={opponentDrink} invitation={drinkGift} source={opponent.image} height={opponentHeight} es={es} /> : <Image source={opponent.image} resizeMode="contain"
-          accessibilityLabel={es ? 'Avatar del rival virtual' : 'Virtual opponent avatar'}
-          style={{ flex: 1, minWidth: 0, height: opponentHeight }} />}
+      <View style={{ height: opponentHeight, flexDirection: 'row-reverse', alignItems: 'flex-end', paddingHorizontal: 12, gap: 6 }}>
+        <View style={{width:82,alignSelf:'flex-start',marginTop:14,gap:6}}><GameSwitchButton disabled={showStock || !!drag} /><GameSwitchButton blackjack disabled={showStock || !!drag}/></View>
+        <OpponentDrinkingAvatar opponentId={opponentId} name={opponent.name} gift={opponentDrink} invitation={drinkGift} source={opponent.image} height={opponentHeight} es={es} />
         <View style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14 }}>
 
           <DrinkInviteButton es={es} compact={compact} active={appActive && !showDrinks && !showMenu && !showRestart && !showRules && !showOpponents} onPress={() => { cancelDrag(); drinkSelectionLock.current = false; setShowDrinks(true); }} />
@@ -321,7 +323,7 @@ export function ComputerGameScreen() {
       </View> : <View ref={computerHandRef} collapsable={false} testID="hidden-opponent-hand" style={{ alignItems: 'center', height: 25, justifyContent: 'center' }}>
         <View>
           <View style={{ flexDirection: 'row', gap: 3 }}>
-            {game.hands.computer.slice(0, 10).map(tile => <View key={tile.id} style={{ width: 12, height: 21, borderRadius: 2, borderWidth: 1, borderColor: '#D5CAB0', backgroundColor: '#8E9A7C' }} />)}
+            {game.hands.computer.slice(0, 10).map((tile, index) => <DealtTile key={tile.id} {...dealPresentation} index={index} side="computer" distance={windowSize.width}><View style={{ width: 12, height: 21, borderRadius: 2, borderWidth: 1, borderColor: '#D5CAB0', backgroundColor: '#8E9A7C' }} /></DealtTile>)}
             <Text style={{ color: C.muted, fontSize: 10, marginLeft: 3 }}>{game.hands.computer.length}</Text>
           </View>
         </View>
@@ -339,7 +341,7 @@ export function ComputerGameScreen() {
         <Animated.View pointerEvents="box-none" style={{ position: 'absolute',
           left: (tableSize.width - metrics.width) / 2, top: (tableSize.height - metrics.height) / 2,
           width: metrics.width, height: metrics.height, transform: [{ translateX: camera.values.x }, { translateY: camera.values.y }, { scale: camera.values.scale }] }}>
-        <AnchoredBoard contactContext={{ round: game.round, actor: game.last?.player, turn: game.turn, lastKind: game.last?.kind }} showMatching={matchingTiles} key={game.round} winningId={game.result && !game.result.blocked && game.last?.kind === 'play' ? game.last.tile?.id : null} arrivingId={game.last?.kind === 'play' ? game.last.tile?.id : null} board={game.board} openingId={game.openingId} metrics={metrics} available={available}
+        <AnchoredBoard onPresented={presentation.onPresented} contactContext={{ round: game.round, actor: game.last?.player, turn: game.turn, lastKind: game.last?.kind }} showMatching={matchingTiles} key={game.round} winningId={game.result && !game.result.blocked && game.last?.kind === 'play' ? game.last.tile?.id : null} arrivingId={game.last?.kind === 'play' ? game.last.tile?.id : null} board={game.board} openingId={game.openingId} metrics={metrics} available={available}
           hovered={hovered} leftLabel={text.left} rightLabel={text.right} openLabel={openingLabel}
           onEnd={end => { if (activeTile) place(activeTile.id, end); }} />
         </Animated.View>
@@ -360,10 +362,10 @@ export function ComputerGameScreen() {
       </View>
       <View ref={humanHandRef} collapsable={false} testID="player-hand" style={{ height: (handSize * 2 + 26) * handRows, width: (handSize + 10) * handColumns + (handColumns - 1) * 2 + 4,
         alignSelf: 'center', flexDirection: 'row', flexWrap: handRows === 1 ? 'nowrap' : 'wrap', columnGap: 2, rowGap: 4, justifyContent: 'center', alignItems: 'center', alignContent: 'center' }}>
-        {game.hands.human.map(tile => {
+        {game.hands.human.map((tile, index) => {
           const ends = legalEnds(game, 'human', tile);
           const enabled = humanTurn && ends.length > 0;
-          return <DraggableDomino key={tile.id} tile={tile} size={handSize} enabled={enabled && !showRules} selected={selected === tile.id} revealed={!!game.result} dragging={drag?.tile.id === tile.id}
+          return <DealtTile key={tile.id} {...dealPresentation} index={index} side="human" distance={windowSize.width}><DraggableDomino tile={tile} size={handSize} enabled={enabled && !showRules} selected={selected === tile.id} revealed={!!game.result} dragging={drag?.tile.id === tile.id}
             onTap={() => { if (enabled) { if (ends.length === 1 || game.hands.human.length === 1) place(tile.id, ends[0]); else setSelected(tile.id); } }} onCancel={cancelDrag}
             onDrag={point => {
               if (!enabled) { cancelDrag(); return; }
@@ -378,7 +380,7 @@ export function ComputerGameScreen() {
               const allowed = legalEnds(game, 'human', tile).map(end => ({ end, point: slot(offsets[end], metrics) }));
               const end = origin ? resolveScreenDrop({ x: point.x - origin.x, y: point.y - origin.y }, allowed, tableSize, metrics, camera.current.current) : null;
               if (end) place(tile.id, end); else cancelDrag();
-            }} />;
+            }} /></DealtTile>;
         })}
       </View>
       <View testID="below-hand-notice" style={{ height: 64, justifyContent: 'center' }}>

@@ -8,7 +8,7 @@ import ts from 'typescript';
 const require=createRequire(import.meta.url);
 globalThis.IS_REACT_ACT_ENVIRONMENT=true;
 function load(file,mocks){const code=ts.transpileModule(readFileSync(new URL(file,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React,esModuleInterop:true}}).outputText;const mod={exports:{}};new Function('require','module','exports',code)(id=>id in mocks?mocks[id]:id.endsWith('.png')?id:require(id),mod,mod.exports);return mod.exports;}
-for(const saved of [null,'yoi','rafael','retired']) test(`Yuni fallback respects saved opponent ${saved}`,async()=>{
+for(const saved of [null,'yoi','rafael','rigo','alex','retired']) test(`Yuni fallback respects saved opponent ${saved}`,async()=>{
  let resolve;const writes=[];
  const opponents=load('./opponents.ts',{});
  const mod=load('./ComputerGameContext.tsx',{
@@ -21,10 +21,10 @@ for(const saved of [null,'yoi','rafael','retired']) test(`Yuni fallback respects
  await act(()=>{renderer=create(React.createElement(mod.ComputerGameProvider,null,React.createElement(Probe)));});
  assert.equal(value.opponentId,'yuni');
  await act(async()=>{resolve(saved);});
- assert.equal(value.opponentId,['yoi','rafael'].includes(saved)?saved:'yuni');
- await act(()=>value.setOpponentId('alex'));
- assert.equal(value.opponentId,'alex');
- assert.equal(writes.at(-1),'alex');
+ assert.equal(value.opponentId,['yoi','rafael','rigo'].includes(saved)?saved:'yuni');
+ await act(()=>value.setOpponentId('rigo'));
+ assert.equal(value.opponentId,'rigo');
+ assert.equal(writes.at(-1),'rigo');
  await act(()=>renderer.unmount());
 });
 test('late storage load cannot overwrite a new explicit opponent choice',async()=>{

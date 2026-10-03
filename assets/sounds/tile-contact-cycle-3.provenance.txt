@@ -1,0 +1,5 @@
+Source: https://pixabay.com/sound-effects/film-special-effects-domino-stone-on-the-table-87997/
+Author: Millavsb (Freesound), via Pixabay.
+License: https://pixabay.com/service/license-summary/
+Original hit 3, exact decoded PCM 5.490-6.250 seconds. Stereo 24000Hz PCM16; no gain, fades, resampling or synthesis.
+SHA256: d50c432f7cfc6c99e1d86162e45d412a0ad94d776aab9e3cc845b0ded755899e

@@ -1,0 +1,6 @@
+Source: https://pixabay.com/sound-effects/film-special-effects-domino-stone-on-the-table-87997/
+License: https://pixabay.com/service/license-summary/
+Original downloaded MP3 confirmed by user 2026-10-03.
+Exact decoded PCM frames 9120:26400, 0.380-1.100 seconds, stereo 24000Hz PCM16. No gain, fades or resampling. Includes softer contact around 0.400 and stronger impact around 0.540.
+Final landing variant: approved linear gain 3 (+9.54 dB); no other processing. Peak 17796/32768; no clipping.
+SHA256: de8f4e1a31cfd7ca07d2eb4fde84365c403ba853456894818c60e373c7ca48bb

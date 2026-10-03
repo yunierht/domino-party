@@ -24,8 +24,13 @@ import { WatchScreen } from './src/screens/WatchScreen';
 import { WatchHistoryScreen } from './src/screens/WatchHistoryScreen';
 import { HowToScreen } from './src/screens/HowToScreen';
 import { PrivacyScreen } from './src/screens/PrivacyScreen';
+import { TableGameProvider, useTableGame } from './src/poker/TableGameContext';
+import { CardGameLobby } from './src/poker/CardGameLobby';
+import { PokerScreen } from './src/poker/PokerScreen';
 import { ComputerGameScreen } from './src/screens/ComputerGameScreen';
 import { ComputerGameProvider } from './src/computer/ComputerGameContext';
+
+function TableScreen() { const {mode}=useTableGame(); return mode === 'poker' ? <PokerScreen /> : <ComputerGameScreen />; }
 
 function Router() {
   const { screen, watchHistory } = useNav();
@@ -36,8 +41,10 @@ function Router() {
       return <NewMatchScreen />;
     case 'game':
       return <GameScreen />;
+    case 'pokerLobby': return <CardGameLobby game="poker" />;
+    case 'blackjackLobby': return <CardGameLobby game="blackjack" />;
     case 'computerGame':
-      return <ComputerGameScreen />;
+      return <TableScreen />;
     case 'history':
       return <HistoryScreen />;
     case 'watchHistory':
@@ -109,7 +116,7 @@ export default function App() {
           <GameProvider>
             <NavProvider>
               <ComputerGameProvider>
-              <AppShell />
+              <TableGameProvider><AppShell /></TableGameProvider>
               </ComputerGameProvider>
             </NavProvider>
           </GameProvider>

@@ -1,0 +1,8 @@
+Rigo seated avatar — 2026-10-03
+Generated with built-in image_gen; no CLI fallback.
+Identity reference supplied by user: C:/Users/yunie/Downloads/Rigo 1.jpg
+Style/pose reference: assets/opponent-depth-yuni-seated-v2.png
+Output: assets/opponent-rigo-seated-v1.png (1536x1024 RGBA, alpha verified).
+Shared by domino and poker catalog; custom drinking frames added separately in assets/opponent-drinks-v2/rigo (see provenance.json).
+Prompt:
+Create a game avatar named Rigo. Reference 1 is the identity source: preserve this man's wavy brown hair, aviator sunglasses, face, light goatee, friendly smile and black T-shirt. Reference 2 is ONLY the pose/framing and realistic dimensional lighting style, do not transfer its identity, beard or cap. Match the seated front-facing waist-up framing with both forearms and hands naturally resting at the bottom on an implied table. No actual table, no background, no halo, no props, no text. Natural detailed hands and skin, warm directional lighting, subtle volume and realistic depth suitable for the existing domino/poker game. Entire head, shoulders, elbows and hands inside the image. Transparent background RGBA, landscape 3:2 composition like reference 2.

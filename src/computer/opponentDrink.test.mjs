@@ -6,8 +6,8 @@ import {deal,matchWinner} from './engine.ts';
 import {DRINKS} from './drinks.ts';
 const gift={drinkId:'heineken',sequence:1};
 const result={winner:'computer',points:12,blocked:false};
-test('all 30 supported identity and beverage pairs animate only on their win',()=>{
- assert.deepEqual(ANIMATED_OPPONENTS,['rafael','yuni','yoi','diego','lucia']);
+test('all 36 supported identity and beverage pairs animate only on their win',()=>{
+ assert.deepEqual(ANIMATED_OPPONENTS,['rafael','yuni','yoi','diego','lucia','rigo']);
  for(const id of ANIMATED_OPPONENTS) for(const {id:drinkId} of DRINKS) {
   const gift={drinkId,sequence:1};
   assert.equal(canOpponentDrink(id,gift,result,false),true);

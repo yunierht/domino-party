@@ -22,7 +22,7 @@ for(const sound of [false,true]) for(const player of ['human','computer']) test(
   'react-native':{View:'View',Pressable:'Pressable',ScrollView:'ScrollView',Text:'Text',Easing:{cubic:0,inOut:()=>0},Animated:{Value,View:'AnimatedView',timing:(value)=>{const a={value,callback:null,start(cb){this.callback=cb;},stop(){}};animations.push(a);return a;}}},
   'expo-haptics':{selectionAsync:()=>Promise.resolve()},'./DominoTile':{DominoTile:()=>React.createElement('Tile')},
   './DrinkGift':{useReducedMotion:()=>false},'../state/PrefsContext':{usePrefs:()=>({tileSound:sound,vibration:false})},
-  '../sound/sounds':{playTileContact:()=>tics++},'./tableTheme':{TABLE:{}},'./boneyardSlots':slots,
+  '../sound/sounds':{reservePlacementContact:()=>{let timer;return{impactMs:0,schedule(ms,enabled){timer=setTimeout(()=>{if(enabled())tics++;},ms);},cancel(){clearTimeout(timer);}};}},'./tableTheme':{TABLE:{}},'./boneyardSlots':slots,
  });
  const stock=[{id:'0-0',a:0,b:0},{id:'0-1',a:0,b:1},{id:'0-2',a:0,b:2}];
  let game={stock,stockSlots:stock.map(t=>t.id),turn:player};const draws=[];
@@ -38,7 +38,7 @@ for(const sound of [false,true]) for(const player of ['human','computer']) test(
  assert.equal(selected.length,1);
  const holeId=selected[0].props.testID;
  assert.equal(draws.length,0);assert.equal(tics,0,'no selection sound before landing');
- await act(()=>{animations[0].value.setValue(1);animations[0].callback({finished:true});});
+ await act(()=>{t.mock.timers.tick(560);animations[0].value.setValue(1);animations[0].callback({finished:true});});
  assert.equal(draws.length,1);assert.equal(tics,sound?1:0,'one tic for the entire completed draw');
  assert.equal(renderer.root.findAllByProps({testID:holeId}).length,1,'hole survives before game commit');
  game={...game,stock:game.stock.filter((_,i)=>i!==draws[0])};

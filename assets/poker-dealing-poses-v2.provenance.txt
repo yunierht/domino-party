@@ -1,0 +1,1 @@
+Generated with built-in imagegen, 2026-10-03. Reference poker-dealing-hand-v1.png. Prompt: four registered horizontal poses, photoreal lateral hand and white cuff, holding a red-backed card, lowering, releasing with articulated thumb/index, withdrawing; transparent background. Runtime crops sheet and blends adjacent poses. 2D sprites, not a rigged 3D hand.

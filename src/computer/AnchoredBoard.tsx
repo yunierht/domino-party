@@ -7,13 +7,15 @@ import type { End, Tile } from './engine';
 import { TABLE } from './tableTheme';
 import { TileCelebration } from './TileCelebration';
 import { usePrefs } from '../state/PrefsContext';
-import { playTileContact, prepareTileContact, traceTileContact } from '../sound/sounds';
+import { reservePlacementContact, traceTileContact } from '../sound/sounds';
 import { useReducedMotion } from './DrinkGift';
 
-function PlacedTile({ tile, point, metrics, opening, winning, arriving, reduced, contactContext = {} }: {
+function PlacedTile({ tile, point, metrics, opening, winning, arriving, reduced, contactContext = {}, onPresented }: {
   tile: Tile; point: ReturnType<typeof chainSlot>; metrics: ReturnType<typeof boardMetrics>; opening: boolean; winning: boolean; arriving: boolean; reduced: boolean;
   contactContext?: Record<string, unknown>;
+  onPresented?: () => void;
 }) {
+  const presentedCallback = useRef(onPresented); presentedCallback.current = onPresented;
   const { tileSound: sound, vibration, ready = true } = usePrefs();
   const prefs = useRef({ sound, vibration, ready });
   prefs.current = { sound, vibration, ready };
@@ -32,21 +34,25 @@ function PlacedTile({ tile, point, metrics, opening, winning, arriving, reduced,
     let active = true;
     let completed = false;
     const start = initial.current;
+    const contact = start.arriving && prefs.current.sound ? reservePlacementContact(traceContext) : undefined;
+    const ordinaryMs = start.reduced ? Math.max(80, contact?.impactMs ?? 0) : 220;
     const timing = (toValue: number, duration: number, easing = Easing.linear) =>
       Animated.timing(arrival, { toValue, duration, easing, useNativeDriver: true });
     const landing = start.winning && !start.reduced
       ? Animated.sequence([timing(0.45, 620, Easing.out(Easing.cubic)), timing(0.6, 420), timing(0.82, 480, Easing.in(Easing.cubic))])
-      : timing(1, start.reduced ? 80 : 220, Easing.out(Easing.cubic));
+      : timing(1, ordinaryMs, Easing.out(Easing.cubic));
     const settle = timing(1, 300, Easing.out(Easing.cubic));
     const startLanding = () => {
       if (!active) return;
       traceTileContact?.('animation-start', { ...traceContext, ...prefs.current });
+      contact?.schedule(start.winning && !start.reduced ? 1520 : ordinaryMs, () => active && prefs.current.sound);
       landing.start(({ finished }) => {
       traceTileContact?.('animation-complete', { ...traceContext, ...prefs.current, finished, active, completed });
       if (!finished || !active || completed) return;
       completed = true;
+      presentedCallback.current?.();
       if (start.arriving) {
-        if (prefs.current.sound) playTileContact(traceContext);
+        if (!prefs.current.sound) contact?.cancel();
         setLanded(true);
         if (start.winning) {
           if (prefs.current.vibration) void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
@@ -55,10 +61,9 @@ function PlacedTile({ tile, point, metrics, opening, winning, arriving, reduced,
       if (start.winning && !start.reduced) settle.start();
       });
     };
-    const preparation = start.arriving && prefs.current.sound ? prepareTileContact?.() : undefined;
-    if (preparation) void preparation.then(startLanding);
-    else startLanding();
-    return () => { traceTileContact?.('animation-cleanup', { ...traceContext, completed }); active = false; landing.stop(); settle.stop(); }; }, [arrival, ready]);
+    // The pool is warmed before interaction; landing never awaits audio work.
+    startLanding();
+    return () => { traceTileContact?.('animation-cleanup', { ...traceContext, completed }); active = false; contact?.cancel(); landing.stop(); settle.stop(); }; }, [arrival, ready]);
   const vertical = point.vertical;
   const width = vertical ? metrics.tileHeight : metrics.tileWidth;
   const height = vertical ? metrics.tileWidth : metrics.tileHeight;
@@ -80,21 +85,18 @@ function PlacedTile({ tile, point, metrics, opening, winning, arriving, reduced,
     </Animated.View>}
   </Animated.View>;
 }
-export function AnchoredBoard({ board, openingId, metrics, available, hovered, leftLabel, rightLabel, openLabel, onEnd, winningId = null, arrivingId = null, showMatching = true, contactContext = {} }: {
+export function AnchoredBoard({ board, openingId, metrics, available, hovered, leftLabel, rightLabel, openLabel, onEnd, winningId = null, arrivingId = null, showMatching = true, contactContext = {}, onPresented }: {
   board: Tile[]; openingId: string | null; metrics: ReturnType<typeof boardMetrics>;
   available: End[]; hovered: End | null; leftLabel: string; rightLabel: string; openLabel: string;
   onEnd: (end: End) => void;
   showMatching?: boolean;
   winningId?: string | null; arrivingId?: string | null;
   contactContext?: Record<string, unknown>;
+  onPresented?: (board: Tile[]) => void;
 }) {
   // Resolve accessibility once on the persistent board, before a new tile mounts.
   // A tile-local hook initially returns true while its async native query loads.
   const reduced = useReducedMotion();
-  const { ready, tileSound } = usePrefs();
-  useEffect(() => {
-    if (ready && tileSound) void prepareTileContact?.();
-  }, [ready, tileSound]);
   // Existing tiles on mount are a restored table, not new landing events.
   // The screen keys this component by round, including an empty new hand.
   const mountedIds = useRef(new Set(board.map(tile => tile.id))).current;
@@ -107,7 +109,7 @@ export function AnchoredBoard({ board, openingId, metrics, available, hovered, l
   const positions = board.map((_tile, index) => slot(index - anchor, metrics));
   const ends: End[] = board.length ? ['left', 'right'] : ['right'];
   return <View pointerEvents="box-none" style={{ height: metrics.height, width: metrics.width }}>
-    {board.map((tile, index) => <PlacedTile key={tile.id} contactContext={{ ...contactContext, count: board.length, arrivingId, restored: mountedIds.has(tile.id) }} reduced={reduced} tile={tile} point={positions[index]} metrics={metrics} opening={tile.id === openingId} winning={tile.id === winningId} arriving={tile.id === arrivingId && !mountedIds.has(tile.id)} />)}
+    {board.map((tile, index) => <PlacedTile key={tile.id} onPresented={tile.id === (arrivingId ?? board[board.length - 1]?.id) ? () => onPresented?.(board) : undefined} contactContext={{ ...contactContext, count: board.length, arrivingId, restored: mountedIds.has(tile.id) }} reduced={reduced} tile={tile} point={positions[index]} metrics={metrics} opening={tile.id === openingId} winning={tile.id === winningId} arriving={tile.id === arrivingId && !mountedIds.has(tile.id)} />)}
     {ends.map(end => {
       const p = slot(offsets[end], metrics);
       const enabled = available.includes(end);

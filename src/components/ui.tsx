@@ -24,6 +24,7 @@ export function Button({
   style,
   disabled,
   fullWidth,
+  singleLine = false,
 }: {
   label: string;
   onPress: () => void;
@@ -31,6 +32,7 @@ export function Button({
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
   fullWidth?: boolean;
+  singleLine?: boolean;
 }) {
   const { theme, s } = useTheme();
   const c = theme.colors;
@@ -57,6 +59,9 @@ export function Button({
 
   const content = (
     <Text
+      numberOfLines={singleLine ? 1 : undefined}
+      adjustsFontSizeToFit={singleLine}
+      minimumFontScale={0.85}
       style={{
         color: textColor,
         fontSize: s(17),

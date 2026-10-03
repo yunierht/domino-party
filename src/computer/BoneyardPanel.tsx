@@ -6,7 +6,7 @@ import type { Point } from './boardLayout';
 import { DominoTile } from './DominoTile';
 import { useReducedMotion } from './DrinkGift';
 import { usePrefs } from '../state/PrefsContext';
-import { playTileContact } from '../sound/sounds';
+import { reservePlacementContact } from '../sound/sounds';
 import { TABLE as C } from './tableTheme';
 import { boneyardSlots } from './boneyardSlots';
 
@@ -68,14 +68,18 @@ export function BoneyardPanel({ game, es, destination, onDraw, interactive = tru
   useEffect(() => {
     if (!flight || !interactive) return;
     let current = true;
-    const animation = Animated.timing(flight.progress, { toValue: 1, duration: reduced ? 80 : 560, easing: Easing.inOut(Easing.cubic), useNativeDriver: true });
+    let completed = false;
+    const contact = sound ? reservePlacementContact({tile:flight.tile.id,actor:game.turn,source:'boneyard'}) : undefined;
+    const duration = reduced ? Math.max(80,contact?.impactMs ?? 0) : 560;
+    contact?.schedule(duration,()=>current&&alive.current&&latest.current.sound);
+    const animation = Animated.timing(flight.progress, { toValue: 1, duration, easing: Easing.inOut(Easing.cubic), useNativeDriver: true });
     animation.start(({ finished }) => {
       if (!current || !finished || !alive.current || !selectable.current || currentStock.current !== game.stock || completedFlight.current === flight) return;
       completedFlight.current = flight;
-      if (latest.current.sound) playTileContact();
+      completed = true;
       latest.current.onDraw(flight.index);
     });
-    return () => { current = false; animation.stop(); };
+    return () => { current = false; if (!completed) contact?.cancel(); animation.stop(); };
   }, [flight, reduced, interactive]);
   return <View ref={root} collapsable={false} testID="boneyard-panel" accessibilityViewIsModal
     style={{ position: 'absolute', inset: 0, zIndex: 110, justifyContent: 'center', padding: 18 }}>

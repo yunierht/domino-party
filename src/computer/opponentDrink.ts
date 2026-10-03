@@ -1,7 +1,7 @@
 import type { Result } from './engine';
 import type { DrinkGift } from './drinks';
 import { isDrinkId } from './drinks.ts';
-export const ANIMATED_OPPONENTS = ['rafael', 'yuni', 'yoi', 'diego', 'lucia'] as const;
+export const ANIMATED_OPPONENTS = ['rafael', 'yuni', 'yoi', 'diego', 'lucia', 'rigo'] as const;
 export type AnimatedOpponentId = typeof ANIMATED_OPPONENTS[number];
 export function isAnimatedOpponent(value: string): value is AnimatedOpponentId {
   return (ANIMATED_OPPONENTS as readonly string[]).includes(value);
