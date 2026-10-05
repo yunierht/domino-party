@@ -12,7 +12,7 @@ export function PokerContinuation({game,es,blocked=false,names,onContinue}:{game
  const submit=()=>{if(blocked||!seat)return;onContinue(continuePoker(game,amount));close();};
  return <>
   <Pressable testID="poker-continue" accessibilityRole="button" accessibilityState={{disabled:blocked}} disabled={blocked}
-   onPress={()=>{if(seat){setAmount(500);setOpen(true);}else onContinue(continuePoker(game));}}
+   onPress={()=>{if(blocked)return;if(seat){setAmount(500);setOpen(true);}else onContinue(continuePoker(game));}}
    style={{minHeight:46,flex:1,justifyContent:'center',alignItems:'center',paddingHorizontal:10,borderRadius:14,borderWidth:1,borderColor:'#E5CB91',backgroundColor:'#267B58',opacity:blocked?.45:1}}>
    <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.7} style={{color:'#FFF2D2',fontWeight:'800',fontSize:14,letterSpacing:1,textTransform:'uppercase'}}>{seat?(es?'Comprar fichas · Simulación':'Buy chips · Simulation'):(es?'Siguiente mano':'Next hand')}</Text>
   </Pressable>

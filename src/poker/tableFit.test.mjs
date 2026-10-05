@@ -15,3 +15,7 @@ test('community row fits inside felt with nine pixel clearance on narrow and wid
   }
  }
 });
+import {pokerBoardZoneHeight} from './tableFit.ts';
+test('short fixed tables reserve64px message strip and keep hand above action lane without scrolling',()=>{
+ for(const height of [640,740,844]){const board=pokerBoardZoneHeight(height,120,87,24,255);const communityWidth=Math.min(54,Math.max(24,(board-4)/1.43));assert.ok(communityWidth*1.43<=board);const handBottom=48+120+86+board+24+117;const tableBottom=height-87-64;assert.ok(handBottom<=tableBottom-55);assert.ok(handBottom<=height-87-56-46-12);}
+});

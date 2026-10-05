@@ -38,3 +38,7 @@ El contexto y el registro de decisiones pertenecen exclusivamente a este proyect
 AGENTS.md es una instrucción para el agente cuando el entorno la carga para este proyecto; no es un servicio ni un hook de cierre. Los documentos se leen por estas instrucciones, no se sincronizan solos. Si se cierra la app, se interrumpe el proceso o falta permiso de escritura, no se garantiza una actualización final: informa la limitación si puedes y reconcilia en la siguiente sesión. No hay tarea programada ni integración Doti creada por este archivo. Referencia: https://learn.chatgpt.com/docs/agent-configuration/agents-md
 
 Excepcion adicional autorizada 2026-10-03 (D-055): mejora de estrategia interna del rival Domino, usando solo mano propia y cadena publica; no autoriza cambiar reglas, apariencia ni audio. Implementacion conserva apertura D-052. Futuras tareas Blackjack no amplian esta excepcion.
+
+## Candidato congelado tras check-in — 2026-10-05
+
+Al completar las verificaciones y el check-in local autorizados del candidato actual, no cambiar codigo de este proyecto sin pedir y obtener autorizacion humana previa explicita. Lecturas y pruebas siguen permitidas; pendientes e ideas no autorizan implementaciones. Regla vigente y fuente en [docs/DECISIONES.md](docs/DECISIONES.md#2026-10-05--candidato-y-congelamiento-del-codigo-tras-check-in). Conserva el historial de excepciones Domino; no aplica a otros proyectos.

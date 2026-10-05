@@ -2,7 +2,7 @@ const en = {
   title: 'Play Computer', human: 'Human players', computer: 'Computer', you: 'You',
   rules: 'Double-six · 1 vs 1 · 7 tiles each. In the first round, whoever holds the highest double starts, excluding the stock. Only if neither player has a double, the highest pip sum decides who starts; ties favor the higher end. The starter may play any tile from their hand. After that, the previous winner opens with any tile. After a tied round, use the first-round opening rule. Match either end. Draw until you can play; pass only with an empty stock. Empty your hand to score the opponent’s remaining pips. If blocked, fewer pips wins the difference; a tie scores zero. First to the target wins.',
   offline: 'Offline practice. This game stays in memory while the app is open and does not count toward shared matches or statistics.',
-  yourTurn: 'Your turn', thinking: 'Computer is thinking…', choose: 'Tap a highlighted tile to play.',
+  yourTurn: 'Your Turn', thinking: 'Computer is thinking…', choose: 'Tap a highlighted tile to play.',
   chooseEnd: 'Choose where to place your tile:', left: 'Left', right: 'Right', cancel: 'Cancel',
   draw: 'Draw a tile', pass: 'Pass', stock: 'Stock', tiles: 'tiles', round: 'Round', target: 'Target',
   openFreely: 'opens with any tile',

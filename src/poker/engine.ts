@@ -114,7 +114,11 @@ export function act(state: PokerGame, seat: Seat, action: Action): PokerGame {
   }
   advance(g);return g;
 }
-export function computerView(g: PokerGame) { return { cards:g.holes.computer,board:g.board,legal:legalActions(g,'computer'),pot:g.total.human+g.total.computer,stack:g.stacks.computer }; }
+export function computerView(g: PokerGame) {
+ // Unmatched opposing chips are returned by payout; they are not a reward for calling.
+ const pot=g.total.computer+Math.min(g.total.human,g.total.computer+g.stacks.computer);
+ return { cards:g.holes.computer,board:g.board,legal:legalActions(g,'computer'),pot,stack:g.stacks.computer };
+}
 /** Sample unknown cards, never the real opposing hand/deck. Large bets suggest a
  * stronger range; this is a heuristic estimate, not knowledge of hidden cards. */
 function estimatedEquity(view: ReturnType<typeof computerView>,random:()=>number){
@@ -140,7 +144,10 @@ export function chooseComputerAction(view: ReturnType<typeof computerView>, rand
  const {legal}=view;const {equity,allTies}=estimatedEquity(view,random);const roll=random();
  const odds=legal.toCall/Math.max(1,view.pot+legal.toCall);
  const exposure=legal.toCall/Math.max(1,view.stack);
- const margin=allTies?0:.025+exposure*.10;
+ // Future streets can make marginal equity harder to realize. An all-in call
+ // closes betting, so stack exposure alone must not demand an extra 10% equity.
+ const futureBetting=legal.canRaise&&legal.toCall<view.stack?(5-view.board.length)/5:0;
+ const margin=allTies?0:.015+exposure*.03*futureBetting;
  const adjusted=equity+(allTies?0:(roll-.5)*.04);
  if(!legal.canCheck&&adjusted<odds+margin)return {type:'fold'};
  const valueThreshold=view.board.length===0?.56:.60;

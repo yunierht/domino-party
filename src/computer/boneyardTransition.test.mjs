@@ -18,7 +18,7 @@ for(const sound of [false,true]) for(const player of ['human','computer']) test(
  const animations=[];const values=[];let tics=0;
  class Value{constructor(n){this.n=n;this.history=[n];values.push(this);}setValue(n){this.n=n;this.history.push(n);}interpolate(){return this.n;}}
  const slots=compile('./boneyardSlots.ts',{});
- const {BoneyardPanel}=compile('./BoneyardPanel.tsx',{
+ const {BoneyardPanel}=compile('./BoneyardPanel.tsx',{'./DominoTurnTitle':{DominoTurnTitle:({children})=>children},
   'react-native':{View:'View',Pressable:'Pressable',ScrollView:'ScrollView',Text:'Text',Easing:{cubic:0,inOut:()=>0},Animated:{Value,View:'AnimatedView',timing:(value)=>{const a={value,callback:null,start(cb){this.callback=cb;},stop(){}};animations.push(a);return a;}}},
   'expo-haptics':{selectionAsync:()=>Promise.resolve()},'./DominoTile':{DominoTile:()=>React.createElement('Tile')},
   './DrinkGift':{useReducedMotion:()=>false},'../state/PrefsContext':{usePrefs:()=>({tileSound:sound,vibration:false})},

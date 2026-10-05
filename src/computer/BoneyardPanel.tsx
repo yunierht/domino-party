@@ -1,3 +1,4 @@
+import {DominoTurnTitle} from './DominoTurnTitle';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, ScrollView, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
@@ -11,11 +12,11 @@ import { TABLE as C } from './tableTheme';
 import { boneyardSlots } from './boneyardSlots';
 
 /** Keep faces hidden until selection; commit exactly once, after arrival. */
-export function BoneyardPanel({ game, es, destination, onDraw, interactive = true, panelProgress, slideDistance = 0 }: {
+export function BoneyardPanel({ game, es, destination, onDraw, interactive = true, attentionActive = true, panelProgress, slideDistance = 0 }: {
   game: Game; es: boolean;
   destination: React.RefObject<View | null>;
   onDraw: (index: number) => void;
-  interactive?: boolean; panelProgress?: Animated.Value; slideDistance?: number;
+  interactive?: boolean; attentionActive?: boolean; panelProgress?: Animated.Value; slideDistance?: number;
 }) {
   const { tileSound: sound, vibration } = usePrefs();
   const reduced = useReducedMotion();
@@ -85,9 +86,9 @@ export function BoneyardPanel({ game, es, destination, onDraw, interactive = tru
     style={{ position: 'absolute', inset: 0, zIndex: 110, justifyContent: 'center', padding: 18 }}>
     <Animated.View pointerEvents="none" style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(2,12,10,0.52)', opacity: panelProgress ?? 1 }} />
     <Animated.View testID="boneyard-tray" style={{ opacity: panelProgress ?? 1, transform: [{ translateX: panelProgress ? panelProgress.interpolate({ inputRange: [0, 1], outputRange: [slideDistance, 0] }) : 0 }], width: '100%', maxWidth: 420, alignSelf: 'center', borderRadius: 18, borderWidth: 2, borderColor: C.gold, padding: 14, backgroundColor: '#34251B', maxHeight: '65%' }}>
-      <Text accessibilityLiveRegion="polite" style={{ color: C.goldLight, textAlign: 'center', fontSize: 17, marginBottom: 12 }}>
+      <DominoTurnTitle active={attentionActive && interactive && !computer && !flight && game.stock.length>0 && !game.result}><Text style={{ color: C.goldLight, textAlign: 'center', fontSize: 17, marginBottom: 12 }}>
         {computer ? (es ? 'El rival roba del pozo' : 'Opponent draws from boneyard') : (es ? 'Elige una ficha del pozo' : 'Choose a tile from the boneyard')}
-      </Text>
+      </Text></DominoTurnTitle>
       <ScrollView contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
         {slots.map((slot, position) => slot.stockIndex < 0 || flight?.tile.id === slot.id ?
           <View key={slot.id} testID={`stock-hole-${position}`} pointerEvents="none" accessible={false}

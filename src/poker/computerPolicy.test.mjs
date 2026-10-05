@@ -46,3 +46,37 @@ test('more active policy finishes seeded hands legally and conserves the bankrol
   assert.ok(g.result,`hand ${seed} did not finish`);
  }
 });
+
+test('ace-king defends a large heads-up all-in without becoming an automatic caller',()=>{
+ let calls=0;for(let seed=1;seed<=40;seed++)calls+=chooseComputerAction(view('As Kd',''),rng(seed)).type==='call';
+ assert.ok(calls>=32,`AK calls ${calls}/40`);
+});
+test('short stack prices only chips it can win, excluding unmatched opposing bets',()=>{
+ const g=newHand(undefined,rng(4));g.turn='computer';g.stacks={human:0,computer:100};g.total={human:1500,computer:400};g.bets={human:1100,computer:0};g.currentBet=1100;
+ assert.equal(computerView(g).pot,900);
+});
+
+test('the same river bluff catcher defends a cheap pot price but folds an expensive overbet',()=>{
+ let cheap=0,expensive=0;
+ for(let seed=1;seed<=32;seed++){
+  const hand=view('9c 9d','Ah Ks Qc 6d 3s');
+  cheap+=chooseComputerAction({...hand,pot:1000,stack:500,legal:{...hand.legal,toCall:50}},rng(seed)).type==='call';
+  expensive+=chooseComputerAction(hand,rng(seed)).type==='fold';
+ }
+ assert.ok(cheap>=24,`cheap calls ${cheap}/32`);assert.ok(expensive>=28,`expensive folds ${expensive}/32`);
+});
+test('aggressive public bets and unequal stacks finish legally without leaking or creating chips',()=>{
+ const decisions={fold:0,call:0,raise:0,check:0};
+ for(let seed=1;seed<=80;seed++){
+  const random=rng(seed);let g=newHand(undefined,random,{human:seed%2?1800:700,computer:seed%2?200:1300}),steps=0;
+  while(!g.result&&steps++<100){
+   const seat=g.turn,l=legalActions(g,seat);
+   const choice=seat==='computer'?chooseComputerAction(computerView(g),random):l.canRaise&&random()<.65?{type:'raise',to:Math.min(l.maxTo,Math.max(l.minTo,g.currentBet+Math.floor((g.total.human+g.total.computer)*1.5)))}:{type:l.canCheck?'check':'call'};
+   if(seat==='computer')decisions[choice.type]++;
+   g=act(g,seat,choice);assert.equal(g.stacks.human+g.stacks.computer+g.total.human+g.total.computer,2000);
+  }
+  assert.ok(g.result,`seed ${seed}`);
+ }
+ for(const type of ['fold','call','raise'])assert.ok(decisions[type]>0,JSON.stringify(decisions));
+ console.log('aggressive unequal-stack decisions',decisions);
+});

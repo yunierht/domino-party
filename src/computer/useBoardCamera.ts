@@ -4,13 +4,13 @@ import { chainBounds, chainMetrics, fitBoardCamera, resizedBoardCamera, BoardCam
 import type { Tile } from './engine';
 import { useReducedMotion } from './DrinkGift';
 
-export function useBoardCamera(board: Tile[], openingId: string | null, width: number, height: number) {
+export function useBoardCamera(board: Tile[], openingId: string | null, width: number, height: number, round?: number) {
   const reduced = useReducedMotion();
   const current = useRef<BoardCamera>({ x: 0, y: 0, scale: 1 });
   const values = useRef({ x: new Animated.Value(0), y: new Animated.Value(0), scale: new Animated.Value(1) }).current;
-  const active = useRef(false), pending = useRef(false);
+  const active = useRef(false), pending = useRef(false), centerRequested = useRef(false);
   const [revision, refresh] = useState(0);
-  const previous = useRef({ width, height, count: 0 });
+  const previous = useRef({ width, height, count: 0, round });
   const fit = useRef(() => {});
   const stop = () => Object.values(values).forEach(value => value.stopAnimation());
   useEffect(() => {
@@ -20,7 +20,9 @@ export function useBoardCamera(board: Tile[], openingId: string | null, width: n
   fit.current = () => {
     if (active.current) { pending.current = true; return; }
     pending.current = false;
-        const reset = board.length < previous.current.count;
+    const newRound = round !== previous.current.round || board.length < previous.current.count;
+    const reset = newRound || centerRequested.current;
+    centerRequested.current = false;
     if (!reset && (width !== previous.current.width || height !== previous.current.height)) {
       stop();
       const adjusted = resizedBoardCamera(current.current, previous.current, {width,height});
@@ -28,18 +30,25 @@ export function useBoardCamera(board: Tile[], openingId: string | null, width: n
       values.x.setValue(adjusted.x); values.y.setValue(adjusted.y);
     }
     const target = fitBoardCamera(chainBounds(board, openingId, chainMetrics(2048, 4096)), { width, height }, { width: 2048, height: 4096 }, current.current, reset);
-    previous.current = { width, height, count: board.length };
+    previous.current = { width, height, count: board.length, round };
+    if (newRound) {
+      // A fresh round must not inherit zoom if its layout interrupts an animation.
+      stop();
+      current.current = target;
+      values.x.setValue(target.x); values.y.setValue(target.y); values.scale.setValue(target.scale);
+      return;
+    }
     if (target === current.current) return;
     stop();
     Animated.parallel((['x', 'y', 'scale'] as const).map(key => Animated.timing(values[key], {
       toValue: target[key], duration: reduced ? 0 : 320, easing: Easing.out(Easing.cubic), useNativeDriver: true,
     }))).start();
   };
-  useEffect(() => { fit.current(); }, [board, openingId, width, height, reduced, revision]);
+  useEffect(() => { fit.current(); }, [board, openingId, width, height, round, reduced, revision]);
   return { current, values,
     begin: () => { active.current = true; stop(); },
     end: () => { active.current = false; if (pending.current) refresh(n => n + 1); },
     pan: (x: number, y: number) => { values.x.setValue(x); values.y.setValue(y); },
-    center: () => { previous.current.count = 29; refresh(n => n + 1); },
+    center: () => { centerRequested.current = true; refresh(n => n + 1); },
   };
 }

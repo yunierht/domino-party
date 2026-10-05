@@ -1,4 +1,7 @@
-import {TableStamp} from '../blackjack/TableFinish';
+import {DominoTurnTitle} from '../computer/DominoTurnTitle';
+import {DominoResultBanner} from '../computer/DominoResultBanner';
+import {useDominoResultTransition} from '../computer/useDominoResultTransition';
+import {TableStamp,WoodSurface} from '../blackjack/TableFinish';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, AppState, BackHandler, Image, Modal, PanResponder, Platform, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -121,7 +124,7 @@ export function ComputerGameScreen() {
   const dragId = useRef<string | null>(null);
   // A fixed virtual canvas keeps tile size independent of hand, stock and chain length.
   const metrics = chainMetrics(2048, 4096);
-  const camera = useBoardCamera(game?.board ?? EMPTY_BOARD, game?.openingId ?? null, tableSize.width, tableSize.height);
+  const camera = useBoardCamera(game?.board ?? EMPTY_BOARD, game?.openingId ?? null, tableSize.width, tableSize.height, game?.round);
   const cameraRef = useRef(camera); cameraRef.current = camera;
   const panStart = useRef({ x: 0, y: 0 });
   const tablePanResponder = useRef(PanResponder.create({
@@ -189,6 +192,17 @@ export function ComputerGameScreen() {
       : <OpponentCarousel selected={opponentId} onSelect={setOpponentId} es={es} />}
   </View>;
 
+  const nextRound = () => {
+    if (!game) return;
+    traceTileContact('next-round-action', { round: game.round, boardCount: game.board.length, winner: game.result?.winner, matchComplete: !!matchWinner(game), waitingForDrink: !!opponentDrink });
+    if (opponentDrink) return;
+    setShowStock(false);
+    cancelDrag(); setSelected(null);
+    if (game && matchWinner(game)) setDrinkGift(null);
+    setGame(current => current === game ? deal(current.playerName, current.target, Math.random, matchWinner(current) ? undefined : current, current.scoringMode) : current);
+  };
+  const resultPaused = !appActive || !!switchTarget || showSettings || showRules || showOpponents || showMenu || showRestart || showDrinks || showStock;
+  const resultVisible = useDominoResultTransition(game,resultPaused,presentation.presented && !opponentDrink,nextRound);
   if (!game) return <View style={{ flex: 1, backgroundColor: C.background }}>
     {header}
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingBottom: 24 }}>
@@ -242,14 +256,6 @@ export function ComputerGameScreen() {
     setGame(current => current === game ? play(current, 'human', id, end) : current);
     setSelected(null); cancelDrag();
   };
-  const nextRound = () => {
-    traceTileContact('next-round-action', { round: game.round, boardCount: game.board.length, winner: game.result?.winner, matchComplete: !!matchWinner(game), waitingForDrink: !!opponentDrink });
-    if (opponentDrink) return;
-    setShowStock(false);
-    cancelDrag(); setSelected(null);
-    if (game && matchWinner(game)) setDrinkGift(null);
-    setGame(current => current ? deal(current.playerName, current.target, Math.random, matchWinner(current) ? undefined : current, current.scoringMode) : current);
-  };
   const chooseDrink = (drinkId: DrinkId) => {
     if (drinkSelectionLock.current) return;
     drinkSelectionLock.current = true;
@@ -270,6 +276,7 @@ export function ComputerGameScreen() {
   const turnLabel = !placementReady ? (es ? 'Preparando sonidos…' : 'Preparing sounds…') : dealPresentation.dealing ? (es ? 'Repartiendo fichas…' : 'Dealing tiles…') : game.result ? resultTitle : game.turn === 'human'
     ? `${turnReminder ? (es ? 'Seguimos esperando tu jugada' : 'Waiting for your move') : text.yourTurn} · ${humanPrompt}` : text.thinking;
   const hasAction = !!game.result || (humanTurn && !hasMove(game)) || !!selectedTile;
+  const noticeHeight = !game.result && hasAction ? 64 : 36;
   const noticeDetail = humanTurn && showTurnHelp && hasMove(game)
     ? (es ? (matchingTiles ? 'Arrastra al extremo iluminado · Toca para jugar' : 'Arrastra a la mesa · Toca para jugar') : (matchingTiles ? 'Drag to a glowing end · Tap to play' : 'Drag onto the table · Tap to play')) : lastText || openingLabel;
   const winsMode = game.scoringMode === 'wins';
@@ -299,8 +306,9 @@ export function ComputerGameScreen() {
         <Feather name="more-vertical" size={19} color={C.gold} />
       </Pressable>
     </View>
-    <View style={{ flex: 1 }}>
+    <View testID="domino-table-surface" style={{ flex: 1 }}>
       <DominoTableBackground opponentHeight={opponentHeight} gift={opponentDrink ? null : drinkGift} es={es} finished={drinkExpiring} />
+      <View testID="domino-decorative-stamp" pointerEvents="none" accessible={false} style={{position:'absolute',top:(usableHeight<900?120:150)+148,left:42,right:42,height:85}}><TableStamp title="DOMINO" engraved/></View>
       <View style={{ height: opponentHeight, flexDirection: 'row-reverse', alignItems: 'flex-end', paddingHorizontal: 12, gap: 6 }}>
         <View style={{width:82,alignSelf:'flex-start',marginTop:14,gap:6}}><GameSwitchButton disabled={showStock || !!drag} /><GameSwitchButton blackjack disabled={showStock || !!drag}/></View>
         <Pressable testID="domino-opponent-avatar" accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }} style={{flex:1,minWidth:44,height:opponentHeight}}>
@@ -319,7 +327,7 @@ export function ComputerGameScreen() {
       </View> : <View ref={computerHandRef} collapsable={false} testID="hidden-opponent-hand" style={{ alignItems: 'center', height: 25, justifyContent: 'center' }}>
         <View>
           <View style={{ flexDirection: 'row', gap: 3 }}>
-            {game.hands.computer.slice(0, 10).map((tile, index) => <DealtTile key={tile.id} {...dealPresentation} index={index} side="computer" distance={windowSize.width}><View style={{ width: 12, height: 21, borderRadius: 2, borderWidth: 1, borderColor: '#D5CAB0', backgroundColor: '#8E9A7C' }} /></DealtTile>)}
+            {game.hands.computer.slice(0, 10).map((tile, index) => <DealtTile key={tile.id} {...dealPresentation} index={index} side="computer" distance={windowSize.width}><View testID="hidden-opponent-tile" style={{ width: 15, height: 24, borderRadius: 2, borderWidth: 1, borderColor: '#D5CAB0', backgroundColor: '#8E9A7C' }} /></DealtTile>)}
             <Text style={{ color: C.muted, fontSize: 10, marginLeft: 3 }}>{game.hands.computer.length}</Text>
           </View>
         </View>
@@ -331,7 +339,6 @@ export function ComputerGameScreen() {
         style={{ flex: 1, marginHorizontal: 12, minHeight: 80,
           overflow: winningTileVisible ? 'visible' : 'hidden',
           zIndex: winningTileVisible ? 20 : 0, elevation: winningTileVisible ? 20 : 0 }}>
-        <View pointerEvents="none" accessible={false} style={{position:'absolute',top:'50%',marginTop:-42,left:30,right:30,height:85}}><TableStamp title="DOMINO" light/></View>
         <Animated.View pointerEvents="box-none" style={{ position: 'absolute',
           left: (tableSize.width - metrics.width) / 2, top: (tableSize.height - metrics.height) / 2,
           width: metrics.width, height: metrics.height, transform: [{ translateX: camera.values.x }, { translateY: camera.values.y }, { scale: camera.values.scale }] }}>
@@ -377,27 +384,27 @@ export function ComputerGameScreen() {
             }} /></DealtTile>;
         })}
       </View>
-      <View testID="below-hand-notice" style={{ height: 64, justifyContent: 'center' }}>
-        {game.result ? <Action casino={!winner} label={winner ? text.again : text.next} onPress={nextRound} disabled={!!opponentDrink} /> : humanTurn && !hasMove(game) ?
+      </View>
+    </View>
+    <View testID="domino-wood-edge" style={{height:87,backgroundColor:'#704329',paddingHorizontal:12,paddingTop:11,paddingBottom:10,justifyContent:'center'}}><View pointerEvents="none" style={{position:'absolute',top:0,bottom:0,left:0,right:0}}><WoodSurface/></View>
+    <View testID="below-hand-notice" style={{ height: noticeHeight, paddingHorizontal: 12, justifyContent: 'center' }}>
+        {game.result ? (resultVisible ? <View pointerEvents="none"><DominoResultBanner key={game.round} result={{title:resultTitle,detail:'',tone:(winner ?? game.result.winner)==='human'?'win':(winner ?? game.result.winner)==='tie'?'tie':'loss'}} paused={resultPaused}/></View> : null) : humanTurn && !hasMove(game) ?
           <Action casino={game.stock.length > 0} label={game.stock.length ? `${text.draw} · ${game.stock.length}` : text.pass} onPress={() => game.stock.length ? setShowStock(true) : setGame(current => current ? drawOrPass(current, 'human') : current)} /> :
           selectedTile ? <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
             {legalEnds(game, 'human', selectedTile).map(end => <Action key={end} subtle label={`${end === 'left' ? text.left : text.right} · ${end === 'left' ? game.board[0]?.a : game.board[game.board.length - 1]?.b}`} onPress={() => place(selectedTile.id, end)} />)}
             <Pressable accessibilityRole="button" accessibilityLabel={text.cancel} onPress={() => setSelected(null)} style={{ padding: 10 }}><Feather name="x" size={18} color={C.muted} /></Pressable>
-          </View> : <View pointerEvents="none" style={{ borderRadius: 14, paddingHorizontal: 10, paddingVertical: 8,
-            backgroundColor: turnReminder ? '#3A3925' : '#122E26', borderWidth: 1, borderColor: turnReminder ? C.gold : C.line,
-            shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 5, shadowOffset: { width: 0, height: 2 }, elevation: 3 }}>
-            <Text accessibilityLiveRegion="polite" numberOfLines={1} style={{ color: C.goldLight, fontSize: 13, fontWeight: '600', textAlign: 'center' }}>{turnLabel}</Text>
-            <Text numberOfLines={2} style={{ color: C.ivory, fontSize: 12, textAlign: 'center', marginTop: 4 }}>{noticeDetail}</Text>
+          </View> : <View pointerEvents="none" style={{ paddingHorizontal: 10 }}>
+            <DominoTurnTitle active={humanTurn && !resultPaused && !drag} label={turnLabel}/>
+            <Text numberOfLines={1} style={{ color: C.ivory, fontSize: 11, lineHeight: 12, textAlign: 'center', marginTop: 1 }}>{noticeDetail}</Text>
           </View>}
-        {hasAction && <Text accessibilityLiveRegion="polite" numberOfLines={1} style={{ color: C.goldLight, textAlign: 'center', fontSize: 11, marginTop: 4 }}>{turnLabel}</Text>}
+        {hasAction && !game.result && <DominoTurnTitle compact active={humanTurn && !resultPaused && !drag} label={turnLabel}/>}
       </View>
-    </View>
     </View>
     {drag && <View pointerEvents="none" style={{ position: 'absolute', zIndex: 100, elevation: 20,
       left: drag.point.x - rootOrigin.current.x - (handSize + 4) / 2, top: drag.point.y - rootOrigin.current.y - handSize - 2, opacity: 0.95 }}>
       <DominoTile a={drag.tile.a} b={drag.tile.b} size={handSize} vertical selected />
     </View>}
-    <BoneyardOverlay key={game.round} active={appActive} visible={showStock && !game.result && game.stock.length > 0 && !hasMove(game)} game={game} es={es}
+    <BoneyardOverlay key={game.round} active={appActive} attentionActive={appActive && !switchTarget && !showSettings && !showRules && !showMenu && !showRestart && !showOpponents && !showDrinks} visible={showStock && !game.result && game.stock.length > 0 && !hasMove(game)} game={game} es={es}
       destination={game.turn === 'human' ? humanHandRef : computerHandRef}
       onDraw={index => {
         const next = drawOrPass(game, game.turn, index);

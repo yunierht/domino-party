@@ -26,6 +26,14 @@ test('floating actions enter, remain mounted disabled, and hidden exit cannot ac
 });
 test('card sound schedules one excerpt per new card; mute and pause cancel',async()=>{
  let played=0,stopped=0;const timers=new Map();let next=0;const oldSet=setTimeout,oldClear=clearTimeout;globalThis.setTimeout=fn=>{timers.set(++next,fn);return next;};globalThis.clearTimeout=id=>timers.delete(id);
- const {useBlackjackCardSound}=load('./useBlackjackCardSound.ts',{react:React,'../sound/sounds':{playCardDeal(){played++;return()=>stopped++;}}});function Probe({g,enabled=true,paused=false}){useBlackjackCardSound(g,enabled,paused);return null;}let r;const g={player:[1,2],dealer:[3,4],phase:'player'};
+ const {useBlackjackCardSound}=load('./useBlackjackCardSound.ts',{react:React,'../sound/sounds':{prepareCardAudio(){},playCardDeal(){played++;return()=>stopped++;}}});function Probe({g,enabled=true,paused=false}){useBlackjackCardSound(g,enabled,paused);return null;}let r;const g={player:[1,2],dealer:[3,4],phase:'player'};
  try{await act(()=>{r=create(React.createElement(Probe,{g}));});assert.equal(timers.size,4);await act(()=>{[...timers.values()].forEach(fn=>fn());timers.clear();});assert.equal(played,4);const nextG={...g,player:[1,2,5]};await act(()=>r.update(React.createElement(Probe,{g:nextG})));assert.equal(stopped,4);assert.equal(timers.size,1);await act(()=>r.update(React.createElement(Probe,{g:nextG,paused:true})));assert.equal(timers.size,0);await act(()=>r.update(React.createElement(Probe,{g:{...nextG,player:[1,2,5,6]},enabled:false})));assert.equal(timers.size,0);assert.equal(played,4);}finally{await act(()=>r.unmount());globalThis.setTimeout=oldSet;globalThis.clearTimeout=oldClear;}
+});
+
+test('result animation stops on pause and reduced motion keeps explanation without effects',async()=>{
+ const h=animation(false);let change;h.rn.AccessibilityInfo.addEventListener=(_event,fn)=>{change=fn;return{remove(){}};};h.rn.Animated.sequence=jobs=>({start(){jobs.forEach(j=>j.start());},stop(){jobs.forEach(j=>j.stop());}});
+ const {ResultBanner}=load('./ResultBanner.tsx',{react:React,'react-native':h.rn,'./NaturalCardAccent':{NaturalCardAccent:'NaturalCardAccent'}});let r;const result={title:'BLACKJACK!',detail:'Ace + ten-value card · natural',tone:'win',natural:true};
+ await act(()=>{r=create(React.createElement(ResultBanner,{result,paused:false}));});assert.equal(h.jobs.length,3);
+ await act(()=>r.update(React.createElement(ResultBanner,{result,paused:true})));assert.ok(h.jobs.every(j=>j.stopped));
+ await act(()=>change(true));await act(()=>r.update(React.createElement(ResultBanner,{result,paused:false})));assert.equal(h.jobs.length,3);assert.equal(r.root.findAllByType('Text')[0].props.children,'BLACKJACK!');assert.equal(r.root.findAllByType('AnimatedView').length,1);await act(()=>r.unmount());
 });

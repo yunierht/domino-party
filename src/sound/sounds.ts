@@ -1,3 +1,4 @@
+import {playPreparedCard} from './cardAudio';
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 import { Platform } from 'react-native';
 import { createPlacementAudio } from './placementAudio';
@@ -248,26 +249,6 @@ export function playRoundDeal(): () => void {
   return stop;
 }
 
-/** Approved single card excerpt; cancelled when its deal is interrupted. */
-export function playCardDeal(): () => void {
-  let cancelled = false, configured = false, started = false;
-  let player: AudioPlayer | null = null;
-  let subscription: { remove(): void } | undefined;
-  let timeout: ReturnType<typeof setTimeout> | undefined;
-  const stop = () => {
-    if (cancelled) return;
-    cancelled = true; clearTimeout(timeout); subscription?.remove();
-    try { player?.pause(); player?.remove(); } catch { /* already disposed */ }
-  };
-  try {
-    player = createAudioPlayer(require('../../assets/sounds/poker-card-deal-v1.wav'), { downloadFirst: true });
-    const start = () => {
-      if (cancelled || started || !configured || !player || !(player.isLoaded || player.duration > 0)) return;
-      started = true; player.volume = 1; player.play();
-    };
-    subscription = player.addListener('playbackStatusUpdate', status => { if (status.didJustFinish) stop(); else start(); });
-    void configureAudio().then(() => { configured = true; start(); }).catch(stop);
-    timeout = setTimeout(stop, 1500);
-  } catch { stop(); }
-  return stop;
-}
+/** Approved card excerpt uses only the Poker/Blackjack pool. */
+export {prepareCardAudio} from './cardAudio';
+export function playCardDeal(): () => void {return playPreparedCard();}

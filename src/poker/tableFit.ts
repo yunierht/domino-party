@@ -11,3 +11,7 @@ export function communityCardWidth(screenWidth:number,screenHeight:number,heroHe
  const half=Math.min(screenWidth/2-left,right-screenWidth/2);
  return Math.max(24,(half*2-16)/5);
 }
+/** Reserve the hand and bottom action lane before assigning empty community space. */
+export function pokerBoardZoneHeight(panelHeight:number,heroHeight:number,footerHeight:number,hintHeight:number,preferred:number,messageHeight=64){
+ return Math.max(36,Math.min(preferred,panelHeight-48-heroHeight-86-hintHeight-117-footerHeight-messageHeight-55));
+}
