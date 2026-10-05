@@ -78,7 +78,7 @@ function PlacedTile({ tile, point, metrics, opening, winning, arriving, reduced,
       { scaleY: 0.86 },
     ] }}>
     {winning && landed && <TileCelebration />}
-    <DominoTile a={point.flipped ? tile.b : tile.a} b={point.flipped ? tile.a : tile.b} size={metrics.half} vertical={vertical} selected={opening} horizontalSix={!vertical} />
+    <DominoTile a={point.flipped ? tile.b : tile.a} b={point.flipped ? tile.a : tile.b} size={metrics.half} vertical={vertical} selected={false} horizontalSix={!vertical} />
     {winning && !reduced && <Animated.View pointerEvents="none" style={{ position: 'absolute', inset: 1, overflow: 'hidden', borderRadius: 4,
       opacity: arrival.interpolate({ inputRange: [0, 0.4, 0.48, 0.57, 0.65, 1], outputRange: [0, 0, 0.7, 0.15, 0, 0] }) }}>
       <View style={{ position: 'absolute', left: '30%', top: -20, width: 5, height: 120, backgroundColor: '#FFFFFF', transform: [{ rotate: '24deg' }] }} />

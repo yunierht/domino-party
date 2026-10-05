@@ -115,12 +115,43 @@ export function act(state: PokerGame, seat: Seat, action: Action): PokerGame {
   advance(g);return g;
 }
 export function computerView(g: PokerGame) { return { cards:g.holes.computer,board:g.board,legal:legalActions(g,'computer'),pot:g.total.human+g.total.computer,stack:g.stacks.computer }; }
-/** Casual opponent: receives only its own cards and public information. */
+/** Sample unknown cards, never the real opposing hand/deck. Large bets suggest a
+ * stronger range; this is a heuristic estimate, not knowledge of hidden cards. */
+function estimatedEquity(view: ReturnType<typeof computerView>,random:()=>number){
+ const known=[...view.cards,...view.board];const unseen:Card[]=[];
+ for(const suit of ['s','h','d','c'] as const)for(let rank=2;rank<=14;rank++)if(!known.some(c=>c.rank===rank&&c.suit===suit))unseen.push({rank,suit});
+ const pressure=view.legal.toCall/Math.max(1,view.pot-view.legal.toCall);
+ let score=0,weightSum=0,ties=0;
+ for(let sample=0;sample<120;sample++){
+  const pool=[...unseen];const draw=()=>pool.splice(Math.min(pool.length-1,Math.floor(random()*pool.length)),1)[0];
+  const opposing=[draw(),draw()];const board=[...view.board];while(board.length<5)board.push(draw());
+  const high=Math.max(opposing[0].rank,opposing[1].rank),low=Math.min(opposing[0].rank,opposing[1].rank);
+  const preflop=opposing[0].rank===opposing[1].rank?.55+high/30:(high+low)/40+(opposing[0].suit===opposing[1].suit?.12:0);
+  const category=view.board.length>=3?evaluate([...opposing,...view.board])[0]:0;
+  const rangeStrength=view.board.length>=3?Math.min(1,.15+category*.22):Math.min(1,preflop);
+  const weight=1+Math.min(4,pressure)*rangeStrength*rangeStrength*5;
+  const comparison=compare(evaluate([...view.cards,...board]),evaluate([...opposing,...board]));
+  score+=weight*(comparison>0?1:comparison===0?.5:0);weightSum+=weight;if(comparison===0)ties++;
+ }
+ return {equity:score/weightSum,allTies:ties===120};
+}
+/** Bounded Monte Carlo policy using own cards, public board and legal bet costs. */
 export function chooseComputerAction(view: ReturnType<typeof computerView>, random=Math.random): Action {
-  const {legal,cards,board}=view;const roll=random();
-  const strength=board.length>=3?evaluate([...cards,...board])[0]:cards[0].rank===cards[1].rank?2:Math.max(...cards.map(c=>c.rank))>=12?1:0;
-  if(legal.canRaise&&((strength>=2&&roll<.45)||roll<.10))return {type:'raise',to:Math.min(legal.maxTo,Math.max(legal.minTo,Math.floor(view.pot*.7)))};
-  if(legal.canCheck)return {type:'check'};
-  if(strength===0&&legal.toCall>Math.max(20,view.pot*.45)&&roll<.65)return {type:'fold'};
-  return {type:'call'};
+ const {legal}=view;const {equity,allTies}=estimatedEquity(view,random);const roll=random();
+ const odds=legal.toCall/Math.max(1,view.pot+legal.toCall);
+ const exposure=legal.toCall/Math.max(1,view.stack);
+ const margin=allTies?0:.025+exposure*.10;
+ const adjusted=equity+(allTies?0:(roll-.5)*.04);
+ if(!legal.canCheck&&adjusted<odds+margin)return {type:'fold'};
+ const valueThreshold=view.board.length===0?.56:.60;
+ const ranks=[...view.cards,...view.board].flatMap(c=>c.rank===14?[1,14]:[c.rank]);
+ const flushDraw=view.board.length>=3&&view.board.length<5&&view.cards.some(c=>[...view.cards,...view.board].filter(x=>x.suit===c.suit).length===4);
+ const straightDraw=view.board.length>=3&&view.board.length<5&&Array.from({length:10},(_,i)=>i+1).some(start=>new Set(ranks.filter(r=>r>=start&&r<start+5)).size===4&&view.cards.some(c=>c.rank>=start&&c.rank<start+5||(c.rank===14&&start===1)));
+ const valueBet=equity>valueThreshold&&roll<(equity>.68?.80:.70);
+ const semiBluff=legal.canCheck&&(flushDraw||straightDraw)&&equity>.38&&roll<.18;
+ if(legal.canRaise&&!allTies&&(valueBet||semiBluff)){
+  const ownBet=legal.maxTo-view.stack;
+  return {type:'raise',to:Math.min(legal.maxTo,Math.max(legal.minTo,ownBet+legal.toCall+Math.floor((view.pot+legal.toCall)*(.5+roll*.3))))};
+ }
+ return {type:legal.canCheck?'check':'call'};
 }

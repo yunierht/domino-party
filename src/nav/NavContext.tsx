@@ -8,6 +8,7 @@ export type ScreenName =
   | 'computerGame'
   | 'pokerLobby'
   | 'blackjackLobby'
+  | 'blackjackTable'
   | 'history'
   | 'stats'
   | 'settings'

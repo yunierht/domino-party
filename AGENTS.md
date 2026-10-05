@@ -10,6 +10,10 @@ Al trabajar en otros juegos, preservar Domino también en componentes compartido
 
 Esta regla se carga con este AGENTS.md y los documentos de continuidad del repositorio; no es un bloqueo técnico automático ni se propaga a otros entornos. El check-in local está autorizado para Domino; no implica push, publicación ni autorización para empezar otro juego. Véase D-047 en docs/DECISIONES.md.
 
+Excepción explícita posterior, 2026-10-03 (D-049): el usuario autoriza también en Domino sustituir el botón independiente de cambiar rival por tocar el avatar para abrir el mismo selector. Solo este acceso cambia; no reabre el resto de Domino ni autoriza modificar audio, reglas, bebidas o reparto.
+
+Excepción explícita adicional, 2026-10-03 (D-052): corregir únicamente la apertura: el doble más alto decide quién inicia; solo si ninguno tiene dobles se compara la ficha de mayor suma (desempate existente por extremo mayor). El derecho de salida permite jugar cualquier ficha de la mano. No cambia otras reglas, audio, animaciones, layout o recursos; sin nuevo commit/push autorizado.
+
 ## Continuidad del proyecto
 
 Al iniciar cada sesión en este repositorio, antes de proponer cambios:
@@ -32,3 +36,5 @@ Tras avances o decisiones importantes, al cerrar una sesión de trabajo de forma
 El contexto y el registro de decisiones pertenecen exclusivamente a este proyecto. No copies datos, estado, historial ni decisiones de otros proyectos, ni exportes los de este proyecto a instrucciones globales. El patrón global solo contiene reglas de trabajo; se aplica al trabajar en cada proyecto, sin recorrer otros repositorios. Si este repositorio incorpora varios proyectos, respeta sus documentos e instrucciones específicas y evita mezclar sus registros. Para resúmenes Doti, incorpora únicamente contenido atribuible a este proyecto según `docs/DECISIONES.md`.
 
 AGENTS.md es una instrucción para el agente cuando el entorno la carga para este proyecto; no es un servicio ni un hook de cierre. Los documentos se leen por estas instrucciones, no se sincronizan solos. Si se cierra la app, se interrumpe el proceso o falta permiso de escritura, no se garantiza una actualización final: informa la limitación si puedes y reconcilia en la siguiente sesión. No hay tarea programada ni integración Doti creada por este archivo. Referencia: https://learn.chatgpt.com/docs/agent-configuration/agents-md
+
+Excepcion adicional autorizada 2026-10-03 (D-055): mejora de estrategia interna del rival Domino, usando solo mano propia y cadena publica; no autoriza cambiar reglas, apariencia ni audio. Implementacion conserva apertura D-052. Futuras tareas Blackjack no amplian esta excepcion.

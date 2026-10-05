@@ -1,0 +1,1 @@
+Original hand-only poker dealing sprite generated with built-in imagegen, 2026-10-03; transparent hand and white cuff. Animated by DealerHands.tsx; replaces full dealer figure at user request.

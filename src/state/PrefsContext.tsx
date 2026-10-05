@@ -4,8 +4,11 @@ import { VoiceStyle } from '../announce/voice';
 import { initSounds } from '../sound/sounds';
 import { tablePreferences, type TablePreferences } from './tablePreferences';
 
+import { musicTrack, type MusicTrack } from '../sound/tableMusicCatalog';
+
 interface Prefs extends TablePreferences {
   /** Distinguishes a user choice from historical automatically persisted defaults. */
+  tableMusicTrack: MusicTrack;
   tileSoundExplicit: boolean;
   tileSoundMigration: number;
   /** Show + speak the winner announcement when a match ends. */
@@ -18,12 +21,13 @@ interface Prefs extends TablePreferences {
   watchWinnerAudio: boolean;
 }
 
-const DEFAULTS: Prefs = { tileSound: true, tileSoundExplicit: false, tileSoundMigration: 2, tableMusic: false, vibration: true, matchingTiles: true, announceWinner: true, voice: 'announcer', sound: true, watchWinnerAudio: true };
+const DEFAULTS: Prefs = { tileSound: true, tileSoundExplicit: false, tileSoundMigration: 2, tableMusic: false, tableMusicTrack: 'smooth-jazz', vibration: true, matchingTiles: true, announceWinner: true, voice: 'announcer', sound: true, watchWinnerAudio: true };
 
 interface PrefsContextValue extends Prefs {
   ready: boolean;
   setTileSound: (v: boolean) => void;
   setTableMusic: (v: boolean) => void;
+  setTableMusicTrack: (v: MusicTrack) => void;
   setVibration: (v: boolean) => void;
   setMatchingTiles: (v: boolean) => void;
   setAnnounceWinner: (v: boolean) => void;
@@ -42,7 +46,7 @@ export function PrefsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     loadJSON<Partial<Prefs>>(KEYS.prefs, {}).then(saved => {
       const { music: _retiredMusic, musicTrack: _retiredTrack, ...p } = (saved ?? {}) as Partial<Prefs> & { music?: unknown; musicTrack?: unknown };
-      setPrefs({ ...DEFAULTS, ...p, ...tablePreferences(p), tileSoundMigration: 2, ...edits.current });
+      setPrefs({ ...DEFAULTS, ...p, ...tablePreferences(p), tableMusicTrack: musicTrack(p.tableMusicTrack), tileSoundMigration: 2, ...edits.current });
       setReady(true);
     });
   }, []);
@@ -67,6 +71,7 @@ export function PrefsProvider({ children }: { children: React.ReactNode }) {
         tileSound: ready && prefs.tileSound,
         setTileSound: v => update({ tileSound: v, tileSoundExplicit: true }),
         setTableMusic: v => update({ tableMusic: v }),
+        setTableMusicTrack: v => update({ tableMusicTrack: musicTrack(v) }),
         setVibration: v => update({ vibration: v }),
         setMatchingTiles: v => update({ matchingTiles: v }),
         setAnnounceWinner: (v) => update({ announceWinner: v }),

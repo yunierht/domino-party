@@ -36,18 +36,15 @@ export function openingMove(hands: Record<Player, Tile[]>) {
   }
   return best;
 }
-/** A winner opens freely; first hands and hands after a tie keep the ranked opening. */
+/** Historical name: identifies the ranked starter, never a mandatory tile to play. */
 export function requiredOpening(game: Game) {
   return !game.board.length && game.openingRule !== 'winner' ? openingMove(game.hands) : null;
 }
 /** Opening eligibility is a rule, independent of endpoint geometry. */
 export function legalEnds(game: Game, player: Player, tile: Tile): End[] {
   if (game.result || game.turn !== player) return [];
-  if (!game.board.length) {
-    if (game.openingRule === 'winner') return ['right'];
-    const opening = requiredOpening(game);
-    return opening?.player === player && opening.tile.id === tile.id ? ['right'] : [];
-  }
+  // deal() already awards the turn. The priority tile grants that right only.
+  if (!game.board.length) return ['right'];
   return endsFor(tile, game.board);
 }
 
@@ -135,18 +132,31 @@ export function drawOrPass(game: Game, player: Player, stockIndex = 0): Game {
 }
 
 /** Strategy sees only its own hand and the public chain, never the user's tiles. */
-export function chooseMove(hand: Tile[], board: Tile[]): { id: string; end: End } | null {
-  let best: { id: string; end: End; value: number } | null = null;
+export function chooseMove(hand: Tile[], board: Tile[], random=()=>.5): { id: string; end: End } | null {
+  const candidates: {id:string;end:End;value:number}[]=[];
+  const known=[...hand,...board];
+  // Seven distinct double-six tiles contain each pip. Seen tiles are public;
+  // our own tiles are known. Unseen tiles are not assigned to human or stock.
+  const unseen=(pip:number)=>7-known.filter(t=>t.a===pip||t.b===pip).length;
   for (const tile of hand) for (const end of endsFor(tile, board)) {
-    const support = hand.filter(t => t.id !== tile.id && (t.a === tile.a || t.b === tile.a || t.a === tile.b || t.b === tile.b)).length;
-    const value = tile.a + tile.b + (tile.a === tile.b ? 3 : 0) + support;
-    if (!best || value > best.value) best = { id: tile.id, end, value };
+    const rest=hand.filter(t=>t.id!==tile.id);
+    const oldLeft=board[0]?.a,oldRight=board[board.length-1]?.b;
+    const left=!board.length?tile.a:end==='left'?(tile.a===oldLeft?tile.b:tile.a):oldLeft;
+    const right=!board.length?tile.b:end==='right'?(tile.a===oldRight?tile.b:tile.a):oldRight;
+    const support=(pip:number)=>rest.filter(t=>t.a===pip||t.b===pip).length;
+    const mobility=rest.filter(t=>t.a===left||t.b===left||t.a===right||t.b===right).length;
+    const control=[...new Set([left,right])].reduce((sum,pip)=>sum+(support(pip)>0?(7-unseen(pip))*.8:0),0);
+    // Do not force a lock merely because a pip is exhausted: preserve exits.
+    const value=rest.length===0?10000:(tile.a+tile.b)*.9+(tile.a===tile.b?1:0)+mobility*3.5+control-(mobility===0?12:0);
+    candidates.push({id:tile.id,end,value});
   }
-  return best;
+  if(!candidates.length)return null;
+  const best=Math.max(...candidates.map(c=>c.value));const near=candidates.filter(c=>c.value>=best-.8);
+  const selected=near[Math.min(near.length-1,Math.floor(random()*near.length))];
+  return {id:selected.id,end:selected.end};
 }
-export function computerStep(game: Game): Game {
+export function computerStep(game: Game, random=Math.random): Game {
   if (game.turn !== 'computer' || game.result) return game;
-  const opening = requiredOpening(game);
-  const move = opening ? { id: opening.tile.id, end: 'right' as End } : chooseMove(game.hands.computer, game.board);
+  const move = chooseMove(game.hands.computer, game.board, random);
   return move ? play(game, 'computer', move.id, move.end) : drawOrPass(game, 'computer');
 }

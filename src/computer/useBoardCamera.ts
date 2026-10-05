@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing } from 'react-native';
-import { chainBounds, chainMetrics, fitBoardCamera, BoardCamera } from './boardLayout';
+import { chainBounds, chainMetrics, fitBoardCamera, resizedBoardCamera, BoardCamera } from './boardLayout';
 import type { Tile } from './engine';
 import { useReducedMotion } from './DrinkGift';
 
@@ -20,9 +20,16 @@ export function useBoardCamera(board: Tile[], openingId: string | null, width: n
   fit.current = () => {
     if (active.current) { pending.current = true; return; }
     pending.current = false;
-    const reset = board.length < previous.current.count || width !== previous.current.width || height !== previous.current.height;
+        const reset = board.length < previous.current.count;
+    if (!reset && (width !== previous.current.width || height !== previous.current.height)) {
+      stop();
+      const adjusted = resizedBoardCamera(current.current, previous.current, {width,height});
+      current.current = adjusted;
+      values.x.setValue(adjusted.x); values.y.setValue(adjusted.y);
+    }
     const target = fitBoardCamera(chainBounds(board, openingId, chainMetrics(2048, 4096)), { width, height }, { width: 2048, height: 4096 }, current.current, reset);
     previous.current = { width, height, count: board.length };
+    if (target === current.current) return;
     stop();
     Animated.parallel((['x', 'y', 'scale'] as const).map(key => Animated.timing(values[key], {
       toValue: target[key], duration: reduced ? 0 : 320, easing: Easing.out(Easing.cubic), useNativeDriver: true,

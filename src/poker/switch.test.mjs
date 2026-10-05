@@ -13,6 +13,6 @@ test('switch confirmation can cancel and preserves poker state both ways',async(
  await act(()=>state.requestSwitch('poker'));await act(()=>button('Switch').props.onPress());assert.equal(state.mode,'poker');assert.equal(state.poker,poker);
  await act(()=>state.requestSwitch('domino'));await act(()=>button('Switch').props.onPress());assert.equal(state.mode,'domino');assert.equal(state.poker,poker);
  await act(()=>state.requestSwitch('blackjack'));await act(()=>button('Cancel').props.onPress());assert.deepEqual(navigation,[]);
- await act(()=>state.requestSwitch('blackjack'));await act(()=>button('Switch').props.onPress());assert.deepEqual(navigation,['blackjackLobby']);assert.equal(state.poker,poker);
+ await act(()=>state.requestSwitch('blackjack'));await act(()=>button('Switch').props.onPress());assert.deepEqual(navigation,['blackjackTable']);assert.equal(state.poker,poker);
  await act(()=>renderer.unmount());
 });

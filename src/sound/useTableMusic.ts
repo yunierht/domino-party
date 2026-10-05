@@ -1,14 +1,15 @@
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
 import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
+import { musicSource, type MusicTrack } from './tableMusicCatalog';
 
 /** One owned player per mounted table; no player exists until explicitly enabled. */
-export function useTableMusic(enabled: boolean) {
+export function useTableMusic(enabled: boolean, track: MusicTrack = 'smooth-jazz') {
   useEffect(() => {
     if (!enabled) return;
     let alive = true;
     let configured = false;
-    const player = createAudioPlayer(require('../../assets/sounds/table-lounge.wav'));
+    const player = createAudioPlayer(musicSource(track));
     player.loop = true;
     player.volume = 0.4;
     const sync = () => {
@@ -25,5 +26,5 @@ export function useTableMusic(enabled: boolean) {
       player.pause();
       player.remove();
     };
-  }, [enabled]);
+  }, [enabled, track]);
 }

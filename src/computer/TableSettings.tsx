@@ -5,7 +5,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { usePrefs } from '../state/PrefsContext';
 import { TABLE as C } from './tableTheme';
 
-export function TableSettings({ visible, es, onClose }: { visible: boolean; es: boolean; onClose: () => void }) {
+import { MusicChoices } from '../sound/MusicChoices';
+
+export function TableSettings({ visible, es, onClose, onRules, matching = true }: { onRules?: () => void; matching?: boolean; visible: boolean; es: boolean; onClose: () => void }) {
   const prefs = usePrefs();
   const controls = [
     { label: es ? 'Música' : 'Music', icon: 'music' as const, value: prefs.tableMusic, set: prefs.setTableMusic },
@@ -33,12 +35,14 @@ export function TableSettings({ visible, es, onClose }: { visible: boolean; es: 
                 <Text style={{ color: control.value ? C.goldLight : C.muted, fontSize: 11 }}>{control.value ? (es ? 'Activado' : 'On') : (es ? 'Desactivado' : 'Off')}</Text>
               </Pressable>)}
             </View>
+            {onRules && <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Reglas del juego' : 'Game rules'} onPress={onRules} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 16, marginTop: 14 }}><Feather name="book-open" size={22} color={C.goldLight} /><Text style={{ color: C.ivory, fontSize: 16 }}>{es ? 'Reglas del juego' : 'Game rules'}</Text></Pressable>}
+            <MusicChoices es={es} />
             <View style={{ height: 1, backgroundColor: C.line, marginVertical: 24 }} />
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            {matching && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Feather name="grid" color={C.gold} size={25} />
               <Text style={{ flex: 1, color: C.ivory, fontSize: 16 }}>{es ? 'Mostrar fichas compatibles' : 'Show Matching Tiles'}</Text>
               <Switch accessibilityLabel={es ? 'Mostrar fichas compatibles' : 'Show Matching Tiles'} value={prefs.matchingTiles} onValueChange={prefs.setMatchingTiles} trackColor={{ false: '#48534A', true: '#987438' }} thumbColor={prefs.matchingTiles ? '#F1CF86' : '#C3C6BC'} />
-            </View>
+            </View>}
           </ScrollView>
         </View>
       </LinearGradient>

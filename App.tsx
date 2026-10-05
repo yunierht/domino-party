@@ -27,6 +27,9 @@ import { PrivacyScreen } from './src/screens/PrivacyScreen';
 import { TableGameProvider, useTableGame } from './src/poker/TableGameContext';
 import { CardGameLobby } from './src/poker/CardGameLobby';
 import { PokerScreen } from './src/poker/PokerScreen';
+import { BlackjackProvider } from './src/blackjack/BlackjackContext';
+import { BlackjackLobby } from './src/blackjack/BlackjackLobby';
+import { BlackjackScreen } from './src/blackjack/BlackjackScreen';
 import { ComputerGameScreen } from './src/screens/ComputerGameScreen';
 import { ComputerGameProvider } from './src/computer/ComputerGameContext';
 
@@ -42,7 +45,8 @@ function Router() {
     case 'game':
       return <GameScreen />;
     case 'pokerLobby': return <CardGameLobby game="poker" />;
-    case 'blackjackLobby': return <CardGameLobby game="blackjack" />;
+    case 'blackjackLobby': return <BlackjackLobby />;
+    case 'blackjackTable': return <BlackjackScreen />;
     case 'computerGame':
       return <TableScreen />;
     case 'history':
@@ -75,7 +79,7 @@ function AppShell() {
   const { theme, ready } = useTheme();
   const { loaded } = useGame();
   const { openWatch, screen } = useNav();
-  const computerTable = screen === 'computerGame';
+  const computerTable = screen === 'computerGame' || screen === 'blackjackTable';
   const tilt = useTilt(18);
 
   // Open a shared game when the app is launched/opened from a link
@@ -116,7 +120,7 @@ export default function App() {
           <GameProvider>
             <NavProvider>
               <ComputerGameProvider>
-              <TableGameProvider><AppShell /></TableGameProvider>
+              <TableGameProvider><BlackjackProvider><AppShell /></BlackjackProvider></TableGameProvider>
               </ComputerGameProvider>
             </NavProvider>
           </GameProvider>

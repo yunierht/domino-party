@@ -77,15 +77,15 @@ test('domino awards remaining opponent pips and recognizes match victory', () =>
   assert.equal(round.turn, 'human');
   assert.deepEqual(round.scores, next.scores);
 });
-test('highest dealt double must open, excludes stock and forbids other tiles or drawing', () => {
+test('highest dealt double awards the turn, excludes stock and permits other tiles but not drawing', () => {
   const game = state({ board: [], openingId: null, hands: { human: [tile(3,3), tile(5,6)], computer: [tile(2,2)] }, stock: [tile(6,6)] });
   assert.equal(openingMove(game.hands).tile.id, '3-3');
-  assert.deepEqual(legalEnds(game, 'human', tile(5,6)), []);
-  assert.equal(play(game, 'human', '5-6', 'right'), game);
+  assert.deepEqual(legalEnds(game, 'human', tile(5,6)), ['right']);
+  assert.equal(play(game, 'human', '5-6', 'right').openingId, '5-6');
   assert.equal(drawOrPass(game, 'human'), game);
   assert.equal(play(game, 'human', '3-3', 'right').openingId, '3-3');
   const cpu = { ...game, turn: 'computer', hands: { human: [tile(3,3)], computer: [tile(4,4), tile(5,6)] } };
-  assert.equal(computerStep(cpu).openingId, '4-4');
+  assert.equal(computerStep(cpu).openingId, chooseMove(cpu.hands.computer, []).id);
 });
 test('even double blank outranks non-doubles; no-double ties favor the higher end', () => {
   assert.equal(openingMove({ human: [tile(0,0)], computer: [tile(5,6)] }).tile.id, '0-0');
@@ -148,10 +148,10 @@ for (const winner of ['human', 'computer']) test(`previous ${winner} winner open
     if(winner==='computer') assert.equal(computerStep(round).openingId,'5-6');
   }
 });
-test('first hand without doubles forces highest pip sum then higher end, excluding stock',()=>{
+test('only without doubles highest pip sum then higher end awards the turn, excluding stock',()=>{
   const game=state({board:[],hands:{human:[tile(4,5),tile(1,2)],computer:[tile(3,6),tile(0,1)]},stock:[tile(6,6)],turn:'computer'});
   assert.equal(requiredOpening(game).tile.id,'3-6');
-  assert.equal(play(game,'computer','0-1','right'),game);
+  assert.equal(play(game,'computer','0-1','right').openingId,'0-1');
   assert.equal(computerStep(game).openingId,'3-6');
   assert.equal(requiredOpening({...game,hands:{human:[tile(4,6)],computer:[tile(3,6)]}}).player,'human');
 });
@@ -168,6 +168,26 @@ test('tie preserves ranked next-hand opening and reset restores first-hand rule'
     assert.equal(fresh.openingRule,'highest');
     assert.equal(fresh.turn,openingMove(fresh.hands).player);
     const opening=requiredOpening(fresh);
-    for(const t of fresh.hands[fresh.turn]) assert.deepEqual(legalEnds(fresh,fresh.turn,t),t.id===opening.tile.id?['right']:[]);
+    for(const t of fresh.hands[fresh.turn]) assert.deepEqual(legalEnds(fresh,fresh.turn,t),['right']);
   }
+});
+
+for(const hands of [
+ {human:[tile(3,3),tile(0,1)],computer:[tile(2,2),tile(5,6)]},
+ {human:[tile(3,6),tile(0,1)],computer:[tile(4,5),tile(1,2)]},
+])test(`ranked starter can open another tile: ${hands.human[0].id}`,()=>{
+ const priority=openingMove(hands);assert.equal(priority.player,'human');
+ const game=state({hands,board:[],openingId:null,openingRule:'highest',turn:priority.player});
+ const next=play(game,'human','0-1','right');assert.equal(next.openingId,'0-1');
+ assert.equal(next.turn,'computer');assert.ok(next.hands.human.some(t=>t.id===priority.tile.id));
+ assert.deepEqual(legalEnds(game,'computer',hands.computer[0]),[]);
+ assert.equal(play(game,'computer',hands.computer[0].id,'right'),game);
+ assert.equal(drawOrPass(game,'human'),game);
+ assert.equal(play(game,'human','6-6','right'),game);
+});
+test('computer with highest double may choose a different opening through normal strategy',()=>{
+ const hands={human:[tile(0,6),tile(1,2)],computer:[tile(0,0),tile(5,6)]};
+ assert.equal(openingMove(hands).player,'computer');
+ const game=state({hands,board:[],openingId:null,openingRule:'highest',turn:'computer'});
+ assert.equal(computerStep(game).openingId,'5-6');
 });

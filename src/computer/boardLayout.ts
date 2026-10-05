@@ -3,7 +3,7 @@ import type { End, Tile } from './engine';
 export interface Point { x: number; y: number }
 /** Size once against the actual connected chain, not the legacy grid estimate. */
 export function chainMetrics(width: number, height: number) {
-  const half = 36;
+  const half = 40;
   const tileWidth = half * 2 + 5, tileHeight = half + 4;
   return { width, height, columns: 7, half, tileWidth, tileHeight, stepX: tileWidth, stepY: tileWidth };
 }
@@ -132,7 +132,7 @@ export function chainBounds(board: Tile[], openingId: string | null, metrics: Re
   return { left: Math.min(...boxes.map(p => p.x - p.w / 2)), right: Math.max(...boxes.map(p => p.x + p.w / 2)),
     top: Math.min(...boxes.map(p => p.y - p.h / 2)), bottom: Math.max(...boxes.map(p => p.y + p.h / 2)) };
 }
-/** Largest readable fit, with a small dead zone and no zoom-in while a chain grows. */
+/** Keep visible chains stationary; fit only when space is needed or explicitly reset. */
 export function fitBoardCamera(bounds: ChainBounds, viewport: { width: number; height: number }, canvas: { width: number; height: number }, current: BoardCamera, reset = false): BoardCamera {
   const margin = Math.min(22, Math.max(6, Math.min(viewport.width, viewport.height) * 0.06));
   const scale = Math.min(1, (viewport.width - margin * 2) / Math.max(1, bounds.right - bounds.left),
@@ -143,11 +143,25 @@ export function fitBoardCamera(bounds: ChainBounds, viewport: { width: number; h
     viewport.width / 2 + current.x + (bounds.right - canvas.width / 2) * current.scale <= viewport.width - margin &&
     viewport.height / 2 + current.y + (bounds.top - canvas.height / 2) * current.scale >= margin &&
     viewport.height / 2 + current.y + (bounds.bottom - canvas.height / 2) * current.scale <= viewport.height - margin;
-  if (!reset && fits && Math.abs(current.x + centerX * scale) < 18 && Math.abs(current.y + centerY * scale) < 18) return current;
-  return { x: -centerX * scale, y: -centerY * scale, scale };
+  if (!reset && fits) return current;
+    if (reset) return { x: -centerX * scale, y: -centerY * scale, scale };
+  // Clamp to the nearest valid frame, rather than shifting visible tiles to center.
+  const clamp = (value: number, low: number, high: number) => Math.max(low, Math.min(high, value));
+  return {
+    x: clamp(current.x, margin - viewport.width / 2 - (bounds.left - canvas.width / 2) * scale,
+      viewport.width / 2 - margin - (bounds.right - canvas.width / 2) * scale),
+    y: clamp(current.y, margin - viewport.height / 2 - (bounds.top - canvas.height / 2) * scale,
+      viewport.height / 2 - margin - (bounds.bottom - canvas.height / 2) * scale),
+    scale,
+  };
 }
 /** Invert the very same camera used for rendering before resolving a drag target. */
 export function screenToBoard(point: Point, viewport: { width: number; height: number }, canvas: { width: number; height: number }, camera: BoardCamera): Point {
   return { x: canvas.width / 2 + (point.x - viewport.width / 2 - camera.x) / camera.scale,
     y: canvas.height / 2 + (point.y - viewport.height / 2 - camera.y) / camera.scale };
+}
+
+/** Preserve screen-space tile centers when the hand frees or takes table space. */
+export function resizedBoardCamera(current: BoardCamera, previous: {width:number;height:number}, next: {width:number;height:number}): BoardCamera {
+  return { ...current, x: current.x + (previous.width-next.width)/2, y: current.y + (previous.height-next.height)/2 };
 }

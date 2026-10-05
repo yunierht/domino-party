@@ -13,10 +13,12 @@ import { VoiceStyle, VOICE_STYLES, previewVoice } from '../announce/voice';
 import { playTap } from '../sound/sounds';
 import { Lang } from '../i18n/strings';
 
+import { MusicChoices } from '../sound/MusicChoices';
+
 export function SettingsScreen() {
   const { theme, themeName, setThemeName, s } = useTheme();
   const { t, lang, setLang } = useI18n();
-  const { announceWinner, setAnnounceWinner, voice, setVoice, sound, setSound } = usePrefs();
+  const { announceWinner, setAnnounceWinner, voice, setVoice, sound, setSound, tableMusic, setTableMusic } = usePrefs();
   const c = theme.colors;
 
   const voiceMeta: { id: VoiceStyle; label: string }[] = [
@@ -43,6 +45,9 @@ export function SettingsScreen() {
     <ScrollView contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}>
       <Header title={t.settings} />
 
+      <SectionLabel>{lang === 'es' ? 'Música' : 'Music'}</SectionLabel>
+      <Switch accessibilityLabel={lang === 'es' ? 'Música' : 'Music'} value={tableMusic} onValueChange={setTableMusic} />
+      <MusicChoices es={lang === 'es'} />
       {/* Language */}
       <SectionLabel>{t.language}</SectionLabel>
       <View style={{ flexDirection: 'row', gap: s(12) }}>

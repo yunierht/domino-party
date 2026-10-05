@@ -1,0 +1,7 @@
+Classic colour playing cards by Adrian Kennard (RevK), based on traditional 19th-century Goodall & Son court designs.
+Author and licence: https://www.me.uk/cards/
+Licence: CC0 1.0 Universal Public Domain Dedication, https://creativecommons.org/publicdomain/zero/1.0/legalcode
+Retrieved 2026-10-04 using official deck customiser https://www.me.uk/cards/makeadeck.cgi?view=
+Official Download zip file of SVG for web use, default poker/classic colour options. Archive poker-qr.zip.
+52 original front-face SVG documents stored by rank/suit in blackjack-classic-deck-v1.json. No external artwork requests during play. Back artwork remains the existing red woven back.
+User selected Classic colour from the author's Standard/Ghost/Blue comparison. Only Blackjack uses this resource.

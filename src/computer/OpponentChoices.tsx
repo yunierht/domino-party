@@ -19,7 +19,7 @@ export function OpponentChoices({selected,onSelect}:{selected:OpponentId;onSelec
 /** Pre-game carousel retains the original domino setup dimensions and gestures. */
 export function OpponentCarousel({selected,onSelect,es}:{selected:OpponentId;onSelect:(id:OpponentId)=>void;es:boolean}) {
  return <View>
-  <ScrollView testID="opponent-carousel" horizontal showsHorizontalScrollIndicator snapToInterval={124}
+  <ScrollView testID="opponent-carousel" horizontal showsHorizontalScrollIndicator={false} snapToInterval={124}
    decelerationRate="fast" keyboardShouldPersistTaps="handled" contentContainerStyle={{gap:8,paddingBottom:8}}>
    {OPPONENTS.map(item=><Pressable key={item.id} accessibilityRole="button" accessibilityLabel={item.name}
     accessibilityState={{selected:item.id===selected}} onPress={()=>onSelect(item.id)}

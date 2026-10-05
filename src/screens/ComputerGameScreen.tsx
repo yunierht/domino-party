@@ -1,3 +1,4 @@
+import {TableStamp} from '../blackjack/TableFinish';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, AppState, BackHandler, Image, Modal, PanResponder, Platform, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,7 +13,7 @@ import { useComputerGame } from '../computer/ComputerGameContext';
 import { COMPUTER_STRINGS } from '../computer/strings';
 import { OPPONENTS } from '../computer/opponents';
 import { OpponentChoices, OpponentCarousel } from '../computer/OpponentChoices';
-import { restartMatch, deal, drawOrPass, End, legalEnds, requiredOpening, hasMove, matchWinner, play, Tile } from '../computer/engine';
+import { restartMatch, deal, drawOrPass, End, legalEnds, hasMove, matchWinner, play, Tile } from '../computer/engine';
 import { DominoTile } from '../computer/DominoTile';
 import { GameSwitchButton, useTableGame } from '../poker/TableGameContext';
 import { DealtTile, useRoundDeal } from '../computer/RoundDeal';
@@ -33,14 +34,15 @@ import { traceTileContact, preparePlacementAudio } from '../sound/sounds';
 
 const EMPTY_BOARD: Tile[] = [];
 
-function Action({ label, onPress, subtle = false, disabled = false }: {
-  label: string; onPress: () => void; subtle?: boolean; disabled?: boolean;
+function Action({ label, onPress, subtle = false, disabled = false, casino = false }: {
+  label: string; onPress: () => void; subtle?: boolean; disabled?: boolean; casino?: boolean;
 }) {
   return <Pressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
     style={({ pressed }) => ({ minHeight: 44, paddingHorizontal: 18, paddingVertical: 11, borderRadius: 12,
       justifyContent: 'center', alignItems: 'center', backgroundColor: subtle ? C.raised : C.gold,
+      ...(casino ? { minHeight: 46, borderRadius: 14, borderWidth: 1, borderColor: '#E5CB91', backgroundColor: '#B18B44' } : {}),
       opacity: disabled ? 0.35 : pressed ? 0.8 : 1 })}>
-    <Text style={{ color: subtle ? C.ivory : C.background, fontSize: 13, fontWeight: '700' }}>{label}</Text>
+    <Text numberOfLines={casino ? 1 : undefined} adjustsFontSizeToFit={casino} style={{ color: casino ? '#FFF2D2' : subtle ? C.ivory : C.background, fontSize: casino ? 14 : 13, fontWeight: casino ? '800' : '700', ...(casino ? { letterSpacing: 1, textTransform: 'uppercase' } : {}) }}>{label}</Text>
   </Pressable>;
 }
 function Dialog({ visible, title, onClose, closeLabel, children }: {
@@ -70,8 +72,8 @@ function Avatar({ computer = false, active = false, small = false }: { computer?
 
 export function ComputerGameScreen() {
   const {switchTarget}=useTableGame();
-  const { matchingTiles, tableMusic, tileSound, ready: prefsReady } = usePrefs();
-  useTableMusic(prefsReady && tableMusic);
+  const { matchingTiles, tableMusic, tableMusicTrack, tileSound, ready: prefsReady } = usePrefs();
+  useTableMusic(prefsReady && tableMusic, tableMusicTrack);
   const [placementReady, setPlacementReady] = useState(false);
   useEffect(() => {
     let active = true;
@@ -228,8 +230,7 @@ export function ComputerGameScreen() {
   const labelFor = (player: 'human' | 'computer') => player === 'human' ? game.playerName : opponent.name;
   const activeTile = drag?.tile ?? selectedTile;
   const available = humanTurn && activeTile ? legalEnds(game, 'human', activeTile) : [];
-  const opening = requiredOpening(game);
-  const openingLabel = opening ? `${labelFor(opening.player)} ${es ? 'abre con' : 'opens with'} ${opening.tile.a} · ${opening.tile.b}` : game.openingRule === 'winner' ? `${labelFor(game.turn)} ${text.openFreely}` : text.open;
+  const openingLabel = `${labelFor(game.turn)} ${text.openFreely}`;
   const offsets = endpointOffsets(game.board, game.openingId);
   const targets = available.map(end => ({ end, point: slot(offsets[end], metrics) }));
   const hitEnd = (point: Point) => tableOrigin.current ? resolveScreenDrop({ x: point.x - tableOrigin.current.x, y: point.y - tableOrigin.current.y }, targets, tableSize, metrics, camera.current.current) : null;
@@ -278,7 +279,7 @@ export function ComputerGameScreen() {
     setGame(current => current ? { ...current, scoringMode: winsMode ? 'points' : 'wins', target: current.scoringTargets[winsMode ? 'points' : 'wins'] } : current);
   };
   return <View key="computer-table" ref={rootRef} collapsable={Platform.OS === 'web' ? undefined : false} onLayout={event => { setPanelWidth(event.nativeEvent.layout.width); cancelDrag(); }} style={{ flex: 1, minHeight: 0, backgroundColor: C.background, overflow: 'hidden' }}>
-    <View testID="game-toolbar" style={{ height: 48, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: C.line, gap: 4 }}>
+    <View testID="game-toolbar" style={{ height: 48, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: C.line, gap: 0 }}>
       <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Volver' : 'Back'} onPress={leaveTable} style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}>
         <Feather name="arrow-left" size={20} color={C.ivory} />
       </Pressable>
@@ -294,13 +295,6 @@ export function ComputerGameScreen() {
         <Text style={{ minWidth: 24, textAlign: 'right', color: C.goldLight, fontWeight: '700', fontSize: 18 }}>{tally.computer}</Text>
         <Text numberOfLines={1} style={{ flex: 1, textAlign: 'left', color: C.ivory, fontSize: 13 }}>{opponent.name}</Text>
       </View>
-      <Pressable accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }}
-          style={{ width: 70, flexShrink: 1, alignSelf: 'flex-start', minHeight: 36, justifyContent: 'center', backgroundColor: '#102820', borderWidth: 1, borderColor: C.line, borderRadius: 12, padding: 8 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Text numberOfLines={1} style={{ flexShrink: 1, color: C.goldLight, fontSize: 10, fontWeight: '600' }}>{opponent.name}</Text>
-            <Feather name="users" size={14} color={C.goldLight} accessible={false} />
-          </View>
-        </Pressable>
       <Pressable testID="game-menu" accessibilityRole="button" accessibilityLabel={es ? 'Menú de partida' : 'Game menu'} onPress={() => { cancelDrag(); setShowMenu(true); }} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
         <Feather name="more-vertical" size={19} color={C.gold} />
       </Pressable>
@@ -309,7 +303,9 @@ export function ComputerGameScreen() {
       <DominoTableBackground opponentHeight={opponentHeight} gift={opponentDrink ? null : drinkGift} es={es} finished={drinkExpiring} />
       <View style={{ height: opponentHeight, flexDirection: 'row-reverse', alignItems: 'flex-end', paddingHorizontal: 12, gap: 6 }}>
         <View style={{width:82,alignSelf:'flex-start',marginTop:14,gap:6}}><GameSwitchButton disabled={showStock || !!drag} /><GameSwitchButton blackjack disabled={showStock || !!drag}/></View>
-        <OpponentDrinkingAvatar opponentId={opponentId} name={opponent.name} gift={opponentDrink} invitation={drinkGift} source={opponent.image} height={opponentHeight} es={es} />
+        <Pressable testID="domino-opponent-avatar" accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }} style={{flex:1,minWidth:44,height:opponentHeight}}>
+          <OpponentDrinkingAvatar opponentId={opponentId} name={opponent.name} gift={opponentDrink} invitation={drinkGift} source={opponent.image} height={opponentHeight} es={es} />
+        </Pressable>
         <View style={{ width: 82, flexShrink: 1, alignSelf: 'flex-start', marginTop: 14 }}>
 
           <DrinkInviteButton es={es} compact={compact} active={appActive && !showDrinks && !showMenu && !showRestart && !showRules && !showOpponents} onPress={() => { cancelDrag(); drinkSelectionLock.current = false; setShowDrinks(true); }} />
@@ -335,9 +331,7 @@ export function ComputerGameScreen() {
         style={{ flex: 1, marginHorizontal: 12, minHeight: 80,
           overflow: winningTileVisible ? 'visible' : 'hidden',
           zIndex: winningTileVisible ? 20 : 0, elevation: winningTileVisible ? 20 : 0 }}>
-        <View pointerEvents="none" style={{ position: 'absolute', top: '21%', left: 0, right: 0, alignItems: 'center', opacity: 0.11 }}>
-          <Feather name="grid" size={28} color="#D5DDB7" /><Text style={{ color: '#D5DDB7', fontSize: 9, letterSpacing: 4, marginTop: 9 }}>SOCIAL CLUB</Text>
-        </View>
+        <View pointerEvents="none" accessible={false} style={{position:'absolute',top:'50%',marginTop:-42,left:30,right:30,height:85}}><TableStamp title="DOMINO" light/></View>
         <Animated.View pointerEvents="box-none" style={{ position: 'absolute',
           left: (tableSize.width - metrics.width) / 2, top: (tableSize.height - metrics.height) / 2,
           width: metrics.width, height: metrics.height, transform: [{ translateX: camera.values.x }, { translateY: camera.values.y }, { scale: camera.values.scale }] }}>
@@ -384,8 +378,8 @@ export function ComputerGameScreen() {
         })}
       </View>
       <View testID="below-hand-notice" style={{ height: 64, justifyContent: 'center' }}>
-        {game.result ? <Action label={winner ? text.again : text.next} onPress={nextRound} disabled={!!opponentDrink} /> : humanTurn && !hasMove(game) ?
-          <Action label={game.stock.length ? `${text.draw} · ${game.stock.length}` : text.pass} onPress={() => game.stock.length ? setShowStock(true) : setGame(current => current ? drawOrPass(current, 'human') : current)} /> :
+        {game.result ? <Action casino={!winner} label={winner ? text.again : text.next} onPress={nextRound} disabled={!!opponentDrink} /> : humanTurn && !hasMove(game) ?
+          <Action casino={game.stock.length > 0} label={game.stock.length ? `${text.draw} · ${game.stock.length}` : text.pass} onPress={() => game.stock.length ? setShowStock(true) : setGame(current => current ? drawOrPass(current, 'human') : current)} /> :
           selectedTile ? <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
             {legalEnds(game, 'human', selectedTile).map(end => <Action key={end} subtle label={`${end === 'left' ? text.left : text.right} · ${end === 'left' ? game.board[0]?.a : game.board[game.board.length - 1]?.b}`} onPress={() => place(selectedTile.id, end)} />)}
             <Pressable accessibilityRole="button" accessibilityLabel={text.cancel} onPress={() => setSelected(null)} style={{ padding: 10 }}><Feather name="x" size={18} color={C.muted} /></Pressable>
@@ -410,7 +404,7 @@ export function ComputerGameScreen() {
         setGame(current => current === game ? next : current);
         setShowStock(!next.result && next.stock.length > 0 && !hasMove(next));
       }} />
-    <TableSettings visible={showSettings} es={es} onClose={() => setShowSettings(false)} />
+    <TableSettings visible={showSettings} es={es} onClose={() => setShowSettings(false)} onRules={() => { setShowSettings(false); setShowRules(true); }} />
     {rules}
     <Dialog visible={showDrinks} title={es ? 'Invita una bebida' : 'Treat your opponent'} onClose={() => setShowDrinks(false)} closeLabel={text.cancel}>
       <DrinkChoices es={es} choose={chooseDrink} />

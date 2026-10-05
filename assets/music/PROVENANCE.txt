@@ -1,0 +1,29 @@
+Selected by user 2026-10-04: original sample numbers 1, 2, 6.
+Downloaded through each official Pixabay page on 2026-10-04.
+Use: background soundtrack embedded in Domino Social Club application, not standalone music redistribution.
+License: Pixabay Content License, royalty-free commercial use, no mandatory attribution; NOT CC0/public domain.
+https://pixabay.com/service/license-summary/
+https://pixabay.com/service/terms/
+All three source pages label Content ID Registered. Retain provenance for possible video claims.
+No personalized license certificate obtained: browser certificate download timed out.
+
+smooth-jazz.mp3 / sample 1
+Smooth Jazz Lounge Podcast Music / Denis-Pavlov-Music
+https://pixabay.com/music/smooth-jazz-smooth-jazz-lounge-podcast-music-312415/
+
+latin-jazz.mp3 / sample 2
+Latin Jazz Energetic Coffee Shop / alex-morgan
+https://pixabay.com/music/latin-latin-jazz-energetic-coffee-shop-560033/
+Source labels AI generated.
+
+reggaeton.mp3 / sample 6
+Spanish Reggaeton Latin / Sound4Stock
+https://pixabay.com/music/latin-spanish-reggaeton-latin-524921/
+
+Path                                                          Hash
+----                                                          ----
+C:\Development\Dominos Codex Pro\assets\music\latin-jazz.mp3  B97708B7A09F1A3C5DEC68FCAFE79EA6FB7C75CB1EC7E740461A05956065316B
+C:\Development\Dominos Codex Pro\assets\music\reggaeton.mp3   660FF24CCA84236081895730D88595012C372D08163D6FB84D7B759A6A59B944
+C:\Development\Dominos Codex Pro\assets\music\smooth-jazz.mp3 22FA2515D9038BA778F9FEE1A714BBA93BE85911691EA83CD9B08BDC334AA376
+
+

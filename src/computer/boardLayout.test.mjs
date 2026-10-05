@@ -25,7 +25,8 @@ test('actual-chain sizing preserves readable tiles without the grid pre-shrink',
   const previous = old.half * chainSlot(0, old, board, '5').scale;
   assert.ok(actual > previous, `${actual} should exceed ${previous}`);
   const short = board.slice(0, 2);
-  assert.ok(chainSlot(0, current, short, '0').scale > 0.9);
+  // Readability depends on rendered size, not the scale of the larger source tile.
+  assert.ok(current.half * chainSlot(0, current, short, '0').scale > 32.4);
 });
 
 test('opening tile remains at center when either branch grows', () => {

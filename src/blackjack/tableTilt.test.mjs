@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {shouldTilt,dragTilt} from './tableTilt.ts';
+test('single finger vertical drag tilts, taps/horizontal card scrolling/pinch do not',()=>{assert.equal(shouldTilt({dx:1,dy:20,numberActiveTouches:1}),true);for(const g of [{dx:0,dy:5,numberActiveTouches:1},{dx:40,dy:20,numberActiveTouches:1},{dx:0,dy:30,numberActiveTouches:2}])assert.equal(shouldTilt(g),false);});
+test('tilt follows finger continuously around current angle, bounded flat to20',()=>{assert.equal(dragTilt(6,-8),6.5);assert.equal(dragTilt(6,8),5.5);assert.equal(dragTilt(6,-1000),20);assert.equal(dragTilt(6,1000),0);assert.equal(dragTilt(12,16),11);});

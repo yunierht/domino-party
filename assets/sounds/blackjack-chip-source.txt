@@ -1,0 +1,7 @@
+Source: Casino Audio 1.1 by Kenney Vleugels
+https://kenney.nl/assets/casino-audio
+License: CC0 https://creativecommons.org/publicdomain/zero/1.0/
+chip-lay-1.ogg -> blackjack-chip-bet-v1.wav
+chips-handle-1.ogg -> blackjack-chip-win-v1.wav
+Converted to mono PCM WAV, 44100 Hz; no other processing.
+Downloaded 2026-10-04. Original license retained in local audit package.
