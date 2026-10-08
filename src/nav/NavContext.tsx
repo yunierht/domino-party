@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import {BackHandler} from 'react-native';
 import type { Match } from '../types';
 
 export type ScreenName =
@@ -21,6 +22,9 @@ interface NavContextValue {
   screen: ScreenName;
   go: (screen: ScreenName) => void;
   back: () => void;
+  openSetup:(mode?:'new'|'edit')=>void;
+  setupMode:'new'|'edit';
+  goHome:()=>void;
   canGoBack: boolean;
   /** A game code from a deep link, to auto-join on the Watch screen. */
   pendingWatchCode: string | null;
@@ -37,15 +41,20 @@ const NavContext = createContext<NavContextValue | undefined>(undefined);
 
 export function NavProvider({ children }: { children: React.ReactNode }) {
   const [stack, setStack] = useState<ScreenName[]>(['home']);
+  const [setupMode,setSetupMode]=useState<'new'|'edit'>('new');
   const [pendingWatchCode, setPendingWatchCode] = useState<string | null>(null);
   const [watchHistory, setWatchHistory] = useState<{
     fallback: Match;
     historySpaceId?: string;
   } | null>(null);
 
-  const go = (screen: ScreenName) => setStack((s) => [...s, screen]);
+  const go = (screen: ScreenName) => {if(screen==='newMatch')setSetupMode('new');setStack((s) => [...s, screen]);};
   const back = () =>
     setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
+
+  const openSetup=(mode:'new'|'edit'='edit')=>{setSetupMode(mode==='new'?'new':'edit');setStack(['home','newMatch']);};
+  const goHome=()=>setStack(['home']);
+  useEffect(()=>{const sub=BackHandler.addEventListener('hardwareBackPress',()=>{const active=stack[stack.length-1];if(active==='game'){openSetup();return true;}if(active==='newMatch'){goHome();return true;}return false;});return()=>sub.remove();},[stack]);
 
   const openWatch = (code: string) => {
     setPendingWatchCode(code.toUpperCase().trim());
@@ -58,6 +67,7 @@ export function NavProvider({ children }: { children: React.ReactNode }) {
         screen: stack[stack.length - 1],
         go,
         back,
+        openSetup,goHome,setupMode,
         canGoBack: stack.length > 1,
         pendingWatchCode,
         openWatch,

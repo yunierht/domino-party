@@ -13,7 +13,7 @@ test('table gradients preserve their offsets through the installed native SVG ex
   const warn = console.warn;
   console.warn = text => warnings.push(text);
   try {
-    for (const file of ['TableFinish.tsx', 'BlackjackScreen.tsx', 'BetWell.tsx']) {
+    for (const file of ['TableFinish.tsx', 'BlackjackScreen.tsx', 'BetWell.tsx', 'DealerChipRack.tsx']) {
       const tree = ts.createSourceFile(file, readFileSync(new URL(file, import.meta.url), 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
       let count = 0;
       const visit = node => {
@@ -26,7 +26,7 @@ test('table gradients preserve their offsets through the installed native SVG ex
         ts.forEachChild(node, visit);
       };
       visit(tree);
-      assert.ok(count > 0);
+      assert.ok(count > 0 || file === 'DealerChipRack.tsx');
     }
     assert.deepEqual(warnings, []);
   } finally { console.warn = warn; }

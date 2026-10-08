@@ -11,7 +11,7 @@ const Context = createContext<{pokerCollected:PokerGame|null;setPokerCollected:R
 export function TableGameProvider({children}:{children:React.ReactNode}) {
  const {go}=useNav();
  const [pokerCollected,setPokerCollected]=useState<PokerGame|null>(null);
- const [pokerStartingChips,setPokerStartingChips]=useState(1000);
+ const [pokerStartingChips,setPokerStartingChips]=useState(3000);
  const [pokerName,setPokerName]=useState('');
  const [pokerShown,setPokerShown]=useState('');
  const [mode,setMode]=useState<TableMode>('domino');const [poker,setPoker]=useState<PokerGame|null>(null);const [switchTarget,setSwitchTarget]=useState<TableMode|'blackjack'|null>(null);
@@ -31,7 +31,7 @@ export function GameSwitchButton({disabled=false,blackjack=false,targetMode,onSe
 }
 
 /** Ivory-and-gold fan inspired by the existing Social Club logo. */
-function DominoFan({white=false}:{white?:boolean}) {
+export function DominoFan({white=false}:{white?:boolean}) {
  return <Svg width={54} height={35} viewBox="0 0 64 42" accessible={false}>
   {[-48,48,-25,25,0].map((angle,index)=><G key={angle} rotation={angle} origin="32,38">
    <Rect x={24} y={3} width={17} height={34} rx={3} fill="#91703E"/>
@@ -42,7 +42,7 @@ function DominoFan({white=false}:{white?:boolean}) {
  </Svg>;
 }
 
-function CardGameIcon({blackjack}:{blackjack:boolean}){
+export function CardGameIcon({blackjack}:{blackjack:boolean}){
  const cards=blackjack?[{rank:'A',suit:'s' as const,red:false,x:13,angle:-12},{rank:'J',suit:'h' as const,red:true,x:31,angle:12}]:[{rank:'Q',suit:'d' as const,red:true,x:5,angle:-18},{rank:'K',suit:'c' as const,red:false,x:23,angle:0},{rank:'A',suit:'s' as const,red:false,x:41,angle:18}];
  return <Svg width={64} height={39} viewBox="0 0 76 46" accessible={false}>
  {cards.map(c=><G key={c.rank} rotation={c.angle} origin={`${c.x+11},26`}><Rect x={c.x} y={5} width={23} height={34} rx={3} fill="#F8F2E4" stroke="#C8B98F" strokeWidth={0.8}/><SvgText x={c.x+4} y={16} fontSize={8.5} fontFamily="sans-serif" fontWeight="bold" fill={c.red?'#A12D35':'#142C24'}>{c.rank}</SvgText><CardSuit suit={c.suit} x={c.x+11.5} y={28} size={12} color={c.red?'#A12D35':'#142C24'}/></G>)}

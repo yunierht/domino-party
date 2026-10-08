@@ -1,6 +1,7 @@
 import {DominoTurnTitle} from '../computer/DominoTurnTitle';
 import {DominoResultBanner} from '../computer/DominoResultBanner';
 import {useDominoResultTransition} from '../computer/useDominoResultTransition';
+import {ResultHoldButton} from '../components/ResultHoldButton';
 import {TableStamp,WoodSurface} from '../blackjack/TableFinish';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, AppState, BackHandler, Image, Modal, PanResponder, Platform, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native';
@@ -86,6 +87,7 @@ export function ComputerGameScreen() {
     else void preparePlacementAudio().then(() => { if (active) setPlacementReady(true); }).catch(() => { if (active) setPlacementReady(true); });
     return () => { active = false; };
   }, [prefsReady, tileSound]);
+  const [holding,setHolding]=useState(false);const resultHold=useRef(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showStock, setShowStock] = useState(false);
   const humanHandRef = useRef<View>(null);
@@ -199,10 +201,12 @@ export function ComputerGameScreen() {
     setShowStock(false);
     cancelDrag(); setSelected(null);
     if (game && matchWinner(game)) setDrinkGift(null);
-    setGame(current => current === game ? deal(current.playerName, current.target, Math.random, matchWinner(current) ? undefined : current, current.scoringMode) : current);
+    setGame(current => current === game && !resultHold.current ? deal(current.playerName, current.target, Math.random, matchWinner(current) ? undefined : current, current.scoringMode) : current);
   };
+  useEffect(()=>{resultHold.current=false;setHolding(false);return()=>{resultHold.current=false;};},[game?.round]);
   const resultPaused = !appActive || !!switchTarget || showSettings || showRules || showOpponents || showMenu || showRestart || showDrinks || showStock;
-  const resultVisible = useDominoResultTransition(game,resultPaused,presentation.presented && !opponentDrink,nextRound);
+  const resultVisible = useDominoResultTransition(game,resultPaused,presentation.presented && !opponentDrink,nextRound,holding,resultHold);
+  useEffect(()=>{if(resultPaused){resultHold.current=false;setHolding(false);}},[resultPaused]);
   if (!game) return <View style={{ flex: 1, backgroundColor: C.background }}>
     {header}
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingBottom: 24 }}>
@@ -308,7 +312,7 @@ export function ComputerGameScreen() {
     </View>
     <View testID="domino-table-surface" style={{ flex: 1 }}>
       <DominoTableBackground opponentHeight={opponentHeight} gift={opponentDrink ? null : drinkGift} es={es} finished={drinkExpiring} />
-      <View testID="domino-decorative-stamp" pointerEvents="none" accessible={false} style={{position:'absolute',top:(usableHeight<900?120:150)+148,left:42,right:42,height:85}}><TableStamp title="DOMINO" engraved/></View>
+      <View testID="domino-decorative-stamp" pointerEvents="none" accessible={false} style={{position:'absolute',top:(opponentHeight-15+usableHeight-48-94)/2-42.5,left:42,right:42,height:85}}><TableStamp title="DOMINO" engraved/></View>
       <View style={{ height: opponentHeight, flexDirection: 'row-reverse', alignItems: 'flex-end', paddingHorizontal: 12, gap: 6 }}>
         <View style={{width:82,alignSelf:'flex-start',marginTop:14,gap:6}}><GameSwitchButton disabled={showStock || !!drag} /><GameSwitchButton blackjack disabled={showStock || !!drag}/></View>
         <Pressable testID="domino-opponent-avatar" accessibilityRole="button" accessibilityLabel={es ? `Cambiar rival: ${opponent.name}` : `Change opponent: ${opponent.name}`} onPress={() => { cancelDrag(); setShowOpponents(true); }} style={{flex:1,minWidth:44,height:opponentHeight}}>
@@ -387,8 +391,8 @@ export function ComputerGameScreen() {
       </View>
     </View>
     <View testID="domino-wood-edge" style={{height:87,backgroundColor:'#704329',paddingHorizontal:12,paddingTop:11,paddingBottom:10,justifyContent:'center'}}><View pointerEvents="none" style={{position:'absolute',top:0,bottom:0,left:0,right:0}}><WoodSurface/></View>
-    <View testID="below-hand-notice" style={{ height: noticeHeight, paddingHorizontal: 12, justifyContent: 'center' }}>
-        {game.result ? (resultVisible ? <View pointerEvents="none"><DominoResultBanner key={game.round} result={{title:resultTitle,detail:'',tone:(winner ?? game.result.winner)==='human'?'win':(winner ?? game.result.winner)==='tie'?'tie':'loss'}} paused={resultPaused}/></View> : null) : humanTurn && !hasMove(game) ?
+    <View testID="below-hand-notice" style={{ height: noticeHeight, paddingLeft:12,paddingRight:12, justifyContent: 'center' }}>
+        {game.result ? (resultVisible ? <View pointerEvents="none"><DominoResultBanner key={game.round} result={{title:resultTitle,detail:'',tone:(winner ?? game.result.winner)==='human'?'win':(winner ?? game.result.winner)==='tie'?'tie':'loss'}} paused={resultPaused||holding}/></View> : null) : humanTurn && !hasMove(game) ?
           <Action casino={game.stock.length > 0} label={game.stock.length ? `${text.draw} · ${game.stock.length}` : text.pass} onPress={() => game.stock.length ? setShowStock(true) : setGame(current => current ? drawOrPass(current, 'human') : current)} /> :
           selectedTile ? <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
             {legalEnds(game, 'human', selectedTile).map(end => <Action key={end} subtle label={`${end === 'left' ? text.left : text.right} · ${end === 'left' ? game.board[0]?.a : game.board[game.board.length - 1]?.b}`} onPress={() => place(selectedTile.id, end)} />)}
@@ -397,6 +401,7 @@ export function ComputerGameScreen() {
             <DominoTurnTitle active={humanTurn && !resultPaused && !drag} label={turnLabel}/>
             <Text numberOfLines={1} style={{ color: C.ivory, fontSize: 11, lineHeight: 12, textAlign: 'center', marginTop: 1 }}>{noticeDetail}</Text>
           </View>}
+        <ResultHoldButton visible={!!game.result&&resultVisible} presentationKey={game.result?game:null} id="domino-result-hold" holding={holding} disabled={resultPaused} onHold={()=>{if(!game.result||resultPaused||!resultVisible)return;resultHold.current=true;setHolding(true);}} onRelease={()=>{resultHold.current=false;setHolding(false);}} es={es}/>
         {hasAction && !game.result && <DominoTurnTitle compact active={humanTurn && !resultPaused && !drag} label={turnLabel}/>}
       </View>
     </View>

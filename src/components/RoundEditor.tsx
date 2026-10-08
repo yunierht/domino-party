@@ -1,5 +1,6 @@
+import {MatchPanelBevel} from './MatchPresentation';
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { Button } from './ui';
@@ -14,6 +15,7 @@ export function RoundEditor({
   onClose,
   onSave,
   onDelete,
+  teamColors: selectedColors,
 }: {
   visible: boolean;
   match: Match;
@@ -24,10 +26,13 @@ export function RoundEditor({
   onClose: () => void;
   onSave: (winnerTeamId: string, points: number) => void;
   onDelete?: () => void;
+  teamColors?: [string,string];
 }) {
   const { theme, s } = useTheme();
   const { t } = useI18n();
   const c = theme.colors;
+  const {height}=useWindowDimensions();
+  const compact=height<720;
 
   const isEditing = !!round;
   // Hide the team picker when adding from a specific team's box.
@@ -45,30 +50,33 @@ export function RoundEditor({
     }
   }, [visible, round, presetWinnerTeamId, match.teams]);
 
-  const teamColors = [c.teamA, c.teamB];
+  const teamColors=selectedColors??[c.teamA,c.teamB];
   const numeric = parseInt(points, 10);
   const valid = !Number.isNaN(numeric) && numeric > 0;
 
   const lockedTeam = teamById(match, winnerTeamId);
   const lockedColor =
-    winnerTeamId === match.teams[0].id ? c.teamA : c.teamB;
+    winnerTeamId === match.teams[0].id ? teamColors[0] : teamColors[1];
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable
         onPress={onClose}
-        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', padding: s(20) }}
+        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent:'center',padding:s(12) }}
       >
         <Pressable
           onPress={(e) => e.stopPropagation()}
           style={{
-            width: '100%',
+            width:'100%',
+            maxHeight:height-s(24),
             maxWidth: s(380),
             backgroundColor: c.surface,
-            borderRadius: theme.radius + 8,
-            padding: s(20),
+            borderRadius:s(26),
+            padding:compact?s(14):s(18),
           }}
         >
+            <MatchPanelBevel color={lockTeam?lockedColor:c.primary} radius={s(26)}/>
+            <ScrollView style={{flexShrink:1}} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {/* Title */}
             <Text style={{ color: c.text, fontSize: s(20), fontWeight: '800', marginBottom: s(16) }}>
               {isEditing ? t.editRound : t.addRound}
@@ -85,7 +93,7 @@ export function RoundEditor({
                   borderLeftWidth: s(5),
                   borderLeftColor: lockedColor,
                   padding: s(14),
-                  marginBottom: s(20),
+                  marginBottom:compact?s(12):s(20),
                 }}
               >
                 <View
@@ -101,7 +109,7 @@ export function RoundEditor({
                 <Text style={{ color: c.textMuted, fontSize: s(13), fontWeight: '700', marginBottom: s(10) }}>
                   {t.whoWon}
                 </Text>
-                <View style={{ flexDirection: 'row', gap: s(10), marginBottom: s(20) }}>
+                <View style={{ flexDirection: 'row', gap: s(10), marginBottom:compact?s(12):s(20) }}>
                   {match.teams.map((team, i) => {
                     const selected = winnerTeamId === team.id;
                     return (
@@ -120,7 +128,7 @@ export function RoundEditor({
                       >
                         <Text
                           numberOfLines={1}
-                          style={{ color: selected ? '#fff' : c.text, fontSize: s(16), fontWeight: '800' }}
+                          style={{ color:selected?(teamColors[i]==='#AA463B'?'#FFF1DF':'#101D25'):c.text, fontSize: s(16), fontWeight: '800' }}
                         >
                           {team.name}
                         </Text>
@@ -139,7 +147,7 @@ export function RoundEditor({
               style={{
                 backgroundColor: c.surfaceAlt,
                 borderRadius: theme.radius,
-                height: s(70),
+                height:compact?s(60):s(70),
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderWidth: 1,
@@ -147,12 +155,12 @@ export function RoundEditor({
                 marginBottom: s(14),
               }}
             >
-              <Text style={{ color: points ? c.text : c.textMuted, fontSize: s(38), fontWeight: '900' }}>
+              <Text style={{ color: points ? c.text : c.textMuted, fontSize:s(50), fontWeight: '900' }}>
                 {points || '0'}
               </Text>
             </View>
 
-            <NumberPad value={points} onChange={setPoints} />
+            <NumberPad value={points} onChange={setPoints} compact={compact} />
 
             <View style={{ height: s(6) }} />
             <Button
@@ -167,6 +175,7 @@ export function RoundEditor({
             ) : (
               <Button label={t.cancel} variant="ghost" onPress={onClose} fullWidth />
             )}
+            </ScrollView>
         </Pressable>
       </Pressable>
     </Modal>

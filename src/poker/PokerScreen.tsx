@@ -5,8 +5,12 @@ import {describePokerResult} from './resultPresentation';
 import {TableSettings} from '../computer/TableSettings';
 import {useBlackjack} from '../blackjack/BlackjackContext';
 import {SeatChipPile} from '../blackjack/SeatChipPile';
+import {PokerPot} from './PokerPot';
+import {ResultHoldButton} from '../components/ResultHoldButton';
+import {chipAmounts} from '../blackjack/chipAmounts';
+import {BANKROLL_CHIP_SCALE} from '../blackjack/BettingTray';
 import {OpponentChoices} from '../computer/OpponentChoices';
-import React, {useEffect,useRef,useState} from 'react';
+import React, {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {AppState,BackHandler,Modal,Pressable,ScrollView,Text,View,useWindowDimensions} from 'react-native';
 import {Feather} from '@expo/vector-icons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -41,12 +45,15 @@ function Button({label,onPress,disabled=false,gold=false}:{label:string;onPress:
 function Chips({amount,label}:{amount:number;label:string}) {return <View style={{alignItems:'center',gap:2}}><Text style={{fontSize:9,color:C.muted,letterSpacing:1}}>{label}</Text><View style={{alignItems:'center',gap:0}}><ChipStack piles amount={amount}/><Text style={{color:C.goldLight,fontSize:18,fontWeight:'700',fontVariant:['tabular-nums']}}>{amount.toLocaleString()}</Text></View></View>;}
 export function PokerScreen(){
  const root=useRef<View>(null),raiseSpot=useRef<View>(null),flightSerial=useRef(0),flightGeneration=useRef(0);
- const [selectedChips,setSelectedChips]=useState<number[]>([]);
- const [flights,setFlights]=useState<(Flight&{seat?:'human'|'computer'})[]>([]);
+ const [selectedChips,setSelectedChips]=useState<number[]>([]);const selectionIndex=useRef(0);const [landed,setLanded]=useState<Set<number>>(new Set());
+ const raiseRef=useRef(0),selectionGame=useRef<import('./engine').PokerGame|null>(null);
+ const [flights,setFlights]=useState<(Flight&{seat?:'human'|'computer';order?:number;generation?:number})[]>([]);
  const humanBalance=useRef<View>(null),computerBalance=useRef<View>(null),collectedPot=useRef<View>(null),collecting=useRef<import('./engine').PokerGame|null>(null),remaining=useRef(0);
  const completedFlights=useRef(new Set<number>());
  const [progress,setProgress]=useState({human:0,computer:0});
  const {pokerCollected,setPokerCollected,pokerStartingChips,pokerName,poker:g,setPoker,pokerShown:shown,setPokerShown:setShown,switchTarget}=useTableGame();const {game:domino,opponentId,setOpponentId}=useComputerGame();
+ const trackedPot=g?(g.result?.pot??g.total.human+g.total.computer):0;const [potChips,setPotChips]=useState<number[]>(()=>chipAmounts(trackedPot));const potAmount=useRef(trackedPot),potHand=useRef(g?.hand);
+ useLayoutEffect(()=>{if(!g)return;const desired=g.result?.pot??g.total.human+g.total.computer;const previous=potAmount.current;const newHand=potHand.current!==g.hand;const selected=selectedChips;setPotChips(current=>{if(newHand||desired<previous)return chipAmounts(desired);const needed=desired-current.reduce((sum,n)=>sum+n,0);if(needed<10)return current;return [...current,...(selected.reduce((sum,n)=>sum+n,0)===desired-previous&&g.last?.player==='human'?selected:chipAmounts(needed))];});potAmount.current=desired;potHand.current=g.hand;},[g]);
  const {lang}=useI18n();const es=lang==='es';const {back}=useNav();const {tableMusic,tableMusicTrack,tileSound,ready}=usePrefs();useTableMusic(ready&&tableMusic,tableMusicTrack);
  const window=useWindowDimensions();const insets=useSafeAreaInsets();const compact=window.height-insets.top-insets.bottom<900;
  const [panelHeight,setPanelHeight]=useState(window.height-insets.top-insets.bottom);
@@ -58,41 +65,51 @@ export function PokerScreen(){
  const cardWidth=Math.min(communityCardWidth(window.width,panelHeight,heroHeight,48+boardZoneY+boardRowY),Math.max(24,(boardHeight-4)/1.43));
  const [active,setActive]=useState(AppState.currentState==='active');const [picker,setPicker]=useState(false);const [settings,setSettings]=useState(false);const [rules,setRules]=useState(false);const [reset,setReset]=useState(false);const [raise,setRaise]=useState('40');const [error,setError]=useState('');
  const presentation=g?`${g.hand}-${g.board.length}`:'';const dealing=shown!==presentation;
- const paused=!!switchTarget||picker||rules||settings||reset||!active;
+ const paused=!!switchTarget||picker||rules||settings||reset||!active;const [holding,setHolding]=useState(false);const resultHold=useRef(false);const deferredCollections=useRef(new Set<number>());
+ useEffect(()=>{resultHold.current=false;setHolding(false);deferredCollections.current.clear();},[g?.hand]);
+ useEffect(()=>{if(paused){resultHold.current=false;setHolding(false);}},[paused]);
  const mounted=useRef(true),currentGame=useRef(g);currentGame.current=g;
- useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;flightGeneration.current++;};},[]);
- const showResult=usePokerResultTransition(g,paused||dealing,pokerCollected===g,next=>{setShown('');setPoker(current=>current===g?next:current);});
+ useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;resultHold.current=false;flightGeneration.current++;};},[]);
+ const showResult=usePokerResultTransition(g,paused||dealing,pokerCollected===g,next=>{setShown('');setPoker(current=>current===g&&!resultHold.current?next:current);},holding,resultHold);
  const {name:blackjackName}=useBlackjack();
  const opponent=OPPONENTS.find(o=>o.id===opponentId)??OPPONENTS[0];const name=pokerName||blackjackName||domino?.playerName||(es?'Tú':'You');
- useEffect(()=>{if(!g)setPoker(newHand(undefined,Math.random,{human:pokerStartingChips,computer:pokerStartingChips}));},[g,setPoker]);
+ useEffect(()=>{if(!g)setPoker(newHand(undefined,Math.random,{human:pokerStartingChips,computer:5000}));},[g,setPoker]);
  useEffect(()=>{const sub=AppState.addEventListener('change',s=>setActive(s==='active'));const nav=BackHandler.addEventListener('hardwareBackPress',()=>{back();return true;});return()=>{sub.remove();nav.remove();};},[back]);
  useEffect(()=>{if(!presentation||paused)return;const timer=setTimeout(()=>setShown(presentation),700);return()=>clearTimeout(timer);},[presentation,paused]);
  useEffect(()=>{if(!g||g.result||g.turn!=='computer'||paused||dealing)return;const timer=setTimeout(()=>setPoker(current=>current===g?act(g,'computer',chooseComputerAction(computerView(g))):current),950);return()=>clearTimeout(timer);},[g,paused,dealing,setPoker]);
- useEffect(()=>{if(g){setRaise(String(g.bets.human));setSelectedChips([]);setError('');flightGeneration.current++;setFlights([]);}},[g?.hand,g?.street,g?.currentBet,g?.turn]);
+ useEffect(()=>{if(g){raiseRef.current=g.bets.human;setRaise(String(g.bets.human));setSelectedChips([]);selectionIndex.current=0;setLanded(new Set());setError('');flightGeneration.current++;setFlights([]);}},[g]);
  useEffect(()=>{
   if(!g?.result){collecting.current=null;setProgress({human:0,computer:0});return;}
-  if(paused||dealing||pokerCollected===g||collecting.current===g)return;
+  if(paused||holding||resultHold.current||dealing||pokerCollected===g||collecting.current===g)return;
   collecting.current=g;const awards=payoutAwards(g);const seats=(['human','computer'] as const).filter(s=>awards[s]>0);remaining.current=seats.length;
   for(const seat of seats){const destination=seat==='human'?humanBalance:computerBalance;
    const add=(rx:number,ry:number,sx:number,sy:number,tx:number,ty:number)=>{if(!mounted.current||currentGame.current!==g)return;setFlights(items=>[...items,{id:++flightSerial.current,kind:'win',seat,amount:awards[seat],from:{x:sx-rx,y:sy-ry},to:{x:tx-rx,y:ty-ry}}]);};
    if(root.current&&raiseSpot.current&&destination.current)root.current.measureInWindow((rx,ry)=>raiseSpot.current?.measureInWindow((sx,sy,sw,sh)=>destination.current?.measureInWindow((tx,ty,tw,th)=>add(rx,ry,sx+sw/2,sy+sh/2,tx+tw/2,ty+th/2))));
-   else add(0,0,window.width/2,window.height/2,seat==='human'?55:90,120);
+   else add(0,0,window.width/2,window.height/2,seat==='human'?window.width/2:90,seat==='human'?window.height-footerHeight+12:120);
   }
- },[g,paused,dealing,pokerCollected]);
+ },[g,paused,dealing,pokerCollected,holding]);
 
  if(!g)return <View style={{flex:1,backgroundColor:C.background}}/>;
+ const finishCollection=(f:typeof flights[number])=>{if(!mounted.current||currentGame.current!==g||completedFlights.current.has(f.id))return;if(f.seat&&resultHold.current){deferredCollections.current.add(f.id);return;}completedFlights.current.add(f.id);if(f.kind==='bet'){if(f.generation!==flightGeneration.current)return;const order=f.order;if(order!==undefined)setLanded(previous=>new Set(previous).add(order));}setFlights(items=>items.filter(x=>x.id!==f.id));if(f.seat){setProgress(current=>({...current,[f.seat!]:1}));remaining.current--;if(remaining.current===0)setPokerCollected(g);}};
+ const releaseHold=()=>{resultHold.current=false;setHolding(false);const ids=[...deferredCollections.current];deferredCollections.current.clear();for(const id of ids){const flight=flights.find(f=>f.id===id);if(flight)finishCollection(flight);}};
+ const beginHold=()=>{if(!g.result||paused||dealing||!showResult||currentGame.current!==g)return;resultHold.current=true;setHolding(true);};
+
  const legal=legalActions(g,'human');const enabled=legal.enabled&&!paused&&!dealing;const pot=g.total.human+g.total.computer;
  const send=(action:Action)=>{if(!enabled)return;try{setPoker(current=>current===g?act(g,'human',action):current);setError('');flightGeneration.current++;setFlights([]);}catch{setError(es?'Revisa el importe de la apuesta.':'Check the bet amount.');}};
  const addChip=(n:number,source:React.RefObject<View|null>)=>{
-  if(!enabled||!legal.canRaise)return;
-  setRaise(current=>String(Math.min(legal.maxTo,Number(current)+n)));setSelectedChips(items=>[...items,n]);
-  const token=flightGeneration.current;
-  if(root.current&&source.current&&raiseSpot.current)root.current.measureInWindow((rx,ry)=>source.current?.measureInWindow((sx,sy,sw,sh)=>raiseSpot.current?.measureInWindow((tx,ty,tw,th)=>{if(token===flightGeneration.current)setFlights(items=>[...items,{id:++flightSerial.current,amount:n,kind:'bet',from:{x:sx+sw/2-rx,y:sy+sh/2-ry},to:{x:tx+tw/2-rx,y:ty+th/2-ry}}]);})));
+  if(!enabled||!legal.canRaise||![10,20,50,100].includes(n))return;
+  const next=raiseRef.current+n;if(next>legal.maxTo)return;
+  raiseRef.current=next;selectionGame.current=g;setRaise(String(next));setSelectedChips(items=>[...items,n]);
+  const token=flightGeneration.current;const order=selectionIndex.current++;
+  const add=(rx:number,ry:number,sx:number,sy:number,tx:number,ty:number,tw:number,th:number)=>{if(token!==flightGeneration.current||currentGame.current!==g)return;setFlights(items=>[...items,{id:++flightSerial.current,amount:n,kind:'bet',order,generation:token,holdUntilLanding:true,landingScale:BANKROLL_CHIP_SCALE,facingPlayer:true,from:{x:sx-rx,y:sy-ry},to:{x:tx+tw/2-rx,y:ty+th-14-(potChips.length+order)*Math.min(2,8/Math.max(1,potChips.length+selectionIndex.current-1))-21*BANKROLL_CHIP_SCALE-ry}}]);};
+  if(root.current&&source.current&&raiseSpot.current)root.current.measureInWindow((rx,ry)=>source.current?.measureInWindow((sx,sy,sw,sh)=>raiseSpot.current?.measureInWindow((tx,ty,tw,th)=>add(rx,ry,sx+sw/2,sy+sh/2,tx,ty,tw,th))));
+  else add(0,0,window.width/2,panelHeight-footerHeight+34,40,panelHeight-footerHeight-(usableHeight<720?104:118)-74,70,74);
  };
  const raiseValue=Number(raise);const validRaise=Number.isInteger(raiseValue)&&raiseValue<=legal.maxTo&&raiseValue>g.currentBet&&(raiseValue>=legal.minTo||raiseValue===legal.maxTo);
  const result=g.result;
  const awards=payoutAwards(g);const collectingPending=!!result&&pokerCollected!==g;
- const displayBalance=(seat:'human'|'computer')=>Math.round(g.stacks[seat]-(collectingPending?awards[seat]*(1-progress[seat]):0));
+ const provisional=!result&&g.turn==='human'&&selectedChips.length&&selectionGame.current===g?Math.max(0,raiseValue-g.bets.human):0;
+ const displayBalance=(seat:'human'|'computer')=>Math.round(g.stacks[seat]-(seat==='human'?provisional:0)-(collectingPending?awards[seat]*(1-progress[seat]):0));
  const visiblePot=result?(pokerCollected===g||collecting.current===g?0:result.pot):pot;
  const winners=result?.reason==='showdown'&&!dealing?(result.winner==='tie'?['human','computer'] as const:[result.winner]):[];
  const winningCards=new Set(!dealing?winningHighlights(g).map(c=>`${c.rank}${c.suit}`):[]);
@@ -109,7 +126,7 @@ export function PokerScreen(){
  <Pressable accessibilityRole="button" accessibilityLabel={es?'Ajustes':'Settings'} onPress={()=>setSettings(true)} style={{width:44,height:44,alignItems:'center',justifyContent:'center'}}><Feather name="more-vertical" size={20} color={C.gold}/></Pressable></View>
  <View testID="poker-table-surface" style={{flex:1,minHeight:0,overflow:'hidden'}}>
  <View testID="poker-table-background" pointerEvents="none" style={{position:'absolute',top:0,bottom:0,left:0,right:0}}><DominoTableBackground opponentHeight={heroHeight} gift={null} es={es} finished={false}/></View>
- <View pointerEvents="none" style={{position:'absolute',top:(usableHeight<900?120:150)+148,left:40,right:40,height:85}}><TableStamp title="POKER" engraved/></View>
+ <View pointerEvents="none" style={{position:'absolute',top:(heroHeight-15+usableHeight-48-94)/2-42.5,left:40,right:40,height:85}}><TableStamp title="POKER" engraved/></View>
  <ScrollView testID="poker-fixed-table-content" scrollEnabled={false} bounces={false} alwaysBounceVertical={false} overScrollMode="never" showsVerticalScrollIndicator={false} style={{flex:1,minHeight:0}} contentContainerStyle={{flexGrow:1,paddingBottom:55+messageHeight}}>
  <View testID="poker-hero" style={{height:heroHeight,flexDirection:'row-reverse',paddingHorizontal:12,alignItems:'flex-end',gap:6}}>
  <View style={{width:82,alignSelf:'flex-start',marginTop:14,gap:6}}><GameSwitchButton whiteDomino/><GameSwitchButton blackjack/></View>
@@ -138,29 +155,31 @@ export function PokerScreen(){
 
  </ScrollView>
 
- <View ref={computerBalance} collapsable={false} style={{position:'absolute',left:42,top:heroHeight-65,zIndex:12}}><SeatChipPile testID="poker-computer-pile" amount={displayBalance('computer')} name={opponent.name} hideName totalAbove/></View>
- <View ref={humanBalance} collapsable={false} style={{position:'absolute',left:12,bottom:140,zIndex:12}}><SeatChipPile testID="poker-player-pile" amount={displayBalance('human')} name={name}/></View>
- <View ref={raiseSpot} collapsable={false} testID='poker-selected-raise' style={{position:'absolute',right:24,top:heroHeight+52,width:128,alignItems:'center',minHeight:54,justifyContent:'center',zIndex:12}}>{result&&visiblePot>0?<View ref={collectedPot} collapsable={false}><SeatChipPile testID="poker-pot-pile" chipScale={1/.55} amount={visiblePot} name={es?'BOTE':'POT'}/></View>:enabled&&raiseValue>g.bets.human?<><SelectedChipPile chips={selectedChips}/><Text numberOfLines={1} style={{color:C.goldLight,fontWeight:'700',fontSize:12}}>{es?'Subir a':'Raise to'} · {raiseValue}</Text><RaiseControls selectionKey={`${g.hand}-${g.street}-${g.turn}-${selectedChips.length}`} value={raiseValue} min={legal.minTo} max={legal.maxTo} base={g.currentBet} enabled={enabled&&legal.canRaise} es={es} onClear={()=>{setRaise(String(g.bets.human));setSelectedChips([]);flightGeneration.current++;setFlights([]);}} onConfirm={()=>{if(validRaise)send({type:'raise',to:raiseValue});}}/></>:visiblePot>0?<View ref={collectedPot} collapsable={false}><SeatChipPile testID="poker-pot-pile" chipScale={1/.55} amount={visiblePot} name={es?'BOTE':'POT'}/></View>:null}</View>
- <View testID="poker-message-overlay" pointerEvents="none" onLayout={e=>setMessageHeight(e.nativeEvent.layout.height)} style={{position:'absolute',left:0,right:0,bottom:0,zIndex:16,minHeight:64,paddingVertical:1,paddingHorizontal:12,justifyContent:'center'}}>
- {showResult&&!dealing?<View testID="poker-result-footer" pointerEvents="none" style={{width:'100%'}}><PokerResultBanner key={g.hand} result={describePokerResult(g,es,opponent.name)} paused={paused}/></View>:null}
+ <View ref={computerBalance} collapsable={false} style={{position:'absolute',left:32,top:heroHeight+14,zIndex:12}}><SeatChipPile testID="poker-computer-pile" amount={displayBalance('computer')} name={opponent.name} hideName piles={3}/></View>
+ <View testID='poker-selected-raise' style={{position:'absolute',left:10,bottom:usableHeight<720?68:82,width:130,height:36,alignItems:'center',justifyContent:'center',zIndex:12}}>{enabled&&raiseValue>g.bets.human&&selectionGame.current===g?<><RaiseControls selectionKey={`${g.hand}-${g.street}-${g.turn}-${selectedChips.length}`} value={raiseValue} min={legal.minTo} max={legal.maxTo} base={g.currentBet} enabled={enabled&&legal.canRaise} es={es} onClear={()=>{raiseRef.current=g.bets.human;setRaise(String(g.bets.human));setSelectedChips([]);selectionIndex.current=0;setLanded(new Set());flightGeneration.current++;setFlights([]);}} onConfirm={()=>{if(validRaise)send({type:'raise',to:raiseValue});}}/></>:null}</View>
+ <View ref={raiseSpot} collapsable={false} testID="poker-pot-spot" style={{position:'absolute',left:40,bottom:usableHeight<720?104:118,width:70,height:74,zIndex:12}}><View ref={collectedPot} collapsable={false}><PokerPot testID="poker-pot-pile" es={es} amount={result?visiblePot:visiblePot+provisional} capacity={potChips.length+(provisional?selectedChips.length:0)} layers={[...potChips.map((_n,i)=>i),...(provisional?selectedChips.map((_n,i)=>i).filter(i=>landed.has(i)).map(i=>potChips.length+i):[])]} chips={visiblePot||provisional?[...potChips,...(provisional?selectedChips.filter((_n,i)=>landed.has(i)):[])]:[]}/></View></View>
+ <View testID="poker-message-overlay" pointerEvents={showResult?"box-none":"none"} onLayout={e=>setMessageHeight(e.nativeEvent.layout.height)} style={{position:'absolute',left:0,right:0,bottom:0,zIndex:16,minHeight:64,paddingVertical:1,paddingLeft:12,paddingRight:12,justifyContent:'center'}}>
+ {showResult&&!dealing?<View testID="poker-result-footer" pointerEvents="none" style={{width:'100%'}}><PokerResultBanner key={g.hand} result={describePokerResult(g,es,opponent.name)} paused={paused||holding}/></View>:null}
+ <ResultHoldButton visible={showResult&&!dealing} presentationKey={g.result?g:null} id="poker-result-hold" holding={holding} disabled={paused} onHold={beginHold} onRelease={releaseHold} es={es}/>
  <View style={{alignItems:'center',paddingHorizontal:enabled?106:0}}>{error&&!result?<Text accessibilityLiveRegion='polite' style={{color:'#F0A899',fontSize:11,textAlign:'center'}}>{error}</Text>:null}{!result&&!error?<><PokerTurnPrompt active={enabled} label={dealing?(es?'Repartiendo…':'Dealing…'):g.turn==='human'?(es?'Tu turno':'Your Turn'):`${opponent.name} ${es?'está pensando…':'is thinking…'}`}/><Text style={{color:C.muted,fontSize:14,lineHeight:20,paddingBottom:2,marginTop:3}}>{g.last?`${g.last.player==='human'?name:opponent.name}: ${actionText}`:(es?'Ciegas 10 / 20':'Blinds 10 / 20')}</Text></>:null}</View>
  </View>
  </View>
- <View onLayout={e=>setFooterHeight(e.nativeEvent.layout.height)} style={{backgroundColor:'#704329',paddingHorizontal:12,paddingTop:22,paddingBottom:10,minHeight:87,gap:0}}><View pointerEvents="none" style={{position:'absolute',top:0,bottom:0,left:0,right:0}}><WoodSurface/></View>
+ <View onLayout={e=>setFooterHeight(e.nativeEvent.layout.height)} style={{backgroundColor:'#704329',paddingHorizontal:12,paddingTop:2,paddingBottom:10,minHeight:87,gap:0}}><View pointerEvents="none" style={{position:'absolute',top:0,bottom:0,left:0,right:0}}><WoodSurface/></View>
 
- <ChipRaiseTray value={raiseValue} min={legal.minTo} max={legal.maxTo} base={g.currentBet} enabled={enabled&&legal.canRaise} es={es} onAdd={addChip} onClear={()=>{setRaise(String(g.bets.human));setSelectedChips([]);flightGeneration.current++;setFlights([]);}} onConfirm={()=>{if(validRaise)send({type:'raise',to:raiseValue});}}/>
+ <View ref={humanBalance} collapsable={false} testID="poker-player-balance" style={{height:20,flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:6}}><Text numberOfLines={1} style={{color:C.ivory,fontSize:11,maxWidth:130}}>{name}</Text><Text style={{color:C.goldLight,fontSize:13,fontWeight:'700'}}>{'$'+displayBalance('human').toLocaleString()}</Text></View>
+ <ChipRaiseTray balance={displayBalance('human')} value={raiseValue} min={legal.minTo} max={legal.maxTo} base={g.currentBet} enabled={enabled&&legal.canRaise} es={es} onAdd={addChip} onClear={()=>{raiseRef.current=g.bets.human;setRaise(String(g.bets.human));setSelectedChips([]);selectionIndex.current=0;setLanded(new Set());flightGeneration.current++;setFlights([]);}} onConfirm={()=>{if(validRaise)send({type:'raise',to:raiseValue});}}/>
  {result&&!showResult&&bankruptSeat(g)?<View testID='poker-bankrupt-continuation' style={{alignSelf:'center',width:156,minHeight:46}}><PokerContinuation game={g} es={es} blocked={dealing||paused||collectingPending} names={{human:name,computer:opponent.name}} onContinue={next=>{setShown('');setPoker(current=>current===g?next:current);}}/></View>:null}
 
 
  </View>
 
- {flights.map(f=><ChipFlight key={f.id} flight={f} sound={ready&&tileSound} paused={paused} onProgress={f.seat?p=>setProgress(current=>({...current,[f.seat!]:p})):undefined} onComplete={()=>{if(!mounted.current||currentGame.current!==g||completedFlights.current.has(f.id))return;completedFlights.current.add(f.id);setFlights(items=>items.filter(x=>x.id!==f.id));if(f.seat){setProgress(current=>({...current,[f.seat!]:1}));remaining.current--;if(remaining.current===0)setPokerCollected(g);}}}/>)}
+ {flights.map(f=><ChipFlight key={f.id} flight={f} sound={ready&&tileSound} paused={paused||holding} onProgress={f.seat?p=>{if(resultHold.current)return;setProgress(current=>({...current,[f.seat!]:p}));}:undefined} onComplete={()=>finishCollection(f)}/>)}
  <FloatingAction id='poker-fold' color='#A4453D' label={es?'RETIRAR':'FOLD'} side='right' visible={enabled&&!result} enabled={enabled&&!result} onPress={()=>send({type:'fold'})} bottom={footerHeight-2}/>
  <FloatingAction id='poker-check-call' color='#267B58' label={legal.toCall?`${es?'IGUALAR':'CALL'} ${legal.toCall}`:(es?'PASAR':'CHECK')} side='right' visible={enabled&&!result} enabled={enabled&&!result} onPress={()=>send({type:legal.toCall?'call':'check'})} bottom={footerHeight+56}/>
  <FloatingAction id='poker-all-in' color='#B18B44' label='ALL-IN' side='left' visible={enabled&&!result&&legal.canRaise} enabled={enabled&&!result&&legal.canRaise} onPress={()=>send({type:'raise',to:legal.maxTo})} bottom={footerHeight-2}/>
  <Modal visible={picker||rules||reset} transparent animationType="fade" onRequestClose={()=>{setPicker(false);setRules(false);setReset(false);}}><View style={{flex:1,justifyContent:'center',padding:22,backgroundColor:'rgba(2,12,10,.86)'}}><View accessibilityViewIsModal style={{maxHeight:'85%',backgroundColor:C.surface,borderRadius:24,padding:22,gap:16,borderWidth:1,borderColor:C.line}}><Text style={{color:C.goldLight,fontSize:23,fontWeight:'600'}}>{picker?(es?'Elige tu rival':'Choose your opponent'):reset?(es?'¿Reiniciar póker?':'Restart poker?'):'Texas Hold’em'}</Text>
  {rules?<Pressable accessibilityRole="button" onPress={()=>{setRules(false);setReset(true);}}><Text style={{color:C.gold}}>{es?'Reiniciar póker':'Restart poker'}</Text></Pressable>:null}
- <ScrollView>{picker?<OpponentChoices selected={opponentId} onSelect={id=>{setOpponentId(id);setPicker(false);}}/>:<Text style={{color:C.ivory,fontSize:15,lineHeight:24}}>{reset?(es?`Se reemplazará solo la partida de póker y ambos jugadores recibirán ${pokerStartingChips} fichas virtuales.`:`Only your poker game will reset. Both players receive ${pokerStartingChips} virtual chips.`):(es?`Dos cartas privadas y cinco comunitarias. Gana la mejor combinación de cinco cartas.
+ <ScrollView>{picker?<OpponentChoices selected={opponentId} onSelect={id=>{setOpponentId(id);setPicker(false);}}/>:<Text style={{color:C.ivory,fontSize:15,lineHeight:24}}>{reset?(es?`Se reemplazará solo la partida de póker y recibirás ${pokerStartingChips} fichas virtuales y el rival 5,000.`:`Only your poker game will reset. You receive ${pokerStartingChips} virtual chips and your opponent 5,000.`):(es?`Dos cartas privadas y cinco comunitarias. Gana la mejor combinación de cinco cartas.
 
 Ciegas: 10 / 20. El botón paga la ciega pequeña y actúa primero antes del flop; después actúa primero el rival. Puedes pasar, igualar, retirarte o subir hasta todas tus fichas.
 
@@ -169,7 +188,7 @@ Flop: tres cartas. Turn y river: una más cada uno. En all-in se completa la mes
 Blinds: 10 / 20. The button posts the small blind and acts first before the flop; the other player acts first afterward. Check, call, fold or raise up to your full stack.
 
 Flop: three cards. Turn and river: one each. An all-in runs out the board and compares hands. Raise amounts are the total bet for this street.`)}</Text>}</ScrollView>
- <View style={{flexDirection:'row',gap:10}}><Button label={es?'Cerrar':'Close'} onPress={()=>{setPicker(false);setRules(false);setReset(false);}}/>{reset?<Button gold label={es?'Reiniciar':'Restart'} onPress={()=>{setPoker(newHand(undefined,Math.random,{human:pokerStartingChips,computer:pokerStartingChips}));setShown('');setReset(false);}}/>:null}</View>
+ <View style={{flexDirection:'row',gap:10}}><Button label={es?'Cerrar':'Close'} onPress={()=>{setPicker(false);setRules(false);setReset(false);}}/>{reset?<Button gold label={es?'Reiniciar':'Restart'} onPress={()=>{setPoker(newHand(undefined,Math.random,{human:pokerStartingChips,computer:5000}));setShown('');setReset(false);}}/>:null}</View>
  </View></View></Modal>
  <TableSettings matching={false} visible={settings} es={es} onClose={()=>setSettings(false)} onRules={()=>{setSettings(false);setRules(true);}}/>
  </View>;

@@ -14,11 +14,13 @@ import { playTap } from '../sound/sounds';
 import { Lang } from '../i18n/strings';
 
 import { MusicChoices } from '../sound/MusicChoices';
+import {useTableMusic} from '../sound/useTableMusic';
 
 export function SettingsScreen() {
   const { theme, themeName, setThemeName, s } = useTheme();
   const { t, lang, setLang } = useI18n();
-  const { announceWinner, setAnnounceWinner, voice, setVoice, sound, setSound, tableMusic, setTableMusic } = usePrefs();
+  const { announceWinner, setAnnounceWinner, voice, setVoice, sound, setSound, tableMusic, setTableMusic,tableMusicTrack,ready } = usePrefs();
+  useTableMusic(ready&&tableMusic,tableMusicTrack);
   const c = theme.colors;
 
   const voiceMeta: { id: VoiceStyle; label: string }[] = [
@@ -45,9 +47,11 @@ export function SettingsScreen() {
     <ScrollView contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}>
       <Header title={t.settings} />
 
-      <SectionLabel>{lang === 'es' ? 'Música' : 'Music'}</SectionLabel>
-      <Switch accessibilityLabel={lang === 'es' ? 'Música' : 'Music'} value={tableMusic} onValueChange={setTableMusic} />
-      <MusicChoices es={lang === 'es'} />
+      <View testID="settings-music-row" style={{flexDirection:'row',alignItems:'center',gap:s(12)}}>
+        <Text style={{color:c.textMuted,fontSize:s(13),fontWeight:'800',textTransform:'uppercase',letterSpacing:.8}}>{lang === 'es' ? 'Música' : 'Music'}</Text>
+        <Switch accessibilityLabel={lang === 'es' ? 'Música' : 'Music'} value={tableMusic} onValueChange={setTableMusic} trackColor={{false:c.border,true:c.primary}} thumbColor="#fff" />
+      </View>
+      <MusicChoices es={lang === 'es'} settingsAppearance={{text:c.text,surface:c.surface,border:c.border,primary:c.primary,radius:theme.radius,fontFamily:theme.fontFamily}}/>
       {/* Language */}
       <SectionLabel>{t.language}</SectionLabel>
       <View style={{ flexDirection: 'row', gap: s(12) }}>

@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { useGame } from '../state/GameContext';
+import {resetNewTrackingMatchAppearance} from '../state/useTrackingAppearance';
 import { useNav } from '../nav/NavContext';
 import { Button, Card } from '../components/ui';
 import { Logo } from '../components/Logo';
@@ -12,11 +13,10 @@ import { Menu } from '../components/Menu';
 import { DemoMatch } from '../components/DemoMatch';
 import { ScoreRing } from '../components/ScoreRing';
 import { Match, Team, teamTotal } from '../types';
-import { ThemeName } from '../theme/themes';
+import {AppearanceSpinner} from '../components/AppearanceSpinner';
 import { useReducedMotion } from '../computer/DrinkGift';
-import { useTableGame } from '../poker/TableGameContext';
+import { DominoFan, CardGameIcon, useTableGame } from '../poker/TableGameContext';
 
-const HOME_THEME_ORDER: ThemeName[] = ['carbon', 'dark', 'casino', 'cubano', 'usa'];
 
 export function HomeScreen() {
   const { theme, s } = useTheme();
@@ -29,6 +29,7 @@ export function HomeScreen() {
 
   const activeMatch =
     currentMatch && !currentMatch.winnerTeamId ? currentMatch : null;
+  const newTrackingMatch=()=>{resetNewTrackingMatchAppearance();go('newMatch');};
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [logoSpin, setLogoSpin] = useState(0);
@@ -40,11 +41,9 @@ export function HomeScreen() {
         contentContainerStyle={{ paddingHorizontal: s(20), paddingTop: s(8), paddingBottom: s(12) }}
         showsVerticalScrollIndicator={false}
       >
-      {/* Top bar with menu button */}
-      <View style={{ position: 'absolute', top: s(8), right: s(20), zIndex: 1 }}>
-        <Pressable onPress={() => setMenuOpen(true)} hitSlop={12} style={{ padding: s(6) }}>
-          <Feather name="menu" size={s(26)} color={c.text} />
-        </Pressable>
+      {/* Keep the original menu actions together, with a single access on the left. */}
+      <View style={{position:'absolute',top:s(8),left:s(18),zIndex:6}}>
+        <Pressable accessibilityRole="button" accessibilityLabel={lang==='es'?'Menú':'Menu'} onPress={()=>setMenuOpen(true)} style={{width:44,height:44,alignItems:'center',justifyContent:'center'}}><Feather name="menu" size={22} color={c.text}/></Pressable>
       </View>
 
       <Menu visible={menuOpen} onClose={() => setMenuOpen(false)} />
@@ -53,29 +52,39 @@ export function HomeScreen() {
       <Logo spinTrigger={logoSpin} height={height < 700 ? 155 : 190} />
 
       {activeMatch ? (
-        <ResumeMatchCard match={activeMatch} onResume={() => go('game')} onNewMatch={() => go('newMatch')}>
+        <ResumeMatchCard match={activeMatch} onResume={() => go('game')} onNewMatch={newTrackingMatch}>
           <HomeMatchActions />
         </ResumeMatchCard>
       ) : (
-        <DemoMatch onNewMatch={() => go('newMatch')}><HomeMatchActions /></DemoMatch>
+        <DemoMatch onNewMatch={newTrackingMatch}><HomeMatchActions /></DemoMatch>
       )}
 
       <Card>
         <View style={{gap:s(10)}}>
-        <Button label={lang === 'es' ? 'Jugar dominó' : 'Play Dominoes'}
-          onPress={() => {enterMode('domino');go('computerGame');}} variant="secondary" fullWidth />
-        <Button label={lang === 'es' ? 'Jugar póker' : 'Play Poker'}
-          onPress={() => go('pokerLobby')} variant="secondary" fullWidth />
-        <Button label={lang === 'es' ? 'Jugar Blackjack' : 'Play Blackjack'}
-          onPress={() => go('blackjackLobby')} variant="secondary" fullWidth />
+        <HomeGameButton game="domino" label={lang === 'es' ? 'Jugar dominó' : 'Play Dominoes'}
+          onPress={() => {enterMode('domino');go('computerGame');}} />
+        <HomeGameButton game="poker" label={lang === 'es' ? 'Jugar póker' : 'Play Poker'}
+          onPress={() => go('pokerLobby')} />
+        <HomeGameButton game="blackjack" label={lang === 'es' ? 'Jugar Blackjack' : 'Play Blackjack'}
+          onPress={() => go('blackjackLobby')} />
         </View>
       </Card>
       </ScrollView>
-      <View testID="home-appearance-header" pointerEvents="box-none" style={{position:'absolute',top:s(8),left:s(18),zIndex:5}}>
+      <View testID="home-appearance-header" pointerEvents="box-none" style={{position:'absolute',top:2,right:8,zIndex:5}}>
         <AppearanceSpinner onSpin={() => setLogoSpin((n) => n + 1)} />
       </View>
     </View>
   );
+}
+
+function HomeGameButton({game,label,onPress}:{game:'domino'|'poker'|'blackjack';label:string;onPress:()=>void}) {
+  const { s } = useTheme();
+  return <View testID={`home-play-${game}`}>
+    <Button label={label} onPress={onPress} variant="secondary" singleLine fullWidth style={{paddingRight:s(84)}} />
+    <View testID={`home-game-icon-${game}`} pointerEvents="none" accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{position:'absolute',right:s(10),top:0,bottom:0,width:64,alignItems:'center',justifyContent:'center'}}>
+      {game==='domino'?<DominoFan white/>:<CardGameIcon blackjack={game==='blackjack'}/>}
+    </View>
+  </View>;
 }
 
 function HomeMatchActions() {
@@ -90,108 +99,6 @@ function HomeMatchActions() {
   </View>;
 }
 
-function AppearanceSpinner({ onSpin }: { onSpin: () => void }) {
-  const { theme, themeName, setThemeName, s } = useTheme();
-  const c = theme.colors;
-  const spin = useRef(new Animated.Value(0)).current;
-
-  const rotate = spin.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  const cycleTheme = () => {
-    const currentIndex = HOME_THEME_ORDER.indexOf(themeName);
-    const next = HOME_THEME_ORDER[(currentIndex + 1) % HOME_THEME_ORDER.length] ?? HOME_THEME_ORDER[0];
-    spin.setValue(0);
-    Animated.timing(spin, {
-      toValue: 1,
-      duration: 420,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
-    setThemeName(next);
-    onSpin();
-  };
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel="Change appearance"
-      onPress={cycleTheme}
-      hitSlop={10}
-      style={({ pressed }) => ({
-        alignSelf: 'flex-start',
-        shadowColor: '#000',
-        shadowOpacity: pressed ? 0.24 : 0.38,
-        shadowRadius: pressed ? s(8) : s(14),
-        shadowOffset: { width: 0, height: pressed ? s(3) : s(8) },
-        elevation: pressed ? 5 : 10,
-        transform: [{ translateY: pressed ? s(1) : 0 }],
-      })}
-    >
-      {({ pressed }) => (
-        <LinearGradient
-          colors={pressed ? [c.surfaceAlt, c.surface, c.surfaceAlt] : ['rgba(255,255,255,0.18)', c.surfaceAlt, c.surface]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{
-            width: s(52),
-            height: s(52),
-            borderRadius: s(26),
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderWidth: 1,
-            borderColor: pressed ? c.border : c.primary,
-            overflow: 'hidden',
-          }}
-        >
-          <LinearGradient
-            colors={['rgba(255,255,255,0.42)', 'rgba(255,255,255,0.08)', 'rgba(0,0,0,0.34)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            pointerEvents="none"
-            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-          />
-          <View
-            pointerEvents="none"
-            style={{
-              position: 'absolute',
-              top: s(5),
-              left: s(9),
-              right: s(9),
-              height: s(14),
-              borderRadius: s(12),
-              backgroundColor: 'rgba(255,255,255,0.13)',
-              opacity: pressed ? 0.32 : 0.7,
-            }}
-          />
-          <View
-            style={{
-              width: s(32),
-              height: s(32),
-              borderRadius: s(16),
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: c.primary,
-              borderWidth: 1,
-              borderColor: '#F6D37B',
-              shadowColor: c.primary,
-              shadowOpacity: 0.3,
-              shadowRadius: s(5),
-              shadowOffset: { width: 0, height: s(2) },
-              elevation: 4,
-            }}
-          >
-            <Animated.View style={{ transform: [{ rotate }] }}>
-              <Feather name="refresh-cw" size={s(17)} color={c.onPrimary} />
-            </Animated.View>
-          </View>
-        </LinearGradient>
-      )}
-    </Pressable>
-  );
-}
 
 function ResumeMatchCard({
   match,

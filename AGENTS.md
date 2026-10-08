@@ -42,3 +42,7 @@ Excepcion adicional autorizada 2026-10-03 (D-055): mejora de estrategia interna 
 ## Candidato congelado tras check-in — 2026-10-05
 
 Al completar las verificaciones y el check-in local autorizados del candidato actual, no cambiar codigo de este proyecto sin pedir y obtener autorizacion humana previa explicita. Lecturas y pruebas siguen permitidas; pendientes e ideas no autorizan implementaciones. Regla vigente y fuente en [docs/DECISIONES.md](docs/DECISIONES.md#2026-10-05--candidato-y-congelamiento-del-codigo-tras-check-in). Conserva el historial de excepciones Domino; no aplica a otros proyectos.
+
+## Congelamiento renovado del candidato aprobado — 2026-10-07
+
+El usuario confirma pruebas satisfactorias en el telefono y autoriza incorporar y hacer push del candidato actual. Al completar este check-in, TODO codigo de este proyecto queda congelado: antes de futuros cambios pedir y obtener nueva autorizacion humana previa explicita. Lecturas y pruebas permitidas. Las excepciones historicas no autorizan nuevas modificaciones. No implica publicacion en tiendas ni despliegue. Fuente y alcance en [docs/DECISIONES.md](docs/DECISIONES.md#2026-10-07--cierre-git-autorizado-y-congelamiento-renovado); evidencia y estado Git en docs/CONTEXTO.md.

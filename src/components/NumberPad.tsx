@@ -1,3 +1,4 @@
+import {LinearGradient} from 'expo-linear-gradient';
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -12,10 +13,12 @@ export function NumberPad({
   value,
   onChange,
   maxLen = 3,
+  compact = false,
 }: {
   value: string;
   onChange: (v: string) => void;
   maxLen?: number;
+  compact?: boolean;
 }) {
   const { theme, s } = useTheme();
   const c = theme.colors;
@@ -41,15 +44,19 @@ export function NumberPad({
       onPress={onPress}
       style={({ pressed }) => ({
         flex: 1,
-        height: s(54),
+        height:compact?s(44):s(54),
         borderRadius: theme.radius,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: pressed ? c.primary : c.surfaceAlt,
         borderWidth: 1,
+        borderBottomWidth:pressed?1:3,
+        shadowColor:'#000',shadowOpacity:.28,shadowRadius:s(5),shadowOffset:{width:0,height:pressed?1:4},elevation:pressed?1:4,
+        transform:[{translateY:pressed?2:0}],overflow:'hidden',
         borderColor: c.border,
       })}
     >
+      <LinearGradient pointerEvents="none" colors={['rgba(255,255,255,0.16)','rgba(255,255,255,0)','rgba(0,0,0,0.20)']} start={{x:0,y:0}} end={{x:0,y:1}} style={{position:'absolute',top:0,left:0,right:0,bottom:0}}/>
       {icon ? (
         <Feather name={icon} size={s(22)} color={c.text} />
       ) : (
@@ -59,7 +66,7 @@ export function NumberPad({
   );
 
   const row = (keys: React.ReactNode) => (
-    <View style={{ flexDirection: 'row', gap: s(10), marginBottom: s(10) }}>{keys}</View>
+    <View style={{ flexDirection: 'row', gap:s(8),marginBottom:compact?s(8):s(10) }}>{keys}</View>
   );
 
   return (

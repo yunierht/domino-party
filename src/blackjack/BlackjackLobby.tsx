@@ -1,3 +1,4 @@
+import {LobbyGameHeader} from '../components/LobbyGameHeader';
 import {useTableGame} from '../poker/TableGameContext';
 import {useComputerGame} from '../computer/ComputerGameContext';
 import React from 'react';
@@ -13,9 +14,7 @@ export function BlackjackLobby(){
  const {go,back}=useNav();const {lang}=useI18n();const es=lang==='es';const {game,setGame,name,setName,dealerId,setDealerId}=useBlackjack();
  const {pokerName,setPokerName}=useTableGame();const {game:domino}=useComputerGame();
  const selected=DEALERS.find(o=>o.id===dealerId)?.id??DEALERS[0].id;
- return <View style={{flex:1,backgroundColor:C.background}}><ScrollView contentContainerStyle={{padding:20,gap:18}}>
- <Pressable accessibilityRole="button" onPress={back}><Text style={{color:C.goldLight,fontSize:16}}>‹ {es?'Volver':'Back'}</Text></Pressable>
- <Text style={{color:C.goldLight,fontSize:26,textAlign:'center'}}>Blackjack</Text>
+ return <View style={{flex:1,backgroundColor:C.background}}><LobbyGameHeader game="blackjack" es={es} onBack={back}/><ScrollView contentContainerStyle={{padding:20,gap:18}}>
  <View style={{flexDirection:'row',justifyContent:'center',gap:8}}><PlayingCard animate={false} card={{rank:14,suit:'s'}} width={64}/><PlayingCard animate={false} card={{rank:11,suit:'h'}} width={64}/></View>
  <Text style={{color:C.muted}}>{es?'TU NOMBRE':'YOUR NAME'}</Text><TextInput accessibilityLabel={es?'Tu nombre':'Your name'} value={pokerName||name||domino?.playerName||''} onChangeText={v=>{setName(v);setPokerName(v);}} maxLength={30} placeholder={es?'Tú':'You'} placeholderTextColor={C.muted} style={{minHeight:50,padding:14,color:C.ivory,borderWidth:1,borderColor:C.line,borderRadius:12}}/>
  <Text style={{color:C.gold}}>{es?'ELIGE TU DEALER':'CHOOSE YOUR DEALER'}</Text><DealerChoices selected={selected} onSelect={setDealerId}/>

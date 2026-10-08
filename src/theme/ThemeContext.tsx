@@ -20,6 +20,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     loadJSON<ThemeName>(KEYS.theme, 'carbon').then((name) => {
       if (THEMES[name]) setThemeNameState(name);
+      else if ((name as string) === 'wood') saveJSON(KEYS.theme, 'carbon');
       setReady(true);
     });
   }, []);
@@ -29,7 +30,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     saveJSON(KEYS.theme, name);
   };
 
-  const theme = THEMES[themeName];
+  // An open dev session may still hold the now-retired wood selection.
+  useEffect(() => {
+    if ((themeName as string) === 'wood') { setThemeNameState('carbon'); saveJSON(KEYS.theme, 'carbon'); }
+  }, [themeName]);
+  const theme = THEMES[themeName] ?? THEMES.carbon;
   const s = (n: number) => Math.round(n * theme.scale);
 
   return (

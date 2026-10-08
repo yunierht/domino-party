@@ -1,7 +1,7 @@
 import {newRound,hit,stand,value} from './engine.ts';
 import type {Round,Card} from './engine';
 export type Session={game:Round|null;chips:number;bet:number;lastBet?:number;wins:number;losses:number;pushes:number;dealerChips:number};
-export const initialSession=():Session=>({game:null,chips:1000,bet:0,wins:0,losses:0,pushes:0,dealerChips:0});
+export const initialSession=():Session=>({game:null,chips:3000,bet:0,wins:0,losses:0,pushes:0,dealerChips:5000});
 function settle(s:Session):Session{
  const result=s.game?.result;if(!result)return s;
  const win=result==='player'||result==='blackjack';

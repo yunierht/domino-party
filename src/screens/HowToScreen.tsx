@@ -51,7 +51,7 @@ export function HowToScreen() {
   return (
     <View style={{ flex: 1 }}>
       {/* Skip */}
-      <View style={{ alignItems: 'flex-end', paddingHorizontal: s(16), paddingTop: s(6) }}>
+      <View style={{ alignItems:'flex-end',paddingLeft:s(16),paddingRight:s(16)+56,paddingTop: s(6) }}>
         <Text onPress={back} style={{ color: c.textMuted, fontSize: s(15), fontWeight: '700', padding: s(8) }}>
           {t.introSkip}
         </Text>

@@ -11,6 +11,7 @@ import { PrefsProvider } from './src/state/PrefsContext';
 import { NavProvider, useNav } from './src/nav/NavContext';
 import { FullScreenLoader } from './src/components/ui';
 import { Background } from './src/components/Background';
+import {AppearanceSpinner} from './src/components/AppearanceSpinner';
 import { DayResetPrompt } from './src/components/DayResetPrompt';
 import { useTilt } from './src/hooks/useTilt';
 
@@ -79,7 +80,7 @@ function AppShell() {
   const { theme, ready } = useTheme();
   const { loaded } = useGame();
   const { openWatch, screen } = useNav();
-  const computerTable = screen === 'computerGame' || screen === 'blackjackTable';
+  const computerTable = screen === 'computerGame' || screen === 'blackjackTable' || screen === 'pokerLobby' || screen === 'blackjackLobby';
   const tilt = useTilt(18);
 
   // Open a shared game when the app is launched/opened from a link
@@ -104,7 +105,10 @@ function AppShell() {
       <StatusBar style={computerTable || theme.dark ? 'light' : 'dark'} />
       {!computerTable && <Background theme={theme} tiltX={tilt.x} tiltY={tilt.y} />}
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
-        <Router />
+        {computerTable?<Router/>:<View style={{flex:1}}>
+          <Router />
+          {screen!=='home'&&screen!=='game'&&<View testID="global-theme-control" pointerEvents="box-none" style={{position:'absolute',top:2,right:8,zIndex:20}}><AppearanceSpinner/></View>}
+        </View>}
       </SafeAreaView>
       <DayResetPrompt />
     </View>

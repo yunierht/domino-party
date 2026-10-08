@@ -6,6 +6,7 @@ import Svg, {
   G,
   LinearGradient,
   Pattern,
+  Path,
   Polygon,
   RadialGradient,
   Rect,
@@ -143,17 +144,10 @@ export function Background({
     return (
       <Bg width={w} height={h} style={style} pointerEvents="none">
         <Defs>
-          <Pattern id="casinoFelt" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
-            <Rect width="18" height="18" fill="#082015" />
-            <Rect x="0" y="0" width="18" height="2" fill="#1E5134" opacity="0.34" />
-            <Rect x="0" y="8" width="18" height="1.4" fill="#06150E" opacity="0.48" />
-            <Circle cx="4" cy="5" r="0.9" fill="#3A7650" opacity="0.32" />
-            <Circle cx="13" cy="14" r="0.75" fill="#B9D0A8" opacity="0.12" />
-          </Pattern>
-          <Pattern id="casinoCrossFelt" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-24)">
-            <Rect width="22" height="22" fill="#0A2A1A" />
-            <Rect x="0" y="0" width="22" height="2" fill="#2E6943" opacity="0.26" />
-            <Rect x="0" y="11" width="22" height="1.5" fill="#021008" opacity="0.42" />
+          <Pattern id="casinoFelt" width="4" height="4" patternUnits="userSpaceOnUse">
+            <Rect width="4" height="4" fill="#082015" />
+            <Path d="M0 1h2 M2 3h2" stroke="#C0DDAC" strokeWidth="0.45" opacity="0.13" />
+            <Path d="M1 2v2 M3 0v2" stroke="#021B12" strokeWidth="0.5" opacity="0.2" />
           </Pattern>
           <RadialGradient id="casinoCenterGlow" cx="0.50" cy="0.42" r="0.72">
             <Stop offset="0" stopColor="#1F7A45" stopOpacity="0.44" />
@@ -166,7 +160,7 @@ export function Background({
         </Defs>
         <Rect width={w} height={h} fill="#04130D" />
         <Rect width={w} height={h} fill="url(#casinoFelt)" opacity="0.92" />
-        <Rect width={w} height={h} fill="url(#casinoCrossFelt)" opacity="0.28" />
+        <Rect width={w} height={h} fill="#0A2A1A" opacity="0.28" />
         <Rect width={w} height={h} fill="url(#casinoCenterGlow)" />
         <Rect width={w} height={h} fill="url(#casinoGoldGlow)" />
       </Bg>

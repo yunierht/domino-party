@@ -1,7 +1,8 @@
-import test from 'node:test';import assert from 'node:assert/strict';import React from 'react';import {create,act} from 'react-test-renderer';import {readFileSync} from 'node:fs';import ts from 'typescript';
+import test from 'node:test';import assert from 'node:assert/strict';import React from 'react';import {create,act} from 'react-test-renderer';import {readFileSync} from 'node:fs';import ts from 'typescript';import {chipAmounts,bankrollCounts} from '../blackjack/chipAmounts.ts';
 globalThis.IS_REACT_ACT_ENVIRONMENT=true;
-const m={exports:{}};new Function('require','module','exports',ts.transpileModule(readFileSync(new URL('./ChipRaiseTray.tsx',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React,esModuleInterop:true}}).outputText)(id=>({react:React,'react-native':{View:'View',Text:'Text',ScrollView:'ScrollView',Pressable:'Pressable'},'../blackjack/BettingTray':{DenominationChip:'Chip'},'../computer/tableTheme':{TABLE:{}}})[id],m,m.exports);
+const m={exports:{}};new Function('require','module','exports',ts.transpileModule(readFileSync(new URL('./ChipRaiseTray.tsx',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React,esModuleInterop:true}}).outputText)(id=>({'../blackjack/chipAmounts':{chipAmounts,bankrollCounts},react:React,'react-native':{View:'View',Text:'Text',ScrollView:'ScrollView',Pressable:'Pressable'},'../blackjack/BettingTray':{DenominationChip:'Chip',BankrollChipFace:'BankrollChipFace'},'../computer/tableTheme':{TABLE:{}}})[id],m,m.exports);
 const {ChipRaiseTray,RaiseControls}=m.exports;function Tray(p){return React.createElement(React.Fragment,null,React.createElement(ChipRaiseTray,p),React.createElement(RaiseControls,p));}
+test('selected chips remain exact after more than six selections',async()=>{let r;try{for(const chips of [[500,100,100,100,50],Array(9).fill(100),[1000,1000,500,100,100,100,100,50,20,20]]){await act(()=>r?r.update(React.createElement(m.exports.SelectedChipPile,{chips})):r=create(React.createElement(m.exports.SelectedChipPile,{chips})));assert.equal(r.root.findAllByType('Chip').reduce((sum,c)=>sum+c.props.amount,0),chips.reduce((a,b)=>a+b,0));}}finally{await act(()=>r.unmount());}});
 test('raise waits three idle seconds, restarts on selection and cancels on clear, confirm, pause or exit',async()=>{
  const oldSet=setTimeout,oldClear=clearTimeout;let now=0,serial=0,confirmed=0,cleared=0,r;const jobs=new Map();
  globalThis.setTimeout=(fn,delay)=>{const id=++serial;jobs.set(id,{fn,at:now+delay});return id;};globalThis.clearTimeout=id=>jobs.delete(id);
@@ -29,8 +30,9 @@ test('chip selection does not send a raise; confirm enforces minimum, cap and di
  await act(()=>r.update(React.createElement(Tray,{...props,value:90})));assert.equal(r.root.findByProps({testID:'poker-chip-20'}).props.disabled,true);
  await act(()=>r.update(React.createElement(Tray,{...props,value:40,enabled:false})));await act(()=>r.root.findByProps({testID:'poker-confirm-raise'}).props.onPress());assert.equal(confirmed,1);await act(()=>r.unmount());
 });
-test('tray offers the same six denominations as Blackjack including 1000',async()=>{
+test('tray offers only four readable denominations in both games',async()=>{
  let r;await act(()=>{r=create(React.createElement(ChipRaiseTray,{value:0,max:2000,enabled:true,onAdd(){}}));});
- assert.deepEqual(r.root.findAllByType('Pressable').map(n=>n.props.accessibilityLabel),['10','20','50','100','500','1000']);
- assert.equal(r.root.findByProps({testID:'poker-chip-1000'}).props.disabled,false);await act(()=>r.unmount());
+ assert.deepEqual(r.root.findAllByType('Pressable').map(n=>n.props.accessibilityLabel),['10','20','50','100']);
+ assert.equal(r.root.findAllByProps({testID:'poker-chip-1000'}).length,0);assert.equal(r.root.findAllByProps({testID:'poker-chip-500'}).length,0);await act(()=>r.unmount());
 });
+test('disabled Poker wood chips retain opaque presentation and cannot invoke selection',async()=>{let r,added=0;try{await act(()=>r=create(React.createElement(ChipRaiseTray,{value:0,max:3000,balance:3000,enabled:false,onAdd(){added++;}})));for(const b of r.root.findAllByType('Pressable')){assert.equal(b.props.disabled,true);assert.equal(b.props.accessibilityState.disabled,true);assert.equal(b.props.style.opacity,1);await act(()=>b.props.onPress());}assert.equal(added,0);}finally{await act(()=>r.unmount());}});

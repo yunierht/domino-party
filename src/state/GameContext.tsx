@@ -81,6 +81,7 @@ type Action =
     }
   | { type: 'DELETE_ROUND'; matchId: string; roundId: string }
   | { type: 'SET_TARGET_SCORE'; matchId: string; targetScore: number }
+  | {type:'UPDATE_MATCH_CONFIGURATION';matchId:string;teamA:{name:string;players:[string,string]};teamB:{name:string;players:[string,string]};targetScore:number}
   | { type: 'DELETE_MATCH'; matchId: string }
   | { type: 'DELETE_ALL_MATCHES' }
   | { type: 'SET_CURRENT'; matchId: string | null }
@@ -198,6 +199,12 @@ function reducer(state: GameState, action: Action): GameState {
         rounds: m.rounds.filter((r) => r.id !== action.roundId),
       }));
 
+    case 'UPDATE_MATCH_CONFIGURATION':
+      return {...state,matches:state.matches.map(m=>{
+        if(m.id!==action.matchId)return m;
+        const updated:Match={...m,teams:[{...m.teams[0],name:action.teamA.name,players:action.teamA.players},{...m.teams[1],name:action.teamB.name,players:action.teamB.players}],targetScore:action.targetScore};
+        return action.targetScore===m.targetScore?updated:reconcile(updated);
+      })};
     case 'SET_TARGET_SCORE':
       // reconcile (inside mapMatch) recomputes the winner for the new target.
       return mapMatch(state, action.matchId, (m) => ({
@@ -263,6 +270,7 @@ interface GameContextValue extends GameState {
   ) => void;
   deleteRound: (matchId: string, roundId: string) => void;
   setTargetScore: (matchId: string, targetScore: number) => void;
+  updateMatchConfiguration:(matchId:string,teamA:{name:string;players:[string,string]},teamB:{name:string;players:[string,string]},targetScore:number)=>void;
   deleteMatch: (matchId: string) => void;
   deleteAllMatches: () => void;
   setCurrent: (matchId: string | null) => void;
@@ -566,6 +574,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'DELETE_ROUND', matchId, roundId }),
     setTargetScore: (matchId, targetScore) =>
       dispatch({ type: 'SET_TARGET_SCORE', matchId, targetScore }),
+    updateMatchConfiguration:(matchId,teamA,teamB,targetScore)=>{
+      if(matchId!==currentMatch?.id||!canEdit)return;
+      dispatch({type:'UPDATE_MATCH_CONFIGURATION',matchId,teamA,teamB,targetScore});
+    },
     deleteMatch: (matchId) => dispatch({ type: 'DELETE_MATCH', matchId }),
     deleteAllMatches: () => dispatch({ type: 'DELETE_ALL_MATCHES' }),
     setCurrent: (matchId) => dispatch({ type: 'SET_CURRENT', matchId }),

@@ -1,7 +1,15 @@
+import {MatchPanelBevel} from '../components/MatchPresentation';
+import {trackingSetupHeaderGap,trackingFirstCardTop} from '../components/trackingLayout';
+import {TrackingColorButton} from '../components/TrackingColorButton';
+import {TrackingFinishDialog} from '../components/TrackingFinishDialog';
+import {TrackingCounter,trackingButtonGradient} from '../components/TrackingCounter';
+import {useTrackingAppearance} from '../state/useTrackingAppearance';
+import type {TrackingStyle,TrackingColor} from '../state/trackingAppearanceStore';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Easing, Modal, Pressable, ScrollView, Share, Text, useWindowDimensions, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Feather } from '@expo/vector-icons';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {Feather,MaterialCommunityIcons} from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
@@ -12,7 +20,6 @@ import { Header } from '../components/Header';
 import { RoundEditor } from '../components/RoundEditor';
 import { TargetEditor } from '../components/TargetEditor';
 import { Toast } from '../components/Toast';
-import { ScoreRing } from '../components/ScoreRing';
 import { usePrefs } from '../state/PrefsContext';
 import { speakWinner } from '../announce/voice';
 import { initSounds, playTap, playWin } from '../sound/sounds';
@@ -24,8 +31,13 @@ import { Match, Round, Team, computeWinner, pointsToWin, teamTotal } from '../ty
 
 export function GameScreen() {
   const { theme, s } = useTheme();
-  const { t } = useI18n();
-  const { width } = useWindowDimensions();
+  const {t,lang}=useI18n();
+  const {width,height}=useWindowDimensions();
+  const insets=useSafeAreaInsets();
+  const [layoutHeight,setLayoutHeight]=useState<number|null>(null);
+  const availableHeight=layoutHeight??height-insets.top-insets.bottom;
+  const [nameHeights,setNameHeights]=useState<[number,number]>([s(20),s(20)]);
+  const appearance=useTrackingAppearance();
   const {
     currentMatch,
     addRound,
@@ -45,7 +57,7 @@ export function GameScreen() {
     approveControl,
     denyControl,
   } = useGame();
-  const { go, back, openWatch } = useNav();
+  const {go,back,openWatch,openSetup,goHome}=useNav();
   const c = theme.colors;
 
   const [editorOpen, setEditorOpen] = useState(false);
@@ -97,7 +109,7 @@ export function GameScreen() {
   if (!currentMatch) {
     return (
       <View style={{ flex: 1, padding: s(20) }}>
-        <Header title={t.appName} />
+        <Header title={t.appName} reserveThemeSpace={false} onBackPress={openSetup}/>
         <Text style={{ color: c.textMuted, fontSize: s(16) }}>{t.noActiveMatch}</Text>
       </View>
     );
@@ -119,6 +131,10 @@ export function GameScreen() {
   const pulseA = danger && leadId === teamA.id;
   const pulseB = danger && leadId === teamB.id;
   const isShared = !!match.shareCode;
+  const panelBudget=(availableHeight-trackingFirstCardTop(availableHeight,s)-s(4)-s(10))/2;
+  const dialSize=Math.min(s(216),width-s(36)-s(136),Math.max(88,panelBudget-s(141)-Math.max(...nameHeights)-s(6)));
+  const nameColumnWidth=Math.max(s(80),Math.min(width-s(24),660)-s(12)-3-2*(Math.max(44,s(44))+s(12)));
+  const measureNames=(index:0|1,measured:number)=>{if(measured>0)setNameHeights(previous=>Math.abs(previous[index]-measured)<1?previous:index===0?[measured,previous[1]]:[previous[0],measured]);};
   const myPending = liveMeta?.pendingRequest?.uid === liveUid;
   // Keep enough horizontal room for the tappable target on narrow phones.
   const compactHeaderActions = width < 390;
@@ -160,10 +176,7 @@ export function GameScreen() {
       match.targetScore,
     );
   };
-  const newTeams = () => {
-    back();
-    go('newMatch');
-  };
+  const newTeams=()=>{appearance.resetNewMatchAppearance();openSetup('new');};
 
   const onSharePress = async () => {
     if (!isFirebaseConfigured) {
@@ -194,12 +207,14 @@ export function GameScreen() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View onLayout={event=>{const measured=event.nativeEvent.layout.height;if(measured>0)setLayoutHeight(previous=>previous!==null&&Math.abs(previous-measured)<1?previous:measured);}} style={{ flex: 1 }}>
       <ScrollView
-        contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}
+        contentContainerStyle={{paddingHorizontal:s(12),paddingTop:2,paddingBottom:s(4),width:'100%',maxWidth:660,alignSelf:'center',flexGrow:1}}
         showsVerticalScrollIndicator={false}
       >
-        <Header
+        <View style={{marginBottom:-s(16)}}><Header
+          reserveThemeSpace={false}
+          onBackPress={openSetup}
           title={`${t.target}: ${match.targetScore}`}
           onTitlePress={canEdit && !finished ? () => setTargetOpen(true) : undefined}
           showTitleEditHint={false}
@@ -253,7 +268,8 @@ export function GameScreen() {
               </Pressable>
             </View>
           }
-        />
+        /></View>
+        <View style={{height:trackingSetupHeaderGap(availableHeight)}}/>
 
         {/* Live control status */}
         {isShared && (
@@ -308,11 +324,19 @@ export function GameScreen() {
           </View>
         )}
 
-        {/* Stacked, full-width team panels */}
+        <View style={{flexDirection:'column',gap:s(10)}}>
         <TeamPanel
           match={match}
           team={teamA}
-          color={c.teamA}
+          colorChoice={appearance.teamAColor}
+          onCycleStyle={appearance.cycleStyle}
+          onCycleColor={()=>appearance.cycleTeamColor('A')}
+          color={appearance.teamAColorValue}
+          dialStyle={appearance.style}
+          dialSize={dialSize}
+          nameColumnWidth={nameColumnWidth}
+          onNamesLayout={measured=>measureNames(0,measured)}
+          panelHeight={panelBudget}
           total={totalA}
           toWin={pointsToWin(match, teamA.id)}
           leading={leadId === teamA.id && !finished}
@@ -324,11 +348,18 @@ export function GameScreen() {
           onAdd={() => openAddFor(teamA.id)}
           onEditRound={openEdit}
         />
-        <View style={{ height: s(14) }} />
         <TeamPanel
           match={match}
           team={teamB}
-          color={c.teamB}
+          colorChoice={appearance.teamBColor}
+          onCycleStyle={appearance.cycleStyle}
+          onCycleColor={()=>appearance.cycleTeamColor('B')}
+          color={appearance.teamBColorValue}
+          dialStyle={appearance.style}
+          dialSize={dialSize}
+          nameColumnWidth={nameColumnWidth}
+          onNamesLayout={measured=>measureNames(1,measured)}
+          panelHeight={panelBudget}
           total={totalB}
           toWin={pointsToWin(match, teamB.id)}
           leading={leadId === teamB.id && !finished}
@@ -341,29 +372,16 @@ export function GameScreen() {
           onEditRound={openEdit}
         />
 
-        {/* End-of-match actions */}
-        {finished && (
-          <View style={{ marginTop: s(22), gap: s(10) }}>
-            <Button label={t.rematch} onPress={rematch} fullWidth />
-            <Button label={t.newTeams} onPress={newTeams} variant="secondary" fullWidth />
-            <Button
-              label={t.backHome}
-              onPress={() => {
-                setCurrent(null);
-                back();
-              }}
-              variant="ghost"
-              fullWidth
-            />
-          </View>
-        )}
+        </View>
       </ScrollView>
 
+      <TrackingFinishDialog visible={finished} onRematch={rematch} onNewMatch={newTeams} onHome={()=>{setCurrent(null);goHome();}}/>
       <RoundEditor
         visible={editorOpen}
         match={match}
         round={editing}
         presetWinnerTeamId={addTeamId}
+        teamColors={[appearance.teamAColorValue,appearance.teamBColorValue]}
         onClose={() => setEditorOpen(false)}
         onSave={onSave}
         onDelete={onDelete}
@@ -453,6 +471,14 @@ function TeamPanel({
   match,
   team,
   color,
+  dialStyle,
+  dialSize,
+  nameColumnWidth,
+  onNamesLayout,
+  panelHeight,
+  colorChoice,
+  onCycleColor,
+  onCycleStyle,
   total,
   toWin,
   leading,
@@ -467,6 +493,14 @@ function TeamPanel({
   match: Match;
   team: Team;
   color: string;
+  dialStyle: TrackingStyle;
+  dialSize:number;
+  nameColumnWidth:number;
+  onNamesLayout:(height:number)=>void;
+  panelHeight:number;
+  colorChoice:TrackingColor;
+  onCycleColor:()=>void;
+  onCycleStyle:()=>void;
   total: number;
   toWin: number;
   leading: boolean;
@@ -479,10 +513,13 @@ function TeamPanel({
   onEditRound: (r: Round) => void;
 }) {
   const { theme, s } = useTheme();
-  const { t } = useI18n();
+
+  const {t,lang}=useI18n();
   const c = theme.colors;
   const locked = finished || readOnly;
-  const addTextColor = color === c.teamA ? c.onPrimary : c.text;
+  const controlSize=Math.max(44,s(44));
+  const compactNames=useWindowDimensions().width<380;
+  const addTextColor=color==='#AA463B'?'#FFF1DF':'#101D25';
   const playerLine = team.players.filter((p) => p.trim()).join(' & ');
   const pressScale = useRef(new Animated.Value(1)).current;
   const spring = (toValue: number, opts: object) =>
@@ -508,192 +545,31 @@ function TeamPanel({
     .filter((x) => x.r.winnerTeamId === team.id);
 
   return (
-    <AnimatedPressable
-      onPress={locked ? undefined : onAdd}
-      onPressIn={locked ? undefined : () => spring(0.96, { speed: 50, bounciness: 0 })}
-      onPressOut={locked ? undefined : () => spring(1, { friction: 4, tension: 140 })}
-      style={{
-        backgroundColor: c.surface,
-        borderRadius: theme.radius + 4,
-        padding: s(18),
-        borderWidth: 1.5,
-        borderColor: isWinner || leading ? color : c.border,
-        overflow: 'hidden',
-        // Raised 3D look.
-        shadowColor: '#000',
-        shadowOpacity: 0.42,
-        shadowRadius: s(24),
-        shadowOffset: { width: 0, height: s(13) },
-        elevation: 14,
-        transform: [{ scale: pressScale }, { scale: winBeat }],
-      }}
-    >
-      <LinearGradient
-        colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.025)', 'rgba(0,0,0,0.30)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        pointerEvents="none"
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <LinearGradient
-        colors={[color, 'rgba(0,0,0,0)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        pointerEvents="none"
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(3), opacity: 0.9 }}
-      />
-      {/* Glossy top sheen for depth */}
-      <LinearGradient
-        colors={[theme.dark ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.75)', 'rgba(255,255,255,0)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        pointerEvents="none"
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: s(70) }}
-      />
-      <View
-        pointerEvents="none"
-        style={{
-          position: 'absolute',
-          top: s(5),
-          left: s(10),
-          right: s(10),
-          height: 1,
-          backgroundColor: 'rgba(255,255,255,0.14)',
-        }}
-      />
-
-      {/* Top row: identity + big total */}
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(8) }}>
-            <View style={{ width: s(14), height: s(14), borderRadius: s(7), backgroundColor: color }} />
-            <Text numberOfLines={1} style={{ color: c.text, fontSize: s(20), fontWeight: '800', flexShrink: 1 }}>
-              {team.name}
-            </Text>
-            {isWinner && <Text style={{ fontSize: s(18) }}>🏆</Text>}
-          </View>
-          {!!playerLine && (
-            <Text numberOfLines={1} style={{ color: c.textMuted, fontSize: s(13), marginTop: s(3) }}>
-              {playerLine}
-            </Text>
-          )}
-          {/* leading badge */}
-          {leading && (
-            <Text style={{ color, fontSize: s(12), fontWeight: '800', textTransform: 'uppercase', marginTop: s(8) }}>
-              ▲ {t.leading}
-            </Text>
-          )}
-        </View>
-
-        <ScoreRing
-          score={total}
-          target={match.targetScore}
-          color={color}
-          size={s(124)}
-          caption={String(toWin)}
-          pulse={pulse}
-          intensity={intensity}
-        />
+    <Animated.View testID={`tracking-marker-panel-${team.id===match.teams[0].id?'A':'B'}`}
+      style={{minHeight:panelHeight,backgroundColor:c.surface,borderRadius:s(18),borderWidth:1.5,borderColor:color,overflow:'hidden',shadowColor:'#000',shadowOpacity:.45,shadowRadius:s(16),shadowOffset:{width:0,height:s(9)},elevation:9,transform:[{scale:pressScale},{scale:winBeat}]}}>
+      <MatchPanelBevel color={color} radius={s(18)}/>
+      {[{top:s(7),left:s(7),borderTopWidth:2,borderLeftWidth:2},{top:s(7),right:s(7),borderTopWidth:2,borderRightWidth:2},{bottom:s(7),left:s(7),borderBottomWidth:2,borderLeftWidth:2},{bottom:s(7),right:s(7),borderBottomWidth:2,borderRightWidth:2}].map((corner,i)=><View key={i} pointerEvents="none" style={{position:'absolute',width:s(10),height:s(10),borderColor:color,opacity:.7,...corner}}/>)}
+      <View testID="tracking-panel-controls" pointerEvents="box-none" style={{position:'absolute',top:s(8),right:s(6),width:controlSize,height:controlSize*2+s(6),zIndex:3}}>
+          <Pressable testID="tracking-style-cycle" accessibilityRole="button" accessibilityLabel={`${lang==='es'?'Cambiar marcador':'Change counter style'}: ${dialStyle}`} onPress={event=>{event?.stopPropagation();onCycleStyle();}} style={{position:'absolute',top:controlSize+s(6),right:0,width:controlSize,height:controlSize,alignItems:'center',justifyContent:'center',borderRadius:s(10),backgroundColor:c.surfaceAlt,borderWidth:1,borderColor:c.border}}><MaterialCommunityIcons name="gauge" size={22} color={c.textMuted}/></Pressable>
+          <View style={{position:'absolute',top:0,right:0}}><TrackingColorButton teamLabel={team.name} value={colorChoice} onPress={onCycleColor}/></View>
       </View>
-
-      {/* Divider */}
-      <View style={{ height: 1, backgroundColor: c.border, marginVertical: s(14), opacity: 0.6 }} />
-
-      {/* This team's rounds */}
-      {teamRounds.length === 0 ? (
-        <Text style={{ color: c.textMuted, fontSize: s(13), fontStyle: 'italic' }}>
-          {locked ? t.noRoundsYet : t.tapToAdd}
-        </Text>
-      ) : (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: s(8) }}>
-          {teamRounds.map(({ r, n }) => (
-            <Pressable
-              key={r.id}
-              onPress={readOnly ? undefined : () => onEditRound(r)}
-              style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: c.surfaceAlt,
-                borderRadius: 999,
-                paddingLeft: s(8),
-                paddingRight: s(12),
-                paddingVertical: s(7),
-                borderWidth: 1,
-                borderColor: c.border,
-                shadowColor: '#000',
-                shadowOpacity: 0.25,
-                shadowRadius: s(5),
-                shadowOffset: { width: 0, height: s(2) },
-                elevation: 3,
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <View
-                style={{
-                  width: s(22),
-                  height: s(22),
-                  borderRadius: s(11),
-              backgroundColor: color,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: s(7),
-                }}
-              >
-                <Text style={{ color: addTextColor, fontSize: s(11), fontWeight: '800' }}>{n}</Text>
-              </View>
-              <Text style={{ color: c.text, fontSize: s(15), fontWeight: '800' }}>+{r.points}</Text>
-            </Pressable>
-          ))}
+      <View pointerEvents="box-none" style={{paddingHorizontal:s(6),paddingVertical:s(8)}}>
+          <View pointerEvents="none" testID="tracking-team-names" onLayout={event=>onNamesLayout(event.nativeEvent.layout.height)} style={{width:nameColumnWidth,alignSelf:'center',paddingHorizontal:s(4),alignItems:'center',justifyContent:'center',marginBottom:s(6)}}>
+            <Text numberOfLines={2} style={{color:c.text,fontSize:s(compactNames?14:16),lineHeight:s(compactNames?17:20),fontWeight:'800',textAlign:'center'}}>{team.name}</Text>
+            {!!playerLine&&<Text numberOfLines={2} style={{color:c.textMuted,fontSize:s(compactNames?11:12),lineHeight:s(compactNames?14:15),textAlign:'center',marginTop:s(4)}}>{playerLine}</Text>}
+            {isWinner&&<Text style={{position:'absolute',top:0,left:-s(22),fontSize:s(18)}}>🏆</Text>}
+          </View>
+        <View pointerEvents="box-none" style={{position:'relative',height:dialSize,alignItems:'center',justifyContent:'center'}}>
+          <AnimatedPressable testID="tracking-dial-add" accessibilityRole="button" accessibilityLabel={`${t.addPoints}: ${team.name}`} onPress={locked?undefined:onAdd} onPressIn={locked?undefined:()=>spring(.98,{speed:50,bounciness:0})} onPressOut={locked?undefined:()=>spring(1,{friction:4,tension:140})} style={{width:dialSize,height:dialSize}}><TrackingCounter style={dialStyle} score={total} target={match.targetScore} color={color} size={dialSize} remaining={toWin} pulse={pulse} intensity={intensity} label={team.name}/></AnimatedPressable>
         </View>
-      )}
+        <View pointerEvents="none" style={{minHeight:s(24),paddingTop:s(6),paddingBottom:s(6),alignItems:'center',justifyContent:'center'}}>{leading&&<Text style={{color:c.text,fontSize:s(10),lineHeight:s(12),fontWeight:'800'}}>▲ {t.leading.toUpperCase()}</Text>}</View>
+        <View pointerEvents="box-none" style={{height:s(44),marginTop:s(2)}}>{!locked&&<AnimatedPressable testID="tracking-add-points" accessibilityRole="button" accessibilityLabel={`${t.addPoints}: ${team.name}`} onPress={onAdd} onPressIn={()=>spring(.98,{speed:50,bounciness:0})} onPressOut={()=>spring(1,{friction:4,tension:140})}><LinearGradient colors={trackingButtonGradient(dialStyle,color)} start={{x:0,y:0}} end={{x:1,y:1}} style={{alignSelf:'stretch',borderRadius:dialStyle==='orbital'?999:s(12),borderWidth:1,borderColor:color,minHeight:s(44),flexDirection:'row',alignItems:'center',justifyContent:'center',gap:s(8),paddingHorizontal:s(12)}}><Feather name="plus-circle" size={s(20)} color={addTextColor}/><Text style={{color:addTextColor,fontSize:s(14),fontWeight:'900'}}>{t.addPoints}</Text></LinearGradient></AnimatedPressable>}</View>
 
-      {/* Add-points button */}
-      {!locked && (
-        <LinearGradient
-          colors={color === c.teamA ? ['#FFE08A', color, '#8B581F'] : ['#D1695E', color, '#5E1F1A']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{
-            marginTop: s(14),
-            borderRadius: 999,
-            paddingVertical: s(13),
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: s(8),
-            borderWidth: 1,
-            borderColor: color === c.teamA ? '#F6D37B' : '#C86256',
-            shadowColor: color,
-            shadowOpacity: 0.42,
-            shadowRadius: s(13),
-            shadowOffset: { width: 0, height: s(6) },
-            elevation: 7,
-            overflow: 'hidden',
-          }}
-        >
-          <LinearGradient
-            colors={['rgba(255,255,255,0.36)', 'rgba(255,255,255,0.02)', 'rgba(0,0,0,0.22)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            pointerEvents="none"
-            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-          />
-          <Feather name="plus-circle" size={s(20)} color={addTextColor} />
-          <Text
-            style={{
-              color: addTextColor,
-              fontSize: s(16),
-              fontWeight: '900',
-              letterSpacing: 0.3,
-              textShadowColor: 'rgba(0,0,0,0.35)',
-              textShadowOffset: { width: 0, height: 1 },
-              textShadowRadius: 1,
-            }}
-          >
-            {t.addPoints}
-          </Text>
-        </LinearGradient>
-      )}
-    </AnimatedPressable>
+        <ScrollView testID="tracking-data-row" horizontal showsHorizontalScrollIndicator={false} style={{marginTop:s(8),height:s(44)}} contentContainerStyle={{gap:s(6),alignItems:'center'}}>
+          {match.rounds.length===0&&<Text style={{color:c.textMuted,fontSize:s(11),fontWeight:'700'}}>{t.rounds.toUpperCase()} · {teamRounds.length}</Text>}
+          {teamRounds.map(({r,n})=><Pressable key={r.id} onPress={readOnly?undefined:()=>onEditRound(r)} style={({pressed})=>({flexDirection:'row',alignItems:'center',gap:s(4),paddingHorizontal:s(9),height:s(44),borderRadius:s(8),backgroundColor:c.surfaceAlt,borderWidth:1,borderColor:c.border,opacity:pressed?.7:1})}><Text style={{color:c.textMuted,fontSize:s(11)}}>#{n}</Text><Text testID="tracking-data-points" style={{color:c.text,fontSize:s(18),fontWeight:'900'}}>{r.points}</Text></Pressable>)}
+        </ScrollView>
+      </View>
+    </Animated.View>
   );
 }
