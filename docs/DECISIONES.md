@@ -12,7 +12,7 @@ Enlaces cold/warm: eventosSO individuales permiten repetir URL tras Home; evento
 
 ## ON-D-056 / 2026-10-11 — Cierre local y APK0.1.3/code4 para dos Android
 
-Fuente humana posterior "Ya estamos ready para crear el APK... probar shared/jugar online con amigos desde devices" ratifica check-in local y APK de ON-D-052 y levanta espera de revisión. Autoriza candidato acumulado pertinente5486, firma/paquete de prueba existentes y APK común para ambos, transferencia local LAN si posible. No push, stores/deploy ni upload externo; website independiente no se mezcla. Versión de prueba elegida0.1.3/code4 para actualizar0.1.2/code3 sin borrar datos. Android/NativeShare/deepLinks/voz físicos quedan siguiente validación, no resultado inferido de617tests.
+Fuente humana posterior "Ya estamos ready para crear el APK... probar shared/jugar online con amigos desde devices" ratifica check-in local y APK de ON-D-052 y levanta espera de revisión. Autoriza candidato acumulado pertinente5486, firma/paquete de prueba existentes y APK común para ambos, transferencia local LAN si posible. No push, stores/deploy ni upload externo; website independiente no se mezcla. Versión de prueba elegida0.1.3/code4 para actualizar0.1.2/code3 sin borrar datos. Completado: commit fuente bb206cd, build local exitoso y APK/firma/hash verificados; evidencia en CONTEXTO. Sin push. Android/NativeShare/deepLinks/voz físicos quedan siguiente validación, no resultado inferido de617tests.
 
 ## ON-D-053 / 2026-10-11 — Aceptación manual Poker y revisión previa a APK
 

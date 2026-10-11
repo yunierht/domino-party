@@ -1,5 +1,14 @@
 # Contexto de Domino Codex Online
 
+## 2026-10-11 — APK 0.1.3/code4 generado y verificado
+
+Check-in local del candidato acumulado: bb206cdbe64388f7ff01940496d52d5ef7c72e55, rama codex/online-test-candidate-013, 276 archivos; staging sin secretos/artefactos y diff-check aprobados. Fuente copiada a C:/do-5486: 1,187 archivos verificados por SHA256. Build autorizado finalizó BUILD SUCCESSFUL in 3m 46s; no push/publicación/despliegue.
+
+APK: [Domino-Online-Test-0.1.3-code4.apk](../.release-audit/candidate-013/Domino-Online-Test-0.1.3-code4.apk), 202,763,228 bytes, SHA256 32e6e6e5e04958102b67e1243ab6f170d732d863650a9d1c2ec25db78999b71d. Package com.nextcodestudios.dominoonline.test, versión 0.1.3/code4, minSDK24/target36, arm64-v8a/armeabi-v7a. Firma APKv2 válida; certificado fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c coincide con code3: actualizar sin desinstalar. [Prueba del artefacto](../.release-audit/candidate-013/apk-proof.json), [fuentes/bundle](../.release-audit/candidate-013/bundle-proof.json), [log build](../backend/domino-online/.local/candidate-013-android-build.log). Seis fuentes pertinentes idénticas en sourcemap nativo y endpoint LAN presente en bundle.
+
+Transferencia local: http://192.168.1.194:8800/Domino-Online-Test-0.1.3-code4.apk; servidor restringe rutas a APK/README. Backend health http://192.168.1.194:8792/health responde desde PC. No firewall cambiado; descarga/acceso desde teléfonos no comprobados. Instalar mismo APK en ambos en misma Wi-Fi; PC/backend deben seguir encendidos. Pendiente prueba física de selector Share, enlaces cold/warm, aceptación manual, sincronización/manos privadas y voz opt-in. LAN no acredita Internet público. Documentación guardada en cierre separado; código fuente del APK permanece bb206cd.
+
+
 ## 2026-10-11 — Candidato0.1.3 listo para check-in/build local
 
 [ON-D-054/055/056](DECISIONES.md#on-d-054--2026-10-11--aislamiento-de-sesiones-online) incorpora fixes adversariales, Share de plataforma y aprobación humana de continuar commit/APK. Solo5486, HEADbasee135055, diffs acumulados preservados. CódigoAndroid0.1.3/code4, paquete com.nextcodestudios.dominoonline.test/scheme domino-online-test, firma de prueba existente; no publicacion/push/deploy. Check-in/build en preparación; aquí se registrará resultado real.
