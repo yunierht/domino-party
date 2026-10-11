@@ -1,10 +1,11 @@
+import {modalCloseMock} from '../components/modalCloseMock.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),React=require('react'),ts=require('typescript'),{act,create}=require('react-test-renderer');
 globalThis.IS_REACT_ACT_ENVIRONMENT=true;
-function load(file,deps={}){const m={exports:{}};new Function('require','module','exports',ts.transpileModule(fs.readFileSync(new URL(file,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React,esModuleInterop:true}}).outputText)(id=>deps[id],m,m.exports);return m.exports;}
+function load(file,deps={}){const m={exports:{}};new Function('require','module','exports',ts.transpileModule(fs.readFileSync(new URL(file,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React,esModuleInterop:true}}).outputText)(id=>id.endsWith('/ModalCloseButton')?modalCloseMock:deps[id],m,m.exports);return m.exports;}
 const {THEMES}=load('../theme/themes.ts'),{STRINGS}=load('../i18n/strings.ts'),types=load('../types.ts');
 const colors={yellow:'#D7A63D',green:'#65C59A',red:'#AA463B',blue:'#68B9F5'};
 async function setup(canEdit=true){

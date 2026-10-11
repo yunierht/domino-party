@@ -1,6 +1,7 @@
+import {GoldPressable} from './GoldPressable';
 import {LinearGradient} from 'expo-linear-gradient';
-import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import React, {useRef} from 'react';
+import { Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -23,24 +24,69 @@ export function NumberPad({
   const { theme, s } = useTheme();
   const c = theme.colors;
 
+  const current = useRef(value);
+  current.current = value;
+  const change = (next: string) => {current.current=next;onChange(next);};
   const press = (d: string) => {
-    let next = (value + d).replace(/^0+(?=\d)/, ''); // strip leading zeros
+    let next = (current.current + d).replace(/^0+(?=\d)/, ''); // strip leading zeros
     if (next.length > maxLen) return;
-    onChange(next);
+    change(next);
   };
-  const back = () => onChange(value.slice(0, -1));
-  const clear = () => onChange('');
+  const back = () => change(current.current.slice(0, -1));
+  const clear = () => change('');
 
-  const Key = ({
+  const row = (keys: React.ReactNode) => (
+    <View style={{ flexDirection: 'row', gap:s(8),marginBottom:compact?s(8):s(10) }}>{keys}</View>
+  );
+
+  return (
+    <View>
+      {row(
+        <>
+          <Key compact={compact} label="1" onPress={() => press('1')} />
+          <Key compact={compact} label="2" onPress={() => press('2')} />
+          <Key compact={compact} label="3" onPress={() => press('3')} />
+        </>,
+      )}
+      {row(
+        <>
+          <Key compact={compact} label="4" onPress={() => press('4')} />
+          <Key compact={compact} label="5" onPress={() => press('5')} />
+          <Key compact={compact} label="6" onPress={() => press('6')} />
+        </>,
+      )}
+      {row(
+        <>
+          <Key compact={compact} label="7" onPress={() => press('7')} />
+          <Key compact={compact} label="8" onPress={() => press('8')} />
+          <Key compact={compact} label="9" onPress={() => press('9')} />
+        </>,
+      )}
+      {row(
+        <>
+          <Key compact={compact} label="C" onPress={clear} />
+          <Key compact={compact} label="0" onPress={() => press('0')} />
+          <Key compact={compact} icon="delete" onPress={back} />
+        </>,
+      )}
+    </View>
+  );
+}
+
+function Key({
     onPress,
     label,
     icon,
+    compact,
   }: {
     onPress: () => void;
     label?: string;
     icon?: keyof typeof Feather.glyphMap;
-  }) => (
-    <Pressable
+    compact: boolean;
+  }) {
+  const {theme,s}=useTheme(),c=theme.colors;
+  return (
+    <GoldPressable preserveChildKeys gold={state=>state.pressed}
       onPress={onPress}
       style={({ pressed }) => ({
         flex: 1,
@@ -62,43 +108,6 @@ export function NumberPad({
       ) : (
         <Text style={{ color: c.text, fontSize: s(23), fontWeight: '800' }}>{label}</Text>
       )}
-    </Pressable>
-  );
-
-  const row = (keys: React.ReactNode) => (
-    <View style={{ flexDirection: 'row', gap:s(8),marginBottom:compact?s(8):s(10) }}>{keys}</View>
-  );
-
-  return (
-    <View>
-      {row(
-        <>
-          <Key label="1" onPress={() => press('1')} />
-          <Key label="2" onPress={() => press('2')} />
-          <Key label="3" onPress={() => press('3')} />
-        </>,
-      )}
-      {row(
-        <>
-          <Key label="4" onPress={() => press('4')} />
-          <Key label="5" onPress={() => press('5')} />
-          <Key label="6" onPress={() => press('6')} />
-        </>,
-      )}
-      {row(
-        <>
-          <Key label="7" onPress={() => press('7')} />
-          <Key label="8" onPress={() => press('8')} />
-          <Key label="9" onPress={() => press('9')} />
-        </>,
-      )}
-      {row(
-        <>
-          <Key label="C" onPress={clear} />
-          <Key label="0" onPress={() => press('0')} />
-          <Key icon="delete" onPress={back} />
-        </>,
-      )}
-    </View>
+    </GoldPressable>
   );
 }

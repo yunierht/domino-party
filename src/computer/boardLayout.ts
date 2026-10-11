@@ -118,14 +118,14 @@ export function resolveScreenDrop(point: Point, targets: { end: End; point: Poin
 export interface BoardCamera { x: number; y: number; scale: number }
 export interface ChainBounds { left: number; top: number; right: number; bottom: number }
 /** Rendered tile edges plus playable end slots, in virtual-canvas coordinates. */
-export function chainBounds(board: Tile[], openingId: string | null, metrics: ReturnType<typeof chainMetrics>): ChainBounds {
+export function chainBounds(board: Tile[], openingId: string | null, metrics: ReturnType<typeof chainMetrics>, includePlayableEnds=true): ChainBounds {
   const anchor = Math.max(0, board.findIndex(tile => tile.id === openingId));
   const boxes = board.map((_, index) => {
     const p = chainSlot(index - anchor, metrics, board, openingId);
     return { x: p.x, y: p.y, w: p.width * p.scale + 4, h: p.height * p.scale * 0.86 + 4 };
   });
   const ends = endpointOffsets(board, openingId);
-  for (const end of board.length ? ['left', 'right'] as const : ['right'] as const) {
+  for (const end of includePlayableEnds||!board.length ? (board.length ? ['left', 'right'] as const : ['right'] as const) : []) {
     const p = chainSlot(ends[end], metrics, board, openingId);
     boxes.push({ x: p.x, y: p.y, w: metrics.stepX, h: metrics.stepY });
   }
@@ -134,7 +134,7 @@ export function chainBounds(board: Tile[], openingId: string | null, metrics: Re
 }
 /** Keep visible chains stationary; fit only when space is needed or explicitly reset. */
 export function fitBoardCamera(bounds: ChainBounds, viewport: { width: number; height: number }, canvas: { width: number; height: number }, current: BoardCamera, reset = false): BoardCamera {
-  const margin = Math.min(22, Math.max(6, Math.min(viewport.width, viewport.height) * 0.06));
+  const margin = 6;
   const scale = Math.min(1, (viewport.width - margin * 2) / Math.max(1, bounds.right - bounds.left),
     (viewport.height - margin * 2) / Math.max(1, bounds.bottom - bounds.top), reset ? 1 : current.scale);
   const centerX = (bounds.left + bounds.right) / 2 - canvas.width / 2;
@@ -144,7 +144,7 @@ export function fitBoardCamera(bounds: ChainBounds, viewport: { width: number; h
     viewport.height / 2 + current.y + (bounds.top - canvas.height / 2) * current.scale >= margin &&
     viewport.height / 2 + current.y + (bounds.bottom - canvas.height / 2) * current.scale <= viewport.height - margin;
   if (!reset && fits) return current;
-    if (reset) return { x: -centerX * scale, y: -centerY * scale, scale };
+    if (reset) return { x: -centerX * scale || 0, y: -centerY * scale || 0, scale };
   // Clamp to the nearest valid frame, rather than shifting visible tiles to center.
   const clamp = (value: number, low: number, high: number) => Math.max(low, Math.min(high, value));
   return {
@@ -164,4 +164,11 @@ export function screenToBoard(point: Point, viewport: { width: number; height: n
 /** Preserve screen-space tile centers when the hand frees or takes table space. */
 export function resizedBoardCamera(current: BoardCamera, previous: {width:number;height:number}, next: {width:number;height:number}): BoardCamera {
   return { ...current, x: current.x + (previous.width-next.width)/2, y: current.y + (previous.height-next.height)/2 };
+}
+
+/** A resized surface keeps its existing screen positions. Reframe only if the
+ * actual placed chain no longer fits; extra room alone never zooms or recenters. */
+export function reconcileBoardCamera(bounds:ChainBounds,viewport:{width:number;height:number},canvas:{width:number;height:number},current:BoardCamera,previous:{width:number;height:number},manual:boolean):BoardCamera{
+ const target=fitBoardCamera(bounds,viewport,canvas,current);
+ return Math.abs(target.x-current.x)<.25&&Math.abs(target.y-current.y)<.25&&Math.abs(target.scale-current.scale)<.0001?current:target;
 }

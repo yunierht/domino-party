@@ -9,3 +9,8 @@ export function handLayout(count: number, width: number, maxHeight: number) {
   }
   return best;
 }
+/** Reserve the measured wood/messages and controls before choosing hand tiles.
+ * The chain keeps its minimum usable viewport even with long voice notices. */
+export function handTrayHeight(height:number,opponentHeight:number,woodHeight:number,actionsHeight:number){
+ return Math.max(52,height-48-opponentHeight-25-80-woodHeight-actionsHeight-6);
+}

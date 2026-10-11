@@ -5,6 +5,7 @@ import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'ex
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
+import {ModalCloseButton} from '../components/ModalCloseButton';
 import { useGame } from '../state/GameContext';
 import { useNav } from '../nav/NavContext';
 import { usePrefs } from '../state/PrefsContext';
@@ -21,7 +22,7 @@ type Status = 'idle' | 'connecting' | 'live' | 'notfound' | 'error';
 
 export function WatchScreen() {
   const { theme, s } = useTheme();
-  const { t } = useI18n();
+  const { t,lang } = useI18n();
   const { liveUid, displayName, setDisplayName, adoptGame } = useGame();
   const { go, pendingWatchCode, clearWatchCode, openWatchHistory } = useNav();
   const { watchWinnerAudio, setWatchWinnerAudio, voice } = usePrefs();
@@ -368,9 +369,7 @@ export function WatchScreen() {
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: s(24) }}>
               <Text style={{ color: '#fff', fontSize: s(20), fontWeight: '900' }}>{t.scanQrCode}</Text>
-              <Pressable onPress={() => setScannerOpen(false)} hitSlop={12} style={{ padding: s(8) }}>
-                <Feather name="x" size={s(26)} color="#fff" />
-              </Pressable>
+              <ModalCloseButton es={lang==='es'} positioned={false} onPress={()=>setScannerOpen(false)}/>
             </View>
             <View style={{ alignItems: 'center' }}>
               <View

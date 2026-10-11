@@ -3,10 +3,9 @@ import { Image, View, ImageSourcePropType } from 'react-native';
 import { DRINKS, normalizeDrinkGift } from './drinks';
 import type { DrinkGift } from './drinks';
 import { isAnimatedOpponent, scheduleOpponentFrames } from './opponentDrink';
-import type { OpponentId } from './opponents';
 import { DRINK_FRAMES } from './drinkFrames';
 
-const REST: Partial<Record<OpponentId, ImageSourcePropType>> = {
+const REST: Partial<Record<string, ImageSourcePropType>> = {
   yuni: require('../../assets/opponent-drinks/yuni/pose-09.png'),
   yoi: require('../../assets/opponent-drinks/yoi/pose-09.png'),
   diego: require('../../assets/opponent-drinks/diego/pose-09.png'),
@@ -19,7 +18,7 @@ const restStyle = { position: 'absolute' as const, left: '-14%' as const, top: '
 const poseStyle = { position: 'absolute' as const, left: '-24.6667%' as const, top: '-4%' as const, width: '149.3334%' as const, height: '110%' as const };
 
 type Props = {
-  opponentId: OpponentId; name: string; gift: DrinkGift; invitation: DrinkGift;
+  opponentId: string; name: string; gift: DrinkGift; invitation: DrinkGift;
   source: ImageSourcePropType; height: number; es: boolean;
 };
 

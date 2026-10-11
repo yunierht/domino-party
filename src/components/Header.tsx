@@ -1,3 +1,5 @@
+import {HomeButton} from './HomeButton';
+import {useI18n} from '../i18n/I18nContext';
 import React from 'react';
 import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -25,6 +27,7 @@ export function Header({
   leftAction?:React.ReactNode;
   onBackPress?:()=>void;
 }) {
+  const {lang}=useI18n();
   const { theme, s } = useTheme();
   const { back, canGoBack } = useNav();
   const c = theme.colors;
@@ -42,19 +45,19 @@ export function Header({
       }}
     >
       {showBack && canGoBack ? (
-        <Pressable
+        <><Pressable
+          accessibilityRole="button" accessibilityLabel={lang==='es'?'Volver':'Back'}
           onPress={onBackPress??back}
-          hitSlop={12}
-          style={{ paddingRight: s(12), paddingVertical: s(8) }}
+          style={{width:44,height:44,alignItems:'center',justifyContent:'center'}}
         >
           <Text style={{ color: c.primary, fontSize: s(26), fontWeight: '700' }}>
             ‹
           </Text>
-        </Pressable>
+        </Pressable><HomeButton es={lang==='es'} color={c.primary}/></>
       ) : (
         <View style={{ width: s(8) }} />
       )}
-      {leftAction}
+      {leftAction}{leftAction&&<HomeButton es={lang==='es'} color={c.primary}/>}
       {onTitlePress ? (
         <Pressable
           onPress={onTitlePress}

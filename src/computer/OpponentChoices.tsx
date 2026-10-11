@@ -17,11 +17,11 @@ export function OpponentChoices({selected,onSelect}:{selected:OpponentId;onSelec
 }
 
 /** Pre-game carousel retains the original domino setup dimensions and gestures. */
-export function OpponentCarousel({selected,onSelect,es}:{selected:OpponentId;onSelect:(id:OpponentId)=>void;es:boolean}) {
+export function OpponentCarousel({selected,onSelect,es,excludedId}:{selected:OpponentId;onSelect:(id:OpponentId)=>void;es:boolean;excludedId?:string}) {
  return <View>
   <ScrollView testID="opponent-carousel" horizontal showsHorizontalScrollIndicator={false} snapToInterval={124}
    decelerationRate="fast" keyboardShouldPersistTaps="handled" contentContainerStyle={{gap:8,paddingBottom:8}}>
-   {OPPONENTS.map(item=><Pressable key={item.id} accessibilityRole="button" accessibilityLabel={item.name}
+   {OPPONENTS.filter(item=>item.id!==excludedId).map(item=><Pressable key={item.id} accessibilityRole="button" accessibilityLabel={item.name}
     accessibilityState={{selected:item.id===selected}} onPress={()=>onSelect(item.id)}
     style={{width:116,overflow:'hidden',borderRadius:12,borderWidth:2,borderColor:item.id===selected?C.gold:C.line,backgroundColor:C.surface}}>
     <Image source={item.image} resizeMode="cover" style={{width:'100%',height:90}}/>

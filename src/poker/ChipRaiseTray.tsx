@@ -1,3 +1,4 @@
+import {GoldPressable} from '../components/GoldPressable';
 import React,{useEffect,useRef} from 'react';
 import {View,Text,ScrollView,Pressable} from 'react-native';
 import {DenominationChip,BankrollChipFace} from '../blackjack/BettingTray';
@@ -18,7 +19,7 @@ export function RaiseControls({value,min,max,base,enabled,es,selectionKey,vertic
   if(enabled&&valid)timer.current=setTimeout(()=>{timer.current=null;latest.current();},3000);
   return cancel;
  },[value,min,max,base,enabled,valid,selectionKey]);
- return <View testID="poker-raise-controls" style={{width:vertical?70:undefined,flexDirection:vertical?'column':'row',alignItems:'center',justifyContent:'center'}}><Pressable accessibilityRole="button" disabled={!enabled} onPress={()=>{cancel();onClear();}} style={{width:vertical?70:undefined,paddingHorizontal:vertical?4:8,paddingVertical:vertical?6:8}}><Text style={{color:C.muted,fontSize:12,textAlign:'center'}}>{es?'Limpiar':'Clear'}</Text></Pressable><Pressable testID="poker-confirm-raise" accessibilityRole="button" accessibilityHint={`${es?'Subida mínima':'Minimum raise'} ${Math.min(min,max)}`} accessibilityState={{disabled:!enabled||!valid}} disabled={!enabled||!valid} onPress={confirm} style={{width:vertical?70:undefined,paddingHorizontal:vertical?4:8,paddingVertical:vertical?6:8,backgroundColor:'transparent',opacity:enabled&&valid?1:.4}}><Text style={{fontWeight:'700',fontSize:12,color:C.goldLight,textAlign:'center'}}>{es?'Confirmar':'Confirm'}</Text></Pressable></View>;
+ return <View testID="poker-raise-controls" style={{width:vertical?70:undefined,flexDirection:vertical?'column':'row',alignItems:'center',justifyContent:'center'}}><GoldPressable gold={false} accessibilityRole="button" disabled={!enabled} onPress={()=>{cancel();onClear();}} style={{width:vertical?70:undefined,paddingHorizontal:vertical?4:8,paddingVertical:vertical?6:8,backgroundColor:'transparent'}}><Text style={{color:C.muted,fontSize:12,textAlign:'center'}}>{es?'Limpiar':'Clear'}</Text></GoldPressable><GoldPressable finish gold={false} testID="poker-confirm-raise" accessibilityRole="button" accessibilityHint={`${es?'Subida mínima':'Minimum raise'} ${Math.min(min,max)}`} accessibilityState={{disabled:!enabled||!valid}} disabled={!enabled||!valid} onPress={confirm} style={{width:vertical?70:undefined,paddingHorizontal:vertical?4:8,paddingVertical:vertical?6:8,backgroundColor:'transparent',opacity:enabled&&valid?1:.4}}><Text style={{fontWeight:'700',fontSize:12,color:C.goldLight,textAlign:'center'}}>{es?'Confirmar':'Confirm'}</Text></GoldPressable></View>;
 }
 export function ChipRaiseTray({value,max,enabled,onAdd,balance=max-value}:RaiseProps&{balance?:number}){
  const counts=bankrollCounts(balance);

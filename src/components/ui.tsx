@@ -1,3 +1,4 @@
+import {ButtonShine} from './ButtonShine';
 import React from 'react';
 import {
   ActivityIndicator,
@@ -13,6 +14,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme/ThemeContext';
+import {primaryButtonFinish,PRIMARY_BUTTON_GLOSS} from './primaryButtonFinish';
 
 // ---- Button ----------------------------------------------------------------
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -84,18 +86,14 @@ export function Button({
           {
             alignSelf: fullWidth ? 'stretch' : 'auto',
             transform: [{ translateY: pressed ? s(2) : 0 }],
-            shadowColor: c.primary,
-            shadowOpacity: pressed ? 0.18 : 0.38,
-            shadowRadius: pressed ? s(8) : s(16),
-            shadowOffset: { width: 0, height: pressed ? s(3) : s(9) },
-            elevation: pressed ? 4 : 10,
+            ...primaryButtonFinish(c.gradient,c.primary,pressed,s).shadow,
           },
           style,
         ]}
       >
         {({ pressed }) => (
           <LinearGradient
-            colors={pressed ? [c.gradient[1], c.gradient[0]] : ['#FFE08A', c.gradient[0], c.gradient[1]]}
+            colors={primaryButtonFinish(c.gradient,c.primary,pressed,s).colors}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={[
@@ -108,7 +106,7 @@ export function Button({
             ]}
           >
             <LinearGradient
-              colors={['rgba(255,255,255,0.42)', 'rgba(255,255,255,0.06)', 'rgba(0,0,0,0.18)']}
+              colors={PRIMARY_BUTTON_GLOSS}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
               pointerEvents="none"
@@ -125,7 +123,7 @@ export function Button({
                 backgroundColor: 'rgba(255,255,255,0.45)',
               }}
             />
-            {content}
+            <ButtonShine paused={disabled}/>{content}
           </LinearGradient>
         )}
       </Pressable>
@@ -174,7 +172,7 @@ export function Button({
           style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: radius }}
         />
       )}
-      {content}
+      <ButtonShine paused={disabled}/>{content}
     </Pressable>
   );
 }

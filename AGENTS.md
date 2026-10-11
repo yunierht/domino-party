@@ -46,3 +46,7 @@ Al completar las verificaciones y el check-in local autorizados del candidato ac
 ## Congelamiento renovado del candidato aprobado — 2026-10-07
 
 El usuario confirma pruebas satisfactorias en el telefono y autoriza incorporar y hacer push del candidato actual. Al completar este check-in, TODO codigo de este proyecto queda congelado: antes de futuros cambios pedir y obtener nueva autorizacion humana previa explicita. Lecturas y pruebas permitidas. Las excepciones historicas no autorizan nuevas modificaciones. No implica publicacion en tiendas ni despliegue. Fuente y alcance en [docs/DECISIONES.md](docs/DECISIONES.md#2026-10-07--cierre-git-autorizado-y-congelamiento-renovado); evidencia y estado Git en docs/CONTEXTO.md.
+
+## Excepción posterior Online — 2026-10-09
+
+El usuario levanta el congelamiento de `C:\Development\Dominos Codex Online` para los cambios que defina en esta sesión/conversación: no pedir autorización repetida por cada edición solicitada. Sustituye en este alcance la obligación anterior de autorización por edición; conserva el historial. No aplica a otros proyectos ni autoriza funcionalidades no pedidas, commit, push o despliegue. Fuente y alcance: [ON-D-016](docs/DECISIONES.md#on-d-016--2026-10-09--desbloqueo-de-online-durante-la-conversación).

@@ -1,34 +1,51 @@
 {
   "expo": {
-    "name": "Domino Social Club",
-    "slug": "domino-party",
-    "version": "1.0.13",
-    "scheme": "dominoparty",
+    "name": "Domino Online Test",
+    "slug": "domino-online-test",
+    "version": "0.1.3",
+    "scheme": "domino-online-test",
     "orientation": "portrait",
     "icon": "./assets/social-club-icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.yht.dominoparty",
-      "buildNumber": "12",
+      "bundleIdentifier": "com.nextcodestudios.dominoonline.test",
+      "buildNumber": "1",
       "icon": "./assets/social-club-ios-icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": []
-      }
+        "UIBackgroundModes": [],
+        "NSMicrophoneUsageDescription": "Domino Online Test uses your microphone for a voice call you start or accept.",
+        "NSCameraUsageDescription": "Domino Online Test uses your camera for your avatar photo or to scan an invitation.",
+        "NSLocalNetworkUsageDescription": "Connect to the Domino Online test server on your Wi-Fi to play and make voice calls.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false,
+          "NSAllowsLocalNetworking": false,
+          "NSExceptionDomains": {
+            "192.168.1.194": {
+              "NSIncludesSubdomains": false,
+              "NSExceptionAllowsInsecureHTTPLoads": true
+            }
+          }
+        }
+      },
+      "deploymentTarget": "16.4"
     },
     "android": {
-      "package": "com.yht.dominoparty",
-      "versionCode": 26,
+      "package": "com.nextcodestudios.dominoonline.test",
+      "versionCode": 4,
       "blockedPermissions": [
-        "android.permission.ACTIVITY_RECOGNITION",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.ACTIVITY_RECOGNITION"
       ],
       "adaptiveIcon": {
         "backgroundColor": "#04130D",
         "foregroundImage": "./assets/social-club-adaptive-foreground.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "favicon": "./assets/social-club-favicon.png"
@@ -58,13 +75,15 @@
       ],
       "expo-status-bar",
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      "./plugins/withOnlineLan",
+      "./plugins/withOnlineInvitationLinks"
     ],
-    "owner": "yunierht",
     "extra": {
       "eas": {
-        "projectId": "4ca6648b-ec5a-4b08-b425-519db3c4ebd7"
+        "projectId": "9d4cdf14-2853-4b0f-86f4-03108c445056"
       }
-    }
+    },
+    "owner": "yunierht"
   }
 }

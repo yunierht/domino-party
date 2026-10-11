@@ -7,7 +7,7 @@ import ts from 'typescript';
 import {deal,legalEnds,play} from './engine.ts';
 globalThis.IS_REACT_ACT_ENVIRONMENT=true;
 for(const sound of [false,true]) for(const gesture of ['tap','drag','accessibility','keyboard','confirm']) test(`last legal tile: ${gesture}, sound=${sound}`,async()=>{
- let handlers;let sounds=0;const deps={react:React,'react-native':{View:'View',Platform:{OS:'android'},PanResponder:{create:h=>{handlers=h;return{panHandlers:{}};}}},'./DominoTile':{DominoTile:()=>React.createElement('Tile')},'../state/PrefsContext':{usePrefs:()=>({vibration:false,matchingTiles:true,tileSound:sound})},'expo-haptics':{},'../sound/sounds':{playTileMove:()=>sounds++}};
+ let handlers;let sounds=0;const deps={'../components/GameSettingsBoundary':{useTableVisible:()=>true},react:React,'react-native':{View:'View',Platform:{OS:'android'},PanResponder:{create:h=>{handlers=h;return{panHandlers:{}};}}},'./DominoTile':{DominoTile:()=>React.createElement('Tile')},'../state/PrefsContext':{usePrefs:()=>({vibration:false,matchingTiles:true,tileSound:sound})},'expo-haptics':{},'../sound/sounds':{playTileMove:()=>sounds++}};
  const mod={exports:{}};const code=ts.transpileModule(readFileSync(new URL('./DraggableDomino.tsx',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React,esModuleInterop:true}}).outputText;
  new Function('require','module','exports',code)(id=>deps[id],mod,mod.exports);
  const tile={id:'3-6',a:3,b:6};let game={...deal('Player',100),turn:'human',board:[{id:'6-3',a:6,b:3}],openingId:'6-3',hands:{human:[tile],computer:[{id:'0-1',a:0,b:1}]},result:null};

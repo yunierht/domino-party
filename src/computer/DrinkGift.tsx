@@ -1,3 +1,4 @@
+import {GoldPressable} from '../components/GoldPressable';
 import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Image, Pressable, Text, View } from 'react-native';
 import { DRINKS, DrinkGift, DrinkId } from './drinks';
@@ -40,11 +41,11 @@ export function DrinkInviteButton({ es, onPress, active, compact }: { es: boolea
     return () => { clearInterval(timer); bounce.stopAnimation(); bounce.setValue(0); };
   }, [reduced, active, bounce]);
   return <Animated.View style={{ transform: [{ translateY: bounce }] }}>
-    <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Invitar bebida virtual' : 'Buy me a drink'} onPress={onPress}
+    <GoldPressable finish gold={false} accessibilityRole="button" accessibilityLabel={es ? 'Invitar bebida virtual' : 'Buy me a drink'} onPress={onPress}
       style={{ minHeight: 44, padding: 6, borderWidth: 1, borderColor: C.gold, borderRadius: 10, backgroundColor: '#223B2D', alignItems: 'center' }}>
       {!compact && <Text style={{ fontSize: 17 }}>🍺</Text>}
       <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.9} style={{ color: C.goldLight, fontSize: 9, textAlign: 'center', fontWeight: '600' }}>{es ? 'Invitar bebida' : 'Buy me a drink'}</Text>
-    </Pressable>
+    </GoldPressable>
   </Animated.View>;
 }
 
@@ -52,12 +53,12 @@ export function DrinkChoices({ es, choose }: { es: boolean; choose: (id: DrinkId
   return <View style={{ gap: 8 }}>
     <Text style={{ color: C.muted, fontSize: 12, marginBottom: 5 }}>{es ? 'Un detalle virtual, totalmente gratis.' : 'A virtual treat, completely free.'}</Text>
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-    {DRINKS.map(beer => <Pressable key={beer.id} accessibilityRole="button" accessibilityLabel={`${beer.name} · ${es ? 'Gratis' : 'Free'}`} onPress={() => choose(beer.id)}
+    {DRINKS.map(beer => <GoldPressable finish gold={false} key={beer.id} accessibilityRole="button" accessibilityLabel={`${beer.name} · ${es ? 'Gratis' : 'Free'}`} onPress={() => choose(beer.id)}
       style={{ width: '48%', alignItems: 'center', gap: 3, paddingHorizontal: 6, paddingVertical: 7, backgroundColor: C.raised, borderRadius: 12, borderColor: C.line, borderWidth: 1 }}>
       <DrinkIllustration id={beer.id} height={54} />
       <Text style={{ color: C.ivory, fontSize: 12 }}>{beer.name}</Text>
       <Text style={{ color: C.mint, fontSize: 11 }}>{es ? 'Gratis' : 'Free'}</Text>
-    </Pressable>)}
+    </GoldPressable>)}
     </View>
   </View>;
 }

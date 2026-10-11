@@ -1,3 +1,4 @@
+import {ButtonShine} from './ButtonShine';
 import React,{useRef} from 'react';
 import {Animated,Easing,Pressable,View} from 'react-native';
 import {Feather} from '@expo/vector-icons';
@@ -102,6 +103,7 @@ export function AppearanceSpinner({onSpin}:{onSpin?:()=>void}) {
               <Feather name="refresh-cw" size={s(17)} color={c.onPrimary} />
             </Animated.View>
           </View>
+          <ButtonShine paused={pressed}/>
         </LinearGradient>
       )}
     </Pressable>

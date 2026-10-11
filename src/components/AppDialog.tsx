@@ -3,11 +3,14 @@ import { Modal, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { Button } from './ui';
+import {ModalCloseButton} from './ModalCloseButton';
+import {useI18n} from '../i18n/I18nContext';
 
 export interface DialogAction {
   label: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  dismiss?:boolean;
 }
 
 /**
@@ -32,6 +35,8 @@ export function AppDialog({
   onRequestClose?: () => void;
 }) {
   const { theme, s } = useTheme();
+  const {lang}=useI18n();
+  const dismiss=actions.find(action=>action.dismiss)?.onPress??onRequestClose;
   const c = theme.colors;
 
   return (
@@ -44,10 +49,12 @@ export function AppDialog({
             backgroundColor: c.surface,
             borderRadius: theme.radius + 8,
             padding: s(22),
+            paddingTop:dismiss?s(60):s(22),
             borderWidth: theme.dark ? 1 : 0,
             borderColor: c.border,
           }}
         >
+          {dismiss&&<ModalCloseButton es={lang==='es'} onPress={dismiss} color={c.text} borderColor={c.primary}/>}
           {icon && (
             <View style={{ alignItems: 'center', marginBottom: s(12) }}>
               <View style={{ width: s(56), height: s(56), borderRadius: s(28), backgroundColor: c.surfaceAlt, alignItems: 'center', justifyContent: 'center' }}>
@@ -64,7 +71,7 @@ export function AppDialog({
             </Text>
           )}
           <View style={{ gap: s(10) }}>
-            {actions.map((a, i) => (
+            {actions.filter(action=>!action.dismiss).map((a, i) => (
               <Button key={i} label={a.label} variant={a.variant} onPress={a.onPress} fullWidth />
             ))}
           </View>

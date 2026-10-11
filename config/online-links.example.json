@@ -1,0 +1,17 @@
+{
+  "purpose": "staging",
+  "origin": null,
+  "scheme": "domino-online-test",
+  "android": {
+    "package": "com.nextcodestudios.dominoonline.test",
+    "sha256": []
+  },
+  "ios": {
+    "bundleIdentifier": "com.nextcodestudios.dominoonline.test",
+    "teamId": null
+  },
+  "stores": {
+    "android": null,
+    "ios": null
+  }
+}

@@ -19,6 +19,11 @@ yarn-error.*
 .DS_Store
 *.pem
 .env*.local
+.env*
+.dev.vars*
+.wrangler/
+.git/
+credentials.json
 *.tsbuildinfo
 /ios
 /android
@@ -30,3 +35,12 @@ yarn-error.*
 /.release-build/
 /.idea/
 *expo-qr*.png
+
+# The mobile iOS build needs client source/assets only. Never upload live room state.
+/backend/
+/docs/
+/output/
+**/.local/
+**/*.test.mjs
+**/*.test.cjs
+/web/online-invitation/

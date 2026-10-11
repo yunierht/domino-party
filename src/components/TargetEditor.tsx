@@ -1,8 +1,10 @@
+import {GoldPressable} from './GoldPressable';
 import React, { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, Text, TextInput, View } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { Button } from './ui';
+import {ModalCloseButton} from './ModalCloseButton';
 
 const PRESETS = [100, 150];
 
@@ -19,7 +21,7 @@ export function TargetEditor({
   onSave: (target: number) => void;
 }) {
   const { theme, s } = useTheme();
-  const { t } = useI18n();
+  const { t,lang } = useI18n();
   const c = theme.colors;
 
   const [customMode, setCustomMode] = useState(false);
@@ -52,9 +54,11 @@ export function TargetEditor({
               borderTopLeftRadius: theme.radius + 8,
               borderTopRightRadius: theme.radius + 8,
               padding: s(20),
+              paddingTop:s(60),
               paddingBottom: s(34),
             }}
           >
+            <ModalCloseButton es={lang==='es'} onPress={onClose} color={c.text} borderColor={c.primary}/>
             <View style={{ alignSelf: 'center', width: s(40), height: s(5), borderRadius: 3, backgroundColor: c.border, marginBottom: s(16) }} />
 
             <Text style={{ color: c.text, fontSize: s(20), fontWeight: '800', marginBottom: s(6) }}>
@@ -68,7 +72,7 @@ export function TargetEditor({
               {PRESETS.map((n) => {
                 const selected = !customMode && current === n;
                 return (
-                  <Pressable
+                  <GoldPressable gold={selected}
                     key={n}
                     onPress={() => pick(n)}
                     style={{
@@ -83,10 +87,10 @@ export function TargetEditor({
                     }}
                   >
                     <Text style={{ color: selected ? c.onPrimary : c.text, fontSize: s(18), fontWeight: '800' }}>{n}</Text>
-                  </Pressable>
+                  </GoldPressable>
                 );
               })}
-              <Pressable
+              <GoldPressable gold={customMode}
                 onPress={() => setCustomMode(true)}
                 style={{
                   paddingHorizontal: s(22),
@@ -100,7 +104,7 @@ export function TargetEditor({
                 }}
               >
                 <Text style={{ color: customMode ? c.onPrimary : c.text, fontSize: s(16), fontWeight: '800' }}>{t.custom}</Text>
-              </Pressable>
+              </GoldPressable>
             </View>
 
             {customMode && (
@@ -133,7 +137,6 @@ export function TargetEditor({
                 <View style={{ height: s(10) }} />
               </>
             )}
-            <Button label={t.cancel} variant="ghost" onPress={onClose} fullWidth />
           </Pressable>
         </KeyboardAvoidingView>
       </Pressable>

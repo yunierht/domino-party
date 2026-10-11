@@ -1,0 +1,7 @@
+import {useEffect,useState} from 'react';import {useTableGame} from './TableGameContext';import {useReducedMotion} from '../computer/DrinkGift';import {isAnimatedOpponent,OPPONENT_DRINK_MS} from '../computer/opponentDrink';import {scheduleDrinkGiftExpiry} from '../computer/drinkGiftLifecycle';import type {DrinkGift,DrinkId} from '../computer/drinks';
+/** Poker's free visual gift is isolated from Domino's gift and game ledger. */
+export function usePokerDrink(actor:string,result:{winner:string}|null,active:boolean){const {pokerDrinkGift:gift,setPokerDrinkGift,pokerDrinkSeen}=useTableGame(),reduced=useReducedMotion();const [captured,setCaptured]=useState<{actor:string;gift:DrinkGift}|null>(null);
+ useEffect(()=>{if(!active||!result||pokerDrinkSeen.current.has(result))return;pokerDrinkSeen.current.add(result);if(result.winner==='computer'&&gift)setCaptured({actor,gift});},[result,actor,gift,active,pokerDrinkSeen]);
+ useEffect(()=>{if(!captured)return;if(captured.actor!==actor||captured.gift!==gift){setCaptured(null);return;}if(!active)return;return scheduleDrinkGiftExpiry(captured.gift,true,reduced,setPokerDrinkGift,isAnimatedOpponent(actor)?OPPONENT_DRINK_MS+100:650);},[captured,actor,gift,active,reduced,setPokerDrinkGift]);
+ return{gift,expiring:!!captured&&captured.gift===gift,consuming:active&&!reduced&&isAnimatedOpponent(actor)&&captured?.actor===actor&&captured.gift===gift?gift:null,invite:(drinkId:DrinkId)=>setPokerDrinkGift(current=>({drinkId,sequence:(current?.sequence??0)+1}))};
+}

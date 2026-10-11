@@ -10,6 +10,8 @@ test('tracking back chain is Game to Setup to Home, including native Back and no
   await act(()=>current.go('game'));await act(()=>{assert.equal(nativeBack(),true);});assert.equal(current.screen,'newMatch');await act(()=>{assert.equal(nativeBack(),true);});assert.equal(current.screen,'home');
   await act(()=>current.go('settings'));assert.equal(nativeBack(),false);
   await act(()=>current.openSetup());await act(()=>current.back());await act(()=>current.go('game'));assert.equal(current.screen,'game');await act(()=>current.goHome());assert.equal(current.screen,'home');
+  for(const origin of ['computerGame','pokerLobby','blackjackLobby','pokerOnline','onlineInvitation']){await act(()=>current.goHome());await act(()=>current.go(origin));await act(()=>current.go('settings'));assert.equal(current.settingsReturnScreen,origin);await act(()=>{assert.equal(nativeBack(),true);});assert.equal(current.screen,origin);}
   await act(()=>current.go('newMatch'));assert.equal(current.setupMode,'new');await act(()=>current.openSetup());assert.equal(current.setupMode,'edit');await act(()=>current.openSetup('new'));assert.equal(current.setupMode,'new');
+  await act(()=>current.openBlackjackOnline('123456'));assert.equal(current.screen,'blackjackLobby');assert.equal(current.pendingBlackjackCode,null);await act(()=>current.go('blackjackOnline'));assert.equal(current.screen,'blackjackLobby');await act(()=>current.openPokerOnline('654321'));assert.equal(current.screen,'pokerOnline');assert.equal(current.pendingPokerCode,'654321');
  }finally{await act(()=>r.unmount());}
 });

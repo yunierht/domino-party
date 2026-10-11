@@ -1,3 +1,373 @@
+# Decisiones de Domino Codex Online
+
+## ON-D-054 / 2026-10-11 — Aislamiento de sesiones Online
+
+Fuente: bugs adversariales del evaluador, permiso humano de corregir funcionalidad y respuesta humana DIRECTA a pregunta asíncrona de este chat: "Sí, autorizo ese aislamiento Domino". Alcance explícito src/online/client.ts: respuestas antiguas no restauran ni sobrescriben sesiones tras Back/forget; sin reglas/apariencia/audio/gameplay Domino. Rechazo inicial automático por freeze fue resuelto con esa autorización, no por inferirla de Share. Implementado en clientes Domino/Poker con generación de operación y cola de storage compartida por vault; disconnect conserva recuperación, forget ordena borrado y cancela resultados viejos. ACK perdido/idempotencia conservados.8/8 casos externos y40/40 pruebas de clientes, incluida instancia nueva/escritura lenta; fake transporte/memoria, no fallo físico reproducido.
+
+## ON-D-055 / 2026-10-11 — Compartir con selector de plataforma y enlaces seguros
+
+Fuente humana específica de Yuni transmitida por raíz, confirmada "Correcto": Compartir a izquierda de tres puntos en Domino/Poker Online abre selector NATIVO con providers instalados. Código manual sigue en Settings/entrada existente; Blackjack solo local. Sustituye modal limitado WhatsApp/Email. API Share existente, sin nuevasdeps; web usa adapter ReactNativeWeb/navigator.share y fallback enlace/código seleccionable/copiar. Cancel/error/retry no borran invitación ni desmontan anfitrión; queda esperando y sigueheartbeat. No mensajes a contactos ni micrófonos usados en pruebas. Enlace lleva únicamente un identificador público de juego/código; receptor requiere Aceptar explícito para entrar/cambiar sala.
+
+Enlaces cold/warm: eventosSO individuales permiten repetir URL tras Home; evento reciente vence initialURL tardía. Poker actualiza destino si llega otra invitación y no abandona sala anterior hasta Aceptar. Pruebas de eventos/mocks SDK, no certificación OS. HTTPS público/AppLinks todavía requiere recursos/asociaciones desplegados y build configurado: NO autorizado ni realizado. Native esquema de prueba y landingPoker LAN actuales, código como respaldo; no prometer que cualquier provider enlaza un esquema custom ni one-tapHTTPS instalado.
+
+## ON-D-056 / 2026-10-11 — Cierre local y APK0.1.3/code4 para dos Android
+
+Fuente humana posterior "Ya estamos ready para crear el APK... probar shared/jugar online con amigos desde devices" ratifica check-in local y APK de ON-D-052 y levanta espera de revisión. Autoriza candidato acumulado pertinente5486, firma/paquete de prueba existentes y APK común para ambos, transferencia local LAN si posible. No push, stores/deploy ni upload externo; website independiente no se mezcla. Versión de prueba elegida0.1.3/code4 para actualizar0.1.2/code3 sin borrar datos. Android/NativeShare/deepLinks/voz físicos quedan siguiente validación, no resultado inferido de617tests.
+
+## ON-D-053 / 2026-10-11 — Aceptación manual Poker y revisión previa a APK
+
+Fuente humana directa: Yuni autoriza añadir Aceptar invitación por código en Poker, ratifica check-in local/APK de ON-D-052 y después ordena ver el candidato completo en navegador antes de APK. Dirección posterior transmitida por raíz: revisión crítica independiente y fixes de bugs concretos funcionalidad/look&feel, sin nuevasfeatures/rediseños; no commit definitivo/APK hasta revisión humana del preview. Sustituye bloqueo de autorización manual de ON-D-052, no permiso push/tiendas/deploy/upload.
+
+Implementado acceso opcional onAcceptInvitation en TableSettings, usado solo por PokerScreen para abrir formulario existente sin crear sala. Rechazo definitivo pendingJoin (not_found/invalid_code/closed/room_full y errores de contrato definidos) libera solo intento sin asiento aceptado; errores de conexión inciertos conservan credencial y recuperación. Mensaje útil y corregir/aceptar de nuevo sin salir; partidaCPU/ledger intactos. EvidenciaTDD/browser/591tests/TypeScript y snapshot en CONTEXTO. Blackjack local, Poker/Domino Online, entradaTracking y círculos quietos de partida pendiente se conservan.
+
+## ON-D-052 / 2026-10-11 — Candidato aprobado en navegador, check-in y APK autorizados
+
+Fuente humana directa: Yuni en chat de voz01a12953-81f0-7202-8d4d-653198ef8871 confirma botones corregidos y spinners alineados, pide guardar todo el código de esta versión como posible candidato para probar/publicar en dispositivos, check-in local y APK Android nuevos después. Confirmación de navegador, no prueba física. Autoriza commit local del candidato acumulado pertinente y compilación local instalable; no push, tiendas, despliegue ni transmisión externa. Mantener Blackjack local, Poker/Domino Online y círculos quietos con partida pendiente.
+
+Condición humana posterior antes de APK: comprobar que compartir códigos e invitar/aceptar continúa funcionando. Estado: validaciones completadas según CONTEXTO, pero falta acceso visible Poker a aceptar código desde mesa; el backend/formulario y enlace existen. La solicitud de chequeo no autoriza añadir ese acceso. Se solicitó autorización específica; no implementar por inferencia. Cierre Git/APK pendientes de resolver este gate, sin descartar cambios ni declarar publicación.
+
+## ON-D-051 / 2026-10-11 — Entrada Add Rounds y centrado de partida pendiente
+
+Fuente humana directa: Yuni confirma Sí a corregir entrada al reabrir Add Rounds y centrar títulos/spinners sobre Resume/New en chat de voz01a12953-81f0-7202-8d4d-653198ef8871. Aclaración final: partida pendiente muestra puntos reales con círculos quietos; demo solo si no hay partida esperando. New Match ya aprobado mantiene geometría y animación; no añadir demo ni movimiento al estado Resume. Solo candidato5486, sin sonidos ni reglas/juegos nuevos, commit/push/APK/deploy.
+
+Implementado: inicialización de RoundEditor antes de pintar, controles NumberPad de identidad estable y acumulación de dígitos rápidos; conservación de keys de contenido activada únicamente en teclado para que GoldPressable no reemplace el texto tocado al presionar/soltar. Centrado de títulos/círculos de HomeScoreSide y columna VS fuera del flujo para alinear con Resume/New. DemoMatch/ScoreRing intactos respecto HEAD. Evidencia65tests/TypeScript/browser y límites en CONTEXTO. Revisión humana del primer clic sigue necesaria: no afirmar corrección física por mocks o automatización. La petición autorizada persiste si el síntoma vuelve en este bundle.
+
+## ON-D-050 / 2026-10-11 — Blackjack exclusivamente local
+
+Fuente humana directa: Yuni en chat de voz 01a12953-81f0-7202-8d4d-653198ef8871 pide quitar la opción de jugar online de Blackjack y conservarla solamente para Poker y Domino. Sustituye el acceso activo de Blackjack Online aprobado en ON-D-047; no ordena borrar backend, archivos históricos, credenciales ni checkpoint. Estado implementado solo en candidato5486.
+
+Retirados botón/overlay de invitación de BlackjackScreen y montaje del listener Blackjack en App/preview. Rutas anteriores blackjackOnline y openBlackjackOnline llevan al lobby local y no guardan código entrante; contratos/archivos históricos se conservan. Blackjack local y accesos Poker/Domino intactos. Pruebas52/52 y TypeScript, navegador completo en390x844; sin prueba física, commit/push/APK/deploy. Teclado y sonido reportados siguen diagnóstico de solo lectura, sin autorización de corregirlos.
+
+## ON-D-049 / 2026-10-11 — Pozo Blackjack con presentación de Poker
+
+Fuente: petición humana directa transmitida por chat raíz. Aprobado: pozo local Blackjack abajo a izquierda de cartas, pila única proporcional al bote Poker actual, fichas aterrizando por capa y Clear transparente centrado debajo con toque44px. Sustituye ubicación central de ON-D-046; conserva importes, ledger, Dealer/Player grandes iguales, Deal/Repeat Bet/Clear y baraja52 nueva por mano. Poker permanece como referencia visual sin cambios de sus fichas. Implementación en BlackjackScreen y betPileGeometry; pruebas focalizadas39/39. Verificación navegador320/390 en curso.
+
+## ON-D-048 / 2026-10-11 — Timers silenciosos y latido visual
+
+Fuente: nueva instrucción humana directa en conversación raíz. SUSTITUYE los recordatorios sonoros/hápticos15s/5s de ON-D-045 y la solicitud intermedia de conservar esa cadencia. Ningún timer debe emitir sonido o vibración: al0, latido visual suave continuo solo en reloj visible y turno/espera local activo; termina al actuar/cambiar turno/salir/overlaypausa/background. Reduced motion: rojo estático. CPU sigue sin acción automática; autoridad/timeout online intactos. Música, voz, sonidos/haptics de fichas y otros eventos ajenos no cambian.
+
+Implementado: OnlineTurnTimer usa useExpiredTurnPulse, sin importar feedback sonoro/haptic; GameSettingsBoundary comunica visibilidad a mesa retenida, que pausa su espera local y cancela pulso. Se añadió guardia de desmontaje al antiguo hook de recordatorios ya no conectado a timers. Regresión reproduce scheduler vivo al esconder Settings antes de corrección; no equivale a causa confirmada de todos los sonidos humanos.567/567 pruebas de fuente, TypeScript aprobados; ciclo real de navegador y validación física permanecen separados.
+
+
+## ON-D-047 / 2026-10-10 — Blackjack Online autorizado con punto de retorno
+
+Acceso activo sustituido por [ON-D-050](#on-d-050--2026-10-11--blackjack-exclusivamente-local); se conservan esta decisión histórica, backend y checkpoint.
+
+Fuente humana directa: chat raíz de voz 01a12636-1dff-7952-9da5-984dc68c39eb, mensajes 01a128ef-f364-70a3-8957-fe38470e7a4b y 01a128f2-4887-7ad1-a1d3-71e089d67f91: pide una marca para regresar y confirma comenzar la implementación. Sustituye desde esta aprobación la cancelación anterior de añadir acceso online a Blackjack; la conversación exploratoria previa no autorizaba código.
+
+Alcance aprobado: dos humanos con apuestas/manos/saldos independientes contra dealer automático neutral; amigo al frente, identidad propia en madera y dealer lateral con cartas centrales diferenciadas. Reglas existentes S17, blackjack 3:2, Hit/Stand/Double; autoridad del servidor, privacidad de hole/futuro, persistencia antes de ACK, reintentos/idempotencia y recuperación. Invitación por WhatsApp/email y código manual separados, perfiles/voz/preferencias existentes. Solo backend y preview locales; sin APK, instalación, commit, push, despliegue ni envío a contactos. Preservar Blackjack local y los quince ajustes anteriores.
+
+Punto de retorno completado ANTES de código nuevo Blackjack Online: [manifest verificado](../.release-audit/blackjack-before-online/2026-10-11T03-38-07Z/manifest.json), [instrucciones](../.release-audit/blackjack-before-online/2026-10-11T03-38-07Z/README.md). Captura UTC 2026-10-11 03:38 (fecha local NY 2026-10-10); HEAD detached e135055. 1,156 archivos fuente/config/assets/locks, incluidos relevantes sin seguimiento; 376 artefactos del preview. Todos los archivos copiados comprobados por SHA256. Excluidos .git, node_modules, .env/claves/credenciales y persistencia runtime; sin APK. Manifest SHA256 2dbf8ef40b08b75d0fbded4869650c534c9d6747f54a687deb5ae62b6f356359. Bundle actualizado 201a931ccac17eae94d861183e612400a62e6e26894fd1324a2fcfda4f64a4ef, seis pruebas de fuente coinciden byte a byte con su sourcemap. Restauración requiere revisar los cambios posteriores y sus archivos nuevos; no reset general ni borrar datos persistentes.
+
+Estado al capturar: ajustes visuales actuales guardados, 562/562 pruebas y TypeScript; parpadeo global de Domino todavía reportado por humano y flujo directo de código manual Poker aún en cierre. El checkpoint no afirma aprobación completa. Implementación Blackjack Online comienza después de este checkpoint. Respuestas humanas directas en este chat: banca compartida 5,000 con límites por reserva suficiente; al vencer sin apuesta confirmada, saltar la mano sin cobrar. En mano activa, Stand al vencimiento. No deuda, refill ni apuestas automáticas.
+
+## ON-D-046 / 2026-10-10 — Ajustes de revisión en navegador
+
+Fuente: instrucciones humanas sucesivas de la misma conversación raíz. Estado implementado localmente: Repeat Bet completo; Clear Poker sin acabado blanco; relojes circulares sin box en los tres juegos/modos existentes; propio avatar/nombre centrado Poker/BJ sin duplicado en esquina; subtítulo bajo avatar Domino retirado, información única conservada arriba; Home junto a Back mediante Header y filas propias, incluyendo Settings; Hold Domino anclado a madera; cartas Blackjack iguales al tamaño grande (74/60 según viewport), ajustes de mano/espacios y pozo visual .9 con Clear centrado bajo la elipse, fuera del aviso y avatar; cartas comunitarias Poker algo mayores y mano inferior, sin agrandar fichas monetarias. Compartir por WhatsApp/email prepara enlace real y evita reconexión en ese acceso; código manual permanece separado. No transmitir mensajes ni activar micrófonos en pruebas.
+
+Pendientes al iniciar ON-D-047: acceso DIRECTO al código en Settings Poker CPU/Online; comparación y diagnóstico de parpadeo con candidato real de ayer. Se comprobó y eliminó reinicio de tres animaciones de cámara cuando los valores compensados ya coinciden, incluido redondeo nativo; no prueba que desaparezca el parpadeo global, que el humano vuelve a reportar. No usar ceros del contador DOM para descartar frames negros SVG/GPU. Las primeras capturas/bundles parciales no prueban el código posterior; preview recompilado con sourcemap, hash y cache-busting antes del checkpoint. Evidencia y límites en CONTEXTO.
+
+## ON-D-045 / 2026-10-10 — Requisitos finales reconciliados y auditoría
+
+Fuente: instrucciones humanas directas de la conversación de voz01a12636-1dff-7952-9da5-984dc68c39eb, transmitidas al ejecutor de5486. Estado implementado en disco y verificado localmente; teléfono pendiente.
+
+- Acabado de botones: gradiente y luz superior ANIMADA, manteniendo colores originales, formas, estados y callbacks. Sustituye la interpretación intermedia de recolorear Call/Fold/Hold a dorado. Incluye botones tradicionales/circulares, selectores numéricos con borde, cambios de juego, Settings; excluye flechas/iconos planos, avatares y dibujos de chips. Respeta reduced motion/background. No movimiento nuevo del cuerpo del botón.
+- CPU en Domino/Poker/Blackjack:30s de espera, avisos cada15s; al llegar0, rojo con pulso suave y aviso cada5s SIN jugar ni cambiar turno. Sustituye autoexpiry CPU deON-D-034 y registros anteriores. Online conserva autoridad y timeout: Domino cede turno sin puntuación; Poker Check legal o Fold. No Blackjack online nuevo. Vibración breve y tap pequeño respetan preferencias; no prueba física nueva.
+- Cámara Domino: centro al iniciar/primera ficha; mientras las fichas reales quepan, mantener posiciones/escala. Ajuste mínimo al borde; no recuperación/recentrado automático por espacio liberado. Sustituye esa parte de la política anterior de cámara; geometría/motor/audio intactos. CPU y Online comparten hook.
+- Poker CPU: bebida virtual gratuita y animación/recurso existentes de Domino, con estado/eventos separados. Se consume con victoria rival; no coste ni mutación de fichas. Online no tenía acción de bebida; no se añadió mecánica de red.
+- Preview: corregir viewport/shim cuando ventana desktop y canvas móvil difieran; no alterar tamaños de chips ni trayectoria al pozo para corregir el arnés. CPU chips/POT y pozo conservan fuentes anteriores.
+- Poker Online: compartir a derecha inmediatamente antes de Settings reutilizado. Sustituye la excepción unilateral de menú ausente enON-D-039. Estado de espera muestra identidad autoritativa de la sala; Settings cambia perfil por defecto para futuras salas, sin editar credenciales/identidad de una sala activa.
+
+Se conservan identidad/tarjeta/nombre/exclusión/retorno y demás acuerdos deON-D-037/038/039. Sin APK, instalación, OTA, commit, push o despliegue. Evidencia y matriz A–I enCONTEXTO. Reauditor independiente01a126a5-5171-7fd2-8339-d4eda54d7c9e trabajó en solo lectura; sus snapshots no sustituyen la evidencia actual ni confirman hardware.
+
+
+## ON-D-039 / 2026-10-10 — Invitación a derecha antes del menú
+
+La excepción de Poker Online sin menú quedó SUSTITUIDA por ON-D-045; ahora hay Settings reutilizado después de compartir.
+
+Corrección humana final desde chatdevoz01a12636-1dff-7952-9da5-984dc68c39eb: icono deinvitar/compartir en mesasPoker/Domino a laDERECHA, junto ayANTES delostrespuntos Settings/menú, comoantes. SUSTITUYE únicamente dirección superiorizquierda deON-D-037 ysuconservación enON-D-038. FlechaBack mantiene izquierda; tarjeta con nombre/exclusión propia/retornoSettings ysinCTAOnlineenlobby intactos. No nuevosmenús ni funcionalidades. EnPokerOnline compartir se coloca al extremo derecho de suheaderexistente, que no tenía menú detrespuntos. Implementado en5486, evidencia enCONTEXTO. SinAPK/commit/push/despliegue.
+
+
+## ON-D-038 / 2026-10-10 — Tarjeta propia con nombre y rivales distintos
+
+Aprobación humana posterior en chat de voz01a12636-1dff-7952-9da5-984dc68c39eb. SUSTITUYE únicamente el requisito de avatar sin nombre deON-D-037: Playing as/Jugando como usa tarjeta con avatar y nombre debajo, misma geometría/borde/proporciones/tipografía del selector rival del lobby. Domino/Poker y entradasOnline usan tarjeta116/imagen90/borde2/radio12; Blackjack usa la presentación dealer (mediafila/imagen125/borde1/radio14/padding8). Identidad permanece fija deSettings; tres puntos, flecha atrás, retorno e invitación dentro de mesa siguen vigentes.
+
+Dirección humana adicional: excluir identidad propia deChoose your opponent/dealer en treslobbies. Al cambiarSettings, conservar rival válido; si coincide, sustituir por primera alternativa válida del catálogo del juego. Filtro SOLO se pasa desde lobby; otros selectores conservan comportamiento. EnBlackjack conservar ancho de tarjeta aunque quede solo undealer. No ampliar catálogos, reglas/audio ni crear BlackjackOnline. Usuario pide refrescar preview, explícitamente NO generar APK; sincommit/push/despliegue. Implementado en5486, evidencia actual enCONTEXTO.
+
+
+## ON-D-037 / 2026-10-10 — Identidad fija en lobbies y acceso Online desde la mesa
+
+Requisito de tarjeta sin nombre SUSTITUIDO por ON-D-038; navegación e invitación permanecen vigentes. Estado: aprobado por humano e implementado en worktree5486; fuente chat devoz01a12636-1dff-7952-9da5-984dc68c39eb. Sustituye SOLO la edición de identidad propia en lobbies por Playing as/Jugando como + avatar guardado en Settings, sin nombre. Avatar solo cambia en Settings, accesible mediante tres puntos; atrás retorna exactamente al juego/lobby deorigen conservando selecciones y avatar actualizado. Rival/dealer y Play conservan flujo previo.
+
+Retirar Play with a friend Online del lobbyPoker; acceder a invitación real desde icono superior IZQUIERDO dentro Poker/Domino, que sustituye dirección intermedia derecha. Opciones de regresar en estos flujos usan flecha, no botón dorado Back. No nueva modalidad BlackjackOnline, reglas/audio ni otros proyectos. No autoriza nuevos APK, instalación, commit/push o deploy. Evidencia actual y límites en CONTEXTO.
+
+
+## ON-D-030 / 2026-10-09 — APK conjunta y paridad visual en 5486
+
+Estado: autorizada por humano vía coordinador01a12235; integración, revisión y APK final completadas en disco. Integrar cierres finales Domino/Poker en worktree5486, APK0.1.2/code3 con identidad/firma previas, sinreset de persistencia ni commit/push/publicación. Revisión requerida antes de entrega: compacta/grande/ambos asientos, avatar/nombre/voz/reloj/nudges/oro/madera/fichas/POT/provisional/llamada entrante. Poker conserva madera más alta por controles monetarios; presentación se alinea conDomino sin cambiar reglas. Heartbeat de fondo corregido tras fallo observable de autoconfirmación; regresiones aprobadas. Evidencia y límites en [CONTEXTO](CONTEXTO.md).
+
+Selección humana directa: **online-test.dominoparty.com** para staging. Sustituye dominio propuesto por elegido enON-P-007; despliegue/DNS continúan pendientes de autorización y activos reales. LoginApple humano sigue pendiente; no frenaAndroid. No nueva validación física atribuida alAPK conjunto.
+
+Actualizado: 2026-10-09 (America/New_York). Registro propio en `C:\Development\Dominos Codex Online`. Las nuevas entradas usan prefijo `ON-` para distinguirlas de IDs heredados de Pro, conservando este documento único.
+
+## ON-D-001 / 2026-10-08 — Recepción y separación documental
+
+Estado: **aprobada**; implementación: documental completada en disco, sin commit/push. Fuente: solicitud humana transmitida al crear este chat desde `01a11e1e-1c9a-7691-a639-449d301a5e41`. El usuario confirmó nombre **Domino Codex Online**, carpeta `C:\Development\Dominos Codex Online` y uso de la copia de Pro como proyecto nuevo. Motivo conocido: transferir conocimiento para futuro multijugador online de dominó y póker preservando Pro congelado.
+
+Alcance autorizado: recibir/reconciliar [handoff](TRASPASO_ONLINE_DISCOVERY_2026-10-08.md), revisar estáticamente copia/Git/referencias heredadas y establecer continuidad propia en documentos existentes. Se conserva la historia atribuida a Pro con sus fechas; las menciones de nombre/ruta/recepción pendientes en el handoff fuente quedan resueltas solo para la recepción actual. No se sustituyen políticas de producto por inferencia. Evidencia y límites en [CONTEXTO](CONTEXTO.md).
+
+No autoriza código, AGENTS, dependencias, configuración, servicios, instalaciones, servidores, builds, commit/push, tiendas o deployment. Los permisos y freezes históricos son procedencia; AGENTS copiado sigue intacto y debe reconciliarse antes de implementación con autorización humana explícita. Pro no se modifica.
+
+## ON-P-001 / 2026-10-08 — Discovery recibido, acuerdos aún pendientes
+
+Estado: **propuesta pendiente**; implementación online: no iniciada. Fuente: handoff de Pro fechado 2026-10-08 y aclaración humana transmitida en la recepción. Motivo: conservar alternativas y evitar confundir separación de desarrollo con decisiones de producto/infraestructura.
+
+- Objetivo futuro confirmado para Online: dominó y póker multijugador. El pendiente de secuencia/simultaneidad queda **sustituido por ON-D-002**: Play Domino online primero, Poker después. Variante/asientos del MVP y exclusión definitiva de Blackjack siguen sin decidirse.
+- Distribución previa como actualización de la misma app; membresía y cupo de invitados gratis por días: historia del discovery, pendiente confirmar su vigencia en Online. Nueva carpeta/nombre no decide ficha de tienda ni monetización. Precio, cupo, días/calendario, inicio del pase, aceptación/acceso, renovación/revocación y política de partida en curso siguen abiertos.
+- Firebase puro, Cloudflare por sala con Firebase Auth o Colyseus: alternativas sin elección humana. Billing propio/RevenueCat y estrategias de enlaces/instalación son propuestas sujetas a evaluación; no cuentas, contratos ni cumplimiento de tienda aprobados.
+- Autoridad de servidor, filtrado de información privada, idempotencia, reconexión/persistencia, relojes/abandono y calidad/operación: propuestas de diseño del handoff. Hold local no se adopta como pausa unilateral del reloj online.
+- Reconciliar freeze/Expo heredados, remoto Git y aislamiento dev/test/servicios antes de implementación. No se elige nuevo remoto ni identidad de tiendas, no se heredan permisos de publicación.
+
+Próximo paso: resolver las decisiones todavía abiertas y obtener autorización explícita de implementación acotada. El traspaso queda completado sin iniciar multiplayer.
+
+## ON-D-002 / 2026-10-08 — Domino primero y salas privadas
+
+Estado: **aprobada como dirección de discovery**; implementación: no iniciada. Fuente: actualizaciones humanas por voz transmitidas durante la recepción desde chat `01a11e1e-1c9a-7691-a639-449d301a5e41`. El usuario confirma inicialmente **Play Domino online solamente, después Poker**. Resuelve el pendiente de MVP simultáneo de ON-P-001 y del handoff fuente; no fija modalidad/asientos nuevos ni excluye definitivamente Blackjack.
+
+Tras recomendar empezar con conocidos en salas privadas por enlace/código, el usuario responde «Perfecto. El código cómo se generaría». Se registra como dirección aceptada del discovery: salas privadas con conocidos por enlace/código. Motivo de la recomendación: empezar por ese flujo; no se atribuye otro motivo al usuario. No autoriza implementación, proveedores, cambios de identidad, membresía ni pases. La mecánica propuesta se separa en ON-P-002.
+
+## ON-P-002 / 2026-10-08 — Generación y unión por código de sala
+
+Estado: **propuesta pendiente**; implementación: no iniciada. Fuente: explicación técnica propuesta en el chat origen ante la pregunta del usuario sobre generación de códigos. Propuesta: el servidor crea un código corto aleatorio, comprueba unicidad entre salas activas y lo asocia a sala, creador y vencimiento; enlace o entrada manual solicitan unirse con validación de permisos/cupo y límite de intentos. El código no es credencial suficiente ni concede automáticamente membresía/pase.
+
+Longitud/alfabeto, vencimiento y aceptación por el anfitrión pendientes; no se fijan valores ni algoritmo como decisión aprobada. Diseño final depende de identidad, permisos y políticas de acceso aún abiertas. La explicación no amplía el permiso documental.
+
+---
+
+## ON-D-003 / 2026-10-08 — MVP simple, invitados y reconexión
+
+Estado: **aprobada como alcance de discovery**; implementación: no iniciada. Fuente: decisiones humanas de la conversación origen `01a11e1e-1c9a-7691-a639-449d301a5e41`, transmitidas a este chat para investigación/documentación. Motivo conocido: conservar reglas actuales y simplicidad del MVP.
+
+Dos jugadores, como modo actual, manteniendo reglas existentes. Entrar como invitados con nombre, sin registro obligatorio. Conservar partida para reconectar; esperar dos minutos y cerrar sin ganador si el jugador no vuelve. No se definieron todavía comienzo del plazo, pausa/reloj, background, salida voluntaria ni alcance exacto de cierre; permanecen preguntas del plan, no se inventan políticas aprobadas.
+
+Sustituye el pendiente de número de asientos/registro obligatorio de ON-P-001 y la recomendación previa de cuenta recuperable obligatoria del handoff solo para este MVP. Cuentas y usuarios Prime que paguen membresía son **posibilidades futuras**, no requisito MVP ni producto/monetización aprobados. La orientación histórica de membresía/cupos queda preservada como discovery previo, sin adopción automática en Online.
+
+## ON-D-004 / 2026-10-08 — Investigación y fronteras de arquitectura
+
+Estado: **aprobada**; implementación: investigación y documentación completadas, sin código. Fuente humana transmitida desde el chat origen: investigar lo necesario e informar necesidades antes de comenzar implementación; flexibilidad futura y best practices según autores/guías de CompanyOS. Motivo conocido: decidir estrategia revisable sin perder mantenibilidad.
+
+Aplicar dominio independiente de proveedor/transporte/UI, contratos y adaptadores para dependencias externas reales, TDD y pruebas separadas de integración/mocks; diseño simple y evolución a Poker sin motor genérico prematuro ni estructura ceremonial. [Plan técnico y evidencia](PLAN_DOMINO_ONLINE_2026-10-08.md). No autoriza implementación, servicios, cuentas, billing o despliegue; freeze copiado sigue sin modificarse.
+
+## ON-P-003 / 2026-10-08 — Firebase primero, diseño y preguntas de cierre
+
+Estado: **sustituida como recomendación por ON-P-004**, conservada como alternativa técnica; implementación: no iniciada. Fuente: investigación de checkout de Online y documentación oficial actual, solicitada por el usuario al comparar Firebase de tracking con Cloudflare. Recomendación inicial: evaluar Firebase JS Auth anónima + Functions autoritativas + Firestore privado/público + programación durable, en entorno aislado; no provider aprobado ni reutilización productiva de `domino-book`. La exigencia posterior de aislamiento total del tracking reduce la ventaja de integración que motivaba Firebase primero.
+
+Plan enlazado en ON-D-004 especifica actor/asiento por UID, privacidad de manos/pozo, transacciones/recibos idempotentes, leases/heartbeat/Cloud Tasks recuperables, fases TDD/emuladores/piloto y costes/Blaze verificados. Son propuestas, no funcionalidades implementadas. Funciones/plazos cloud, persistencia RN, reglas desplegadas, latencia y consumo no están probados hoy.
+
+Necesario antes de código: concretar pausa/inicio de gracia/alcance de cierre, aprobación del segundo invitado y límites de recuperación, decisión de provider/prueba aislada y autorización humana scoped que reconcilie freeze. Longitud de código/cadencia/schema se eligen técnicamente con evidencia. Acceso/Blaze/presupuesto/region y remoto/distribución son requisitos antes de acciones cloud/remotas, no autorización implícita. No preguntar de nuevo lo aprobado en ON-D-002/003.
+
+## ON-D-005 / 2026-10-08 — Tracking intacto y reevaluación independiente
+
+Estado: **aprobada como restricción y alcance de investigación**; implementación: documentación, sin configuración/código. Fuente humana transmitida desde el chat origen durante la investigación: tracking manual funciona bien y no tocar su implementación Firebase, reglas ni comportamiento; Online debe ser separado. Preservar backend/reglas/datos/colecciones/identidades de tracking. Motivo conocido: proteger funcionalidad existente. Compartir proyecto Firebase por colección no demuestra el aislamiento requerido.
+
+Usuario pide verificar otra vez si Firebase es mejor y proponer alternativas si no. Se permite investigación/documentación, no proveedor definitivo, código, configuración, proyectos remotos, billing, deploy, commit/push ni cambios al freeze. [Plan sección7](PLAN_DOMINO_ONLINE_2026-10-08.md#7-reevaluación-vigente-tracking-intacto-y-backend-online-separado) incluye frontera de imports/instancias/almacenamiento, riesgo de getApps/getApp en init compartida, pruebas de aislamiento y comparación crítica.
+
+## ON-P-004 / 2026-10-08 — Prueba DO aislada como recomendación actual
+
+Estado: **propuesta pendiente**; implementación: no iniciada. Fuente: reevaluación del mismo plan, checkout y docs oficiales Firebase/Cloudflare/Colyseus. Recomendación actual: prueba técnica Worker + DO SQLite por sala completamente separado, por autoridad/persistencia/alarma colocalizadas; no selección aprobada ni mejor latencia/precio demostrado. Sustituye Firebase primero de ON-P-003; Firebase separado queda alternativa sólida por identidad gestionada/operación, Colyseus separado alternativa con framework de salas/reconexión/vistas pero persistencia y operación propias.
+
+Identidad invitada por credencial opaca ligada a sala/asiento es propuesta para evitar cualquier dependencia de Firebase tracking; requiere seguridad/restore/abuso y almacenamiento seguro por diseñar/probar, no cuenta Prime nueva. Backend/endpoint/config/adaptador/secretos separados; no otra FirebaseApp Online inicializada antes de la default de tracking. Nada configurado.
+
+Decisión final exige diseño/aislamiento revisables, preguntas de producto y autorización scoped previa; piloto remoto adicional para medir latencia/coste y probar redes/reinicio/timeout/privacy. No afirmar listo para implementar solo por confirmar facturación o desconexión.
+
+## ON-D-006 / 2026-10-08 — Pausa y comparación medible de ambas alternativas
+
+Estado: **aprobada**; implementación: solo documentación en este bloque. Fuente: respuestas humanas por voz transmitidas desde chat `01a11e1e-1c9a-7691-a639-449d301a5e41`. A la pregunta de pausar mientras corren los dos minutos para reconectar, responde sí. **Pausa aprobada**; cierre sin ganador al vencer ya aprobado en ON-D-003. Sustituye el pendiente de pausa de ON-D-003/ON-P-003/004, no define comienzo preciso del plazo, background/salida voluntaria ni alcance exacto del cierre.
+
+A «¿Autorizas medir ambos?» (Firebase separado y Cloudflare) responde «Sí, autorizo». Autoriza comparación técnica medible de ambas alternativas; no proveedor final ni permiso de alterar tracking/servicios existentes, desplegar, crear/contratar recursos, activar facturación o publicar. En este bloque únicamente [protocolo revisable de medición](PLAN_DOMINO_ONLINE_2026-10-08.md#8-protocolo-propuesto-de-comparación-medible), sin benchmarks/código/infraestructura. El alcance ejecutable posterior debe presentarse y reconciliar freeze antes de iniciar. ON-P-004 permanece hipótesis de diseño a contrastar; no sustituye la comparación por una prueba exclusiva de DO.
+
+## ON-V-001 / 2026-10-08 — Cuenta Cloudflare y dominio informados por usuario
+
+Estado: **dato humano no verificado**. Fuente: voz transmitida del mismo chat origen. Usuario informa una cuenta Cloudflare ya usada para website relacionado con «Domino’s Book» (transcripción incierta) y un dominio llamado «Domino Party». No corregir esos nombres ni atribuir el website a otro proyecto por inferencia. No demuestra dominio exacto, acceso, plan, permisos o recursos disponibles.
+
+Evidencia estática de Online, distinta del reporte: docs/CNAME contiene `dominoparty.com`; wrangler.jsonc declara `domino-party` y assets/docs. No prueba cuenta/dominio/servicio remoto vigentes ni correspondencia con nombre incierto. No se recorrieron otros proyectos ni se consultaron cuentas/DNS/hosting. Cuenta existente podría aprovecharse después con permiso/config confirmados y recursos/endpoint Online independientes, sin alterar sitio o Firebase tracking; ninguna acción remota autorizada por este dato.
+
+## ON-D-007 / 2026-10-08 — Cloudflare elegido y primer backend local autorizado
+
+Estado: **aprobada; primer bloque local implementado y probado**. Fuente: dirección humana por voz del chat origen `01a11e1e-1c9a-7691-a639-449d301a5e41`, transmitida aquí: listo para implementar con Cloudflare; confirmación posterior «Te autorizo» para comenzar y reportar cambios. Motivo conocido: comenzar Domino Online con la estrategia revisada. Selecciona Cloudflare ahora; comparación anterior autorizada no obliga construir Firebase en esta fase. Sustituye pendiente de elección/reautorización local de ON-P-004/ON-D-006 solo para este bloque.
+
+Excepción explícita al freeze copiado de Online: backend aislado y pruebas locales verticales de dos clientes simulados, dominio independiente, DO por sala, credenciales de invitados, vistas privadas, idempotencia/persistencia y pausa/reconexión/alarma. No reabre Pro, tracking/Firebase, motores/UI offline, Poker/Blackjack ni sitio/dominio/DNS. Instalar tooling solo del backend independiente cuando imprescindible; no versión/deps/config raíz. No cuenta/login, recursos cloud, billing, deploy, piloto remoto, tiendas, commit/push.
+
+Implementado [backend local](../backend/domino-online/README.md) y actualizado [plan sección9](PLAN_DOMINO_ONLINE_2026-10-08.md#9-primer-bloque-local-implementado--cloudflare). Evidencia: 7tests de dominio (incluyen equivalencia de20partidas), 6integraciones workerd/SQLite/WebSockets/alarma/reinicio, TypeScript backend y raíz con pila ampliada exit0. No device/producción/latencia/coste reales. Defaults técnicos locales documentados como diseño revisable: lease30s, grace120s desde detección lógica servidor, aprobación anfitrión, siguiente ronda con dos ready, sala esperando15min; no atribuirlos como acuerdos humanos adicionales.
+
+## ON-D-008 / 2026-10-08 — Invitación dentro de Play Domino e inicio inmediato
+
+Estado: **aprobada; integración local implementada y recorrido probado en navegador**. Fuente: dirección humana transmitida durante el trabajo de Online y confirmación directa en este chat: «cuando el amigo acepta, la partida online empieza inmediatamente».
+
+El flujo comienza en Play Domino, con selección de personaje y mesa contra la computadora. Incorporar «Invitar amigo» en esa experiencia, conservando la mesa, recursos, fichas y controles existentes. Cada jugador ve al otro enfrente: Juni ve a Andy y Andy ve a Juni. La mesa simplificada del preview local es evidencia funcional provisional y no es la presentación final aprobada.
+
+La aceptación del amigo inicia inmediatamente una partida online nueva; no se espera a terminar la ronda contra la computadora ni se trasladan sus manos al servidor. Resuelve la pregunta pendiente sobre el momento de transición. No añadir una segunda confirmación de inicio que contradiga esa aceptación; distinguir la aceptación de una mera solicitud de unión. La autoridad y el reparto permanecen en el servidor.
+
+Alcance: integración acotada en este checkout Online, incluido el acceso mínimo desde ComputerGameScreen y regresiones del flujo offline. No amplía permisos sobre Pro, Firebase/tracking, recursos o reglas del juego, despliegues, tiendas, commit o push. Mantener disponible el preview que el usuario está probando; validar la presentación nueva en otra sesión/puerto.
+
+## ON-D-009 / 2026-10-08 — Simulación desde Home y ajustes de presentación
+
+Estado: **aprobada; implementación local en revisión humana**. Fuente: usuario directamente en voz en este chat. Autoriza continuar mediante otros agentes y pide simulación en navegador desde Home con dos jugadores. Solicita después mesa más alta como teléfono, fichas completas, icono propio sobre la madera y controles para alejar la vista y ver toda la mesa. Alcance exclusivo Online, incluido el ajuste visual acotado de ComputerGameScreen; Pro sigue intacto.
+
+La invitación se encuentra en menú de partida → Invitar amigo. El invitado introduce código y pulsa Aceptar y jugar; no hay notificación push ni diálogo automático en otro dispositivo. Crear invitación preautoriza al invitado; aceptación válida con anfitrión presente reparte inmediatamente y de forma idempotente. No se pide un segundo ready inicial; siguientes rondas conservan acuerdo de ambos. La prueba local usa el servidor real de desarrollo y dos sesiones de navegador separadas. No equivale a validación física, producción o distribución.
+
+Preferencia de continuidad expresada: si el trabajo vuelve a detenerse por falta de dirección clara, preguntar qué hacer antes de dejarlo detenido. No se crea automatización ni trabajo programado por esta preferencia.
+
+## ON-D-010 / 2026-10-08 — Invitación mínima en dos acciones
+
+Estado: **aprobada; implementada y probada en navegador local**. Fuente: petición humana directa por voz en este chat, tras probar el flujo. Motivo: reducir pasos y confusión en esta etapa. «Invitar amigo» abre directamente el código de sala; «Aceptar invitación» es una acción separada que pide el código y conecta. Reutiliza nombre y personaje disponibles; recuperar conserva identidad del servidor. Conserva inicio inmediato al aceptar, privacidad y recuperación. Sustituye la pantalla mixta de crear/aceptar de ON-D-009; mejoras posteriores de compartir/enlaces quedan pendientes. Nueve pruebas enfocadas y suite raíz409/409; evidencia y límites en CONTEXTO.
+
+La invitación debe seguir activa al volver a la computadora mientras se espera; al aceptar el amigo, ambos pasan a la mesa online. Corrección previa comprobada en navegador con dos sesiones y dos jugadas sincronizadas. Salir de una partida ya comenzada conserva pausa/reconexión. No autoriza cambios de reglas, backend productivo, tracking, Pro, commit/push ni despliegue.
+
+## ON-D-011 / 2026-10-08 — Botones dorados y siguiente ronda por cualquiera
+
+Estado: **aprobada; cambios locales implementados y comprobados**. Fuente: usuario directamente en voz tras probar una ronda online. Confirma que la partida se ve bien y pide que los botones de siguiente ronda, pozo y cancelar usen el estilo dorado/amarillo existente de Play Domino y póker, en lugar del fondo verde invasivo. Ajuste acotado a controles de la mesa online, sin rediseñar juegos compartidos. Botones del menú/Cancelar verificados visualmente, helper común aplicado al resto; avance de ronda probado contra servidor local.
+
+Confirma que cualquiera de los dos jugadores, ganador o perdedor, debe poder iniciar la siguiente ronda con un único toque. Sustituye el acuerdo de ambos ready de ON-D-008/009/010 para salas de invitación; conservar contratos de salas diagnósticas anteriores y prevenir doble reparto por carreras/reintentos. No autoriza alterar reglas de dominó ni avanzar tras terminar la partida completa.
+
+Pregunta adicional sobre tardanza: se explicó el comportamiento actual, sin reloj de turno ni penalización mientras siga conectado; desconexión pausa y conserva los dos minutos de reconexión desde detección lógica del servidor. No se pidió ni se implementó un temporizador de turno en este bloque.
+
+## ON-D-012 / 2026-10-08 — Reloj de turno de 30 segundos con pausa
+
+Estado: **aprobada; implementada y comprobada en navegador local**. Fuente: petición humana directa por voz, posterior a explicación de ausencia de timer en ON-D-011. Aro cuyo borde se vacía durante30segundos; al vencer se considera pasado y juega el otro. Ubicación elegida: debajo del icono propio, sobre madera. Botón central pausa/triángulo reanudar para dar tiempo al jugador. Reemplaza ausencia de temporizador solo en salas nuevas de invitación Online creadas con interfaz actualizada; salas/clientes anteriores conservan compatibilidad. Motores offline y reglas de otros juegos intactos.
+
+Diseño técnico comunicado: autoridad servidor y estado compartido entre ambos; solo quien tiene el turno pausa/reanuda; conservar segundos restantes, reiniciar30 al cambiar turno, no al robar ficha. Desconexión pausa reloj y conserva regla de reconexión de dos minutos. No se estableció máximo de pausa manual. Timeout cambia turno sin repartir, cambiar puntuación ni declarar bloqueo por dos ausencias; bloqueo legal ordinario conserva motor existente. Evidencia418tests raíz,21dominio/10integración real y navegador (pausa compartida y vencimiento) en CONTEXTO; sin publicación autorizada.
+
+## ON-D-013 / 2026-10-09 — Pozo, celebración automática y avisos entre jugadores
+
+Estado: **aprobada e implementada localmente**. Fuente: correcciones y selección humana directa por voz durante la simulación. En el pozo, Cancelar pasa a texto blanco sin fondo; sustituye ese control dorado de ON-D-011. Abrir el pozo reinicia30s y pausa hasta elegir la primera ficha; esa elección reanuda, y robos posteriores en el mismo pozo no reinician. Cancelar antes de elegir reanuda el reloj. Ajuste acotado Online.
+
+La última dirección sustituye el botón Siguiente ronda de ON-D-011: confeti y nombre del ganador, avance automático tras3s, mismo botón lateral animado Hold de Blackjack/Poker. Mantenerlo pulsado pausa el avance; soltar reanuda el restante. Cualquiera puede mantenerlo, y si ambos lo hacen se espera la última liberación. Servidor autoritativo, desconexión/reconexión y reintentos sin doble reparto; partida completa no avanza. Las salas anteriores sin capacidad nueva conservan su contrato manual.
+
+Acciones elegidas: «Te toca», «Toc, toc» y «¿Estás ahí?». Solo quien espera ve los tres iconos junto al reloj. Aviso discreto al rival hasta3s, respetando sonido/vibración y movimiento reducido; separación10s entre envíos. Si el receptor juega, roba o pasa, se descarta inmediatamente y se cancela el segundo golpe pendiente. Recibir un aviso no cancela selección/arrastre ni modifica manos, puntos o reloj. La propuesta temporal «Tu turno» fue retirada por el usuario. No son notificaciones push.
+
+Se habilita el audio real de fichas en el simulador, que antes lo silenciaba mediante un adaptador. No se modifican sonidos/recursos compartidos. Evidencia de pruebas, navegador y límites físicos en CONTEXTO. Sin cloud, publicación, commit/push ni cambios en Pro/tracking.
+
+## ON-D-014 / 2026-10-09 — Avisos de tres segundos y presentación consistente
+
+Estado: **aprobada, implementada y comprobada en navegador local**. Fuente: corrección humana directa por voz tras probar ON-D-013. Los tres avisos solo deshabilitan sus botones durante3s y se habilitan automáticamente después; sustituye espera10s de ON-D-013 tanto en cliente como servidor. Conserva descarte inmediato al actuar y protección contra envíos simultáneos. Se comprobó enviar Toc,toc, reactivación y segundo aviso ¿Estás ahí?.
+
+«Tu turno» centrado respecto a toda la mesa, compensando espacio del reloj cuando no se muestran acciones. Celebración usa directamente PokerResultBanner existente (fondo oscuro y confeti), sustituyendo el banner transparente de Domino de ON-D-013; conserva nombre del ganador y Hold animado. No cambia Poker, Blackjack ni componentes compartidos. Evidencia y alcance guardados en CONTEXTO; sin commit/push/publicación.
+
+## ON-D-015 / 2026-10-09 — Avatar propio separado del rival AI
+
+Estado: **aprobada, implementada y probada en navegador local**. Fuente: petición y ejemplo humano directo por voz. Configuración en orden: nombre, avatar propio, puntos/victorias, rival AI, comenzar partida. Avatar propio no reemplaza al rival en mesa offline. Yuni puede comenzar contra Yase y Andy contra Rigo; al aceptar la invitación ambos deben ver enfrente el avatar propio elegido por el otro jugador. Sustituye reutilización anterior del avatar del rival como identidad de ON-D-010.
+
+Selector propio y estado `playerAvatarId` independientes de `opponentId`; se conserva en memoria del proveedor mientras app abierta, incluida navegación y comienzo de partida. Invitación/aceptación envían ese avatar; recuperación conserva identidad autoritativa guardada en sala. Modificación acotada autorizada a configuración/identidad en ComputerGameScreen/ComputerGameContext y picker Online; sin modificar reglas, motor, audio ni rival AI. Prueba de ejemplo completo y441tests en CONTEXTO. Sin publicación, commit/push ni cambios en Pro/Firebase.
+
+## ON-D-016 / 2026-10-09 — Desbloqueo de Online durante la conversación
+
+Estado: **aprobada**. Fuente humana directa por voz en chat `01a12198-d663-76b1-81d7-49a192072ee9`, transmitida a este executor: «Vamos a estar haciendo cambios, así que no quiero que me estés preguntando cada vez que vayamos a cambiar algo si tienes autorización». Levanta el congelamiento exclusivamente de Online para cambios definidos en esta sesión/conversación; sustituye obligación de autorización por edición de los freezes heredados y preserva su historia. AGENTS incorpora excepción enlazada. No extiende a otros proyectos, funcionalidades no pedidas, commit/push ni despliegue.
+
+## ON-D-017 / 2026-10-09 — Cierre y opciones del menú Online
+
+Estado: **aprobada e implementada en disco**. Fuente humana directa del mismo chat: quitar Cancelar y usar cruz dentro de borde circular arriba a la derecha; salida primero y Reglas después. ON-D-016 autoriza completar estos cambios sin otra confirmación. Menú de OnlineDominoTable: X accesible Cerrar/Close, área táctil44 y círculo30; Salir de la partida/Leave match primero, Reglas después. Cierre conserva solo setMenu(false)/setRules(false); salida conserva handler previo y recuperación/desconexión existentes. No cambia el Cancelar del pozo, mesa offline, reglas, reloj, conexión ni componentes compartidos. Evidencia y límites en CONTEXTO. Sin commit/push/despliegue.
+
+## ON-D-018 / 2026-10-09 — Prueba de avatar y persistencia web
+
+Estado: **prueba solicitada y ejecutada**. Fuente humana directa «Podemos probarlo en el navegador», en chat de voz `01a12198-d663-76b1-81d7-49a192072ee9`, transmitida a este executor. Foto como avatar, conservación tras recarga y dos jugadores; usar imagen sintética de prueba sin cámara/foto personal. Bajo ON-D-016 se retira solo adaptador de almacenamiento en memoria del arnés para probar storage real de app con AsyncStorage web. Conserva aislamiento de tracking/Firebase y resto de adaptadores; sin refactors/features nuevas ni dependencias.
+
+Resultados y capturas en CONTEXTO: preview/guardar/aplicar foto, avatar de catálogo B, persistencia al recargar, sala local y jugada sincronizada, recuperación sin nuevo reparto, X circular cierra menú sin salir. Cámara, reinicio completo del navegador, persistencia nativa y teléfonos no probados. Sin commit/push/despliegue.
+
+## ON-D-019 / 2026-10-09 — Identidad propia en madera inferior izquierda
+
+Estado: **aprobada e implementada**. Fuente humana directa por voz del chat `01a12198-d663-76b1-81d7-49a192072ee9`: cara pequeña y nombre del avatar seleccionado (ejemplo Yuni) abajo a la izquierda; aclaración posterior confirma ubicación sobre mesa de madera. OnlineDominoTable ya tenía miniatura propia a la derecha con nombre escrito del jugador; se mueve a la izquierda y muestra nombre de DOMINO_AVATARS. Selfie conserva foto y nombre del jugador. Pozo pasa a la derecha en esa fila; conserva reloj, acciones, avisos y borde de turno. Mesa offline/otros proyectos intactos; no chat de voz ni reglas nuevas. Pruebas de ambos asientos y selfie y evidencia navegador en CONTEXTO.
+
+## ON-D-020 / 2026-10-09 — Recuperación de invitación no disponible
+
+Estado: **defecto reproducido y corregido localmente**. Fuente humana directa del mismo chat: Invitar amigo muestra invitación no disponible y Reconectar no cambia nada. Se reprodujo ese estado con sesión guardada anterior; no se atribuye por inferencia a outage/backend caído. El cliente conservaba canResume y la UI ofrecía reconectar/auto-reintentar aun con error terminal de sala. OnlineFriendScreen distingue closed/room_closed/room_missing/not_found y snapshot closed: detiene reintentos y explica que no es recuperable. Botones explícitos Crear nueva invitación/Aceptar otra invitación liberan solamente credencial/sesión de sala anterior; host crea con identidad/config actuales y guest vuelve a formulario. No borra preferencias ni resucita sala, no crea reemplazo sin toque. Back desde terminal también libera solo sesión vieja. Reconectar temporal muestra progreso y fallo explícito, conservando recuperación de salas válidas.
+
+Usuario pide refrescar ambas vistas y dejarlas en Home al finalizar, conservando avatares y sin sala zombie de prueba. Mantener semántica de salida/gracia120s; pruebas TDD y navegador en CONTEXTO. Sin commit/push/despliegue.
+
+## ON-D-021 / 2026-10-09 — Compartir invitación desde la mesa
+
+Estado: **implementado localmente; distribución pendiente**. Fuente humana directa por voz del chat `01a12198-d663-76b1-81d7-49a192072ee9`: Compartir antes de puntos del menú, también desde mesa inicial. Botón local prepara/reusa invitación en el flujo existente; Compartir posterior abre API nativa/web o copia/expone enlace público. Se mantienen código manual y recuperación terminal. URL solo contiene onlineRoom, nunca credencial. Entrada dedicada valida código/URL, solicita identidad y aceptación explícita, maneja arranque y nueva URL sin alterar Watch. Se probó unión local desde enlace sin teclear código. No envío real a contactos.
+
+Esquema dominoparty, dominio y fichas de tienda observados son heredados; no se declaran identidad/distribución propias de Online. Pendiente decidir app propia vs actualización, dominio/endpoint y asociación Android/iOS antes de instalar-y-abrir. No instalación silenciosa ni flujo deferred certificado. Fuentes y límites en CONTEXTO.
+
+## ON-D-022 / 2026-10-09 — Selfie propia con cámara, nombre y orden
+
+Estado: **implementado**. Fuente humana directa: solo cámara, sin Choose file; nombre elegido obligatorio antes de guardar; selfie primero, catálogo seleccionado después, resto estable sin duplicados. Se aplica a avatar propio en Preferences y configuración/entrada por enlace. Nombre trim1–40 sin controles, acorde al contrato de sala; foto/nombre/selección persistidos y transmisión usa identidad existente de sala. Fotos antiguas preservadas, sin reset. No cámara personal activada en pruebas; captura/procesamiento/guardado/nombre con dobles, UI real de campo/cámara/X verificada.
+
+Aclaración posterior: selector ELIGE TU RIVAL NO ofrece Crear selfie. Esa exclusión sustituye la extensión anterior de orden/creación a rival; conserva fotos/estado históricos. No modifica nombres de catálogo.
+
+## ON-D-023 / 2026-10-09 — Marco estable del simulador
+
+Estado: **defecto de arnés reproducido y corregido**. Usuario precisa scrollbars externas y shaking de B. Mediciones alternaron441×900 y411×870 con overflow441×900. Contenedor HTML del arnés fija límites y suprime overflow exterior; scroll interno permanece. No se desactiva demo animada de Home. B estable15muestras/15s, navegación y scroll de Preferences comprobados. Parámetros width/height del arnés permiten prueba compacta sin alterar viewport global.
+
+## ON-D-024 / 2026-10-09 — Nombre por defecto y alias editable de partida
+
+Estado: **implementado y verificado**. Al elegir avatar propio, campo superior toma nombre canónico; selfie toma nombre guardado. Usuario puede editarlo después; otra elección explícita vuelve al default. Hidratación/renders no sobreescriben una edición. Alias de partida se usa en mesa local, invitación y snapshot Online. Sustituye nombre de catálogo rígido de ON-D-019; nombre de selfie persistido es default de perfil, alias de partida no se persiste como override nuevo.
+
+## ON-D-025 / 2026-10-09 — Identidad visible y mensajes sin solapamiento
+
+Estado: **implementado**. Aclaración humana: vista desde Home también necesita miniatura propia/nombre en madera y Share arriba derecha. Se extiende la presentación a mesa local; miniatura42px en ambas. Mensajes inferiores permiten varias líneas en espacio propio y madera con altura mínima adaptable; avisos de compartir separados del estado de turno. Texto conserva semántica, sin truncarlo para esconder mensajes. Prueba visual normal/compacta en CONTEXTO; manos y controles visibles. No cambia reglas ni rivales.
+
+## ON-D-026 / 2026-10-09 — X circular en popups
+
+Estado: **implementado**. Usuario pide reemplazar Cancelar/Cancel de popup por X circular superior derecha, respetando acción previa. ModalCloseButton común: área44/círculo30, Cerrar/Close y estados deshabilitados. Aplicado a selfie, menús/reglas/ajustes, pozo Online, selectores y confirmaciones de juegos, rebuy Poker, editores/popup de Tracking, compartir marcador y scanner. Conserva exactamente cierre/cancelación previa; reserva espacio para títulos y scroll. Clear/Confirm de apuestas, salida de partida y pozo local obligatorio sin handler de cancelación no se convierten en cierres nuevos. Pruebas de callbacks/regresión y casos navegador en CONTEXTO. No otros repositorios, commit/push/despliegue.
+
+## ON-D-027 / 2026-10-09 — Prueba positiva, guardado y madera legible
+
+Estado: **confirmación humana y ajuste aprobado**. Fuente directa: prueba positiva en navegador y guardar cambios. Guardado en disco/continuidad, no autorización inferida de commit/push. Usuario pide mover un poco la identidad hacia el centro y cada cláusula de mensajes de madera en su línea, retirando punto separador. Desplazamiento24px local/Online y saltos de línea explícitos; no alterar separadores numéricos de ficha/pozo ni reglas. Verificación nueva en CONTEXTO.
+
+## ON-D-028 / 2026-10-09 — Voz opcional Online
+
+Estado: **implementada; conversación física básica en LAN reportada por el usuario, validación exhaustiva/remota pendiente**. Fuente directa: opción para hablar mientras juegan, icono junto al jugador. Preferencia confirmada por herramienta de pregunta: conversación continua con silenciar. Entrada voluntaria, micrófono apagado hasta toque, silencio y salida explícitos; voz separada de autoridad de partida y de sonidos de fichas. No autorización de grabar conversaciones, activar micrófono personal durante pruebas, transmitir a contactos, contratar TURN/servicios ni desplegar. Cierre recibido del chat `01a12199-9c74-7662-914a-e348115c21a9`: conexión, mute, salida y reconexión con audio sintético en dos navegadores locales; entonces sin prueba audible real. Reporte humano físico posterior del 2026-10-09: voz voluntaria y conversación entre Samsung S24 Ultra y Samsung S8 en CyberNet. Silenciar, salir y reconectar físicamente siguen pendientes. Integración nativa de este worktree y sus límites se documentan en ON-D-029, sin convertir evidencia web en teléfono ni LAN en prueba entre redes distintas.
+
+## ON-D-029 / 2026-10-09 — Preparación aislada para dos Android con voz
+
+Estado: **implementación y build local autorizadas; recorrido físico básico en LAN reportado por el usuario**. Fuente humana transmitida al crear este chat desde `01a12235-0430-7de2-ad2a-b554d7bbec70`: empezar cambios para instalar/probar en DOS ANDROID, posteriormente confirma jugar con voz y avisar cuando esté ready. Autoriza recuperar fielmente fuente Online sin commit en worktree aislado y preparar APK local; no modificar original, Pro, tracking Firebase, publicar, desplegar ni subir código/APK a terceros.
+
+Decisión técnica reversible de piloto: paquete `com.nextcodestudios.dominoonline.test`, nombre/scheme propios y permiso micrófono voluntario; endpoint privado LAN en8792 y WebRTC nativo124.0.8. No identidad de tienda ni backend público aprobado. Primera prueba requiere ambos teléfonos en misma Wi-Fi que computadora; pregunta sobre redes enviada, sin respuesta al registrar. No atribuir al usuario aprobación de red/NAT/TURN. Redes distintas requieren concretar endpoint público y STUN/TURN y obtener autorización antes de desplegar/contratar. [Matriz y procedimiento](PRUEBA_DOS_ANDROID_2026-10-09.md).
+
+Propuesta posterior pendiente de autorización: usuario intentahealth desdeAndroid y no abre. Servidor actual sigueHTTP200LANdesdePC/IPsin cambios; firewallPublic bloqueaInboundTCP del ejecutable exacto workerd en todospuertos. Script `scripts/online-firewall-8792.ps1` preparado/verificado ModeReview para excepciónSOLOTCP8792 desde subredWi-Fi actual, conservando bloqueootrosTCP/UDP y restauración. Ningún cambio de firewall ejecutado; petición inicial excluía modificaciones automáticas, así que esperar autorizaciónhumana/admin. No sustituirlo porproxy/puertonuevo/túnel ni presentar accesoPC comoAndroid.
+
+**Sustitución de ese pendiente, autorización aplicada:** fuentehumana directa «Sí, autorizo» a excepciónexacta, transmitida por coordinador01a12235. Applyse detuvo inicialmente por faltaadmin sinmutar; UACelevadoejecutóexit0 y ActiveStore confirmó excepciónSOLOprogramaactual/TCP8792/local192.168.1.194/remotos192.168.1.0/24/Wi-Fi/Public; bloqueoTCPotrosrangos yUDPintactos. SnapshotyRestore disponibles; evidencia enCONTEXTO. No otrosperfiles/programas/puertos, nofirewallglobaldesactivado ni serviciospublicados. Autorización no significa accesoAndroid confirmado: reintentofísicopendiente.
+
+Resultado final de voz recibido e integrado en ocho archivos con hashes, conservando configuración Android propia. Pruebas locales finales:495 app,1 plugin de red,35 dominio,16 integración workerd/SQLite; TypeScript raíz/backend. Tres fallos iniciales de arnés AppShell se corrigieron incluyendo doble OnlineLinkListener; cuatro arneses ahora resuelven paquetes localmente en vez de Pro, sin cambios de comportamiento de juegos. Build, firma y estado de APK se registran en CONTEXTO; no evidencia física inventada. No integrar al original automáticamente.
+
+**Actualización física posterior, reportada por el usuario (2026-10-09):** S24 no estaba conectado a Wi-Fi; al conectarlo a CyberNet, QRhealth mostró `status: ok`. Invite Friend generó código; S8 en CyberNet aceptó y ambas pantallas mostraron la misma partida/juego. Ambos activaron voz voluntariamente, aceptaron permisos y el usuario confirmó conversación entre teléfonos después de «Connecting voice». Sustituye los pendientes de acceso LAN y recorrido básico de este registro, conservando el diagnóstico histórico. No hay métricas, versiones Android, hash instalado por dispositivo ni confirmación de silenciar/salir/reconexión física, exhaustividad de juego o redes distintas. En este cierre solo se guardan documentos del worktree, sin nuevos cambios de código/build/firewall ni escritura al original, commit/push.
+
+### Actualización autorizada de llamada y layout Online — 2026-10-09
+
+Estado: **implementada e integrada en APK0.1.1/code2; confirmación física de esta revisión pendiente**. Fuente humana final transmitida por coordinador `01a12235-0430-7de2-ad2a-b554d7bbec70`, resultado terminado del chat Mostrar simulación de Dominó Online. Sustituye la activación independiente de voz en ambos: un jugador llama; el rival recibe aviso con nombre y acepta/rechaza; el iniciador cancela. Receptor no adquiere micrófono hasta aceptar, pista del iniciador silenciada hasta aceptación; después voz continua/mute/salir. Espera30s autoritativa y conexión20s, primera llamada serializada gana sin consentimiento implícito, IDs/sesiones/epoch impiden reactivar llamadas anteriores; desconexión termina voz. No grabación, llamadas OS/background ni recursos TURN públicos.
+
+Autoriza también SOLOOnline avatar centrado con nombre debajo, timer derecha y madera aprox29% menor; sustituye idea ON-P-005 y su posición exploratoria izquierda. Cliente/backend copiados juntos en13archivos acotados desde fuente final; migraciónSQLite aditiva verificada contra bundleV1 conservando sala/manos/cadena/recibos.497app/1plugin/38dominio/16integración+1migración y TypeScript aprobados; smokeLAN confirma consentimiento, rechazo/cancelación sin micrófono. NuevaAPK mismaidentidad/firma y mayorcode, anterior conservada; actualizar ambosSINdesinstalar/borrar. Fuente original etiqueta llamada ON-D-029, ID que aquí ya nombraba preparaciónAndroid; mantener esta procedencia y reconciliar IDs al integrar, no reemplazar documentación concurrente. Resultado/bundle/firma/URL enCONTEXTO. Sin commit/push/deploy/TURN ni ampliaciónfirewall. Prueba real anteriorS24/S8 no se extrapola a este flujo/layout nuevo.
+
+## ON-P-006 / 2026-10-09 — Preparación iOS y EAS Cloud
+
+**Avance de condiciónAPK conjunta:** Poker cerrado/manifest29 verificado porrevisiónsololectura en5486; pausa humana hastaimplementaciónPoker ya cubierta por ese cierre, pero candidata/build esperan aún DOMINOfinal activoy suintegración. Patchnoaplicaciegamentea6rutas delrootantiguo, dependenciasGoldPressable/manualCodes faltantes hastaDomino final. Fuenteautoriza lectura3620 para preparar merge solo5486, no editarotrocheckout/original. Conservar namespacesaliases/DOmigrations/sesionesPokerprivadas yconfigAndroid/iOS/EAS/links propia. VerCONTEXTO paraevidenciayplan; noSourceparcial niAPK/IPA nuevos enesta revisión.
+
+**Autorización posterior aplicada parcialmente:** humano respondióSÍ a usarExpo/Apple existentes para proyectoOnline separado/registrariPhone/enviarfuente/buildinterna SINAppStore. Expoactor verificadoyunierht, proyectoNUEVO @yunierht/domino-online-test/UUID9d4cdf14-2853-4b0f-86f4-03108c445056 creado/vinculado; noEASheredado/ascAppId reutilizados. Registro llegóaAppleID yse detuvoantescredenciales; loginhumano enTerminal mediante `scripts/register-online-iphone.ps1`, sincontraseña/OTP porchat/logs. FaltaUDID/perfil/firma, sinQR/IPA/uploadfuente. Loque abajo era autorizaciónpendiente se conserva como historia, sustituido enestealcance; nohosting/DNS/store/TURN/compras ni sourceparcial permitido.
+
+**Nueva pausa humana de buildAndroid:** esperar AMBOS cierresDomino+PokerOnline e integraciónconjunta antes próximaAPK; conservar0.1.1/code2. Usuarioautoriza avanzarpreparaciónindependiente conjuicio rutinario duranteausenciaaprox1hora. No ampliar aIPA confuenteparcial ni autodeploy/publicación. Coordinador notificacierre; no leer/alterar Poker3620 porcuentapropia.
+
+Estado: **preparación autorizada y guardada; ejecución cloud/firma/registro pendientes de autorización concreta**. Fuente humana por coordinador01a12235: quiere probariPhone y prefierecompilaciónCloud; tienecuentaAppleDeveloper usada enappanterior (reporte sinverificación). Macno confirmado, no requisito local deEASCloud. Preparados bundleiOS propio/permisos/ATSIPexacta, perfilinternaliOS limpio y exclusiones de backend/estado/secretos. Androidconfig/firma/version/scheme y backendtracking/original intactos; fuenteconcurrente noincorporada ni nuevoAPK. Evidencia/alcance enCONTEXTO y [guía iPhone](PRUEBA_IOS_2026-10-09.md).
+
+AntesEASCloud: elegircuentaExpo y crear/vincular proyectoOnline nuevo tras aprobación, validarAppleTeam/membresía, registrariPhoneUDID y perfiladHocpropio, revisar fuente/assets aenviar. No reutilizarascAppId/bundle/perfilheredados porinferencia, no pedirguardarOTP/contraseñas ni contratarplanes/publicar. Ningún envío/buildcloud/registro/certificado/AppID realizado. Perfilpreparado noequivale IPA instalable, autolinking/config noequivale pruebaWebRTC iOS. Esperar cierrefuenteAndroid antes candidata final; prueba físicaAndroidprevia no validaiPhone.
+
+## ON-P-005 / 2026-10-09 — Altura de madera en la prueba Android
+
+Estado: **sustituida por la autorización final de llamada/layout Online, actualización de ON-D-029 arriba**. Fuente inicial: comentario humano durante la prueba física S24 Ultra/S8, transmitido por el coordinador `01a12235-0430-7de2-ad2a-b554d7bbec70`. La madera ocupaba demasiado espacio hacia arriba; posible reducirla, conservando avatar a la izquierda y timer a la derecha. Motivo conocido: espacio visual observado por el usuario. En ese momento no había dimensiones/solución final ni permiso inequívoco de implementación. Dirección final posterior autorizó madera aprox29% menor, avatar CENTRADO/nombre debajo y timer derecha; implementada soloOnline y preparada en APK0.1.1/code2, aún pendiente de confirmación física.
+
+## ON-P-007 / 2026-10-09 — Invitación HTTPS Online y prueba antes de tiendas
+
+Estado: **preparación/implementación revisable autorizada; hosting/asociaciónOS/tiendas pendientes**. Fuentehumana porcoordinador01a12235: prepararinvitar como futurarelease y verificarlinks realesantespublicar; ahorateléfonos continúan concódigo. EnlaceHTTPS propio Online, appinstalada abrecanonicalroom, noinstalada usaStorecorrespondiente cuandohayURLspropiasverificadas; preservaridentificador/código y retornoalmismolink trasinstalación. No prometerdeferred automáticoiOS sinimplementación/prueba. MantenerWatch/tiendasSocialClub intactos.
+
+Usuario confirmócontrolardominoparty.com, sustituye lecturaambiguaanterior; noaccesoDNS/Cloudflare probado. Propuesta online-test.dominoparty.com enWorker nuevo independiente: configuraciones/landing/plugin/asociaciones preparadas yvalidadaslocalmente, certDebug soloSTAGING, AppleTeam yStoreURLs sininventar.12testsharness+tiposWorker, NOOSWhatsApp ni publicación. Activaciónrequiereconfig realidente a build; pathsolo/online/invite, tokens/manos/sesiones nuncaenlink. CanonicalID10 noaliasmanual6; preservartexto delmensaje y probar integraciónfinal para evitartruncado oconfusiónWatch.
+
+Acciónhosting preparada en [guía](ONLINE_LINKS_PREPARACION_2026-10-09.md), aún SINaprobación DNS/Worker/deploy. Trasassetsreales, revisiónúltima y permisoscuentadominio, pediraprobación paraúnicamentestaging; no tocarwebsiteheredado ni backendpúblico. PruebaadHoc/Debug antesStore cubreOS/asociaciones/coldwarm/manualinstall-return; noelimina smoke de firmasPlayAppSigning/AppStore yURLsfinales después. AutorizarEASbuildinternal noautorizaHosting/Store ni compradominio/TURN. NextAPKhumanaesperaDomino+Pokerfinal.
+
+## Historia heredada de Pro — registro original preservado
+
+Las entradas siguientes pertenecen a Domino Social Club / `C:\Development\Dominos Codex Pro` en sus fechas originales. Se conservan como procedencia de la copia y referencia de comportamiento/evidencia; no se convierten en acuerdos nuevos, autorizaciones ni validaciones de Online. El proceso de registro heredado se utiliza para aportes futuros atribuibles a Online; no supone acceso automático a Doti.
+
 # Decisiones y aportes de voz
 
 Actualizado: 2026-10-02 (America/New_York). Proyecto: Domino Social Club / Dominos Codex Pro.

@@ -5,11 +5,12 @@ import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { useNav } from '../nav/NavContext';
 import { STORE_LINKS } from '../config/links';
+import {ModalCloseButton} from './ModalCloseButton';
 
 /** Slide-in sidebar holding secondary actions (opened from the home ☰ button). */
 export function Menu({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const { theme, s } = useTheme();
-  const { t } = useI18n();
+  const { t,lang } = useI18n();
   const { go } = useNav();
   const c = theme.colors;
   const { width } = useWindowDimensions();
@@ -77,9 +78,7 @@ export function Menu({ visible, onClose }: { visible: boolean; onClose: () => vo
           {/* Header */}
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: s(10), marginBottom: s(18) }}>
             <Text style={{ color: c.text, fontSize: s(20), fontWeight: '900' }}>{t.appName}</Text>
-            <Pressable onPress={onClose} hitSlop={10} style={{ padding: s(4) }}>
-              <Feather name="x" size={s(24)} color={c.textMuted} />
-            </Pressable>
+            <ModalCloseButton es={lang==='es'} positioned={false} onPress={onClose} color={c.text} borderColor={c.primary}/>
           </View>
 
           {items.map((it) => (

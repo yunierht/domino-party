@@ -1,0 +1,3 @@
+export interface WaitingClock{identity:object|null;key:string;generation:number;remainingMs:number;deadline:number|null;manualPaused:boolean}
+/** A presentation clock cannot execute or mutate any game action. */
+export function syncWaitingClock(previous:WaitingClock|null,identity:object|null,key:string,now:number,waiting:boolean):WaitingClock{const fresh=!previous||previous.identity!==identity||previous.key!==key;const state:WaitingClock=fresh?{identity,key,generation:(previous?.generation??0)+1,remainingMs:30000,deadline:null,manualPaused:false}:{...previous!,remainingMs:previous!.deadline===null?previous!.remainingMs:Math.max(0,previous!.deadline-now)};return{...state,deadline:waiting&&!state.manualPaused?now+state.remainingMs:null};}

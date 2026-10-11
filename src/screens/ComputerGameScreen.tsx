@@ -1,22 +1,35 @@
+import {useTableVisible} from '../components/GameSettingsBoundary';
+import {HomeButton} from '../components/HomeButton';
+import {lobbyOpponent} from '../computer/lobbyOpponent';
+import {PlayingIdentity} from '../components/PlayingIdentity';
+import {GoldPressable} from '../components/GoldPressable';
+import {OnlineFriendScreen} from '../online/OnlineFriendScreen';
+import {OnlinePlayerAvatarPicker} from '../online/OnlinePlayerAvatarPicker';
+import {useAvatarSetupName} from '../online/useAvatarSetupName';
+import {normalizeAvatarName} from '../online/avatarIdentity';
+import {ModalCloseButton} from '../components/ModalCloseButton';
 import {DominoTurnTitle} from '../computer/DominoTurnTitle';
 import {DominoResultBanner} from '../computer/DominoResultBanner';
 import {useDominoResultTransition} from '../computer/useDominoResultTransition';
 import {ResultHoldButton} from '../components/ResultHoldButton';
 import {TableStamp,WoodSurface} from '../blackjack/TableFinish';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, AppState, BackHandler, Image, Modal, PanResponder, Platform, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { OpponentDrinkingAvatar } from '../computer/OpponentDrinkingAvatar';
 import { useBoardCamera } from '../computer/useBoardCamera';
+import {useLocalTurnClock} from '../computer/useLocalTurnClock';
+import {OnlineTurnTimer as DominoTurnTimer} from '../online/OnlineTurnTimer';
+import type {Game} from '../computer/engine';
 import { DrinkChoices, DrinkInviteButton } from '../computer/DrinkGift';
 import type { DrinkId } from '../computer/drinks';
 import { DominoTableBackground } from '../computer/DominoTableBackground';
 import { useComputerGame } from '../computer/ComputerGameContext';
 import { COMPUTER_STRINGS } from '../computer/strings';
-import { OPPONENTS } from '../computer/opponents';
-import { OpponentChoices, OpponentCarousel } from '../computer/OpponentChoices';
+import { DOMINO_AVATARS } from '../computer/dominoAvatars';
+import { DominoAvatarChoices, DominoAvatarCarousel } from '../computer/DominoAvatarChoices';
 import { restartMatch, deal, drawOrPass, End, legalEnds, hasMove, matchWinner, play, Tile } from '../computer/engine';
 import { DominoTile } from '../computer/DominoTile';
 import { GameSwitchButton, useTableGame } from '../poker/TableGameContext';
@@ -26,7 +39,7 @@ import { AnchoredBoard } from '../computer/AnchoredBoard';
 import { usePresentedTurn } from '../computer/usePresentedTurn';
 import { chainMetrics, endpointOffsets, Point, resolveScreenDrop, chainSlot } from '../computer/boardLayout';
 import { TABLE as C } from '../computer/tableTheme';
-import { handLayout } from '../computer/handLayout';
+import { handLayout,handTrayHeight } from '../computer/handLayout';
 import { useI18n } from '../i18n/I18nContext';
 import { useNav } from '../nav/NavContext';
 
@@ -41,25 +54,23 @@ const EMPTY_BOARD: Tile[] = [];
 function Action({ label, onPress, subtle = false, disabled = false, casino = false }: {
   label: string; onPress: () => void; subtle?: boolean; disabled?: boolean; casino?: boolean;
 }) {
-  return <Pressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
+  return <GoldPressable finish gold={!subtle||casino} accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
     style={({ pressed }) => ({ minHeight: 44, paddingHorizontal: 18, paddingVertical: 11, borderRadius: 12,
       justifyContent: 'center', alignItems: 'center', backgroundColor: subtle ? C.raised : C.gold,
       ...(casino ? { minHeight: 46, borderRadius: 14, borderWidth: 1, borderColor: '#E5CB91', backgroundColor: '#B18B44' } : {}),
       opacity: disabled ? 0.35 : pressed ? 0.8 : 1 })}>
     <Text numberOfLines={casino ? 1 : undefined} adjustsFontSizeToFit={casino} style={{ color: casino ? '#FFF2D2' : subtle ? C.ivory : C.background, fontSize: casino ? 14 : 13, fontWeight: casino ? '800' : '700', ...(casino ? { letterSpacing: 1, textTransform: 'uppercase' } : {}) }}>{label}</Text>
-  </Pressable>;
+  </GoldPressable>;
 }
-function Dialog({ visible, title, onClose, closeLabel, children }: {
-  visible: boolean; title: string; onClose: () => void; closeLabel: string; children: React.ReactNode;
+function Dialog({ visible, title, onClose, closeLabel, children,es=true }: {
+  visible: boolean; title: string; onClose: () => void; closeLabel: string; children: React.ReactNode;es?:boolean;
 }) {
   return <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
     <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(2,12,10,0.82)' }}>
       <View accessibilityViewIsModal style={{ maxHeight: '85%', borderRadius: 24, padding: 24, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
           <Text style={{ flex: 1, color: C.ivory, fontSize: 22, fontWeight: '600' }}>{title}</Text>
-          <Pressable accessibilityRole="button" accessibilityLabel={closeLabel} onPress={onClose} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
-            <Feather name="x" size={22} color={C.muted} />
-          </Pressable>
+          <ModalCloseButton finish es={es} positioned={false} onPress={onClose}/>
         </View>
         <ScrollView showsVerticalScrollIndicator={false}>{children}</ScrollView>
       </View>
@@ -75,6 +86,25 @@ function Avatar({ computer = false, active = false, small = false }: { computer?
 }
 
 export function ComputerGameScreen() {
+  const { game, playerAvatarId, playerAvatarPhoto,playerAvatarName } = useComputerGame();
+  const [showInvite, setShowInvite] = useState(false);
+  const [hasInvite, setHasInvite] = useState(false);
+  const [onlineShare,setOnlineShare]=useState(false);
+  const [onlineEntry, setOnlineEntry] = useState<'invite'|'accept'>('invite');
+  const [onlineRequest, setOnlineRequest] = useState(0);
+  return <View style={{flex:1}}>
+    <View style={{flex:1,display:showInvite?'none':'flex'}} accessibilityElementsHidden={showInvite} importantForAccessibility={showInvite?'no-hide-descendants':'auto'}>
+      <LocalComputerGameScreen showInvite={showInvite} onInvite={(entry,shareOnly=false)=>{setOnlineShare(shareOnly);setOnlineEntry(entry);setOnlineRequest(value=>value+1);setHasInvite(true);setShowInvite(true);}}/>
+    </View>
+    {hasInvite&&<View style={{flex:1,display:showInvite?'flex':'none'}} accessibilityElementsHidden={!showInvite} importantForAccessibility={showInvite?'auto':'no-hide-descendants'}>
+      <OnlineFriendScreen initialName={game?.playerName??''} initialTarget={game?.target??100} initialMode={game?.scoringMode??'points'}
+        initialAvatar={playerAvatarId} initialAvatarPhoto={playerAvatarPhoto} inviteOnly={onlineShare} entry={onlineEntry} requestId={onlineRequest} visible={showInvite} onBack={()=>setShowInvite(false)} onStarted={()=>setShowInvite(true)}/>
+    </View>}
+  </View>;
+}
+
+function LocalComputerGameScreen({showInvite,onInvite}:{showInvite:boolean;onInvite:(entry:'invite'|'accept',shareOnly?:boolean)=>void}) {
+ const tableVisible=useTableVisible();
   const {switchTarget}=useTableGame();
   const { matchingTiles, tableMusic, tableMusicTrack, tileSound, ready: prefsReady } = usePrefs();
   useTableMusic(prefsReady && tableMusic, tableMusicTrack);
@@ -94,14 +124,21 @@ export function ComputerGameScreen() {
   const computerHandRef = useRef<View>(null);
   const windowSize = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const { game, setGame, start, opponentId, setOpponentId, drinkGift, drinkExpiring, opponentDrink, cancelOpponentConsumption, setDrinkGift } = useComputerGame();
+  const { game, setGame, localTurnClockRef, start, dominoOpponentId:opponentId, setDominoOpponentId:setOpponentId, playerAvatarId, setPlayerAvatarId, playerAvatarPhoto,playerAvatarName, setPlayerAvatarPhoto, dominoOpponentPhoto,dominoOpponentName, setDominoOpponentPhoto, drinkGift, drinkExpiring, opponentDrink, cancelOpponentConsumption, setDrinkGift } = useComputerGame();
   useEffect(() => () => { cancelOpponentConsumption(); }, [cancelOpponentConsumption]);
-  const opponent = OPPONENTS.find(item => item.id === opponentId) ?? OPPONENTS[0];
+  const selectedLobbyOpponent=lobbyOpponent(DOMINO_AVATARS,opponentId,playerAvatarId);
+  useEffect(()=>{if(!game&&selectedLobbyOpponent!==opponentId)setOpponentId(selectedLobbyOpponent);},[game,selectedLobbyOpponent,opponentId,setOpponentId]);
+  const opponent = opponentId === 'selfie' && dominoOpponentPhoto ? {id:'selfie',name:dominoOpponentName||'Selfie',image:{uri:dominoOpponentPhoto}} : DOMINO_AVATARS.find(item => item.id === opponentId) ?? DOMINO_AVATARS[0];
   const { lang, t } = useI18n();
   const { back } = useNav();
   const text = COMPUTER_STRINGS[lang];
+  const ownAvatar=DOMINO_AVATARS.find(item=>item.id===playerAvatarId)??DOMINO_AVATARS[0];
+  const ownDefaultName=playerAvatarId==='selfie'?(playerAvatarName||'') :ownAvatar.name;
+  const ownAvatarName=game?.playerName||ownDefaultName;
   const es = lang === 'es';
-  const [name, setName] = useState('');
+  const {name,editName,chooseName}=useAvatarSetupName(playerAvatarId,ownDefaultName);
+  const chooseOwnAvatar=(id:typeof playerAvatarId)=>{setPlayerAvatarId(id);chooseName(id==='selfie'?(playerAvatarName||''):DOMINO_AVATARS.find(avatar=>avatar.id===id)?.name??'');};
+  const saveOwnPhoto=(photo:string,chosenName:string)=>{setPlayerAvatarPhoto(photo,chosenName);chooseName(chosenName);};
   const [target, setTarget] = useState(100);
   const [scoringMode, setScoringMode] = useState<'points' | 'wins'>('points');
   const [winTarget, setWinTarget] = useState(3);
@@ -115,9 +152,10 @@ export function ComputerGameScreen() {
   const [turnReminder, setTurnReminder] = useState(false);
   const [showTurnHelp, setShowTurnHelp] = useState(false);
   const [appActive, setAppActive] = useState(AppState.currentState === 'active');
-  const dealPresentation = useRoundDeal(game, prefsReady, appActive && !showSettings && !showRules && !showMenu && !showRestart && !showOpponents && !showDrinks, tileSound);
+  const dealPresentation = useRoundDeal(game, prefsReady, appActive && !showInvite && !showSettings && !showRules && !showMenu && !showRestart && !showOpponents && !showDrinks, tileSound);
   const [panelWidth, setPanelWidth] = useState(390);
   const [tableSize, setTableSize] = useState({ width: 340, height: 360 });
+  const [woodHeight,setWoodHeight]=useState(98),[actionsHeight,setActionsHeight]=useState(48),[panelHeight,setPanelHeight]=useState(windowSize.height);
   const rootRef = useRef<View>(null);
   const tableRef = useRef<View>(null);
   const rootOrigin = useRef<Point>({ x: 0, y: 0 });
@@ -141,7 +179,7 @@ export function ComputerGameScreen() {
   const compact = usableHeight < 720;
   const opponentHeight = compact ? 105 : Math.min(165, usableHeight * 0.20);
   const { columns: handColumns, rows: handRows, size: handSize } = handLayout(
-    game?.hands.human.length ?? 7, Math.min(panelWidth, windowSize.width) - 24, Math.max(110, usableHeight - opponentHeight - 294));
+    game?.hands.human.length ?? 7, Math.min(panelWidth, windowSize.width) - 24, handTrayHeight(panelHeight,opponentHeight,woodHeight,actionsHeight));
   const cancelDrag = () => { if (dragId.current) camera.end(); dragId.current = null; tableOrigin.current = null; setDrag(null); };
   const mandatoryDraw = useRef(false);
   mandatoryDraw.current = !!(showStock && game && !game.result && game.stock.length && !hasMove(game));
@@ -152,25 +190,31 @@ export function ComputerGameScreen() {
       setAppActive(state === 'active');
       if (state !== 'active') cancelDrag();
     });
-    const androidBack = BackHandler.addEventListener('hardwareBackPress', () => { if (!mandatoryDraw.current) back(); return true; });
+    const androidBack = BackHandler.addEventListener('hardwareBackPress', () => { if (showInvite) return false; if (!mandatoryDraw.current) back(); return true; });
     return () => { subscription.remove(); androidBack.remove(); };
-  }, [back]);
-  const presentation = usePresentedTurn({game, opponentId, setGame, onDraw: () => setShowStock(true),
-    paused: !placementReady || !!switchTarget || dealPresentation.dealing || showStock || !appActive || showSettings || showRules || showOpponents || showMenu || showRestart || showDrinks});
-  useEffect(() => { setSelected(null); cancelDrag(); }, [game?.round, game?.turn, game?.result]);
+  }, [back, showInvite]);
+  const [stockFlying,setStockFlying]=useState(false);
+  const timedDispatch=useRef(setGame),allowTimedAction=useRef<()=>boolean>(()=>true);
+  const dispatchTimedGame=useCallback((update:React.SetStateAction<Game|null>)=>timedDispatch.current(update),[]);
+  const presentation = usePresentedTurn({game, opponentId, setGame:dispatchTimedGame, onDraw: () => {if(allowTimedAction.current())setShowStock(true);},
+    paused: !tableVisible || showInvite || !placementReady || !!switchTarget || dealPresentation.dealing || showStock || !appActive || showSettings || showRules || showOpponents || showMenu || showRestart || showDrinks});
+  const localClockPaused=!tableVisible||showInvite||stockFlying||!placementReady||!presentation.presented||!!switchTarget||dealPresentation.dealing||!appActive||showSettings||showRules||showOpponents||showMenu||showRestart||showDrinks;
+  const localTimer=useLocalTurnClock(game,setGame,localClockPaused,showStock,localTurnClockRef);
+  timedDispatch.current=localTimer.setGame;allowTimedAction.current=localTimer.allowAction;
+  useEffect(() => { setSelected(null);setShowStock(false);cancelDrag(); }, [game?.round, game?.turn, game?.result]);
   useEffect(() => {
     setTurnReminder(false);
     setShowTurnHelp(false);
-    if (!game || game.result || game.turn !== 'human' || !appActive || showSettings || showRules || showOpponents || showMenu || showRestart || showDrinks) return;
+    if (!game || game.result || game.turn !== 'human' || !appActive || showInvite || showSettings || showRules || showOpponents || showMenu || showRestart || showDrinks) return;
     setShowTurnHelp(true);
     const helpTimer = setTimeout(() => setShowTurnHelp(false), 5000);
     const timer = setTimeout(() => setTurnReminder(true), 8000);
     return () => { clearTimeout(timer); clearTimeout(helpTimer); };
-  }, [game, showSettings, appActive, showRules, showOpponents, showMenu, showRestart, showDrinks]);
+  }, [game, showInvite, showSettings, appActive, showRules, showOpponents, showMenu, showRestart, showDrinks]);
 
   const header = <View style={{ height: compact ? 48 : 58, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: C.line }}>
     <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Volver' : 'Back'} onPress={leaveTable}
-      style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}><Feather name="arrow-left" size={20} color={C.ivory} /></Pressable>
+      style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}><Feather name="arrow-left" size={20} color={C.ivory} /></Pressable><HomeButton es={es} color={C.gold}/>
     <View style={{ flex: 1, alignItems: 'center' }}>
       <Text style={{ color: C.ivory, fontSize: 17, letterSpacing: 4, fontWeight: '600' }}>DOMINO</Text>
       <Text style={{ color: C.gold, fontSize: 8, letterSpacing: 2.2, marginTop: 3 }}>SOCIAL CLUB · PRO</Text>
@@ -180,7 +224,7 @@ export function ComputerGameScreen() {
       <Feather name="book-open" size={17} color={C.gold} /><Text style={{ color: C.muted, fontSize: 9 }}>{text.showRules}</Text>
     </Pressable>
   </View>;
-  const rules = <Dialog visible={showRules} title={text.showRules} onClose={() => setShowRules(false)} closeLabel={text.hideRules}>
+  const rules = <Dialog es={es} visible={showRules} title={text.showRules} onClose={() => setShowRules(false)} closeLabel={text.hideRules}>
     <Text style={{ color: C.ivory, fontSize: 15, lineHeight: 25 }}>{text.rules}</Text>
     <Text style={{ color: C.goldLight, marginTop: 12, lineHeight: 22 }}>{es ? 'Modo victorias: cada ronda ganada suma una victoria y una derrota al rival. Los empates no suman. La meta se elige antes de empezar; puedes alternar el marcador sin perder los conteos.' : 'Wins mode: each round won counts as one win and one loss for your opponent. Ties do not count. Choose the goal before starting; switching the scoreboard preserves both totals.'}</Text>
     <View style={{ height: 1, backgroundColor: C.line, marginVertical: 20 }} />
@@ -190,12 +234,12 @@ export function ComputerGameScreen() {
 
   const opponentPicker = <View>
     <Text style={{ color: C.gold, fontSize: 12, marginBottom: 12 }}>{es ? 'ELIGE TU RIVAL' : 'CHOOSE YOUR OPPONENT'}</Text>
-    {game ? <OpponentChoices selected={opponentId} onSelect={id => { setOpponentId(id); setShowOpponents(false); }} />
-      : <OpponentCarousel selected={opponentId} onSelect={setOpponentId} es={es} />}
+    {game ? <DominoAvatarChoices es={es} selected={opponentId} onSelect={id => { setOpponentId(id); setShowOpponents(false); }} />
+      : <DominoAvatarCarousel excludedId={playerAvatarId} selected={selectedLobbyOpponent} onSelect={setOpponentId} es={es} />}
   </View>;
 
   const nextRound = () => {
-    if (!game) return;
+    if (!game || showInvite) return;
     traceTileContact('next-round-action', { round: game.round, boardCount: game.board.length, winner: game.result?.winner, matchComplete: !!matchWinner(game), waitingForDrink: !!opponentDrink });
     if (opponentDrink) return;
     setShowStock(false);
@@ -204,9 +248,10 @@ export function ComputerGameScreen() {
     setGame(current => current === game && !resultHold.current ? deal(current.playerName, current.target, Math.random, matchWinner(current) ? undefined : current, current.scoringMode) : current);
   };
   useEffect(()=>{resultHold.current=false;setHolding(false);return()=>{resultHold.current=false;};},[game?.round]);
-  const resultPaused = !appActive || !!switchTarget || showSettings || showRules || showOpponents || showMenu || showRestart || showDrinks || showStock;
+  const resultPaused = !tableVisible || showInvite || !appActive || !!switchTarget || showSettings || showRules || showOpponents || showMenu || showRestart || showDrinks || showStock;
   const resultVisible = useDominoResultTransition(game,resultPaused,presentation.presented && !opponentDrink,nextRound,holding,resultHold);
   useEffect(()=>{if(resultPaused){resultHold.current=false;setHolding(false);}},[resultPaused]);
+  if (showInvite) return null;
   if (!game) return <View style={{ flex: 1, backgroundColor: C.background }}>
     {header}
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingBottom: 24 }}>
@@ -220,21 +265,18 @@ export function ComputerGameScreen() {
           <Text style={{ color: C.muted, fontSize: 12, lineHeight: 18, marginTop: 4, textAlign: 'center' }}>{es ? 'Elige tu rival. Disfruta el dominó.' : 'Choose your rival. Enjoy dominoes.'}</Text>
         </View>
       </View>
-      <Text style={{ color: C.muted, fontSize: 10, letterSpacing: 1.5, marginBottom: 9 }}>{es ? 'TU NOMBRE' : 'YOUR NAME'}</Text>
-      <TextInput accessibilityLabel={es ? 'Tu nombre' : 'Your name'} value={name} onChangeText={setName} maxLength={30}
-        placeholder={text.you} placeholderTextColor={C.muted} style={{ minHeight: 50, padding: 14, color: C.ivory, fontSize: 16,
-          backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 12 }} />
+      <PlayingIdentity es={es}/>
       <View testID="setup-scoring-row" style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginVertical: 18 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Cambiar entre puntos y victorias' : 'Switch points and wins'} onPress={() => setScoringMode(mode => mode === 'points' ? 'wins' : 'points')}
+        <GoldPressable finish gold={false} accessibilityRole="button" accessibilityLabel={es ? 'Cambiar entre puntos y victorias' : 'Switch points and wins'} onPress={() => setScoringMode(mode => mode === 'points' ? 'wins' : 'points')}
           style={{ width: 104, minHeight: 48, borderRadius: 12, backgroundColor: C.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: C.gold }}>
           <Text style={{ color: C.goldLight, fontSize: 12 }}>{scoringMode === 'wins' ? (es ? 'Victorias' : 'Wins') : (es ? 'Puntos' : 'Points')} ↔</Text>
-        </Pressable>
-        {(scoringMode === 'wins' ? [3, 5, 7] : [50, 100, 150]).map(n => <Pressable key={n} accessibilityRole="button" accessibilityState={{ selected: (scoringMode === 'wins' ? winTarget : target) === n }} onPress={() => scoringMode === 'wins' ? setWinTarget(n) : setTarget(n)}
+        </GoldPressable>
+        {(scoringMode === 'wins' ? [3, 5, 7] : [50, 100, 150]).map(n => <GoldPressable finish gold={false} key={n} accessibilityRole="button" accessibilityState={{ selected: (scoringMode === 'wins' ? winTarget : target) === n }} onPress={() => scoringMode === 'wins' ? setWinTarget(n) : setTarget(n)}
           style={{ flex: 1, minHeight: 48, justifyContent: 'center', borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: (scoringMode === 'wins' ? winTarget : target) === n ? C.gold : C.line,
-            backgroundColor: C.surface }}><Text style={{ color: C.goldLight, fontWeight: '700', fontSize: 18 }}>{n}</Text></Pressable>)}
+            backgroundColor: C.surface }}><Text style={{ color: C.goldLight, fontWeight: '700', fontSize: 18 }}>{n}</Text></GoldPressable>)}
       </View>
       {opponentPicker}
-      <View style={{ marginTop: 18 }}><Action label={t.startMatch} onPress={() => start(name.trim() || text.you, scoringMode === 'wins' ? winTarget : target, scoringMode)} /></View>
+      <View style={{ marginTop: 18 }}><Action label={es?'Jugar dominó':'Play Domino'} disabled={!normalizeAvatarName(name)} onPress={() => {const chosenName=normalizeAvatarName(name);if(chosenName)start(chosenName, scoringMode === 'wins' ? winTarget : target, scoringMode);}} /></View>
       <Text style={{ color: C.muted, fontSize: 11, lineHeight: 18, textAlign: 'center', marginTop: 18 }}>{es ? '7 fichas por jugador · Reglas disponibles arriba\nLa partida se conserva mientras la app siga abierta.' : '7 tiles each · Rules available above\nYour game stays in memory while the app is open.'}</Text>
     </ScrollView>
     {rules}
@@ -257,7 +299,7 @@ export function ComputerGameScreen() {
   const lastText = last ? `${labelFor(last.player)} ${last.kind === 'draw' ? text.drew : last.kind === 'pass' ? text.passed : `${text.played} ${last.tile?.a} · ${last.tile?.b}`}` : '';
   const place = (id: string, end: End) => {
     if (!humanTurn) return;
-    setGame(current => current === game ? play(current, 'human', id, end) : current);
+    localTimer.setGame(current => current === game ? play(current, 'human', id, end) : current);
     setSelected(null); cancelDrag();
   };
   const chooseDrink = (drinkId: DrinkId) => {
@@ -278,22 +320,22 @@ export function ComputerGameScreen() {
   const resultTitle = game.result ? winner ? `${labelFor(winner)} ${text.wonMatch}` : game.result.winner === 'tie' ? text.tie : `${labelFor(game.result.winner)} ${text.wonRound}` : '';
   const humanPrompt = !hasMove(game) ? (game.stock.length ? text.draw : text.pass) : es ? 'Coloca una ficha' : 'Play a tile';
   const turnLabel = !placementReady ? (es ? 'Preparando sonidos…' : 'Preparing sounds…') : dealPresentation.dealing ? (es ? 'Repartiendo fichas…' : 'Dealing tiles…') : game.result ? resultTitle : game.turn === 'human'
-    ? `${turnReminder ? (es ? 'Seguimos esperando tu jugada' : 'Waiting for your move') : text.yourTurn} · ${humanPrompt}` : text.thinking;
+    ? `${turnReminder ? (es ? 'Seguimos esperando tu jugada' : 'Waiting for your move') : text.yourTurn}\n${humanPrompt}` : text.thinking;
   const hasAction = !!game.result || (humanTurn && !hasMove(game)) || !!selectedTile;
   const noticeHeight = !game.result && hasAction ? 64 : 36;
   const noticeDetail = humanTurn && showTurnHelp && hasMove(game)
-    ? (es ? (matchingTiles ? 'Arrastra al extremo iluminado · Toca para jugar' : 'Arrastra a la mesa · Toca para jugar') : (matchingTiles ? 'Drag to a glowing end · Tap to play' : 'Drag onto the table · Tap to play')) : lastText || openingLabel;
+    ? (es ? (matchingTiles ? 'Arrastra al extremo iluminado\nToca para jugar' : 'Arrastra a la mesa\nToca para jugar') : (matchingTiles ? 'Drag to a glowing end\nTap to play' : 'Drag onto the table\nTap to play')) : lastText || openingLabel;
   const winsMode = game.scoringMode === 'wins';
   const tally = winsMode ? game.wins : game.scores;
   const toggleScoring = () => {
     cancelDrag();
     setGame(current => current ? { ...current, scoringMode: winsMode ? 'points' : 'wins', target: current.scoringTargets[winsMode ? 'points' : 'wins'] } : current);
   };
-  return <View key="computer-table" ref={rootRef} collapsable={Platform.OS === 'web' ? undefined : false} onLayout={event => { setPanelWidth(event.nativeEvent.layout.width); cancelDrag(); }} style={{ flex: 1, minHeight: 0, backgroundColor: C.background, overflow: 'hidden' }}>
+  return <View key="computer-table" ref={rootRef} collapsable={Platform.OS === 'web' ? undefined : false} onLayout={event => { setPanelWidth(event.nativeEvent.layout.width);setPanelHeight(event.nativeEvent.layout.height); cancelDrag(); }} style={{ flex: 1, minHeight: 0, backgroundColor: C.background, overflow: 'hidden' }}>
     <View testID="game-toolbar" style={{ height: 48, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: C.line, gap: 0 }}>
       <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Volver' : 'Back'} onPress={leaveTable} style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}>
         <Feather name="arrow-left" size={20} color={C.ivory} />
-      </Pressable>
+      </Pressable><HomeButton es={es} color={C.gold}/>
       <View testID="human-score" style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Text numberOfLines={1} style={{ flex: 1, textAlign: 'right', color: C.ivory, fontSize: 13 }}>{game.playerName}</Text>
         <Text style={{ minWidth: 24, textAlign: 'left', color: C.goldLight, fontWeight: '700', fontSize: 18 }}>{tally.human}</Text>
@@ -306,6 +348,7 @@ export function ComputerGameScreen() {
         <Text style={{ minWidth: 24, textAlign: 'right', color: C.goldLight, fontWeight: '700', fontSize: 18 }}>{tally.computer}</Text>
         <Text numberOfLines={1} style={{ flex: 1, textAlign: 'left', color: C.ivory, fontSize: 13 }}>{opponent.name}</Text>
       </View>
+      <Pressable testID="local-game-share" accessibilityRole="button" accessibilityLabel={es?'Compartir invitación':'Share invitation'} onPress={()=>{cancelDrag();onInvite('invite',true);}} style={{width:44,height:44,alignItems:'center',justifyContent:'center'}}><Feather name="share-2" size={19} color={C.gold}/></Pressable>
       <Pressable testID="game-menu" accessibilityRole="button" accessibilityLabel={es ? 'Menú de partida' : 'Game menu'} onPress={() => { cancelDrag(); setShowMenu(true); }} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
         <Feather name="more-vertical" size={19} color={C.gold} />
       </Pressable>
@@ -343,28 +386,31 @@ export function ComputerGameScreen() {
         style={{ flex: 1, marginHorizontal: 12, minHeight: 80,
           overflow: winningTileVisible ? 'visible' : 'hidden',
           zIndex: winningTileVisible ? 20 : 0, elevation: winningTileVisible ? 20 : 0 }}>
-        <Animated.View pointerEvents="box-none" style={{ position: 'absolute',
+        <Animated.View testID="board-camera" pointerEvents="box-none" style={{ position: 'absolute',
           left: (tableSize.width - metrics.width) / 2, top: (tableSize.height - metrics.height) / 2,
           width: metrics.width, height: metrics.height, transform: [{ translateX: camera.values.x }, { translateY: camera.values.y }, { scale: camera.values.scale }] }}>
         <AnchoredBoard onPresented={presentation.onPresented} contactContext={{ round: game.round, actor: game.last?.player, turn: game.turn, lastKind: game.last?.kind }} showMatching={matchingTiles} key={game.round} winningId={game.result && !game.result.blocked && game.last?.kind === 'play' ? game.last.tile?.id : null} arrivingId={game.last?.kind === 'play' ? game.last.tile?.id : null} board={game.board} openingId={game.openingId} metrics={metrics} available={available}
           hovered={hovered} leftLabel={text.left} rightLabel={text.right} openLabel={openingLabel}
           onEnd={end => { if (activeTile) place(activeTile.id, end); }} />
         </Animated.View>
-        <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Centrar mesa' : 'Center table'} onPress={camera.center}
+        <GoldPressable finish gold={false} accessibilityRole="button" accessibilityLabel={es ? 'Centrar mesa' : 'Center table'} onPress={camera.center}
           style={{ position: 'absolute', right: 0, top: 0, minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: C.surface, borderRadius: 12 }}>
           <Feather name="maximize" size={18} color={C.gold} />
-        </Pressable>
+        </GoldPressable>
+      </View>
+    <View testID="below-hand-notice" onLayout={e=>setActionsHeight(e.nativeEvent.layout.height)} style={{ minHeight:game.result?noticeHeight:hasAction?64:28, paddingLeft:12,paddingRight:12, justifyContent: 'center' }}>
+        {game.result ? (resultVisible ? <View pointerEvents="none"><DominoResultBanner key={game.round} result={{title:resultTitle,detail:'',tone:(winner ?? game.result.winner)==='human'?'win':(winner ?? game.result.winner)==='tie'?'tie':'loss'}} paused={resultPaused||holding}/></View> : null) : humanTurn && !hasMove(game) ?
+          <Action casino={game.stock.length > 0} label={game.stock.length ? `${text.draw} · ${game.stock.length}` : text.pass} onPress={() => {if(!localTimer.allowAction())return;game.stock.length?setShowStock(true):localTimer.setGame(current=>current?drawOrPass(current,'human'):current);}} /> :
+          selectedTile ? <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
+            {legalEnds(game, 'human', selectedTile).map(end => <Action key={end} subtle label={`${end === 'left' ? text.left : text.right} · ${end === 'left' ? game.board[0]?.a : game.board[game.board.length - 1]?.b}`} onPress={() => place(selectedTile.id, end)} />)}
+            <Pressable accessibilityRole="button" accessibilityLabel={text.cancel} onPress={() => setSelected(null)} style={{ padding: 10 }}><Feather name="x" size={18} color={C.muted} /></Pressable>
+          </View> : <View pointerEvents="none" style={{ paddingHorizontal: 10 }}>
+            <DominoTurnTitle multiline active={humanTurn && !resultPaused && !drag} label={turnLabel}/><Text testID="local-turn-detail" style={{color:C.muted,fontSize:11,textAlign:'center',lineHeight:14}}>{noticeDetail}</Text>
+          </View>}
+        {hasAction && !game.result && <DominoTurnTitle multiline compact active={humanTurn && !resultPaused && !drag} label={turnLabel}/>}
       </View>
     <View style={{ paddingHorizontal: 12, paddingBottom: 2 }}>
-      <View style={{ height: compact ? 30 : 35, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Avatar active={humanTurn} small />
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1 }}>
-          <Text numberOfLines={1} style={{ flexShrink: 1, color: C.ivory, fontSize: 12, fontWeight: '600' }}>{game.playerName}</Text>
 
-        </View>
-        <View style={{ flex: 1 }} />
-        <View testID="stock-info" style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Feather name="layers" color={C.muted} size={11} /><Text style={{ color: C.muted, fontSize: 10 }}>{text.stock} · {game.stock.length}</Text></View>
-      </View>
       <View ref={humanHandRef} collapsable={false} testID="player-hand" style={{ height: (handSize * 2 + 26) * handRows, width: (handSize + 10) * handColumns + (handColumns - 1) * 2 + 4,
         alignSelf: 'center', flexDirection: 'row', flexWrap: handRows === 1 ? 'nowrap' : 'wrap', columnGap: 2, rowGap: 4, justifyContent: 'center', alignItems: 'center', alignContent: 'center' }}>
         {game.hands.human.map((tile, index) => {
@@ -390,53 +436,52 @@ export function ComputerGameScreen() {
       </View>
       </View>
     </View>
-    <View testID="domino-wood-edge" style={{height:87,backgroundColor:'#704329',paddingHorizontal:12,paddingTop:11,paddingBottom:10,justifyContent:'center'}}><View pointerEvents="none" style={{position:'absolute',top:0,bottom:0,left:0,right:0}}><WoodSurface/></View>
-    <View testID="below-hand-notice" style={{ height: noticeHeight, paddingLeft:12,paddingRight:12, justifyContent: 'center' }}>
-        {game.result ? (resultVisible ? <View pointerEvents="none"><DominoResultBanner key={game.round} result={{title:resultTitle,detail:'',tone:(winner ?? game.result.winner)==='human'?'win':(winner ?? game.result.winner)==='tie'?'tie':'loss'}} paused={resultPaused||holding}/></View> : null) : humanTurn && !hasMove(game) ?
-          <Action casino={game.stock.length > 0} label={game.stock.length ? `${text.draw} · ${game.stock.length}` : text.pass} onPress={() => game.stock.length ? setShowStock(true) : setGame(current => current ? drawOrPass(current, 'human') : current)} /> :
-          selectedTile ? <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
-            {legalEnds(game, 'human', selectedTile).map(end => <Action key={end} subtle label={`${end === 'left' ? text.left : text.right} · ${end === 'left' ? game.board[0]?.a : game.board[game.board.length - 1]?.b}`} onPress={() => place(selectedTile.id, end)} />)}
-            <Pressable accessibilityRole="button" accessibilityLabel={text.cancel} onPress={() => setSelected(null)} style={{ padding: 10 }}><Feather name="x" size={18} color={C.muted} /></Pressable>
-          </View> : <View pointerEvents="none" style={{ paddingHorizontal: 10 }}>
-            <DominoTurnTitle active={humanTurn && !resultPaused && !drag} label={turnLabel}/>
-            <Text numberOfLines={1} style={{ color: C.ivory, fontSize: 11, lineHeight: 12, textAlign: 'center', marginTop: 1 }}>{noticeDetail}</Text>
-          </View>}
+    <View testID="domino-wood-edge" onLayout={e=>setWoodHeight(e.nativeEvent.layout.height)} style={{minHeight:compact?94:98,flexShrink:0,backgroundColor:'#704329',paddingHorizontal:12,paddingTop:4,paddingBottom:4}}><View pointerEvents="none" style={{position:'absolute',top:0,bottom:0,left:0,right:0}}><WoodSurface/></View>
         <ResultHoldButton visible={!!game.result&&resultVisible} presentationKey={game.result?game:null} id="domino-result-hold" holding={holding} disabled={resultPaused} onHold={()=>{if(!game.result||resultPaused||!resultVisible)return;resultHold.current=true;setHolding(true);}} onRelease={()=>{resultHold.current=false;setHolding(false);}} es={es}/>
-        {hasAction && !game.result && <DominoTurnTitle compact active={humanTurn && !resultPaused && !drag} label={turnLabel}/>}
+
+      <View style={{minHeight:60,flexDirection:'row',alignItems:'center',gap:8}}>
+        <View testID="stock-info" style={{width:80,flexShrink:0,flexDirection:'row',alignItems:'center',justifyContent:'flex-start',gap:4}}><Feather name="layers" color={C.muted} size={11}/><Text style={{color:C.muted,fontSize:10}}>{text.stock} · {game.stock.length}</Text></View>
+        <View testID="local-domino-own-identity" style={{flex:1,minWidth:0,alignItems:'center',justifyContent:'center',gap:2}}><Image testID="local-domino-own-avatar" accessibilityLabel={ownAvatarName} source={playerAvatarId==='selfie'&&playerAvatarPhoto?{uri:playerAvatarPhoto}:ownAvatar.image} style={{width:44,height:44,borderRadius:22,borderWidth:1,borderColor:humanTurn?C.gold:C.line}}/><Text accessibilityLabel={ownAvatarName} numberOfLines={2} style={{width:'100%',textAlign:'center',lineHeight:14,color:C.ivory,fontSize:12,fontWeight:'600'}}>{ownAvatarName}</Text></View>
+        <View style={{width:80,flexShrink:0}}/>
+
       </View>
+      <View testID="local-wood-timer" style={{position:'absolute',top:4,bottom:4,right:12,width:80,alignItems:'flex-end',justifyContent:'center'}}><DominoTurnTimer circularOnly remindAfterExpiry attentionKey={`local-domino:${game.round}:${game.turn}:${game.board.length}:${game.hands.human.length}:${game.stock.length}`} clock={!dealPresentation.dealing&&appActive?localTimer.clock:null} enabled={!localClockPaused&&!showStock&&game.turn==='human'&&!game.result} es={es} onPause={localTimer.pause} onResume={localTimer.resume}/></View>
     </View>
     {drag && <View pointerEvents="none" style={{ position: 'absolute', zIndex: 100, elevation: 20,
       left: drag.point.x - rootOrigin.current.x - (handSize + 4) / 2, top: drag.point.y - rootOrigin.current.y - handSize - 2, opacity: 0.95 }}>
       <DominoTile a={drag.tile.a} b={drag.tile.b} size={handSize} vertical selected />
     </View>}
     <BoneyardOverlay key={game.round} active={appActive} attentionActive={appActive && !switchTarget && !showSettings && !showRules && !showMenu && !showRestart && !showOpponents && !showDrinks} visible={showStock && !game.result && game.stock.length > 0 && !hasMove(game)} game={game} es={es}
-      destination={game.turn === 'human' ? humanHandRef : computerHandRef}
+      destination={game.turn === 'human' ? humanHandRef : computerHandRef} onFlightChange={setStockFlying} canDraw={localTimer.allowAction}
       onDraw={index => {
+        if(!localTimer.allowAction())return;
         const next = drawOrPass(game, game.turn, index);
-        setGame(current => current === game ? next : current);
+        localTimer.setGame(current => current === game ? next : current);
         setShowStock(!next.result && next.stock.length > 0 && !hasMove(next));
       }} />
     <TableSettings visible={showSettings} es={es} onClose={() => setShowSettings(false)} onRules={() => { setShowSettings(false); setShowRules(true); }} />
     {rules}
-    <Dialog visible={showDrinks} title={es ? 'Invita una bebida' : 'Treat your opponent'} onClose={() => setShowDrinks(false)} closeLabel={text.cancel}>
+    <Dialog es={es} visible={showDrinks} title={es ? 'Invita una bebida' : 'Treat your opponent'} onClose={() => setShowDrinks(false)} closeLabel={text.cancel}>
       <DrinkChoices es={es} choose={chooseDrink} />
       <View style={{ height: 14 }} />
-      <Action label={text.cancel} subtle onPress={() => setShowDrinks(false)} />
     </Dialog>
-    <Dialog visible={showMenu} title={es ? 'Menú de partida' : 'Game menu'} onClose={() => setShowMenu(false)} closeLabel={text.cancel}>
+    <Dialog es={es} visible={showMenu} title={es ? 'Menú de partida' : 'Game menu'} onClose={() => setShowMenu(false)} closeLabel={text.cancel}>
+      <Action label={es ? 'Invitar amigo' : 'Invite a friend'} onPress={() => { setShowMenu(false); onInvite('invite'); }} />
+      <View style={{ height: 12 }} />
+      <Action label={es ? 'Aceptar invitación' : 'Accept invitation'} onPress={() => { setShowMenu(false); onInvite('accept'); }} />
+      <View style={{ height: 12 }} />
       <Action label={es ? 'Ajustes' : 'Settings'} onPress={() => { setShowMenu(false); setShowSettings(true); }} />
       <View style={{ height: 12 }} />
       <Action label={text.showRules} onPress={() => { setShowMenu(false); setShowRules(true); }} />
       <View style={{ height: 12 }} />
       <Action label={es ? 'Reiniciar partida' : 'Restart game'} onPress={() => { setShowMenu(false); setShowRestart(true); }} />
     </Dialog>
-    <Dialog visible={showRestart} title={es ? '¿Quieres reiniciar el juego?' : 'Restart the game?'} onClose={() => setShowRestart(false)} closeLabel={text.cancel}>
+    <Dialog es={es} visible={showRestart} title={es ? '¿Quieres reiniciar el juego?' : 'Restart the game?'} onClose={() => setShowRestart(false)} closeLabel={text.cancel}>
       <Text style={{ color: C.ivory, fontSize: 15, lineHeight: 23, marginBottom: 20 }}>{es ? 'Se borrarán todos los puntos, victorias y el progreso de esta partida. Comenzarás desde cero con el mismo rival y tus preferencias.' : 'All points, wins and progress in this game will be cleared. You will start from zero with the same opponent and preferences.'}</Text>
-      <Action label={text.cancel} subtle onPress={() => setShowRestart(false)} />
       <View style={{ height: 12 }} />
       <Action label={es ? 'Reiniciar' : 'Restart'} onPress={confirmRestart} />
     </Dialog>
-    <Dialog visible={showOpponents} title={es ? 'Tu rival' : 'Your opponent'} onClose={() => setShowOpponents(false)} closeLabel={text.cancel}>
+    <Dialog es={es} visible={showOpponents} title={es ? 'Tu rival' : 'Your opponent'} onClose={() => setShowOpponents(false)} closeLabel={text.cancel}>
       {opponentPicker}
     </Dialog>
 

@@ -12,10 +12,11 @@ import { TABLE as C } from './tableTheme';
 import { boneyardSlots } from './boneyardSlots';
 
 /** Keep faces hidden until selection; commit exactly once, after arrival. */
-export function BoneyardPanel({ game, es, destination, onDraw, interactive = true, attentionActive = true, panelProgress, slideDistance = 0 }: {
+export function BoneyardPanel({ game, es, destination, onDraw, interactive = true, attentionActive = true, panelProgress, slideDistance = 0,onFlightChange,canDraw }: {
   game: Game; es: boolean;
   destination: React.RefObject<View | null>;
   onDraw: (index: number) => void;
+  onFlightChange?:(active:boolean)=>void;canDraw?:()=>boolean;
   interactive?: boolean; attentionActive?: boolean; panelProgress?: Animated.Value; slideDistance?: number;
 }) {
   const { tileSound: sound, vibration } = usePrefs();
@@ -34,6 +35,7 @@ export function BoneyardPanel({ game, es, destination, onDraw, interactive = tru
   const latest = useRef({ onDraw, sound }); latest.current = { onDraw, sound };
   const selectable = useRef(interactive); selectable.current = interactive;
   const currentStock = useRef(game.stock); currentStock.current = game.stock;
+  useLayoutEffect(()=>{onFlightChange?.(!!flight&&interactive);return()=>onFlightChange?.(false);},[flight,interactive,onFlightChange]);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   // The panel stays mounted across draws. Rearm only after the parent commits
   // the new stock, before painting another frame or accepting another choice.
@@ -44,7 +46,7 @@ export function BoneyardPanel({ game, es, destination, onDraw, interactive = tru
   }, [game.stock, interactive]);
   const choose = (slotIndex: number) => {
     const index = slots[slotIndex]?.stockIndex ?? -1;
-    if (!selectable.current || index < 0 || locked.current || !cells.current.get(slotIndex) || !root.current || !destination.current) return;
+    if (!selectable.current || index < 0 || locked.current || !cells.current.get(slotIndex) || !root.current || !destination.current||canDraw?.()===false) return;
     locked.current = true;
     const generation = measurementGeneration.current;
     if (!computer && vibration) Haptics.selectionAsync().catch(() => {});

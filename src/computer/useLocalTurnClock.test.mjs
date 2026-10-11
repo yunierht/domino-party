@@ -1,0 +1,17 @@
+import test from 'node:test';import assert from 'node:assert/strict';import React from 'react';import {act,create} from 'react-test-renderer';import {readFileSync} from 'node:fs';import ts from 'typescript';
+import * as model from './localTurnClock.ts';import {deal,play} from './engine.ts';
+globalThis.IS_REACT_ACT_ENVIRONMENT=true;
+async function fixture(t,{shared,strict=false}={}){let now=0;t.mock.method(performance,'now',()=>now);t.mock.timers.enable({apis:['setTimeout']});
+ const m={exports:{}};new Function('require','module','exports',ts.transpileModule(readFileSync(new URL('./useLocalTurnClock.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(id=>id==='react'?React:model,m,m.exports);
+ const initial={...deal('Ana',100,()=>.5),turn:'human'};let props={paused:false,boneyard:false},value,game,r;function Probe(){const [g,setGame]=React.useState(()=>initial);game=g;value=m.exports.useLocalTurnClock(g,setGame,props.paused,props.boneyard,shared);return null;}
+ const element=()=>strict?React.createElement(React.StrictMode,null,React.createElement(Probe)):React.createElement(Probe);
+ await act(()=>{r=create(element());});return{get value(){return value;},get game(){return game;},time:n=>{now=n;},async tick(ms){now+=ms;await act(()=>t.mock.timers.tick(ms));},async update(patch){props={...props,...patch};await act(()=>r.update(element()));},async leave(){await act(()=>r.unmount());},async return(){await act(()=>{r=create(element());});},async close(){await act(()=>r.unmount());t.mock.timers.reset();}};
+}
+test('CPU can still play after zero; no scheduled autoaction changes a waiting hand',async t=>{const f=await fixture(t);try{const before=f.game;await f.tick(60000);await f.update({});assert.strictEqual(f.game,before);assert.equal(f.value.clock.remainingMs,0);assert.equal(f.value.allowAction(),true);await act(()=>f.value.setGame(g=>play(g,'human',g.hands.human[0].id,'right')));assert.equal(f.game.board.length,1);assert.equal(f.game.turn,'computer');}finally{await f.close();}});
+test('manual and background pauses preserve time and never expire into an automatic turn',async t=>{const f=await fixture(t);try{await f.tick(10000);await act(()=>f.value.pause());assert.equal(f.value.clock.remainingMs,20000);await f.tick(60000);assert.equal(f.game.turn,'human');await act(()=>f.value.resume());await f.tick(20000);await f.update({});assert.equal(f.game.turn,'human');assert.equal(f.value.clock.remainingMs,0);await f.update({paused:true});await f.tick(60000);assert.equal(f.game.turn,'human');}finally{await f.close();}});
+test('navigation stores remaining time in the game context, then resumes the same deal rather than resetting thirty seconds',async t=>{
+ const store={current:null},f=await fixture(t,{shared:store});try{await f.tick(10000);await f.leave();assert.equal(store.current.remainingMs,20000);assert.equal(store.current.deadline,null);await f.tick(60000);await f.return();assert.equal(f.value.clock.remainingMs,20000);await f.tick(19999);assert.equal(f.game.turn,'human');await f.tick(1);await f.update({});assert.equal(f.game.turn,'human');assert.equal(f.value.clock.remainingMs,0);}finally{await f.close();}
+});
+test('strict effect cleanup/restart preserves the advisory clock without automatic expiry',async t=>{
+ const f=await fixture(t,{shared:{current:null},strict:true});try{await f.tick(29999);assert.equal(f.game.turn,'human');await f.tick(1);await f.update({});assert.equal(f.game.turn,'human');assert.equal(f.value.clock.remainingMs,0);}finally{await f.close();}
+});

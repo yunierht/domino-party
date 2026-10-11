@@ -1,0 +1,42 @@
+# Preparación iPhone — Domino Online Test
+
+## Estado posterior: proyecto creado, registro Apple pendiente
+
+Usuario autorizó explícitamente usar Expo/Apple existentes para proyectoOnline separado, registrariPhone y enviarfuente aEAS para buildinterna SINAppStore. CLI24.12.1 aislado en `.release-audit/eas-cli-24.12.1`; Expoactor verificadoyunierht. ProyectoNUEVO creado/vinculado: [@yunierht/domino-online-test](https://expo.dev/accounts/yunierht/projects/domino-online-test), UUID `9d4cdf14-2853-4b0f-86f4-03108c445056`. app.json incorpora owner/UUIDpropios; no recursosSocialClub reutilizados. No source/iconupload/buildcloud realizado.
+
+RegistroEASdevice:create llegó alpromptAppleID; intento posterior de restaurar elAppleAccountpreseleccionado confirmó sesiónlocal CADUCADA ypidiócontraseña. Se canceló ANTESde introducirsecretos; no accesoApple vigente confirmado. Para continuar, el usuario ejecuta directamente enTerminal deestechat `& ".\scripts\register-online-iphone.ps1"`, eligeconfirmaAppleAccount/team ycompleta login/MFA enla interfazlocal, nunca porchat ni redirects/transcript/logs. Scriptverifica UUID/bundle propios ytoolingaislado. NoQRregistro/UDID/perfil/certificado/IPA todavía. CuentaAppleDeveloper previa solo reportada, acceso/membresía actual noverificados.
+
+La autorizaciónCloud descrita abajo comopendiente eshistoria depreparación y queda sustituida únicamenteenelalcance aprobado; hostingstaging/DNS/Store/billing siguen sinautorizar. PróximaAPKAndroid PORPEDIDOHUMANO espera cierresDomino+PokerOnline e integraciónconjunta; noIPA confuenteintermedia porimplicación. Fuenteactualcámara/alias/timers/Poker noincorporada aesta candidata. Asociaciones opcionales ahora preparadas peroINACTIVAS; [planstaging](ONLINE_LINKS_PREPARACION_2026-10-09.md). Ningún nuevoAndroidbuild ni firmaLAN/backendtracking alterados.
+
+Fecha:2026-10-09. Preparación autorizada por el usuario a través del coordinador01a12235. Worktree5486; original no modificado. Fuente original con cambios de cámara/alias/layout todavía activa: no se incorporó ningún snapshot incompleto ni se recompiló Android.
+
+## Resultado concreto preparado
+
+- Identidad iOS local propuesta `com.nextcodestudios.dominoonline.test`, buildNumber1 y versión0.1.1; distinta del bundle heredado `com.yht.dominoparty`. No AppID registrado ni reserva Apple confirmada.
+- iOS mínimo16.4: declarado `ios.deploymentTarget` y exigido por Expo/ExpoModulesCore instalados57.0.x. La documentación versionada de [Expo57](https://docs.expo.dev/versions/v57.0.0/) indica Xcode26.4+; [Expo56](https://docs.expo.dev/versions/v56.0.0/) consultado por AGENTS. RNreal0.86.3 y React19.2.3 preservados.
+- Permisos propios de micrófono, cámara y red local en app.json. Voz usa WebRTC124.0.8; autolinking iOS descubre su podspec y dependenciaJitsiWebRTC~124.0.0. Micrófono del receptor se adquiere solo al aceptar llamada. No CallKit/notificaciones/background/grabación nuevos.
+- ATS mantiene NSAllowsArbitraryLoads=false y NSAllowsLocalNetworking=false, con excepciónHTTP únicamente para192.168.1.194 y sin subdominios. Apple admite IPs/CIDR en NSExceptionDomains desdeiOS17; iOS16.4 permite IPs directamente de forma predeterminada. No excepción global ni dominios de Firebase/tiendas modificados. [Apple ATS](https://developer.apple.com/documentation/bundleresources/information-property-list/nsapptransportsecurity/nsallowslocalnetworking).
+- Perfil limpio `online-ios-internal` en eas.json: distribucióninternal, Release para teléfono, developmentClient=false, autoIncrement=false y variablesURL/scheme del piloto. Se retiraron perfiles y submit/ascAppId heredados; Android continúa con su build LOCAL existente y misma configuración/firma. No owner/projectId EAS heredados ni proyecto cloud creado. El perfil está preparado y aún sin vincular a un destino real.
+- `.easignore` excluye backend completo, estado local/SQLite, docs, audits/copias nativas, artefactos, Git, archivosenv y claves/certificados. Futuro envío solo necesita fuentecliente/assets/lockfiles/config; antes de enviarlo inspeccionar el archivo real y secretos. No se envió nada a EAS en esta preparación.
+
+Verificación REAL actual: `expo config --type introspect` resuelve Info.plist con los permisos/ATS exactos y PodfileProperties16.4; prueba por comparaciones confirma Android/plugins/version/scheme intactos. Autolinking descubreWebRTC iOS. Evidencia `.release-audit/ios-preparation/expo-introspect.json` y `autolinking-ios.json`. Esto es configuración/resolución estática: NOpod install, compilaciónXcode, IPA, firma, instalación ni voz iPhone comprobados.
+
+## Camino preferido: EAS Cloud, sujeto a autorización
+
+El usuario reporta tener cuenta Apple Developer usada para publicar la app previa; no se verificó vigencia/membresía/equipo ni recursos. Mac no confirmado, preferenciacloud. EASCloud puede compilar iOS sinMac local; distribuciónadHoc exige membresíaAppleDeveloper válida yUDID del iPhone en su perfil. [Expo distribución interna](https://docs.expo.dev/build/internal-distribution/).
+
+Antes de ejecutar, faltan: cuentaExpo elegida y acceso seguro, proyectoEAS NUEVO paraOnline con UUID real, equipoAppleDeveloper correcto y permisos para certificado/perfil adHoc del bundle propio, modelo/versióniOS y registroUDID del iPhone. No pedir ni guardar contraseñas/OTP; el usuario completa autenticación en interfaz segura. La cuentaApple anterior no autoriza reutilizar su ascAppId/bundle/perfil de producción por inferencia.
+
+Acciones previstas SOLO tras autorización concreta: autenticar Expo/Apple de forma segura; crear/vincular proyectoOnline (verificar nombre/owner/UUID); registrar el iPhone; seleccionar/crear certificado adecuado y perfiladHoc específico; revisar archivo de envío; ejecutar `eas build --platform ios --profile online-ios-internal` SINauto-submit. La aprobación debe cubrir envío de fuente/assets aEAS, proyecto destino, registroiPhone y gestión de firma. No contratar servicio/plan ni asumir presupuesto/créditos de build; revisar disponibilidad antes de ejecutar. No se instalaron CLI globales ni se ejecutaron estas acciones.
+
+La cuentaApple de pago permiteadHoc; una cuenta gratuita/PersonalTeam puede probar en dispositivo desdeXcode con perfiles temporales, pero no sustituye membresíaadHoc deEAS. [Apple cuentas/PersonalTeam](https://developer.apple.com/help/account/basics/about-your-developer-account). CLI EAS/Xcode/CocoaPods no hallados enPATH Windows actual; no se buscó accesoMac remoto ni credenciales. Si se dispone deMac, alternativa local: dependencias del lockfile, prebuildiOS, CocoaPods, Xcode con equipo/provision propio y dispositivo; firma/registro externos también requieren autorización. Windows puede prepararconfig/bundleJS; NOcompilar ni firmar iOS nativo localmente. [Expo build local](https://docs.expo.dev/guides/local-app-development/).
+
+## Antes de instalar/probar físicamente
+
+Esperar el cierre de la fuente activa y sincronizar cliente/backend finales juntos antes de crear la candidataiOS; este documento no cambia cuál APK Android está instalado. Una futuraIPA debe demostrar firma/perfil conUDID correcto, bundle propio, WebRTC nativo, Info.plist permisos/ATS, bundle/endpoint y versiones reales. No usarExpoGo como prueba de WebRTC ni prometer instalación medianteAPK/QRExpo.
+
+En iPhone: iOS16.4+, DeveloperMode para builds de desarrollo/internas según corresponda, confiar en firma siguiendoApple, permitir redlocal cuando se solicite, mismaWi-FiCyberNet quePC. Abrir `http://192.168.1.194:8792/health` enSafari comprueba ruta de red del navegador; no demuestra permiso redlocal de la app ni ATS del binario. PC/servidor deben seguir activos y esaIP estable; cambiarla exige regenerar excepciónATS y bundle, sin abrirfirewall adicional por defecto.
+
+Probar iPhone/Android en misma sala: invitación, manos privadas,2jugadas, llamadaA→B/aceptar/rechazar/cancelar, micrófono receptor soloaceptar, conversación/mute/salir y recuperación. VozfueraLAN no validada, sinSTUN/TURN actual. SiAppdeniega redlocal/micrófono, reautorizar enAjustes y repetir; no grabar ni activar micrófonos personales durante pruebas automatizadas. PruebaAndroidreal anteriorS24/S8 no validaiOS.
+
+Guardado solo en worktree: app.json(ios),eas.json,.easignore y documentación. Sin cloud/register/certificados/AppleAppID/TestFlight/AppStore/publicación/deploy/TURN/billing/commit/push ni cambiosAndroidLAN/firma/backendtracking/original.

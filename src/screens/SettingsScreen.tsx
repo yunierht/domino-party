@@ -1,3 +1,5 @@
+import {useNav} from '../nav/NavContext';
+import {GoldPressable} from '../components/GoldPressable';
 import React from 'react';
 import { Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,10 +17,14 @@ import { Lang } from '../i18n/strings';
 
 import { MusicChoices } from '../sound/MusicChoices';
 import {useTableMusic} from '../sound/useTableMusic';
+import {useComputerGame} from '../computer/ComputerGameContext';
+import {OnlinePlayerAvatarPicker} from '../online/OnlinePlayerAvatarPicker';
 
 export function SettingsScreen() {
+  const {back,canGoBack}=useNav();
   const { theme, themeName, setThemeName, s } = useTheme();
   const { t, lang, setLang } = useI18n();
+  const {playerAvatarId,setPlayerAvatarId,playerAvatarPhoto,playerAvatarName,setPlayerAvatarPhoto} = useComputerGame();
   const { announceWinner, setAnnounceWinner, voice, setVoice, sound, setSound, tableMusic, setTableMusic,tableMusicTrack,ready } = usePrefs();
   useTableMusic(ready&&tableMusic,tableMusicTrack);
   const c = theme.colors;
@@ -45,20 +51,23 @@ export function SettingsScreen() {
 
   return (
     <ScrollView contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}>
-      <Header title={t.settings} />
+      <Header title={t.settings} showBack={false} leftAction={canGoBack?<Pressable testID="settings-back" accessibilityRole="button" accessibilityLabel={lang==='es'?'Volver':'Back'} onPress={back} style={{width:44,height:44,justifyContent:'center',alignItems:'center'}}><Feather name="arrow-left" size={22} color={c.primary}/></Pressable>:undefined}/>
 
       <View testID="settings-music-row" style={{flexDirection:'row',alignItems:'center',gap:s(12)}}>
         <Text style={{color:c.textMuted,fontSize:s(13),fontWeight:'800',textTransform:'uppercase',letterSpacing:.8}}>{lang === 'es' ? 'Música' : 'Music'}</Text>
         <Switch accessibilityLabel={lang === 'es' ? 'Música' : 'Music'} value={tableMusic} onValueChange={setTableMusic} trackColor={{false:c.border,true:c.primary}} thumbColor="#fff" />
       </View>
       <MusicChoices es={lang === 'es'} settingsAppearance={{text:c.text,surface:c.surface,border:c.border,primary:c.primary,radius:theme.radius,fontFamily:theme.fontFamily}}/>
+      <View testID="settings-default-avatar" style={{marginBottom:s(24)}}>
+        <OnlinePlayerAvatarPicker label={lang==='es'?'Tu avatar por defecto':'Your default avatar'} es={lang==='es'} selected={playerAvatarId} onSelect={setPlayerAvatarId} photo={playerAvatarPhoto} photoName={playerAvatarName} onSavePhoto={setPlayerAvatarPhoto}/>
+      </View>
       {/* Language */}
       <SectionLabel>{t.language}</SectionLabel>
       <View style={{ flexDirection: 'row', gap: s(12) }}>
         {langMeta.map((l) => {
           const selected = lang === l.code;
           return (
-            <Pressable
+            <GoldPressable finish gold={selected}
               key={l.code}
               onPress={() => setLang(l.code)}
               style={{
@@ -74,7 +83,7 @@ export function SettingsScreen() {
               <Text style={{ color: selected ? c.onPrimary : c.text, fontSize: s(16), fontWeight: '700' }}>
                 {l.label}
               </Text>
-            </Pressable>
+            </GoldPressable>
           );
         })}
       </View>
@@ -184,7 +193,7 @@ export function SettingsScreen() {
               {voiceMeta.map((v) => {
                 const selected = voice === v.id;
                 return (
-                  <Pressable
+                  <GoldPressable finish gold={selected}
                     key={v.id}
                     onPress={() => {
                       setVoice(v.id);
@@ -204,7 +213,7 @@ export function SettingsScreen() {
                     <Text style={{ color: selected ? c.onPrimary : c.text, fontSize: s(14), fontWeight: '800' }}>
                       {v.label}
                     </Text>
-                  </Pressable>
+                  </GoldPressable>
                 );
               })}
             </View>

@@ -166,7 +166,7 @@ export function HistoryScreen({
                     setPendingDelete(null);
                   },
                 },
-                { label: t.cancel, variant: 'ghost', onPress: () => setPendingDelete(null) },
+                { label: t.cancel, variant: 'ghost',dismiss:true, onPress: () => setPendingDelete(null) },
               ]}
               onRequestClose={() => setPendingDelete(null)}
             />
@@ -186,7 +186,7 @@ export function HistoryScreen({
                     setClearAllOpen(false);
                   },
                 },
-                { label: t.cancel, variant: 'ghost', onPress: () => setClearAllOpen(false) },
+                { label: t.cancel, variant: 'ghost',dismiss:true, onPress: () => setClearAllOpen(false) },
               ]}
               onRequestClose={() => setClearAllOpen(false)}
             />

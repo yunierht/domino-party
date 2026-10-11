@@ -1,0 +1,25 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import ts from 'typescript';
+import React from 'react';
+import {create,act} from 'react-test-renderer';
+import {modalCloseMock} from '../components/modalCloseMock.mjs';
+import {TABLE} from '../computer/tableTheme.ts';
+globalThis.IS_REACT_ACT_ENVIRONMENT=true;
+const transpile=path=>ts.transpileModule(readFileSync(new URL(path,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React,esModuleInterop:true}}).outputText;
+const controllerModule={exports:{}};new Function('module','exports',transpile('./voiceController.ts'))(controllerModule,controllerModule.exports);
+for(const reason of ['background','unavailable','unmount'])test(`voice releases media when ${reason}`,async()=>{
+ let acquired=0,stopped=0,background;const uuid='12345678-1234-1234-1234-123456789abc';
+ const platform={available:()=>true,acquire:async()=>{acquired++;return{mute(){},stop(){stopped++;},peer(){throw Error('unexpected peer');}};}};
+ const deps={react:React,'react-native':{AppState:{addEventListener:(_,fn)=>{background=fn;return{remove(){}};}},Modal:({visible,children})=>visible?React.createElement('Modal',null,children):null,Pressable:'Pressable',View:'View',Text:'Text'},'@expo/vector-icons':{Feather:'Feather'},'expo-crypto':{randomUUID:()=>uuid},'./voiceController':controllerModule.exports,'./voicePlatform':{createVoicePlatform:()=>platform},'../computer/tableTheme':{TABLE},'../components/ModalCloseButton':modalCloseMock};
+ const m={exports:{}};new Function('require','module','exports',transpile('./OnlineVoiceControl.tsx'))(id=>id.endsWith('/GoldPressable')?{GoldPressable:'Pressable'}:deps[id]??(()=>{throw Error(id);})(),m,m.exports);
+ const props={epoch:'e',seat:'human',opponentName:'Luis',relay:async req=>({peer:null,messages:[],call:req.message?.type==='call'?{id:req.message.callId,caller:'human',callerSession:uuid,calleeSession:null,expiresAt:30000,status:'ringing',reason:null}:null}),available:true,es:true,onStatus(){}};let r;
+ await act(()=>{r=create(React.createElement(m.exports.OnlineVoiceControl,props));});assert.equal(acquired,0);
+ await act(async()=>{r.root.findByProps({testID:'online-voice-control'}).props.onPress();await Promise.resolve();await Promise.resolve();});assert.equal(acquired,1);
+ if(reason==='background')await act(()=>background('background'));
+ else if(reason==='unavailable')await act(()=>r.update(React.createElement(m.exports.OnlineVoiceControl,{...props,available:false})));
+ else await act(()=>r.unmount());
+ assert.equal(stopped,1);
+ if(reason!=='unmount')await act(()=>r.unmount());
+});

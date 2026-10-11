@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { chainMetrics, chainBounds, fitBoardCamera, resizedBoardCamera, screenToBoard, chainSlot, endpointOffsets, resolveDrop } from './boardLayout.ts';
+import { chainMetrics, chainBounds, fitBoardCamera, resizedBoardCamera, reconcileBoardCamera, screenToBoard, chainSlot, endpointOffsets, resolveDrop } from './boardLayout.ts';
 const m=chainMetrics(2048,4096);
 const deck=[];for(let a=0;a<=6;a++)for(let b=a;b<=6;b++)deck.push({id:`${a}-${b}`,a,b});
 function assertFits(b,v,c){
@@ -45,7 +45,7 @@ test('visible asymmetric growth preserves the camera even far from the chain cen
 test('overflow pans only far enough to restore the margin instead of centering the chain',()=>{
  const v={width:366,height:350},bounds={left:980,right:1210,top:2010,bottom:2086},current={x:0,y:0,scale:1};
  const next=fitBoardCamera(bounds,v,m,current);
- const margin=Math.min(22,Math.min(v.width,v.height)*.06);
+ const margin=6;
  assert.ok(Math.abs(next.x+ (183+(1210-1024)-(366-margin)))<1e-8);
  assert.equal(next.y,0);assert.equal(next.scale,1);assertFits(bounds,v,next);
 });
@@ -58,3 +58,31 @@ test('hand row resize preserves existing screen-space tile centers',()=>{
  for(const offset of [0,1]){const p=chainSlot(offset,m,board,deck[0].id);
  assert.equal(before.height/2+camera.y+(p.y-m.height/2)*camera.scale,after.height/2+fitted.y+(p.y-m.height/2)*fitted.scale);}
 });
+
+test('freeing hand space preserves the fitted zoom and screen positions',()=>{
+ const large={width:366,height:270},small={width:366,height:120},b=chainBounds(deck,deck[14].id,m);
+ const initial=fitBoardCamera(b,large,m,{x:0,y:0,scale:1},true);
+ const compact=reconcileBoardCamera(b,small,m,resizedBoardCamera(initial,large,small),large,false);
+ assertFits(b,small,compact);assert.ok(compact.scale<initial.scale);
+ const restored=reconcileBoardCamera(b,large,m,resizedBoardCamera(compact,small,large),small,false);
+ assertFits(b,large,restored);assert.equal(restored.scale,compact.scale);assert.equal(small.height/2+compact.y,large.height/2+restored.y);
+ assert.strictEqual(reconcileBoardCamera(b,large,m,restored,large,false),restored,'settled frame does not oscillate');
+});
+test('space changes preserve manual framing and adequate automatic frames',()=>{
+ const before={width:700,height:350},after={width:700,height:420},b=chainBounds(deck.slice(0,2),deck[0].id,m),manual={x:12,y:-20,scale:.8};
+ const adjusted=resizedBoardCamera(manual,before,after);
+ assert.strictEqual(reconcileBoardCamera(b,after,m,adjusted,before,true),adjusted);
+ const jitter={width:700.5,height:350.5},normal=fitBoardCamera(b,before,m,{x:0,y:0,scale:1},true),same=resizedBoardCamera(normal,before,jitter);
+ assert.strictEqual(reconcileBoardCamera(b,jitter,m,same,before,false),same);
+});
+test('rotation fits only if needed and growing chains remain still when adequate',()=>{
+ const portrait={width:366,height:220},landscape={width:700,height:160},b=chainBounds(deck,deck[14].id,m);
+ const p=fitBoardCamera(b,portrait,m,{x:0,y:0,scale:1},true);
+ const l=reconcileBoardCamera(b,landscape,m,resizedBoardCamera(p,portrait,landscape),portrait,false);assertFits(b,landscape,l);
+ const restored=reconcileBoardCamera(b,portrait,m,resizedBoardCamera(l,landscape,portrait),landscape,false);assertFits(b,portrait,restored);assert.ok(restored.scale<=l.scale);
+ const view={width:700,height:350},short=fitBoardCamera(chainBounds(deck.slice(0,1),deck[0].id,m),view,m,{x:0,y:0,scale:1},true);
+ assert.strictEqual(reconcileBoardCamera(chainBounds(deck.slice(0,3),deck[0].id,m),view,m,short,view,false),short);
+});
+
+test('actual opening centers and contained additions retain placed coordinates, including doubles and either end',()=>{for(const opening of [deck[0],deck[1],deck[27]])for(const side of ['left','right']){const v={width:700,height:700};let board=[opening],camera=fitBoardCamera(chainBounds(board,opening.id,m,false),v,m,{x:0,y:0,scale:1},true);assert.equal(camera.x,0);assert.equal(camera.y,0);assert.equal(camera.scale,1);for(const tile of deck.filter(t=>t.id!==opening.id).slice(0,5)){const old=board.map(t=>({id:t.id,p:chainSlot(board.indexOf(t)-board.findIndex(t=>t.id===opening.id),m,board,opening.id)}));board=side==='left'?[tile,...board]:[...board,tile];const b=chainBounds(board,opening.id,m,false),next=fitBoardCamera(b,v,m,camera);assert.strictEqual(next,camera);for(const entry of old){const p=chainSlot(board.findIndex(t=>t.id===entry.id)-board.findIndex(t=>t.id===opening.id),m,board,opening.id);assert.deepEqual(p,entry.p);}assertFits(b,v,next);camera=next;}}});
+test('a newly placed tile at either border gets the nearest translation without unnecessary zoom',()=>{const v={width:300,height:400};for(const sign of [-1,1]){const b={left:1024+(sign<0?-180:-30),right:1024+(sign<0?30:180),top:2028,bottom:2068},camera={x:0,y:0,scale:1},next=fitBoardCamera(b,v,m,camera);assert.equal(next.x,sign<0?36:-36);assert.equal(next.y,0);assert.equal(next.scale,1);assertFits(b,v,next);assert.strictEqual(fitBoardCamera(b,v,m,next),next);}});

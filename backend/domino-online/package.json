@@ -1,0 +1,21 @@
+{
+  "name": "domino-online-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:domain": "node --test test/domain.test.mjs test/invitation.test.mjs test/turn-clock.test.mjs test/result-clock.test.mjs test/attention.test.mjs test/selfie.test.mjs test/voice-call.test.mjs test/manual-code.test.mjs test/poker-domain.test.mjs test/poker-invitation.test.mjs test/blackjack-game.test.mjs test/blackjack-room.test.mjs",
+    "build": "node scripts/build.mjs",
+    "test:integration": "npm run build && node --test test/integration.test.mjs test/voice.integration.test.mjs test/manual.integration.test.mjs test/poker.integration.test.mjs test/blackjack.integration.test.mjs",
+    "test": "npm run test:domain && npm run test:integration",
+    "types": "node scripts/wrangler.mjs types worker-configuration.d.ts",
+    "check": "tsc --noEmit",
+    "dev:local": "node scripts/wrangler.mjs dev --local --port 8791"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "miniflare": "^5.20261006.1-alpha",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.149.0"
+  }
+}

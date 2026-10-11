@@ -1,3 +1,4 @@
+import {GoldPressable} from '../components/GoldPressable';
 import {MatchPanelBevel} from '../components/MatchPresentation';
 import {trackingSetupHeaderGap,trackingFirstCardTop} from '../components/trackingLayout';
 import {TrackingColorButton} from '../components/TrackingColorButton';
@@ -24,6 +25,7 @@ import { usePrefs } from '../state/PrefsContext';
 import { speakWinner } from '../announce/voice';
 import { initSounds, playTap, playWin } from '../sound/sounds';
 import { AppDialog } from '../components/AppDialog';
+import {ModalCloseButton} from '../components/ModalCloseButton';
 import QRCode from 'react-native-qrcode-svg';
 import { isFirebaseConfigured } from '../firebase/config';
 import { joinUrl } from '../config/links';
@@ -307,7 +309,7 @@ export function GameScreen() {
                   {t.waitingApproval}
                 </Text>
               ) : (
-                <Pressable
+                <GoldPressable
                   onPress={() => requestControl()}
                   style={{
                     backgroundColor: c.primary,
@@ -319,7 +321,7 @@ export function GameScreen() {
                   <Text style={{ color: c.onPrimary, fontSize: s(13), fontWeight: '800' }}>
                     {t.requestToScore}
                   </Text>
-                </Pressable>
+                </GoldPressable>
               ))}
           </View>
         )}
@@ -413,8 +415,10 @@ export function GameScreen() {
         >
           <Pressable
             onPress={(e) => e.stopPropagation()}
-            style={{ width: '100%', backgroundColor: c.surface, borderRadius: theme.radius + 8, padding: s(24), alignItems: 'center' }}
+            style={{ width: '100%',maxHeight:'90%', backgroundColor: c.surface, borderRadius: theme.radius + 8, padding: s(24),paddingTop:s(60), alignItems: 'center' }}
           >
+            <ModalCloseButton es={lang==='es'} onPress={()=>setShareOpen(false)} color={c.text} borderColor={c.primary}/>
+            <ScrollView style={{flexShrink:1,width:'100%'}} contentContainerStyle={{alignItems:'center'}}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(8), marginBottom: s(10) }}>
               <View style={{ width: s(10), height: s(10), borderRadius: s(5), backgroundColor: c.danger }} />
               <Text style={{ color: c.danger, fontWeight: '900', fontSize: s(14), letterSpacing: 1 }}>{t.live}</Text>
@@ -446,6 +450,7 @@ export function GameScreen() {
             />
             <View style={{ height: s(10) }} />
             <Button label={t.confirm} variant="ghost" onPress={() => setShareOpen(false)} fullWidth />
+            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>

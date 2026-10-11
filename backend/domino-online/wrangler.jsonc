@@ -1,0 +1,63 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "domino-online-local-backend",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-10-08",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": false,
+  "preview_urls": false,
+  "vars": {
+    "LOCAL_ONLY": "true"
+  },
+  "observability": {
+    "enabled": false
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "ROOMS",
+        "class_name": "DominoRoom"
+      },
+      {
+        "class_name": "ManualCodes",
+        "name": "MANUAL_CODES"
+      },
+      {
+        "class_name": "PokerRoom",
+        "name": "POKER_ROOMS"
+      },
+      {
+        "class_name": "BlackjackRoom",
+        "name": "BLACKJACK_ROOMS"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "DominoRoom"
+      ]
+    },
+    {
+      "tag": "v2-manual",
+      "new_sqlite_classes": [
+        "ManualCodes"
+      ]
+    },
+    {
+      "tag": "v3-poker",
+      "new_sqlite_classes": [
+        "PokerRoom"
+      ]
+    },
+    {
+      "tag": "v4-blackjack",
+      "new_sqlite_classes": [
+        "BlackjackRoom"
+      ]
+    }
+  ]
+}

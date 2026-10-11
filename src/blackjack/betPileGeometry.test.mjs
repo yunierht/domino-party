@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {betPilePoint,betPileStep} from './betPileGeometry.ts';
+test('one Poker-sized pile lands each chip at the same horizontal center and above prior layers',()=>{for(const capacity of [1,3,8,40]){const step=betPileStep(capacity);for(let i=0;i<capacity;i++){const p=betPilePoint(i,capacity);assert.equal(p.x,35);assert.equal(p.y,74-14-i*step-21*.92);assert.ok(p.y>30&&p.y<42);if(i)assert.ok(p.y<betPilePoint(i-1,capacity).y);}}});

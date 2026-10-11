@@ -1,3 +1,4 @@
+import {GoldPressable} from '../components/GoldPressable';
 import {MatchPanelBevel} from '../components/MatchPresentation';
 import {trackingSetupComfort,trackingSetupHeaderGap} from '../components/trackingLayout';
 import {TrackingColorButton} from '../components/TrackingColorButton';
@@ -184,7 +185,7 @@ function Chip({
   const { theme, s } = useTheme();
   const c = theme.colors;
   return (
-    <Pressable
+    <GoldPressable gold={selected}
       onPress={onPress}
       style={({ pressed }) => ({
         flex:1,
@@ -209,7 +210,7 @@ function Chip({
       <LinearGradient
         colors={
           selected
-            ? ['rgba(255,255,255,0.42)', 'rgba(255,255,255,0.04)', 'rgba(0,0,0,0.20)']
+            ? ['transparent', 'transparent']
             : ['rgba(255,255,255,0.10)', 'rgba(255,255,255,0)', 'rgba(0,0,0,0.20)']
         }
         start={{ x: 0, y: 0 }}
@@ -229,6 +230,6 @@ function Chip({
       >
         {label}
       </Text>
-    </Pressable>
+    </GoldPressable>
   );
 }

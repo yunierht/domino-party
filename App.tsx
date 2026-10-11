@@ -1,3 +1,4 @@
+import {GameSettingsBoundary} from './src/components/GameSettingsBoundary';
 import React, { useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
@@ -28,16 +29,20 @@ import { PrivacyScreen } from './src/screens/PrivacyScreen';
 import { TableGameProvider, useTableGame } from './src/poker/TableGameContext';
 import { CardGameLobby } from './src/poker/CardGameLobby';
 import { PokerScreen } from './src/poker/PokerScreen';
+import {PokerOnlineScreen} from './src/poker/PokerOnlineScreen';
+import {PokerOnlineLinkListener} from './src/poker/PokerOnlineLinkListener';
 import { BlackjackProvider } from './src/blackjack/BlackjackContext';
 import { BlackjackLobby } from './src/blackjack/BlackjackLobby';
 import { BlackjackScreen } from './src/blackjack/BlackjackScreen';
 import { ComputerGameScreen } from './src/screens/ComputerGameScreen';
 import { ComputerGameProvider } from './src/computer/ComputerGameContext';
+import {OnlineLinkListener} from './src/online/OnlineLinkListener';
+import {OnlineInvitationEntry} from './src/online/OnlineInvitationEntry';
 
 function TableScreen() { const {mode}=useTableGame(); return mode === 'poker' ? <PokerScreen /> : <ComputerGameScreen />; }
 
-function Router() {
-  const { screen, watchHistory } = useNav();
+function ScreenContent({screen}:{screen:import('./src/nav/NavContext').ScreenName}) {
+  const { watchHistory } = useNav();
   switch (screen) {
     case 'home':
       return <HomeScreen />;
@@ -46,10 +51,13 @@ function Router() {
     case 'game':
       return <GameScreen />;
     case 'pokerLobby': return <CardGameLobby game="poker" />;
+    case 'pokerOnline': return <PokerOnlineScreen/>;
+    case 'blackjackOnline': return <BlackjackLobby/>;
     case 'blackjackLobby': return <BlackjackLobby />;
     case 'blackjackTable': return <BlackjackScreen />;
     case 'computerGame':
       return <TableScreen />;
+    case 'onlineInvitation':return <OnlineInvitationEntry/>;
     case 'history':
       return <HistoryScreen />;
     case 'watchHistory':
@@ -76,11 +84,13 @@ function Router() {
   }
 }
 
+function Router(){const {screen,settingsReturnScreen}=useNav();const inGameSettings=screen==='settings'&&['computerGame','pokerLobby','blackjackLobby','pokerOnline','blackjackTable','onlineInvitation'].includes(settingsReturnScreen);return <GameSettingsBoundary settings={inGameSettings} settingsScreen={<SettingsScreen/>}><ScreenContent screen={inGameSettings?settingsReturnScreen:screen}/></GameSettingsBoundary>;}
+
 function AppShell() {
   const { theme, ready } = useTheme();
   const { loaded } = useGame();
   const { openWatch, screen } = useNav();
-  const computerTable = screen === 'computerGame' || screen === 'blackjackTable' || screen === 'pokerLobby' || screen === 'blackjackLobby';
+  const computerTable = screen === 'computerGame' || screen === 'onlineInvitation' || screen === 'blackjackTable' || screen === 'pokerLobby' || screen === 'blackjackLobby' || screen === 'pokerOnline';
   const tilt = useTilt(18);
 
   // Open a shared game when the app is launched/opened from a link
@@ -91,7 +101,9 @@ function AppShell() {
     if (!url || handledUrl.current === url) return;
     handledUrl.current = url;
     try {
-      const code = Linking.parse(url).queryParams?.code;
+      const params=Linking.parse(url).queryParams;
+      if(params?.onlineRoom!==undefined||params?.pokerRoom!==undefined||params?.blackjackRoom!==undefined)return;
+      const code = params?.code;
       if (code) openWatch(String(code));
     } catch {
       // ignore malformed links
@@ -103,6 +115,7 @@ function AppShell() {
   return (
     <View style={{ flex: 1, backgroundColor: computerTable ? '#081D1B' : theme.colors.bg }}>
       <StatusBar style={computerTable || theme.dark ? 'light' : 'dark'} />
+      <OnlineLinkListener/><PokerOnlineLinkListener/>
       {!computerTable && <Background theme={theme} tiltX={tilt.x} tiltY={tilt.y} />}
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         {computerTable?<Router/>:<View style={{flex:1}}>

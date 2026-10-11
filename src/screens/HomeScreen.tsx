@@ -156,23 +156,21 @@ function ResumeMatchCard({
               backgroundColor: 'rgba(255,255,255,0.13)',
             }}
           />
-          <Pressable accessibilityRole="button" accessibilityLabel={t.resumeMatch} onPress={onResume} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t.resumeMatch} onPress={onResume} style={{ flexDirection: 'row', alignItems: 'center', gap:s(10) }}>
             <HomeScoreSide
               team={match.teams[0]}
               score={scoreA}
               target={match.targetScore}
               color={c.teamA}
             />
-            <Text style={{ color: c.textMuted, fontWeight: '800', fontSize: s(16) }}>
+            <Text pointerEvents="none" style={{ position:'absolute',left:0,right:0,top:'50%',transform:[{translateY:-s(8)}],textAlign:'center',color: c.textMuted, fontWeight: '800', fontSize: s(16) }}>
               {t.vs}
             </Text>
             <HomeScoreSide
               team={match.teams[1]}
               score={scoreB}
               target={match.targetScore}
-              color={c.teamB}
-              alignRight
-            />
+              color={c.teamB}            />
           </Pressable>
           <View style={{ marginTop: s(16), flexDirection: 'row', gap: s(10) }}>
             <Animated.View testID="resume-button-pulse" style={{ flex: 1, transform: [{ scale: attention }] }}>
@@ -193,24 +191,20 @@ function HomeScoreSide({
   team,
   score,
   target,
-  color,
-  alignRight,
-}: {
+  color,}: {
   team: Team;
   score: number;
   target: number;
-  color: string;
-  alignRight?: boolean;
-}) {
+  color: string;}) {
   const { theme, s } = useTheme();
   const c = theme.colors;
   const caption = String(Math.max(0, target - score));
 
   return (
-    <View style={{ flex: 1, alignItems: alignRight ? 'flex-end' : 'flex-start' }}>
+    <View style={{ flex: 1, alignItems:'center' }}>
       <Text
         numberOfLines={1}
-        style={{ color: c.text, fontSize: s(15), fontWeight: '800', marginBottom: s(8) }}
+        style={{ width:'100%',textAlign:'center',color: c.text, fontSize: s(15), fontWeight: '800', marginBottom: s(8) }}
       >
         {team.name}
       </Text>

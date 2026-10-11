@@ -1,9 +1,10 @@
 import {MatchPanelBevel} from './MatchPresentation';
-import React, { useEffect, useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { useI18n } from '../i18n/I18nContext';
 import { Button } from './ui';
+import {ModalCloseButton} from './ModalCloseButton';
 import { NumberPad } from './NumberPad';
 import { Match, Round, teamById } from '../types';
 
@@ -29,7 +30,7 @@ export function RoundEditor({
   teamColors?: [string,string];
 }) {
   const { theme, s } = useTheme();
-  const { t } = useI18n();
+  const { t,lang } = useI18n();
   const c = theme.colors;
   const {height}=useWindowDimensions();
   const compact=height<720;
@@ -43,7 +44,8 @@ export function RoundEditor({
   );
   const [points, setPoints] = useState('');
 
-  useEffect(() => {
+  // Initialize the draft before paint so opening effects cannot erase the first key.
+  useLayoutEffect(() => {
     if (visible) {
       setWinnerTeamId(round?.winnerTeamId ?? presetWinnerTeamId ?? match.teams[0].id);
       setPoints(round ? String(round.points) : '');
@@ -73,9 +75,11 @@ export function RoundEditor({
             backgroundColor: c.surface,
             borderRadius:s(26),
             padding:compact?s(14):s(18),
+            paddingTop:s(60),
           }}
         >
             <MatchPanelBevel color={lockTeam?lockedColor:c.primary} radius={s(26)}/>
+            <ModalCloseButton es={lang==='es'} onPress={onClose} color={c.text} borderColor={c.primary}/>
             <ScrollView style={{flexShrink:1}} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {/* Title */}
             <Text style={{ color: c.text, fontSize: s(20), fontWeight: '800', marginBottom: s(16) }}>
@@ -172,9 +176,7 @@ export function RoundEditor({
             <View style={{ height: s(10) }} />
             {isEditing && onDelete ? (
               <Button label={t.delete} variant="danger" onPress={onDelete} fullWidth />
-            ) : (
-              <Button label={t.cancel} variant="ghost" onPress={onClose} fullWidth />
-            )}
+            ) : null}
             </ScrollView>
         </Pressable>
       </Pressable>

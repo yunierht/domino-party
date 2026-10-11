@@ -1,4 +1,7 @@
+import type {DrinkGift} from '../computer/drinks';
+import {GoldPressable} from '../components/GoldPressable';
 import {CardSuit} from './PlayingCard';
+import {ModalCloseButton} from '../components/ModalCloseButton';
 import React, { createContext, useContext, useState } from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
 import Svg, { G, Rect, Line, Circle, Text as SvgText } from 'react-native-svg';
@@ -7,27 +10,29 @@ import type { PokerGame } from './engine';
 import { TABLE as C } from '../computer/tableTheme';
 import { useI18n } from '../i18n/I18nContext';
 export type TableMode = 'domino' | 'poker';
-const Context = createContext<{pokerCollected:PokerGame|null;setPokerCollected:React.Dispatch<React.SetStateAction<PokerGame|null>>;pokerStartingChips:number;setPokerStartingChips:(amount:number)=>void;pokerName:string;setPokerName:(name:string)=>void;mode:TableMode;poker:PokerGame|null;setPoker:React.Dispatch<React.SetStateAction<PokerGame|null>>;pokerShown:string;setPokerShown:React.Dispatch<React.SetStateAction<string>>;switchTarget:TableMode|'blackjack'|null;requestSwitch:(target:TableMode|'blackjack')=>void;enterMode:(target:TableMode)=>void;}|null>(null);
+const Context = createContext<{pokerDrinkGift:DrinkGift;setPokerDrinkGift:React.Dispatch<React.SetStateAction<DrinkGift>>;pokerDrinkSeen:{current:WeakSet<object>};pokerCollected:PokerGame|null;setPokerCollected:React.Dispatch<React.SetStateAction<PokerGame|null>>;pokerStartingChips:number;setPokerStartingChips:(amount:number)=>void;pokerName:string;setPokerName:(name:string)=>void;mode:TableMode;poker:PokerGame|null;setPoker:React.Dispatch<React.SetStateAction<PokerGame|null>>;pokerShown:string;setPokerShown:React.Dispatch<React.SetStateAction<string>>;switchTarget:TableMode|'blackjack'|null;requestSwitch:(target:TableMode|'blackjack')=>void;enterMode:(target:TableMode)=>void;}|null>(null);
 export function TableGameProvider({children}:{children:React.ReactNode}) {
  const {go}=useNav();
+ const [pokerDrinkGift,setPokerDrinkGift]=useState<DrinkGift>(null);const pokerDrinkSeen=React.useRef(new WeakSet<object>());
  const [pokerCollected,setPokerCollected]=useState<PokerGame|null>(null);
  const [pokerStartingChips,setPokerStartingChips]=useState(3000);
  const [pokerName,setPokerName]=useState('');
  const [pokerShown,setPokerShown]=useState('');
  const [mode,setMode]=useState<TableMode>('domino');const [poker,setPoker]=useState<PokerGame|null>(null);const [switchTarget,setSwitchTarget]=useState<TableMode|'blackjack'|null>(null);
  const {lang}=useI18n();const es=lang==='es';const target=switchTarget==='blackjack'?'Blackjack':switchTarget==='poker'?(es?'póker':'poker'):(es?'dominó':'dominoes');
- return <Context.Provider value={{pokerCollected,setPokerCollected,pokerStartingChips,setPokerStartingChips,pokerName,setPokerName,mode,poker,setPoker,pokerShown,setPokerShown,switchTarget,requestSwitch:setSwitchTarget,enterMode:target=>{setSwitchTarget(null);setMode(target);}}}>{children}
- <Modal visible={switchTarget!==null} transparent animationType="fade" onRequestClose={()=>setSwitchTarget(null)}><View style={{flex:1,backgroundColor:'rgba(2,12,10,.84)',justifyContent:'center',padding:26}}><View accessibilityViewIsModal style={{backgroundColor:C.surface,borderRadius:24,padding:24,borderWidth:1,borderColor:C.line,gap:18}}>
+ return <Context.Provider value={{pokerDrinkGift,setPokerDrinkGift,pokerDrinkSeen,pokerCollected,setPokerCollected,pokerStartingChips,setPokerStartingChips,pokerName,setPokerName,mode,poker,setPoker,pokerShown,setPokerShown,switchTarget,requestSwitch:setSwitchTarget,enterMode:target=>{setSwitchTarget(null);setMode(target);}}}>{children}
+ <Modal visible={switchTarget!==null} transparent animationType="fade" onRequestClose={()=>setSwitchTarget(null)}><View style={{flex:1,backgroundColor:'rgba(2,12,10,.84)',justifyContent:'center',padding:26}}><View accessibilityViewIsModal style={{backgroundColor:C.surface,borderRadius:24,padding:24,paddingTop:60,borderWidth:1,borderColor:C.line,gap:18}}>
+ <ModalCloseButton finish es={es} onPress={()=>setSwitchTarget(null)}/>
  <Text style={{color:C.ivory,fontSize:23,fontWeight:'600'}}>{es?`¿Quieres cambiar a ${target}?`:`Switch to ${target}?`}</Text>
  <Text style={{color:C.muted,fontSize:15,lineHeight:23}}>{es?'Tu partida actual quedará pausada para continuar al volver.':'Your current game will pause so you can continue when you return.'}</Text>
- <View style={{flexDirection:'row',gap:12}}><Pressable accessibilityRole="button" onPress={()=>setSwitchTarget(null)} style={{flex:1,padding:15,borderRadius:12,backgroundColor:C.raised,alignItems:'center'}}><Text style={{color:C.ivory}}>{es?'Cancelar':'Cancel'}</Text></Pressable><Pressable accessibilityRole="button" onPress={()=>{if(switchTarget==='blackjack')go('blackjackTable');else if(switchTarget)setMode(switchTarget);setSwitchTarget(null);}} style={{flex:1,padding:15,borderRadius:12,backgroundColor:C.gold,alignItems:'center'}}><Text style={{color:C.background,fontWeight:'700'}}>{es?'Cambiar':'Switch'}</Text></Pressable></View>
+ <View style={{flexDirection:'row',gap:12}}><GoldPressable finish accessibilityRole="button" onPress={()=>{if(switchTarget==='blackjack')go('blackjackTable');else if(switchTarget)setMode(switchTarget);setSwitchTarget(null);}} style={{flex:1,padding:15,borderRadius:12,backgroundColor:C.gold,alignItems:'center'}}><Text style={{color:C.background,fontWeight:'700'}}>{es?'Cambiar':'Switch'}</Text></GoldPressable></View>
  </View></View></Modal></Context.Provider>;
 }
 export function useTableGame(){const value=useContext(Context);if(!value)throw Error('TableGameProvider required');return value;}
 export function GameSwitchButton({disabled=false,blackjack=false,targetMode,onSelect,whiteDomino=false}:{disabled?:boolean;blackjack?:boolean;targetMode?:TableMode;onSelect?:()=>void;whiteDomino?:boolean}) {
  const {mode,requestSwitch}=useTableGame();const {lang}=useI18n();const es=lang==='es';const poker=targetMode?targetMode==='poker':mode==='domino';
- return <Pressable testID="table-game-switch" accessibilityRole="button" accessibilityLabel={blackjack?(es?'Abrir Blackjack':'Open Blackjack'):poker?(es?'Cambiar a póker':'Switch to poker'):(es?'Cambiar a dominó':'Switch to dominoes')} disabled={disabled} onPress={onSelect??(()=>requestSwitch(blackjack?'blackjack':poker?'poker':'domino'))} style={{minHeight:66,paddingVertical:6,paddingHorizontal:2,borderRadius:12,backgroundColor:'rgba(8,29,27,.42)',borderWidth:1,borderColor:C.line,alignItems:'center',justifyContent:'center',gap:3,opacity:disabled?.4:1}}>
- {(blackjack||poker)?<CardGameIcon blackjack={blackjack}/>:<View style={{height:36,width:58,alignItems:'center',justifyContent:'center'}}><DominoFan white={whiteDomino}/></View>}<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{fontSize:9,fontWeight:'600',color:C.goldLight}}>{blackjack?'BLACKJACK':poker?'POKER':'DOMINO'}</Text></Pressable>;
+ return <GoldPressable finish gold={false} testID="table-game-switch" accessibilityRole="button" accessibilityLabel={blackjack?(es?'Abrir Blackjack':'Open Blackjack'):poker?(es?'Cambiar a póker':'Switch to poker'):(es?'Cambiar a dominó':'Switch to dominoes')} disabled={disabled} onPress={onSelect??(()=>requestSwitch(blackjack?'blackjack':poker?'poker':'domino'))} style={{minHeight:66,paddingVertical:6,paddingHorizontal:2,borderRadius:12,backgroundColor:'rgba(8,29,27,.42)',borderWidth:1,borderColor:C.line,alignItems:'center',justifyContent:'center',gap:3,opacity:disabled?.4:1}}>
+ {(blackjack||poker)?<CardGameIcon blackjack={blackjack}/>:<View style={{height:36,width:58,alignItems:'center',justifyContent:'center'}}><DominoFan white={whiteDomino}/></View>}<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{fontSize:9,fontWeight:'600',color:C.goldLight}}>{blackjack?'BLACKJACK':poker?'POKER':'DOMINO'}</Text></GoldPressable>;
 }
 
 /** Ivory-and-gold fan inspired by the existing Social Club logo. */
