@@ -1,3 +1,4 @@
+import {parseIceConfiguration} from './iceConfiguration.ts';
 import {SessionGeneration} from './sessionGeneration.ts';
 import {parseView} from './contract.ts';
 import type {Action,OnlineView,Session,Vault,Transport} from './contract.ts';
@@ -45,6 +46,7 @@ export class OnlineClient{
     if(!this.resultHoldIntent&&v?.presentation?.resultClock?.heldBy.includes(v.seat))this.setResultHeld(false);
   }
   async resume(){await this.run(async generation=>{await this.readSaved(generation);await this.recover(generation);});}
+ async iceConfiguration(){const generation=this.lifetime.capture(),saved=this.requireSession(),view=this.state.view;if(!saved.code||!view||view.phase!=='playing')throw Error('not_playing');const raw=await this.transport.request('/rooms/'+saved.code+'/ice',saved.token,{epoch:view.epoch});this.lifetime.assert(generation);return parseIceConfiguration(raw,process.env.EXPO_PUBLIC_ONLINE_MODE??'lan');}
   async voice(request:VoiceRequest):Promise<VoiceReply>{const generation=this.lifetime.capture(),session=this.requireSession();if(!session.code)throw Error('no_session');const reply=await this.transport.request(`/rooms/${session.code}/voice`,session.token,request) as VoiceReply;this.lifetime.assert(generation);return reply;}
   async refresh(){if(this.state.busy||!this.session?.code||this.session.pendingCommand||['closed','completed'].includes(this.state.view?.phase??''))return;
     const generation=this.lifetime.capture(),session=this.session;

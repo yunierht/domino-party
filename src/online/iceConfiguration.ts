@@ -1,0 +1,9 @@
+import {isLocalHost} from './networkPolicy.cjs';
+export type IceServer={urls:string[];username?:string;credential?:string};
+export type IceConfiguration={protocol:1;iceServers:IceServer[];expiresAt:number|null};
+export type IceResolver=()=>Promise<IceConfiguration>;
+export function parseIceConfiguration(value:unknown,mode='lan',now=Date.now()):IceConfiguration{
+ if(!value||typeof value!=='object')throw Error('invalid_ice_configuration');const v=value as Record<string,unknown>;if(Object.keys(v).some(k=>!['protocol','iceServers','expiresAt'].includes(k))||v.protocol!==1||!Array.isArray(v.iceServers)||v.iceServers.length>4)throw Error('invalid_ice_configuration');
+ const servers=v.iceServers.map(raw=>{if(!raw||typeof raw!=='object'||Object.keys(raw).some(k=>!['urls','username','credential'].includes(k))||!Array.isArray(raw.urls)||!raw.urls.length||raw.urls.length>8)throw Error('invalid_ice_configuration');for(const url of raw.urls){if(typeof url!=='string')throw Error('invalid_ice_configuration');const m=/^(stun|turn|turns):([a-zA-Z0-9.-]+)(?::[0-9]{1,5})?(?:\?transport=(udp|tcp))?$/.exec(url);if(!m||isLocalHost(m[2])||!m[2].includes('.')||m[2].endsWith('.local'))throw Error('invalid_ice_configuration');}for(const key of ['username','credential'])if(raw[key]!==undefined&&(typeof raw[key]!=='string'||!raw[key]||raw[key].length>1024))throw Error('invalid_ice_configuration');if(raw.urls.some((u:string)=>u.startsWith('turn'))&&(!raw.username||!raw.credential))throw Error('invalid_ice_configuration');return raw as IceServer;});
+ if(mode==='internet'&&(!servers.some(s=>s.urls.some(u=>u.startsWith('turn')))||typeof v.expiresAt!=='number'||v.expiresAt<now+30000||v.expiresAt>now+3600000))throw Error('invalid_ice_configuration');if(mode==='lan'&&v.expiresAt!==null&&(typeof v.expiresAt!=='number'||v.expiresAt<=now))throw Error('invalid_ice_configuration');return{protocol:1,iceServers:servers,expiresAt:v.expiresAt as number|null};
+}

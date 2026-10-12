@@ -1,10 +1,12 @@
+import {sessionStorageKeys} from './sessionStorageKeys';
 import * as SecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {createSessionVault} from './sessionVault';
-const key='domino-online.session.v1';
+const storageKeys=sessionStorageKeys('domino',process.env.EXPO_PUBLIC_DOMINO_ONLINE_URL??'');
+const key=storageKeys.session;
 const options={keychainService:'domino-online',keychainAccessible:SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY};
-const photoPrefix='domino-online.session-photo.v1.';
+const photoPrefix=storageKeys.photos;
 export const vault=createSessionVault({
   read:()=>SecureStore.getItemAsync(key,options),
   write:value=>SecureStore.setItemAsync(key,value,options),

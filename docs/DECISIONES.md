@@ -1,5 +1,27 @@
 # Decisiones de Domino Codex Online
 
+## ON-D-060 — 2026-10-12 — Checkpoint local y congelamiento renovado
+
+Fuente humana directa verificada en chat APK para prueba online: Yuni pide resumen de todos los trabajos y pendientes iPhone para mañana, confirma tener APK Android, solicita check-in al código y ordena no hacer más cambios hasta recibir indicación después de probarlo. Autoriza checkpoint/commit LOCAL del candidato Internet acumulado y continuidad, no push/PR/merge/publicación/nuevos builds/despliegues ni fixes. Versión segura significa punto recuperable, sin certificación de seguridad o preparación productiva.
+
+Congelamiento vigente de TODO código Online actual; sustituye en este alcance ON-D-016 y autorizaciones anteriores de implementación. Lecturas/pruebas permitidas, pendientes no autorizan cambios. Candidato en worktree online-internet-prep, rama codex/online-internet-checkpoint-014 desde ae24874; incluye diffs previos5486 copiados y preserva raíz/5486 sin merge/descarte. CONTEXTO guarda resumen, APK/hash/firma, backend, pruebas y límites, pasos físicos/iOS; hash del checkpoint mediante git log -1, comunicado al cierre. Sin secretos/APK/binarios/logs/persistencia en Git. Usuario tiene APK, no confirma instalación/juego; Android+iPhone físicos y voz pública siguen pendientes. Próximo paso: feedback físico y nuevas instrucciones humanas.
+
+
+## ON-D-059 / 2026-10-12 — Internet, backend público aislado y Android inmediato
+
+Fuente humana en New voice chat01a12e22: retomar/implementar capacidadesInternet Domino/Poker con compartirmensaje y dispositivos/redes distintas; Blackjack soloCPU confirmado. Tarea continúa hasta confirmación física Android+iPhone. Hito inmediato sustituye esperaApple: dosAndroid con redesmóviles y APKusuarioenvíaWhatsApp, cloudhostingAPK deja de ser requisito. Autoriza buildlocal/installable y creación Workerprueba/salasSQLite enFree tras explicación/rechazo automático y "Vamos a autorizarla". No OAuthgenérico inferido como deploy; autorización específica verificada. No pagos/DNS/sitios existentes/tiendas/commit/push. Implementado copiaaislada actual, backend36abe235 y APK0.1.4/code5; evidencia/limitacionesCONTEXTO. Applehumana mañana, EASauthsolo vigente, firma/perfilUDID/IPA pendientes. VozTURNcontrato listo sinprovider/key ni costo; no vozInternet comprobada. No meta física completada.
+
+
+## ON-D-058 / 2026-10-11 — New Teams prellena nombres editables del marcador
+
+Fuente humana Yuni: New Match/New Teams debe abrir formulario con equipos y jugadores anteriores para editar sin reintroducir. Aprobación directa posterior aquí "Sí, autorizo ese prellenado del marcador" resolvió bloqueo automático por autorización interchat no aceptada. Alcance: copia inicial de seis strings desde partidaactual o última disponible; guardar crea match nuevo/cero, cancelar no altera anterior; sin previa defaults actuales. No reutilizar IDs/rondas/fechas/compartidos; meta100 inicial y edit/rematch existentes conservados. Implementado NewMatchScreen y pruebas,16/16/TypeScript/browser; sin commit/APK/push/deploy. No aplica a PlayDomino, Poker/Blackjack ni namingAvatar. Evidencia en CONTEXTO.
+
+
+## ON-D-057 / 2026-10-11 — Separación de fichas Poker tras prueba física
+
+Fuente humana Yuni vía Invitaciones Online y APK: APK0.1.3code4 instalado; bote cae sobre rival. Autoriza SOLO desplazar bote y fichas propias hacia abajo, sin cambiar tamaños/rival/reglas/audio/ledger. Implementación local para revisión: bandeja+8, bote ordinario+16; ancho<360 reserva borde medido de mano+etiqueta+4px, overlay raíz permite ocupar espacio inferior. Primer cruce carta propia reemplazado,20tests/TypeScript y preview320/390; revisión posterior REABIERTA por ALL-IN/importe y Clear/denominación. Excepción lateral/controles verticales propuesta y permiso asíncrono pendiente, sin aplicar. Falta validar teléfono. Sin commit/APK/push. Nueva petición avatar/nombre es diagnóstico: inconsistencias locales confirmadas Poker/BJ, semántica de nombres personalizados/asientos pendiente, no autoriza cambiar Domino por inferencia. Evidencia y próximo paso en CONTEXTO.
+
+
 ## ON-D-054 / 2026-10-11 — Aislamiento de sesiones Online
 
 Fuente: bugs adversariales del evaluador, permiso humano de corregir funcionalidad y respuesta humana DIRECTA a pregunta asíncrona de este chat: "Sí, autorizo ese aislamiento Domino". Alcance explícito src/online/client.ts: respuestas antiguas no restauran ni sobrescriben sesiones tras Back/forget; sin reglas/apariencia/audio/gameplay Domino. Rechazo inicial automático por freeze fue resuelto con esa autorización, no por inferirla de Share. Implementado en clientes Domino/Poker con generación de operación y cola de storage compartida por vault; disconnect conserva recuperación, forget ordena borrado y cancela resultados viejos. ACK perdido/idempotencia conservados.8/8 casos externos y40/40 pruebas de clientes, incluida instancia nueva/escritura lenta; fake transporte/memoria, no fallo físico reproducido.

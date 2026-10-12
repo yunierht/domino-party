@@ -30,7 +30,7 @@ export function OnlineFriendScreen({initialName,initialTarget,initialMode,initia
  const {lang}=useI18n(),es=lang==='es',tr=(a:string,b:string)=>es?a:b;
  const endpoint=useMemo(()=>{try{return onlineEndpoint(process.env.EXPO_PUBLIC_DOMINO_ONLINE_URL);}catch{return null;}},[]);
  const client=useMemo(()=>endpoint?new OnlineClient(vault,httpTransport(endpoint),credential,endpoint):null,[endpoint]);
- const voiceRelay=useMemo(()=>client?(request:VoiceRequest)=>client.voice(request):undefined,[client]);
+ const voiceRelay=useMemo(()=>client?Object.assign((request:VoiceRequest)=>client.voice(request),{iceConfiguration:()=>client.iceConfiguration()}):undefined,[client]);
  const [state,setState]=useState<ClientState>({view:null,busy:false,status:'idle',error:null,canResume:false});
  const [loaded,setLoaded]=useState(false),[code,setCode]=useState(invitationCode??''),[notice,setNotice]=useState<string|null>(null);
  const [replacing,setReplacing]=useState(false),replacementPending=useRef(false);

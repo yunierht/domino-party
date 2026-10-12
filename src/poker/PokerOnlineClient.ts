@@ -1,3 +1,4 @@
+import {parseIceConfiguration} from '../online/iceConfiguration.ts';
 import {parsePokerView} from './onlineContract.ts';
 import {SessionGeneration} from '../online/sessionGeneration.ts';
 import type {PokerOnlineAction,PokerOnlineView,PokerSession,PokerVault} from './onlineContract';
@@ -40,6 +41,7 @@ export class PokerOnlineClient {
  }
  setResultHeld(held:boolean){if(!this.state.view?.result)return;this.held=held;void this.flushHold();}
  private async flushHold(){if(this.holding||this.state.busy||this.state.status!=='connected')return;const generation=this.lifetime.capture();this.holding=true;try{while(this.lifetime.current(generation)&&this.held!==null&&!this.state.busy&&this.state.status==='connected'){const held=this.held,v=this.state.view;if(!v?.result||!v.presentation.resultClock){this.held=null;return;}if(v.phase!=='playing'||v.presentation.resultClock.heldBy.includes(v.seat)===held)return;await this.command({type:held?'holdResult':'releaseResult'});if(!this.lifetime.current(generation)||this.state.error)return;}}finally{if(this.lifetime.current(generation))this.holding=false;}}
+ async iceConfiguration(){const generation=this.lifetime.capture(),saved=this.require(),view=this.state.view;if(!saved.code||!view||view.phase!=='playing')throw Error('not_playing');const raw=await this.transport.request('/poker/rooms/'+saved.code+'/ice',saved.token,{epoch:view.epoch});this.lifetime.assert(generation);return parseIceConfiguration(raw,process.env.EXPO_PUBLIC_ONLINE_MODE??'lan');}
  async voice(request:VoiceRequest):Promise<VoiceReply>{const generation=this.lifetime.capture(),s=this.require();if(!s.code)throw Error('no_session');const reply=await this.transport.request(`/poker/rooms/${s.code}/voice`,s.token,request) as VoiceReply;this.lifetime.assert(generation);return reply;}
  private async notifyDisconnect(s:PokerSession|null){if(s?.code)try{await this.transport.request(`/poker/rooms/${s.code}/disconnect`,s.token,{});}catch{}}
  async disconnect(){const s=this.session,generation=this.lifetime.advance();this.held=false;this.holding=false;this.refreshing=false;this.emit({busy:false,status:'disconnected'});await this.notifyDisconnect(s);if(this.lifetime.current(generation))this.emit({status:'disconnected'});}

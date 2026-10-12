@@ -17,5 +17,5 @@ export function parseInvitationLink(value:string,base?:string,scheme='dominopart
 export function sharePayload(code:string,es:boolean,base:string|undefined,phase:string,scheme='dominoparty',manualCode?:string){
  if(!['waiting','playing','paused'].includes(phase))throw Error('invitation_unavailable');
  if(manualCode!==undefined&&!/^\d{6}$/.test(manualCode))throw Error('invalid_code');
- const url=invitationLink(code,base,scheme),entry=manualCode??code;return{title:es?'Invitación a dominó':'Domino invitation',url,text:es?`Juguemos dominó. Código ${entry}.`:`Let's play dominoes. Code ${entry}.`};
+ const url=invitationLink(code,base,scheme),entry=manualCode??code;return{code:entry,title:es?'Invitación a dominó':'Domino invitation',url,text:es?`Juguemos dominó. Código ${entry}.`:`Let's play dominoes. Code ${entry}.`};
 }

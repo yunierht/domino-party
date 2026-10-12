@@ -25,3 +25,5 @@ test('configured store fallback uses the platform URL, but opening app, copying 
  const direct=windowFixture(config);mount(direct.w);for(const fn of direct.timers.values())fn();assert.deepEqual(direct.redirects,[config.stores.android]);
  for(const action of ['open','copy-link','visibilitychange','pagehide']){const f=windowFixture(config);mount(f.w);if(action==='visibilitychange'){f.w.document.hidden=true;f.events[action]();}else if(action==='pagehide')f.events[action]();else await f.nodes[action].events.click();assert.equal(f.timers.size,0);assert.equal(f.redirects.length,0);}
 });
+
+test('Poker shares the public path but opens only Poker, never Domino',()=>{const v=invitation('https://staging.example.test/online/invite?pokerRoom=ABCDEF0123');assert.equal(v.game,'poker');assert.equal(v.code,'ABCDEF0123');assert.throws(()=>invitation('https://staging.example.test/online/invite?pokerRoom=ABCDEF0123&onlineRoom=ABCDEF0123'));});

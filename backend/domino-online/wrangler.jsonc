@@ -9,7 +9,12 @@
   "workers_dev": false,
   "preview_urls": false,
   "vars": {
-    "LOCAL_ONLY": "true"
+    "LOCAL_ONLY": "true",
+    "NETWORK_MODE": "lan",
+    "PUBLIC_ORIGIN": "",
+    "ALLOWED_WEB_ORIGINS": "[]",
+    "TURN_KEY_ID": "",
+    "LINKS_HOST": ""
   },
   "observability": {
     "enabled": false
@@ -59,5 +64,20 @@
         "BlackjackRoom"
       ]
     }
-  ]
+  ],
+  "ratelimits": [
+    {
+      "name": "ADMISSION_LIMIT",
+      "namespace_id": "735217984621",
+      "simple": {
+        "limit": 100,
+        "period": 60
+      }
+    }
+  ],
+  "assets": {
+    "directory": "../../.release-audit/internet/public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  }
 }

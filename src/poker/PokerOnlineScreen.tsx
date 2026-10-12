@@ -43,7 +43,7 @@ export function PokerOnlineScreen({inviteOnly=false,manualOnly=false,onClose}:{i
  useEffect(()=>{if(pendingPokerCode){setCode(pendingPokerCode);setIncomingCode(pendingPokerCode);clearPokerCode();}},[pendingPokerCode]);
  async function acceptInvitation(){const current=client.state.view;if(client.state.canResume&&current?.code!==code&&current?.manualCode!==code)await client.forget();await client.join(name,code,avatar,avatar==='selfie'?photo??undefined:undefined);if(!client.state.error)setIncomingCode(null);}
  const command=useCallback(async(action:PokerOnlineAction)=>{await client.command(action);return !client.state.error;},[client]);
- const hold=useCallback((held:boolean)=>client.setResultHeld(held),[client]);const voice=useCallback((request:VoiceRequest)=>client.voice(request),[client]);
+ const hold=useCallback((held:boolean)=>client.setResultHeld(held),[client]);const voice=useMemo(()=>Object.assign((request:VoiceRequest)=>client.voice(request),{iceConfiguration:()=>client.iceConfiguration()}),[client]);
  function invitationUrl(){const v=client.state.view;if(!v)return '';const base=process.env.EXPO_PUBLIC_POKER_ONLINE_INVITE_BASE||process.env.EXPO_PUBLIC_DOMINO_ONLINE_INVITE_BASE||(Platform.OS==='web'?`${window.location.origin}/`:`${endpoint}/poker/invite`);let url=pokerInvitation(v.code,base,appConfig.expo.scheme);if(new URL(base).pathname==='/poker/invite'){const page=new URL(url);if(v.manualCode)page.searchParams.set('manualCode',v.manualCode);page.searchParams.set('scheme',appConfig.expo.scheme);url=page.toString();}return url;}
  async function prepareInvitation(active:()=>boolean=()=>true){
   if(!active())throw Error('invitation_unavailable');

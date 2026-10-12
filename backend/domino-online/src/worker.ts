@@ -1,3 +1,7 @@
+import {turnCredentials} from './turnCredentials.ts';
+import {apkDownload} from './apkDownload.ts';
+import onlineAssets from '../../../web/online-invitation/worker.js';
+import {networkAccess} from './networkAccess.ts';
 import {blackjackRoute} from './blackjackWorker.ts';
 import {blackjackInvitationPage} from './blackjackInvitationPage.ts';
 export {BlackjackRoom} from './blackjackWorker.ts';
@@ -234,15 +238,15 @@ const handler = {
   async fetch(request: Request, env: Cloudflare.Env): Promise<Response> {
     try {
       const url = new URL(request.url);
-      if (env.LOCAL_ONLY !== 'true' || !localHost(url.hostname))
-        return Response.json({error:'local_only'}, {status:403});
-      if (request.method === 'GET' && url.pathname === '/health') return Response.json({status:'ok',protocol:1,mode:'local'});
+      if (request.method === 'GET' && url.pathname === '/health') return Response.json({status:'ok',protocol:1,mode:env.NETWORK_MODE==='internet'?'internet':'local'});
       if(request.method==='GET'&&url.pathname==='/blackjack/invite')return blackjackInvitationPage(url);
       if(request.method==='GET'&&url.pathname==='/poker/invite')return pokerInvitationPage(url);
       if (url.search) throw new Error('invalid_request'); // credentials never in query strings
       const authorization = request.headers.get('authorization') ?? '';
       if (!/^Bearer [a-f0-9]{64}$/.test(authorization)) throw new Error('unauthorized');
       const hash = await digest(authorization.slice(7));
+      const ice=/^(\/poker)?\/rooms\/([A-F0-9]{10})\/ice$/.exec(url.pathname);
+      if(ice&&request.method==='POST'){const o=object(await body(request,1024));if(Object.keys(o).some(k=>k!=='epoch'))throw Error('invalid_request');const reply=ice[1]?await env.POKER_ROOMS.getByName(ice[2]).request('snapshot',hash,{}):await env.ROOMS.getByName(ice[2]).request('snapshot',hash,{});if('error'in reply.body)return Response.json(reply.body,{status:reply.status,headers:{'cache-control':'no-store'}});if(reply.body.phase!=='playing'||o.epoch!==reply.body.epoch)throw Error('not_playing');try{return Response.json(await turnCredentials(env),{headers:{'cache-control':'no-store'}});}catch{return Response.json({error:'voice_not_configured'},{status:503});}}
       if(url.pathname.startsWith('/blackjack/'))return blackjackRoute(request,env,hash,body);
       if(url.pathname.startsWith('/poker/'))return pokerRoute(request,env,hash,body);
       if (url.pathname === '/rooms' && request.method === 'POST') {
@@ -294,17 +298,26 @@ const handler = {
     } catch (error) { return json(errorReply(error)); }
   }
 } satisfies ExportedHandler<Cloudflare.Env>;
-function localHost(host: string): boolean {
-  const ip=host.split('.').map(Number);
-  return ['localhost','127.0.0.1','[::1]'].includes(host)||(ip.length===4&&ip.every(n=>Number.isInteger(n)&&n>=0&&n<=255)
-    &&(ip[0]===10||(ip[0]===192&&ip[1]===168)||(ip[0]===172&&ip[1]>=16&&ip[1]<=31)));
-}
 export default {
-  async fetch(request:Request,env:Cloudflare.Env):Promise<Response> {
+  async fetch(request:Request,env:Cloudflare.Env,ctx:ExecutionContext):Promise<Response> {
+    const access=networkAccess(request,env);
+    if(access.error)return Response.json({error:access.error},{status:access.status,headers:{'cache-control':'no-store'}});
     const origin=request.headers.get('origin');
-    if (origin) {
-      try {if (!localHost(new URL(origin).hostname))return Response.json({error:'local_origin_only'},{status:403});}
-      catch{return Response.json({error:'invalid_origin'},{status:400});}
+    const url=new URL(request.url),path=url.pathname;
+    if(access.mode==='internet'&&path.startsWith('/downloads/'))return apkDownload(request,env.ASSETS,ctx);
+    if(access.mode==='internet'&&(path.startsWith('/online/invite')||path.startsWith('/.well-known/'))){
+      const keys=[...url.searchParams.keys()];
+      if(path==='/online/invite'||path==='/online/invite/'){if(keys.length!==1||!['onlineRoom','pokerRoom'].includes(keys[0])||!/^[A-F0-9]{10}$/.test(url.searchParams.get(keys[0])??''))return Response.json({error:'invalid_invitation'},{status:400});}
+      else if(url.search)return Response.json({error:'invalid_invitation'},{status:400});
+      return onlineAssets.fetch(request,{...env,LINKS_HOST:url.hostname});
+    }
+    if(access.mode==='internet'&&request.method==='POST'&&(/^(?:\/poker)?\/rooms$/.test(path)||path.endsWith('/join')||path.endsWith('/ice'))){
+      const auth=request.headers.get('authorization')??'';if(!/^Bearer [a-f0-9]{64}$/.test(auth))return Response.json({error:'unauthorized'},{status:401});
+      if(!env.ADMISSION_LIMIT)return Response.json({error:'admission_not_configured'},{status:503});
+      // Soft network cap covers allocation only, not gameplay/heartbeats. Token rotation cannot bypass it.
+      const ip=request.headers.get('CF-Connecting-IP')??'unknown';
+      const keys=[await digest(env.PUBLIC_ORIGIN+':network:'+ip),await digest(env.PUBLIC_ORIGIN+':actor:'+auth.slice(7))];
+      for(const key of keys)if(!(await env.ADMISSION_LIMIT.limit({key})).success)return Response.json({error:'rate_limited'},{status:429,headers:{'retry-after':'60','cache-control':'no-store'}});
     }
     const response=request.method==='OPTIONS' ? new Response(null,{status:204}) : await handler.fetch(request,env);
     if (!origin || response.status===101)return response;

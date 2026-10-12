@@ -21,3 +21,6 @@ test('short fixed tables reserve64px message strip and keep hand above action la
 });
 
 test('enlarged community row keeps a three pixel felt margin on compact and normal widths',()=>{for(const width of [320,360,390])for(const top of [240,280,320]){const old=communityCardWidth(width,700,120,top),large=communityCardWidth(width,700,120,top,3,2);assert.ok(large>old);assert.ok(Math.abs(large-old-4)<.001);const y=(top-153)/617*600,t=(Math.max(14,Math.min(547,y))-14)/533;const left=-30+(56-41*t)/400*(width+53),right=-30+(344+41*t)/400*(width+53),span=5*large+8;assert.ok(width/2-span/2>=left+2.99);assert.ok(width/2+span/2<=right-2.99);}});
+
+import {pokerPotBottom} from './tableFit.ts';
+test('narrow pot label stays four pixels below hand without changing pot or card dimensions',()=>{for(const [height,footer,hand] of [[640,144,448],[740,144,548],[844,144,652]]){const bottom=pokerPotBottom(height,footer,hand,true,height<720);const top=height-bottom-74;assert.ok(top-17>=hand+4);const highestPaintedChip=top+74-14-8-42*.92;assert.ok(highestPaintedChip>hand+4,'maximum stack paint remains below hand');assert.equal((bottom-36)+36,bottom);assert.ok(bottom-36>=0);assert.equal(pokerPotBottom(height,footer,hand,false,height<720),footer+(height<720?44:58));}});

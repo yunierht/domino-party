@@ -20,10 +20,12 @@ const PRESETS = [100, 150];
 export function NewMatchScreen() {
   const { theme, s } = useTheme();
   const { t } = useI18n();
-  const {createMatch,currentMatch,updateMatchConfiguration,canEdit}=useGame();
+  const {createMatch,currentMatch,matches=[],updateMatchConfiguration,canEdit}=useGame();
   const {go,back,goHome,setupMode}=useNav();
   const editingMatch=setupMode==='edit'?currentMatch:null;
   const editingRequested=setupMode==='edit';
+  // Copy names into a new draft once; later match updates must not replace user edits.
+  const previousTeams=editingRequested?undefined:(currentMatch??matches[0])?.teams;
   const c = theme.colors;
   const appearance=useTrackingAppearance();
   const {height}=useWindowDimensions();
@@ -34,12 +36,12 @@ export function NewMatchScreen() {
   const comfort=trackingSetupComfort(availableHeight);
   const spacing=(small:number,large:number)=>Math.round(small+(large-small)*comfort);
 
-  const [teamAName, setTeamAName] = useState('');
-  const [teamBName, setTeamBName] = useState('');
-  const [a1, setA1] = useState('');
-  const [a2, setA2] = useState('');
-  const [b1, setB1] = useState('');
-  const [b2, setB2] = useState('');
+  const [teamAName, setTeamAName] = useState(()=>previousTeams?.[0].name??'');
+  const [teamBName, setTeamBName] = useState(()=>previousTeams?.[1].name??'');
+  const [a1, setA1] = useState(()=>previousTeams?.[0].players[0]??'');
+  const [a2, setA2] = useState(()=>previousTeams?.[0].players[1]??'');
+  const [b1, setB1] = useState(()=>previousTeams?.[1].players[0]??'');
+  const [b2, setB2] = useState(()=>previousTeams?.[1].players[1]??'');
   const [target, setTarget] = useState<number>(100);
   const [customMode, setCustomMode] = useState(false);
   const [customText, setCustomText] = useState('');

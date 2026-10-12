@@ -15,3 +15,9 @@ export function communityCardWidth(screenWidth:number,screenHeight:number,heroHe
 export function pokerBoardZoneHeight(panelHeight:number,heroHeight:number,footerHeight:number,hintHeight:number,preferred:number,messageHeight=64){
  return Math.max(36,Math.min(preferred,panelHeight-48-heroHeight-86-hintHeight-117-footerHeight-messageHeight-55));
 }
+
+/** A narrow hand shares x with the pot: reserve its label plus four pixels below the cards. */
+export function pokerPotBottom(panelHeight:number,footerHeight:number,handBottom:number,narrow:boolean,compact:boolean){
+ const ordinary=footerHeight+(compact?44:58);
+ return narrow&&handBottom>0?Math.min(ordinary,panelHeight-handBottom-21-74):ordinary;
+}

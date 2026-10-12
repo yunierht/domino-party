@@ -1,0 +1,73 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "domino-online-internet-test",
+  "main": "src/internetWorker.ts",
+  "compatibility_date": "2026-10-08",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    "NETWORK_MODE": "internet",
+    "LOCAL_ONLY": "false",
+    "PUBLIC_ORIGIN": "https://domino-online-internet-test.domino-party.workers.dev",
+    "ALLOWED_WEB_ORIGINS": "[]",
+    "LINKS_HOST": "domino-online-internet-test.domino-party.workers.dev",
+    "TURN_KEY_ID": ""
+  },
+  "observability": {
+    "enabled": false
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "ROOMS",
+        "class_name": "DominoRoom"
+      },
+      {
+        "class_name": "ManualCodes",
+        "name": "MANUAL_CODES"
+      },
+      {
+        "class_name": "PokerRoom",
+        "name": "POKER_ROOMS"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "DominoRoom"
+      ]
+    },
+    {
+      "tag": "v2-manual",
+      "new_sqlite_classes": [
+        "ManualCodes"
+      ]
+    },
+    {
+      "tag": "v3-poker",
+      "new_sqlite_classes": [
+        "PokerRoom"
+      ]
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "ADMISSION_LIMIT",
+      "namespace_id": "735217984621",
+      "simple": {
+        "limit": 100,
+        "period": 60
+      }
+    }
+  ],
+  "assets": {
+    "directory": "../../.release-audit/internet/public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  }
+}

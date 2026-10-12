@@ -1,10 +1,12 @@
+import {sessionStorageKeys} from '../online/sessionStorageKeys';
 import * as SecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {createSessionVault} from '../online/sessionVault';
-const key='poker-online.session.v1';
+const storageKeys=sessionStorageKeys('poker',process.env.EXPO_PUBLIC_POKER_ONLINE_URL||process.env.EXPO_PUBLIC_DOMINO_ONLINE_URL||'');
+const key=storageKeys.session;
 const options={keychainService:'poker-online',keychainAccessible:SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY};
-const photoPrefix='poker-online.session-photo.v1.';
+const photoPrefix=storageKeys.photos;
 export const vault=createSessionVault({
   read:()=>SecureStore.getItemAsync(key,options),
   write:value=>SecureStore.setItemAsync(key,value,options),

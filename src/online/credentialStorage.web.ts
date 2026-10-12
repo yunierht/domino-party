@@ -1,5 +1,7 @@
+import {sessionStorageKeys} from './sessionStorageKeys';
 import type {Vault,Session} from './contract';
-const key='domino-online.session.v1';
+const storageKeys=sessionStorageKeys('domino',process.env.EXPO_PUBLIC_DOMINO_ONLINE_URL??'');
+const key=storageKeys.session;
 // Explicit web fallback: per-tab session storage, not native encrypted storage.
 export const vault:Vault={
   async read(){const raw=sessionStorage.getItem(key);return raw?JSON.parse(raw) as Session:null;},

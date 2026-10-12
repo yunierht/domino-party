@@ -1,3 +1,4 @@
+import type {IceResolver} from './iceConfiguration';
 import {GoldPressable} from '../components/GoldPressable';
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {AppState,Modal,Pressable,Text,View} from 'react-native';
@@ -9,9 +10,9 @@ import type {VoiceState} from './voiceController';
 import type {VoiceRequest,VoiceReply} from './voiceProtocol';
 import {TABLE as C} from '../computer/tableTheme';
 import {ModalCloseButton} from '../components/ModalCloseButton';
-export type VoiceRelay=(request:VoiceRequest)=>Promise<VoiceReply>;
+export type VoiceRelay=((request:VoiceRequest)=>Promise<VoiceReply>)&{iceConfiguration?:IceResolver};
 export function OnlineVoiceControl({epoch,seat,relay,available,es,onStatus,opponentName}:{epoch:string;seat:'human'|'computer';relay:VoiceRelay;available:boolean;es:boolean;onStatus:(message:string|null)=>void;opponentName:string}){
- const platform=useMemo(createVoicePlatform,[]),controller=useMemo(()=>new VoiceController(epoch,seat,relay,platform,()=>Crypto.randomUUID()),[epoch,seat,relay,platform]);
+ const platform=useMemo(()=>createVoicePlatform(relay.iceConfiguration),[relay]),controller=useMemo(()=>new VoiceController(epoch,seat,relay,platform,()=>Crypto.randomUUID()),[epoch,seat,relay,platform]);
  const [state,setState]=useState<VoiceState>(controller.state),longPressed=useRef(false),foreground=useRef(AppState.currentState!=='background'&&AppState.currentState!=='inactive');
  useEffect(()=>{const unsubscribe=controller.subscribe(setState);return()=>{unsubscribe();void controller.suspend();};},[controller]);
  useEffect(()=>{if(available&&foreground.current)controller.listen();else void controller.suspend();},[available,controller]);
@@ -24,7 +25,7 @@ export function OnlineVoiceControl({epoch,seat,relay,available,es,onStatus,oppon
   else if(state.phase==='connecting')message=es?'Conectando voz…':'Connecting voice…';
   else if(state.phase==='connected')message=state.muted?(es?'Tu micrófono está silenciado.':'Your microphone is muted.'):(es?'Voz conectada.':'Voice connected.');
   else if(state.phase==='ended')message=state.error==='rejected'?(es?'Llamada rechazada.':'Call declined.'):state.error==='cancelled'?(es?'Llamada cancelada.':'Call cancelled.'):state.error==='expired'?(es?'No hubo respuesta. Puedes volver a llamar.':'No answer. You can call again.'):(es?'La llamada terminó.':'Call ended.');
-  else if(state.phase==='error')message=state.error==='voice_unavailable'?(es?'La voz no está disponible en esta versión.':'Voice is unavailable in this version.'):state.error==='microphone_denied'?(es?'No se permitió el micrófono. Puedes volver a intentar.':'Microphone permission was denied. You can retry.'):(es?'No se pudo conectar la llamada. Puedes volver a intentar.':'The call could not connect. You can retry.');
+  else if(state.phase==='error')message=state.error==='voice_not_configured'?(es?'La voz por Internet requiere configurar el servidor de voz.':'Internet voice needs server configuration.'):state.error==='voice_unavailable'?(es?'La voz no está disponible en esta versión.':'Voice is unavailable in this version.'):state.error==='microphone_denied'?(es?'No se permitió el micrófono. Puedes volver a intentar.':'Microphone permission was denied. You can retry.'):(es?'No se pudo conectar la llamada. Puedes volver a intentar.':'The call could not connect. You can retry.');
   onStatus(platform.fixture&&message?`${es?'Audio sintético de prueba':'Synthetic test audio'}\n${message}`:message);
  },[state,es,onStatus,platform.fixture,opponentName]);
  const active=!['off','error','ended'].includes(state.phase),incoming=state.phase==='incoming';

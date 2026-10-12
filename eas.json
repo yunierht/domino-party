@@ -16,6 +16,45 @@
         "simulator": false,
         "buildConfiguration": "Release"
       }
+    },
+    "online-android-internet-internal": {
+      "distribution": "internal",
+      "developmentClient": false,
+      "autoIncrement": false,
+      "env": {
+        "EXPO_PUBLIC_ONLINE_MODE": "internet",
+        "EXPO_PUBLIC_ONLINE_ORIGIN": "https://domino-online-internet-test.domino-party.workers.dev",
+        "EXPO_PUBLIC_DOMINO_ONLINE_URL": "https://domino-online-internet-test.domino-party.workers.dev",
+        "EXPO_PUBLIC_POKER_ONLINE_URL": "https://domino-online-internet-test.domino-party.workers.dev",
+        "EXPO_PUBLIC_DOMINO_ONLINE_INVITE_BASE": "https://domino-online-internet-test.domino-party.workers.dev/online/invite",
+        "EXPO_PUBLIC_POKER_ONLINE_INVITE_BASE": "https://domino-online-internet-test.domino-party.workers.dev/online/invite",
+        "EXPO_PUBLIC_DOMINO_ONLINE_SCHEME": "domino-online-test",
+        "DOMINO_ONLINE_LINKS_CONFIG": "config/online-internet.json",
+        "ONLINE_BUILD_PLATFORM": "android"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "online-ios-internet-internal": {
+      "distribution": "internal",
+      "developmentClient": false,
+      "autoIncrement": false,
+      "env": {
+        "EXPO_PUBLIC_ONLINE_MODE": "internet",
+        "EXPO_PUBLIC_ONLINE_ORIGIN": "https://domino-online-internet-test.domino-party.workers.dev",
+        "EXPO_PUBLIC_DOMINO_ONLINE_URL": "https://domino-online-internet-test.domino-party.workers.dev",
+        "EXPO_PUBLIC_POKER_ONLINE_URL": "https://domino-online-internet-test.domino-party.workers.dev",
+        "EXPO_PUBLIC_DOMINO_ONLINE_INVITE_BASE": "https://domino-online-internet-test.domino-party.workers.dev/online/invite",
+        "EXPO_PUBLIC_POKER_ONLINE_INVITE_BASE": "https://domino-online-internet-test.domino-party.workers.dev/online/invite",
+        "EXPO_PUBLIC_DOMINO_ONLINE_SCHEME": "domino-online-test",
+        "DOMINO_ONLINE_LINKS_CONFIG": "config/online-internet.json",
+        "ONLINE_BUILD_PLATFORM": "ios"
+      },
+      "ios": {
+        "simulator": false,
+        "buildConfiguration": "Release"
+      }
     }
   }
 }
