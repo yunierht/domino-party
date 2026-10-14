@@ -9,6 +9,7 @@ import { useReducedMotion } from './DrinkGift';
 import { usePrefs } from '../state/PrefsContext';
 import { reservePlacementContact } from '../sound/sounds';
 import { TABLE as C } from './tableTheme';
+import { WoodSurface } from '../blackjack/TableFinish';
 import { boneyardSlots } from './boneyardSlots';
 
 /** Keep faces hidden until selection; commit exactly once, after arrival. */
@@ -87,7 +88,8 @@ export function BoneyardPanel({ game, es, destination, onDraw, interactive = tru
   return <View ref={root} collapsable={false} testID="boneyard-panel" accessibilityViewIsModal
     style={{ position: 'absolute', inset: 0, zIndex: 110, justifyContent: 'center', padding: 18 }}>
     <Animated.View pointerEvents="none" style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(2,12,10,0.52)', opacity: panelProgress ?? 1 }} />
-    <Animated.View testID="boneyard-tray" style={{ opacity: panelProgress ?? 1, transform: [{ translateX: panelProgress ? panelProgress.interpolate({ inputRange: [0, 1], outputRange: [slideDistance, 0] }) : 0 }], width: '100%', maxWidth: 420, alignSelf: 'center', borderRadius: 18, borderWidth: 2, borderColor: C.gold, padding: 14, backgroundColor: '#34251B', maxHeight: '65%' }}>
+    <Animated.View testID="boneyard-tray" style={{ opacity: panelProgress ?? 1, transform: [{ translateX: panelProgress ? panelProgress.interpolate({ inputRange: [0, 1], outputRange: [slideDistance, 0] }) : 0 }], width: '100%', maxWidth: 420, alignSelf: 'center', borderRadius: 18, borderWidth: 2, borderColor: C.gold, padding: 14, backgroundColor: '#704329', maxHeight: '65%' }}>
+      <View pointerEvents="none" accessible={false} style={{position:"absolute",inset:0,borderRadius:16,overflow:"hidden"}}><WoodSurface/></View>
       <DominoTurnTitle active={attentionActive && interactive && !computer && !flight && game.stock.length>0 && !game.result}><Text style={{ color: C.goldLight, textAlign: 'center', fontSize: 17, marginBottom: 12 }}>
         {computer ? (es ? 'El rival roba del pozo' : 'Opponent draws from boneyard') : (es ? 'Elige una ficha del pozo' : 'Choose a tile from the boneyard')}
       </Text></DominoTurnTitle>

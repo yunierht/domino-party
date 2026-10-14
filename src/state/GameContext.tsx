@@ -32,6 +32,7 @@ export interface LiveMeta {
   controllerId: string;
   controllerName: string;
   pendingRequest: ControlRequest | null;
+  live?:boolean;
 }
 
 // ---- ID helper -------------------------------------------------------------
@@ -315,8 +316,7 @@ const initial: GameState = {
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initial);
   const hydrated = useRef(false);
-  // undefined = not yet initialized; null = no match; string = match id
-  const prevMatchIdRef = useRef<string | null | undefined>(undefined);
+  const previousBroadcastRef=useRef<{match:Match|null;controller:boolean;matches:Match[]}|null>(null);
 
   const [liveUid, setLiveUid] = useState<string | null>(null);
   const [liveMeta, setLiveMeta] = useState<LiveMeta | null>(null);
@@ -397,6 +397,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           controllerId: g.controllerId,
           controllerName: g.controllerName,
           pendingRequest: g.pendingRequest ?? null,
+          live:g.live,
         });
         // Upgrade a game created by an earlier app version. Only its original
         // host can publish the full local history; a controller takeover must
@@ -455,25 +456,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
   }, [currentMatch, state.matches, amController, liveUid]);
 
-  // Auto-broadcast when the host starts a new match while already broadcasting.
-  // This keeps spectators connected without the host needing to re-tap Broadcast.
-  useEffect(() => {
-    if (!state.loaded) return;
-    const prev = prevMatchIdRef.current;
-    prevMatchIdRef.current = state.currentMatchId;
-    // Skip initial hydration — only react to runtime changes.
-    if (prev === undefined) return;
-    if (!state.currentMatchId || state.currentMatchId === prev) return;
-    const newMatch = state.matches.find((m) => m.id === state.currentMatchId);
-    if (!newMatch || newMatch.shareCode) return;
-    // If any previous finished match is still broadcasting, auto-share this one.
-    const wasSharing = state.matches.some(
-      (m) => m.id !== state.currentMatchId && !!m.shareCode && !!m.winnerTeamId,
-    );
-    if (!wasSharing || !isFirebaseConfigured) return;
-    shareMatch(state.currentMatchId).catch(() => {});
+  // Continue only the broadcast the host was actively scoring, never one found in history.
+  useEffect(()=>{
+    if(!state.loaded)return;
+    const previous=previousBroadcastRef.current;
+    previousBroadcastRef.current={match:currentMatch,controller:amController&&liveMeta?.live===true,matches:state.matches};
+    if(!previous||!currentMatch||previous.match?.id===currentMatch.id||currentMatch.shareCode)return;
+    if(previous.matches.some(match=>match.id===currentMatch.id))return;
+    if(!previous.controller||!previous.match?.shareCode||!previous.match.winnerTeamId||!isFirebaseConfigured)return;
+    shareMatch(currentMatch.id).catch(()=>{});
+    // The transition is keyed by the current match; retries remain an explicit action.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.currentMatchId, state.loaded]);
+  },[currentMatch,amController,liveMeta?.live,state.matches,state.loaded]);
 
   const shareMatch = async (matchId: string): Promise<string> => {
     const m = state.matches.find((x) => x.id === matchId);

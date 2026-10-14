@@ -1,3 +1,4 @@
+import {recordPlayActivity} from './room.ts';
 import {DurableObject} from 'cloudflare:workers';
 import * as poker from './pokerRoom.ts';
 import type {PokerRoomState,PokerView,PokerIntent,Identity} from './pokerRoom.ts';
@@ -62,6 +63,7 @@ export class PokerRoom extends DurableObject<Cloudflare.Env>{
      this.limit(hash,now);if(this.ctx.storage.sql.exec<{n:number}>('SELECT COUNT(*) AS n FROM receipts').one().n>=4096)throw Error('receipt_capacity');
      if(parsed.epoch!==room.epoch)throw Error('stale_epoch');if(parsed.round!==(room.poker?.hand??0))throw Error('stale_round');if(parsed.revision!==room.revision)throw Error('stale_revision');
      room=poker.command(room,hash,parsed,now,secureRandom);
+     if(['fold','check','call','raise','nextHand','rebuy'].includes(parsed.type))room=recordPlayActivity(room,hash,now);
      const ack=poker.view(room,hash,now);this.ctx.storage.sql.exec('INSERT INTO receipts(actor,id,payload,ack) VALUES(?,?,?,?)',hash,parsed.commandId,payload,JSON.stringify(ack));
     }else if(operation==='join'){
      this.limit('join:'+hash,now);const data=object(input);if(Object.keys(data).some(k=>!['name','avatar','avatarPhoto','acceptInvitation'].includes(k))||data.acceptInvitation!==true)throw Error('invalid_request');

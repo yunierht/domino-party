@@ -17,19 +17,19 @@ const deps={react:React,'react-native':{Animated:{View:'AnimatedView'},Image:'Im
  '../computer/DominoTableBackground':{DominoTableBackground:'Background'},'../computer/OpponentDrinkingAvatar':{OpponentDrinkingAvatar:'Opponent'},'../computer/dominoAvatars':{DOMINO_AVATARS:opponents},'../blackjack/TableFinish':{TableStamp:'Stamp',WoodSurface:'Wood'},
  '../computer/DraggableDomino':{DraggableDomino:'Tile'},'../computer/DominoTile':{DominoTile:'Face'},'../computer/AnchoredBoard':{AnchoredBoard:'Board'},'../computer/DominoTurnTitle':{DominoTurnTitle:'Turn'},
  '../computer/useBoardCamera':{useBoardCamera:()=>({values:{x:0,y:0,scale:1},current:{current:{x:0,y:0,scale:1}},begin(){},end(){},pan(){},center(){}})},'../computer/boardLayout':geometry,'../computer/handLayout':{handLayout,handTrayHeight},'../computer/tableTheme':{TABLE},'../state/PrefsContext':{usePrefs:()=>({matchingTiles:true,ready:true,tileSound:false})},'../computer/strings':{COMPUTER_STRINGS},'../computer/RoundDeal':{DealtTile:pass},'./useOnlineDeal':{useOnlineDeal:()=>({dealing:false,progress:{}})}};
-deps['./OnlineTurnTimer']={OnlineTurnTimer:'TurnTimer'};
+deps['./OnlineTurnTimer']={OnlineTurnTimer:'TurnTimer',OnlineTurnWarning:'TurnWarning'};
 deps['./OnlineVoiceControl']={OnlineVoiceControl:'VoiceControl'};
 deps['./OnlineRoundResult']={OnlineRoundResult:'RoundResult'};
 deps['./OnlineQuickActions']={OnlineQuickActions:'QuickActions',OnlineAttentionNotice:'AttentionNotice'};
-const m={exports:{}};new Function('require','module','exports',ts.transpileModule(readFileSync(new URL('./OnlineDominoTable.tsx',import.meta.url),'utf8'),{compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText)(id=>{if(id.endsWith('/ResultHoldButton'))return{ResultHoldButton:'HoldButton'};if(id.endsWith('/HomeButton'))return{HomeButton:'HomeButton'};if(id.endsWith('/GoldPressable'))return{GoldPressable:'Pressable'};if(id.endsWith('/ModalCloseButton'))return modalCloseMock;if(!(id in deps))throw Error(id);return deps[id];},m,m.exports);
+const m={exports:{}};new Function('require','module','exports',ts.transpileModule(readFileSync(new URL('./OnlineDominoTable.tsx',import.meta.url),'utf8'),{compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText)(id=>{if(id.endsWith('/FloatingAction'))return{FloatingAction:'FloatingAction'};if(id.endsWith('/OnlineCancellation'))return{CancelRoomControl:'CancelRoomControl',RoomClosedNotice:'RoomClosedNotice'};if(id.endsWith('/ResultHoldButton'))return{ResultHoldButton:'HoldButton'};if(id.endsWith('/HomeButton'))return{HomeButton:'HomeButton'};if(id.endsWith('/GoldPressable'))return{GoldPressable:'Pressable'};if(id.endsWith('/ModalCloseButton'))return modalCloseMock;if(!(id in deps))throw Error(id);return deps[id];},m,m.exports);
 function view(seat='human'){return {protocol:1,code:'ABCDEF0123',epoch:'e',revision:1,phase:'playing',seat,names:{human:'Juni',computer:'Andy'},presentation:{avatars:{human:'yuni',computer:'rafael'},openingId:null},board:[],hand:[{id:'6-6',a:6,b:6},{id:'1-2',a:1,b:2}],opponentCount:7,stock:['slot-0'],round:1,turn:seat,mode:'points',target:100,scores:{human:0,computer:0},wins:{human:0,computer:0},last:null,result:null,winner:null,roundReady:[],legalMoves:[{tileId:'6-6',ends:['right']},{tileId:'1-2',ends:['right']}],canDraw:false,canPass:false};}
 async function setup(v,handle){const commands=[];let r;const props={view:v,enabled:true,es:true,onAction:a=>{commands.push(a);return handle?.(a);},onBack(){},error:null};await act(()=>{r=create(React.createElement(m.exports.OnlineDominoTable,props),{createNodeMock:()=>({measureInWindow:cb=>cb(0,0)})});});return{r,commands,async update(patch){Object.assign(props,patch);await act(()=>r.update(React.createElement(m.exports.OnlineDominoTable,props)));}};}
 for(const seat of ['human','computer'])test(`seat ${seat} sees own avatar below and the other player across; opening tap sends one server command`,async()=>{
  const v=view(seat),{r,commands}=await setup(v);try{
   assert.equal(r.root.findByType('Opponent').props.name,seat==='human'?'Andy':'Juni');
-  assert.equal(r.root.findByProps({testID:'online-local-avatar'}).props.source,seat==='human'?'juni.png':'andy.png');
+  assert.ok(r.root.findByProps({testID:'online-local-name'}).parent===r.root.findByProps({testID:'online-wood-right'}));assert.equal(r.root.findByProps({testID:'online-local-name'}).props.style.top,69);assert.equal(r.root.findByProps({testID:'online-local-name'}).props.style.left+r.root.findByProps({testID:'online-local-name'}).props.style.width/2,36);assert.equal(r.root.findByProps({testID:'online-local-name'}).props.style.maxWidth,88);assert.equal(r.root.findByType('TurnTimer').props.avatar,seat==='human'?'juni.png':'andy.png');
   assert.equal(r.root.findByProps({testID:'online-local-name'}).props.children,seat==='human'?'Juni':'Andy','own identity preserves the player name edited before starting');
-  let avatarParent=r.root.findByProps({testID:'online-local-avatar'}).parent;while(avatarParent&&avatarParent.props.testID!=='domino-wood-edge')avatarParent=avatarParent.parent;assert.ok(avatarParent,'local avatar belongs on the wood edge');
+  let avatarParent=r.root.findByType('TurnTimer').parent;while(avatarParent&&avatarParent.props.testID!=='domino-wood-edge')avatarParent=avatarParent.parent;assert.ok(avatarParent,'local avatar belongs on the wood edge');
   assert.equal(r.root.findAllByType('Tile').length,2);
   await act(()=>r.root.findAllByType('Tile')[0].props.onTap());
   assert.deepEqual(commands,[{type:'play',tileId:'6-6',end:'right'}]);assert.equal(v.hand.length,2,'UI never mutates the authoritative hand');
@@ -39,7 +39,7 @@ test('new avatar identities render their own images on both seats without fallin
  for(const seat of ['human','computer']){
   const v=view(seat);v.presentation.avatars={human:'mateo',computer:'amara'};
   const{r}=await setup(v);try{
-   assert.equal(r.root.findByProps({testID:'online-local-avatar'}).props.source,seat==='human'?'mateo.png':'amara.png');
+   assert.equal(r.root.findByType('TurnTimer').props.avatar,seat==='human'?'mateo.png':'amara.png');
    assert.equal(r.root.findByType('Opponent').props.source,seat==='human'?'amara.png':'mateo.png');
   }finally{await act(()=>r.unmount());}
  }
@@ -50,7 +50,7 @@ test('a selfie snapshot displays the authorized photo rather than a catalog fall
  v.presentation.avatarPhotos={human:'data:image/jpeg;base64,/9j/aA==',computer:'data:image/jpeg;base64,/9j/cA=='};
  const{r}=await setup(v);try{
   assert.equal(r.root.findByProps({testID:'online-local-name'}).props.children,'Juni','selfie keeps its player name');
-  assert.deepEqual(r.root.findByProps({testID:'online-local-avatar'}).props.source,{uri:v.presentation.avatarPhotos.human});
+  assert.deepEqual(r.root.findByType('TurnTimer').props.avatar,{uri:v.presentation.avatarPhotos.human});
   assert.deepEqual(r.root.findByType('Opponent').props.source,{uri:v.presentation.avatarPhotos.computer});
   assert.equal(r.root.findByType('Opponent').props.opponentId,'selfie','photo bypasses catalog resting poses');
  }finally{await act(()=>r.unmount());}
@@ -100,7 +100,7 @@ test('automatic results expose HOLD and release intents with no local advance or
 function drawView(clock=true){const v=view();v.canDraw=true;v.legalMoves=[];v.stock=['slot-0','slot-1'];if(clock)v.presentation.turnClock={durationMs:30000,remainingMs:12000,deadline:13000,serverNow:1000,paused:false};return v;}
 test('opening the timed boneyard waits for server confirmation and ignores duplicate taps',async()=>{
  const v=drawView();let answer;const {r,commands}=await setup(v,()=>new Promise(resolve=>{answer=resolve;}));
- try{const open=r.root.findByProps({accessibilityLabel:COMPUTER_STRINGS.es.draw+' · 2'});let pending;
+ try{const open=r.root.findByType('FloatingAction');let pending;
   await act(()=>{pending=open.props.onPress();open.props.onPress();});
   assert.deepEqual(commands,[{type:'openBoneyard'}]);assert.equal(r.root.findAllByType('Modal').length,0);
   assert.equal(v.presentation.turnClock.remainingMs,12000,'client never resets the server clock optimistically');
@@ -110,8 +110,8 @@ test('opening the timed boneyard waits for server confirmation and ignores dupli
 });
 test('failed opening keeps the boneyard shut; failed cancellation keeps it visible until an acknowledged retry',async()=>{
  let allow=false;const v=drawView(),h=await setup(v,async()=>allow);
- try{await act(()=>h.r.root.findByProps({accessibilityLabel:COMPUTER_STRINGS.es.draw+' · 2'}).props.onPress());assert.equal(h.r.root.findAllByType('Modal').length,0);
-  allow=true;await act(()=>h.r.root.findByProps({accessibilityLabel:COMPUTER_STRINGS.es.draw+' · 2'}).props.onPress());assert.equal(h.r.root.findAllByType('Modal').length,1);
+ try{await act(()=>h.r.root.findByType('FloatingAction').props.onPress());assert.equal(h.r.root.findAllByType('Modal').length,0);
+  allow=true;await act(()=>h.r.root.findByType('FloatingAction').props.onPress());assert.equal(h.r.root.findAllByType('Modal').length,1);
   allow=false;await act(()=>h.r.root.findByProps({testID:'online-boneyard-cancel'}).props.onPress());assert.equal(h.r.root.findAllByType('Modal').length,1);
   allow=true;await act(()=>h.r.root.findByType('Modal').props.onRequestClose());assert.equal(h.r.root.findAllByType('Modal').length,0);
   assert.deepEqual(h.commands.map(a=>a.type),['openBoneyard','openBoneyard','cancelBoneyard','cancelBoneyard']);
@@ -119,7 +119,7 @@ test('failed opening keeps the boneyard shut; failed cancellation keeps it visib
 });
 test('the first draw resumes on the server while additional opaque draws keep the open boneyard without reopening',async()=>{
  const v=drawView(),h=await setup(v,async()=>true);
- try{await act(()=>h.r.root.findByProps({accessibilityLabel:COMPUTER_STRINGS.es.draw+' · 2'}).props.onPress());
+ try{await act(()=>h.r.root.findByType('FloatingAction').props.onPress());
   await act(()=>h.r.root.findByProps({accessibilityLabel:'Ficha boca abajo 1'}).props.onPress());
   await h.update({view:{...v,revision:2,stock:['slot-1'],hand:[...v.hand,{id:'0-1',a:0,b:1}],presentation:{...v.presentation,turnClock:{...v.presentation.turnClock,remainingMs:30000,deadline:32000,serverNow:2000}}}});
   assert.equal(h.r.root.findAllByType('Modal').length,1);assert.equal(h.r.root.findAllByProps({accessibilityLabel:'Ficha boca abajo 2'}).length,0);
@@ -130,7 +130,7 @@ test('the first draw resumes on the server while additional opaque draws keep th
 });
 test('legacy rooms open and cancel locally without issuing timer commands',async()=>{
  const h=await setup(drawView(false));try{
-  await act(()=>h.r.root.findByProps({accessibilityLabel:COMPUTER_STRINGS.es.draw+' · 2'}).props.onPress());assert.equal(h.r.root.findAllByType('Modal').length,1);
+  await act(()=>h.r.root.findByType('FloatingAction').props.onPress());assert.equal(h.r.root.findAllByType('Modal').length,1);
   await act(()=>h.r.root.findByProps({testID:'online-boneyard-cancel'}).props.onPress());assert.equal(h.r.root.findAllByType('Modal').length,0);assert.deepEqual(h.commands,[]);
  }finally{await act(()=>h.r.unmount());}
 });
@@ -155,3 +155,7 @@ test('cosmetic attention revisions preserve selected ends and an active drag unt
   await h.update({view:{...v,revision:4,turn:'computer'}});assert.equal(h.r.root.findAllByType('Face').length,0);
  }finally{await act(()=>h.r.unmount());}
 });
+
+test('draw and pass use one right floating action and retain command and turn guards',async()=>{const v=view();v.legalMoves=[];v.canDraw=true;const h=await setup(v);try{let action=h.r.root.findByType('FloatingAction');assert.equal(action.props.side,'right');assert.equal(action.props.visible,true);assert.equal(action.props.label,'ROBAR');await act(()=>action.props.onPress());assert.equal(h.r.root.findAllByType('Modal').length,1);await act(()=>h.r.root.findByProps({testID:'online-boneyard-cancel'}).props.onPress());await h.update({view:{...v,canDraw:false,canPass:true}});action=h.r.root.findByType('FloatingAction');assert.equal(action.props.label,'PASAR');await act(()=>action.props.onPress());assert.deepEqual(h.commands,[{type:'pass'}]);await h.update({enabled:false});assert.equal(h.r.root.findByType('FloatingAction').props.visible,false);}finally{await act(()=>h.r.unmount());}});
+
+test('turn notice uses one title line and one last move line without a warning beneath tiles',async()=>{const v=view();v.last={player:'computer',kind:'play',tile:{a:0,b:1}};const h=await setup(v);try{const title=h.r.root.findByType('Turn');assert.ok(!title.props.multiline);const detail=h.r.root.findByProps({testID:'online-turn-detail'});assert.equal(detail.props.numberOfLines,1);assert.equal(detail.props.children,'Andy jugó 0 · 1');assert.equal(h.r.root.findAllByType('TurnWarning').length,0);}finally{await act(()=>h.r.unmount());}});

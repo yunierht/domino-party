@@ -26,3 +26,5 @@ test('cancellation, expiry and stale commands cannot resurrect or replace an acc
  assert.throws(()=>updateVoiceCall(accepted,{...callee,sessionId:'replacement'},{type:'leave',callId:'c'},now),/voice_call_forbidden/);
  assert.equal(updateVoiceCall(accepted,callee,{type:'leave',callId:'c'},now).reason,'disconnected');
 });
+
+test('accepted calls end at five minutes and accepting again cannot extend the deadline',()=>{const a={seat:'human',sessionId:'a'},b={seat:'computer',sessionId:'b'};let c=updateVoiceCall(null,a,{type:'call',callId:'limit'},0);c=updateVoiceCall(c,b,{type:'accept',callId:'limit'},1000);assert.equal(c.expiresAt,301000);assert.equal(updateVoiceCall(c,b,{type:'accept',callId:'limit'},2000).expiresAt,301000);assert.equal(expireVoiceCall(c,300999).status,'accepted');assert.equal(expireVoiceCall(c,301000).reason,'duration_limit');});

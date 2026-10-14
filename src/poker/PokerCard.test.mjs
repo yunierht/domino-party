@@ -24,3 +24,5 @@ test('hidden cards cannot expose a winner; revealed winners get a dot without an
  const h=setup();let r;await act(()=>{r=create(React.createElement(h.Card,{card:{rank:14,suit:'s'},winning:true,back:true}));});assert.equal(r.root.findAllByProps({testID:'poker-winning-dot'}).length,0);
  await act(()=>r.update(React.createElement(h.Card,{card:{rank:14,suit:'s'},winning:true})));assert.equal(r.root.findAllByProps({testID:'poker-winning-dot'}).length,1);await act(()=>r.unmount());
 });
+
+test('current combination uses a dot without a highlighted border and never marks hidden cards',async()=>{const h=setup();let r;const card={rank:14,suit:'s'};await act(()=>{r=create(React.createElement(h.Card,{card,combination:true,combinationLabel:'Combinación actual'}));});assert.equal(r.root.findByProps({testID:'poker-winning-dot'}).props.accessibilityLabel,'Combinación actual');assert.ok(!r.root.findByType('PlayingCard').props.highlight);await act(()=>r.update(React.createElement(h.Card,{card,combination:true,back:true})));assert.equal(r.root.findAllByProps({testID:'poker-winning-dot'}).length,0);await act(()=>r.unmount());});

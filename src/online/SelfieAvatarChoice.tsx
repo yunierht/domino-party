@@ -4,8 +4,8 @@ import {Feather} from '@expo/vector-icons';
 import {TABLE as C} from '../computer/tableTheme';
 import {OnlineSelfieCapture} from './OnlineSelfieCapture';
 
-export function SelfieAvatarChoice({photo,selected,onSelect,onSave,es,variant='own',name}:{
- photo?:string|null;selected:boolean;onSelect:()=>void;onSave:(photo:string,name:string)=>void;es:boolean;variant?:'own'|'rival'|'grid';name?:string|null;
+export function SelfieAvatarChoice({photo,selected,onSelect,onSave,es,variant='own',name,onClear}:{
+ photo?:string|null;selected:boolean;onSelect:()=>void;onSave:(photo:string,name:string)=>void;es:boolean;variant?:'own'|'rival'|'grid';name?:string|null;onClear?:()=>void;
 }){
  const [capturing,setCapturing]=useState(false);
  const height=variant==='grid'?110:variant==='rival'?90:64;
@@ -17,9 +17,10 @@ export function SelfieAvatarChoice({photo,selected,onSelect,onSave,es,variant='o
      <View style={{height,alignItems:'center',justifyContent:'center'}}><Feather name="user-plus" size={32} color={C.gold}/></View>}
     <Text numberOfLines={1} style={{color:C.ivory,textAlign:'center',fontSize:12,fontWeight:'600',marginVertical:6}}>{photo?(name||(es?'Mi selfie':'My selfie')):(es?'Crear selfie':'Create selfie')}</Text>
    </Pressable>
-   {!!photo&&<Pressable accessibilityRole="button" accessibilityLabel={es?'Cambiar selfie':'Retake selfie'} onPress={()=>setCapturing(true)} style={{minHeight:44,alignItems:'center',justifyContent:'center'}}>
-    <Feather name="camera" size={18} color={C.gold}/>
-   </Pressable>}
+   {(!!photo||onClear)&&<View style={{flexDirection:'row'}}>
+    <Pressable testID="selfie-camera" accessibilityRole="button" accessibilityLabel={photo?(es?'Cambiar selfie':'Retake selfie'):(es?'Crear selfie':'Create selfie')} onPress={()=>setCapturing(true)} style={{flex:1,minWidth:44,minHeight:44,alignItems:'center',justifyContent:'center'}}><Feather name="camera" size={18} color={C.gold}/></Pressable>
+    {onClear?<Pressable testID="selfie-clear" accessibilityRole="button" accessibilityLabel={es?'Borrar avatar selfie':'Clear selfie avatar'} accessibilityState={{disabled:!photo}} disabled={!photo} onPress={()=>{if(photo)onClear();}} style={{flex:1,minWidth:44,minHeight:44,alignItems:'center',justifyContent:'center',opacity:photo?1:.4}}><Feather name="trash-2" size={18} color={C.gold}/></Pressable>:null}
+   </View>}
   </View>
   {capturing&&<OnlineSelfieCapture visible es={es} initialName={name??''} onCancel={()=>setCapturing(false)} onSave={(value,chosenName)=>{onSave(value,chosenName);setCapturing(false);}}/>}
  </>;

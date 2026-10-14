@@ -9,7 +9,7 @@ import { TABLE as C } from './tableTheme';
 import { MusicChoices } from '../sound/MusicChoices';
 import {ModalCloseButton} from '../components/ModalCloseButton';
 
-export function TableSettings({ visible, es, onClose, onRules, onInvite, onAcceptInvitation, matching = true }: { onAcceptInvitation?: () => void; onInvite?: () => void; onRules?: () => void; matching?: boolean; visible: boolean; es: boolean; onClose: () => void }) {
+export function TableSettings({ visible, es, onClose, onRules, onInvite, onAcceptInvitation, onRestart, matching = true }: { onRestart?:()=>void; onAcceptInvitation?: () => void; onInvite?: () => void; onRules?: () => void; matching?: boolean; visible: boolean; es: boolean; onClose: () => void }) {
   const prefs = usePrefs();
   const controls = [
     { label: es ? 'Música' : 'Music', icon: 'music' as const, value: prefs.tableMusic, set: prefs.setTableMusic },
@@ -19,7 +19,7 @@ export function TableSettings({ visible, es, onClose, onRules, onInvite, onAccep
   return <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
     <View style={{ flex: 1, backgroundColor: '#020C0ADB', justifyContent: 'center', padding: 20 }}>
       <LinearGradient colors={['#78502E', '#352419']} style={{ width: '100%', maxWidth: 440, alignSelf: 'center', maxHeight: '90%', borderRadius: 26, padding: 7, borderWidth: 1, borderColor: C.gold }}>
-        <View accessibilityViewIsModal testID="table-settings" style={{ backgroundColor: C.surface, borderRadius: 20, padding: 18 }}>
+        <View accessibilityViewIsModal testID="table-settings" style={{ backgroundColor: C.surface, borderRadius: 20, padding: 18,...(onRestart?{flexShrink:1,minHeight:0}: {}) }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
             <Text accessibilityRole="header" style={{ flex: 1, color: C.goldLight, fontSize: 25, fontWeight: '700' }}>{es ? 'Ajustes' : 'Settings'}</Text>
             <ModalCloseButton finish es={es} positioned={false} onPress={onClose}/>
@@ -38,6 +38,7 @@ export function TableSettings({ visible, es, onClose, onRules, onInvite, onAccep
             {onRules && <Pressable accessibilityRole="button" accessibilityLabel={es ? 'Reglas del juego' : 'Game rules'} onPress={onRules} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 16, marginTop: 14 }}><Feather name="book-open" size={22} color={C.goldLight} /><Text style={{ color: C.ivory, fontSize: 16 }}>{es ? 'Reglas del juego' : 'Game rules'}</Text></Pressable>}
             {onInvite&&<Pressable accessibilityRole="button" accessibilityLabel={es?'Invitar amigo con código':'Invite a friend with code'} onPress={onInvite} style={{flexDirection:'row',alignItems:'center',gap:12,paddingVertical:16}}><Feather name="user-plus" size={22} color={C.goldLight}/><Text style={{color:C.ivory,fontSize:16}}>{es?'Invitar amigo con código':'Invite a friend with code'}</Text></Pressable>}
             {onAcceptInvitation&&<Pressable accessibilityRole="button" accessibilityLabel={es?'Aceptar invitación por código':'Accept invitation by code'} onPress={onAcceptInvitation} style={{flexDirection:'row',alignItems:'center',gap:12,paddingVertical:16}}><Feather name="log-in" size={22} color={C.goldLight}/><Text style={{color:C.ivory,fontSize:16}}>{es?'Aceptar invitación por código':'Accept invitation by code'}</Text></Pressable>}
+            {onRestart&&<Pressable accessibilityRole="button" accessibilityLabel={es?'Reiniciar partida':'Restart game'} onPress={onRestart} style={{minHeight:44,flexDirection:'row',alignItems:'center',gap:12,paddingVertical:12}}><Feather name="rotate-ccw" size={22} color={C.goldLight}/><Text style={{color:C.ivory,fontSize:16}}>{es?'Reiniciar partida':'Restart game'}</Text></Pressable>}
             <MusicChoices es={es} />
             <View style={{ height: 1, backgroundColor: C.line, marginVertical: 24 }} />
             {matching && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>

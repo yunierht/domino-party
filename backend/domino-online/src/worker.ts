@@ -1,3 +1,4 @@
+export {VoiceBudget} from './voiceBudget.ts';
 import {turnCredentials} from './turnCredentials.ts';
 import {apkDownload} from './apkDownload.ts';
 import onlineAssets from '../../../web/online-invitation/worker.js';
@@ -10,7 +11,7 @@ import {pokerRoute} from './pokerWorker.ts';
 import {pokerInvitationPage} from './pokerInvitationPage.ts';
 export {PokerRoom} from './pokerWorker.ts';
 import { DurableObject } from 'cloudflare:workers';
-import { createRoom, joinRoom, approveGuest, startRoom, readyRoom, nextRound, act, actor, advanceRoom, heartbeat, disconnect, deadline, project, setTurnTimerPaused, setBoneyardOpen, holdResult, sendAttention } from './room.ts';
+import { leaveRoom,recordPlayActivity,createRoom, joinRoom, approveGuest, startRoom, readyRoom, nextRound, act, actor, advanceRoom, heartbeat, disconnect, deadline, project, setTurnTimerPaused, setBoneyardOpen, holdResult, sendAttention } from './room.ts';
 import type { Room } from './room.ts';
 import { object, text, command, digest, secureRandom } from './protocol.ts';
 import type {VoiceReply,VoiceCall} from '../../../src/online/voiceProtocol.ts';
@@ -133,7 +134,8 @@ export class DominoRoom extends DurableObject<Cloudflare.Env> {
             if (parsed.epoch !== room.epoch) throw new Error('stale_epoch');
             if (parsed.revision !== room.revision) throw new Error('stale_revision');
             if (parsed.round !== (room.game?.round ?? 0)) throw new Error('stale_round');
-            if (parsed.type === 'approve') room = approveGuest(room,hash);
+            if(parsed.type==='leave')room=leaveRoom(room,hash);
+            else if (parsed.type === 'approve') room = approveGuest(room,hash);
             else if (parsed.type === 'start') room = startRoom(room,hash,now,secureRandom);
             else if (parsed.type === 'ready') room = readyRoom(room,hash,now,secureRandom);
             else if (parsed.type === 'nextRound') room = nextRound(room,hash,secureRandom,now);
@@ -142,6 +144,7 @@ export class DominoRoom extends DurableObject<Cloudflare.Env> {
             else if (parsed.type==='holdResult' || parsed.type==='releaseResult') room=holdResult(room,hash,parsed.type==='holdResult',now);
             else if (parsed.type==='attention') room=sendAttention(room,hash,parsed.kind,now,crypto.randomUUID());
             else room = act(room,hash,parsed,now);
+            if(['play','draw','pass','nextRound','ready'].includes(parsed.type))room=recordPlayActivity(room,hash,now);
             const ack = project(room,hash,now);
             this.ctx.storage.sql.exec('INSERT INTO receipts(actor,id,payload,ack) VALUES(?,?,?,?)',hash,parsed.commandId,payload,JSON.stringify(ack));
           }
@@ -246,7 +249,7 @@ const handler = {
       if (!/^Bearer [a-f0-9]{64}$/.test(authorization)) throw new Error('unauthorized');
       const hash = await digest(authorization.slice(7));
       const ice=/^(\/poker)?\/rooms\/([A-F0-9]{10})\/ice$/.exec(url.pathname);
-      if(ice&&request.method==='POST'){const o=object(await body(request,1024));if(Object.keys(o).some(k=>k!=='epoch'))throw Error('invalid_request');const reply=ice[1]?await env.POKER_ROOMS.getByName(ice[2]).request('snapshot',hash,{}):await env.ROOMS.getByName(ice[2]).request('snapshot',hash,{});if('error'in reply.body)return Response.json(reply.body,{status:reply.status,headers:{'cache-control':'no-store'}});if(reply.body.phase!=='playing'||o.epoch!==reply.body.epoch)throw Error('not_playing');try{return Response.json(await turnCredentials(env),{headers:{'cache-control':'no-store'}});}catch{return Response.json({error:'voice_not_configured'},{status:503});}}
+      if(ice&&request.method==='POST'){const o=object(await body(request,1024));if(Object.keys(o).some(k=>k!=='epoch'))throw Error('invalid_request');const reply=ice[1]?await env.POKER_ROOMS.getByName(ice[2]).request('snapshot',hash,{}):await env.ROOMS.getByName(ice[2]).request('snapshot',hash,{});if('error'in reply.body)return Response.json(reply.body,{status:reply.status,headers:{'cache-control':'no-store'}});if(reply.body.phase!=='playing'||o.epoch!==reply.body.epoch)throw Error('not_playing');if(env.NETWORK_MODE==='internet'&&env.TURN_KEY_ID&&env.TURN_KEY_API_TOKEN&&!await env.VOICE_BUDGET.getByName('voice-budget').reserve(hash))return Response.json({error:'voice_usage_limit'},{status:429,headers:{'cache-control':'no-store'}});try{return Response.json(await turnCredentials(env),{headers:{'cache-control':'no-store'}});}catch{return Response.json({error:'voice_not_configured'},{status:503});}}
       if(url.pathname.startsWith('/blackjack/'))return blackjackRoute(request,env,hash,body);
       if(url.pathname.startsWith('/poker/'))return pokerRoute(request,env,hash,body);
       if (url.pathname === '/rooms' && request.method === 'POST') {

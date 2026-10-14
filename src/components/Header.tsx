@@ -8,6 +8,7 @@ import { useNav } from '../nav/NavContext';
 
 export function Header({
   title,
+  centeredTitle = false,
   showBack = true,
   right,
   onTitlePress,
@@ -17,6 +18,7 @@ export function Header({
   onBackPress,
 }: {
   title: string;
+  centeredTitle?: boolean;
   showBack?: boolean;
   right?: React.ReactNode;
   /** When set, the title becomes tappable. */
@@ -41,7 +43,7 @@ export function Header({
         alignItems: 'center',
         height: s(52),
         marginBottom:s(8),
-        paddingRight:reserveThemeSpace?56:0,
+        paddingRight:centeredTitle?0:reserveThemeSpace?56:0,
       }}
     >
       {showBack && canGoBack ? (
@@ -53,11 +55,11 @@ export function Header({
           <Text style={{ color: c.primary, fontSize: s(26), fontWeight: '700' }}>
             ‹
           </Text>
-        </Pressable><HomeButton es={lang==='es'} color={c.primary}/></>
+        </Pressable><HomeButton es={lang==='es'}/></>
       ) : (
         <View style={{ width: s(8) }} />
       )}
-      {leftAction}{leftAction&&<HomeButton es={lang==='es'} color={c.primary}/>}
+      {leftAction}{leftAction&&<HomeButton es={lang==='es'}/>}
       {onTitlePress ? (
         <Pressable
           onPress={onTitlePress}
@@ -74,13 +76,14 @@ export function Header({
         </Pressable>
       ) : (
         <Text
-          style={{ flex: 1, color: c.text, fontSize:titleSize, fontWeight: '800', fontFamily: theme.fontFamily }}
+          testID={centeredTitle?'centered-header-title':undefined}
+          style={{ flex: 1, color: c.text, fontSize:titleSize, fontWeight: '800', fontFamily: theme.fontFamily, ...(centeredTitle?{position:'absolute',left:100,right:100,textAlign:'center' as const}: {}) }}
           numberOfLines={1}
         >
           {title}
         </Text>
       )}
-      {right}
+      {centeredTitle&&right?<View style={{marginLeft:"auto"}}>{right}</View>:right}
     </View>
   );
 }

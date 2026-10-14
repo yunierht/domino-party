@@ -36,6 +36,10 @@
       {
         "class_name": "BlackjackRoom",
         "name": "BLACKJACK_ROOMS"
+      },
+      {
+        "name": "VOICE_BUDGET",
+        "class_name": "VoiceBudget"
       }
     ]
   },
@@ -62,6 +66,12 @@
       "tag": "v4-blackjack",
       "new_sqlite_classes": [
         "BlackjackRoom"
+      ]
+    },
+    {
+      "tag": "v5-voice-budget",
+      "new_sqlite_classes": [
+        "VoiceBudget"
       ]
     }
   ],

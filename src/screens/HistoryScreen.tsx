@@ -35,7 +35,7 @@ export function HistoryScreen({
 
   return (
     <ScrollView contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}>
-      <Header
+      <Header centeredTitle
         title={t.history}
         right={
           matches.length > 0 && !readOnly ? (

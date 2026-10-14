@@ -1,3 +1,5 @@
+import {Feather} from '@expo/vector-icons';
+import {AppDialog} from '../components/AppDialog';
 import {GoldPressable} from '../components/GoldPressable';
 import {MatchPanelBevel} from '../components/MatchPresentation';
 import {trackingSetupComfort,trackingSetupHeaderGap} from '../components/trackingLayout';
@@ -140,7 +142,11 @@ function TeamCard({
   const { theme,s } = useTheme();
   const c=theme.colors;
   const spacing=(small:number,large:number)=>Math.round(small+(large-small)*comfort);
-  const { t } = useI18n();
+  const { t,lang } = useI18n();
+  const es=lang==='es';
+  const [confirmClear,setConfirmClear]=useState(false);
+  const hasNames=Boolean(name||p1||p2);
+  const clearNames=()=>{setName('');setP1('');setP2('');setConfirmClear(false);};
   return (
     <Card style={{borderColor:accent,borderWidth:1.5,borderRadius:24,shadowOpacity:.45,padding:spacing(12,38)}}><MatchPanelBevel color={accent}/>
       <View
@@ -154,14 +160,24 @@ function TeamCard({
           backgroundColor: 'rgba(255,255,255,0.13)',
         }}
       />
-      <View style={{flexDirection:'row',alignItems:'flex-start',gap:12,marginBottom:spacing(12,27)}}>
+      <View style={{flexDirection:'row',alignItems:'flex-start',paddingRight:Math.max(0,58-spacing(12,38)),marginBottom:spacing(12,27)}}>
         <View style={{flex:1}}><SetupField labelGap={spacing(4,10)} label={t.teamName} accessibilityLabel={`${t.teamName}: ${title}`} value={name} onChangeText={setName} placeholder={title} style={{height:spacing(44,55),fontWeight:'700',borderColor:accent,borderWidth:1}}/></View>
-        <TrackingColorButton teamLabel={title} value={colorChoice} onPress={onCycleColor}/>
+
       </View>
       <View style={{flexDirection:'row',gap:8}}>
         <View style={{flex:1}}><SetupField labelGap={spacing(4,10)} label={t.player1} value={p1} onChangeText={setP1} placeholder={t.player1} style={{height:spacing(44,55)}}/></View>
         <View style={{flex:1}}><SetupField labelGap={spacing(4,10)} label={t.player2} value={p2} onChangeText={setP2} placeholder={t.player2} style={{height:spacing(44,55)}}/></View>
+
       </View>
+      <View testID="tracking-team-actions" style={{position:'absolute',top:8,right:8,width:44,gap:6}}>
+        <TrackingColorButton teamLabel={title} value={colorChoice} onPress={onCycleColor}/>
+        <Pressable testID="tracking-clear-team" accessibilityRole="button" accessibilityLabel={es?`Borrar nombres de ${title}`:`Clear names for ${title}`} accessibilityHint={es?'Pide confirmación antes de borrar':'Asks for confirmation before clearing'} disabled={!hasNames} onPress={()=>setConfirmClear(true)}
+          style={({pressed})=>({width:44,height:44,alignSelf:'flex-end',alignItems:'center',justifyContent:'center',borderRadius:12,borderWidth:1,borderColor:c.border,backgroundColor:c.surfaceAlt,opacity:!hasNames?.4:pressed?.7:1})}>
+          <Feather name="trash-2" size={20} color={c.textMuted}/>
+        </Pressable>
+      </View>
+      <AppDialog visible={confirmClear} title={es?`¿Borrar nombres de ${title}?`:`Clear names for ${title}?`} message={es?'Se borrarán el nombre del equipo y los dos jugadores de esta sección.':'This will clear the team name and both player names in this section.'} icon="trash-2" iconColor={c.danger} onRequestClose={()=>setConfirmClear(false)}
+        actions={[{label:t.cancel,onPress:()=>setConfirmClear(false),dismiss:true},{label:es?'Borrar nombres':'Clear names',variant:'danger',onPress:clearNames}]}/>
     </Card>
   );
 }

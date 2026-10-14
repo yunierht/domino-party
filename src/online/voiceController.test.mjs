@@ -63,3 +63,5 @@ test('an accepted call that never connects releases capture after twenty seconds
   t.mock.timers.tick(20000);assert.equal(p.a.counts.stopped,1);assert.equal(p.b.counts.stopped,1);assert.equal(p.a.controller.state.error,'voice_connection_failed');
  }finally{await p.close();t.mock.timers.reset();}
 });
+
+test('local five-minute cap releases microphone and peer even when signaling becomes unreachable',async t=>{t.mock.timers.enable({apis:['setTimeout']});const p=pair();p.a.controller.listen();p.b.controller.listen();await settle();try{await p.a.controller.start();await p.b.controller.pump();await p.b.controller.accept();await p.a.controller.pump();await p.b.controller.pump();await p.a.controller.pump();p.a.callbacks[0].connection('connected');p.b.callbacks[0].connection('connected');t.mock.timers.tick(299999);assert.equal(p.a.counts.stopped,0);t.mock.timers.tick(1);await settle();assert.equal(p.a.counts.stopped,1);assert.equal(p.a.counts.closed,1);assert.equal(p.a.controller.state.phase,'ended');assert.equal(p.a.controller.state.error,'duration_limit');}finally{await p.close();t.mock.timers.reset();}});

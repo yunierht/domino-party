@@ -12,13 +12,14 @@ export function BankrollChipFace({amount,count}:{amount:number;count:number}){
 
  return <View testID={`bankroll-denomination-${amount}`} accessibilityLabel={`${count} chips of ${amount}`} style={{width:64,height:68}}>{count?Array.from({length:count},(_,i)=><View key={i} style={{position:'absolute',left:9,bottom:4+i*step,transform:[{scale:BANKROLL_CHIP_SCALE}],transformOrigin:'bottom left'}}><DenominationChip amount={amount} facingPlayer/></View>):<View style={{position:'absolute',left:9,bottom:12,width:46,height:24,borderRadius:18,borderWidth:1,borderColor:C.muted,alignItems:'center',justifyContent:'center'}}><Text style={{color:C.muted,fontSize:11}}>{amount}</Text></View>}</View>;
 }
-function ChipButton({amount,count,disabled,onChip}:{amount:number;count:number;disabled:boolean;onChip:(n:number,ref:React.RefObject<View|null>)=>void}){
+function ChipButton({amount,count,disabled,onChip,width=64}:{width?:number;amount:number;count:number;disabled:boolean;onChip:(n:number,ref:React.RefObject<View|null>)=>void}){
  const ref=useRef<View>(null);
- return <Pressable ref={ref} testID={`blackjack-bet-${amount}`} accessibilityRole="button" accessibilityLabel={`${amount}`} accessibilityState={{disabled}} disabled={disabled} onPress={()=>onChip(amount,ref)} style={{width:64,height:68,opacity:1,alignItems:'center'}}><BankrollChipFace amount={amount} count={count}/></Pressable>;
+ return <Pressable ref={ref} testID={`blackjack-bet-${amount}`} accessibilityRole="button" accessibilityLabel={`${amount}`} accessibilityState={{disabled}} disabled={disabled} onPress={()=>onChip(amount,ref)} style={{width,height:68,opacity:1,alignItems:'center'}}><BankrollChipFace amount={amount} count={count}/></Pressable>;
 }
-export function BettingTray({stake,balance,available=balance-stake,es,canBet,onChip,onClear}:{stake:number;balance:number;available?:number;es:boolean;canBet:boolean;onChip:(n:number,ref:React.RefObject<View|null>)=>void;onClear:()=>void}){
+export function BettingTray({stake,balance,available=balance-stake,es,canBet,onChip,onClear,split=false,chipWidth=64}:{split?:boolean;chipWidth?:number;stake:number;balance:number;available?:number;es:boolean;canBet:boolean;onChip:(n:number,ref:React.RefObject<View|null>)=>void;onClear:()=>void}){
  const counts=bankrollCounts(available);
+ const chip=(n:number)=><ChipButton key={n} width={chipWidth} amount={n} count={counts[n]??0} disabled={!canBet||stake+n>balance} onChip={onChip}/>;
  return <View testID="blackjack-betting-tray" style={{paddingTop:0,gap:0}}>
- <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:7,paddingHorizontal:4,flexGrow:1,justifyContent:'center'}}>{denominations.map(n=><ChipButton key={n} amount={n} count={counts[n]??0} disabled={!canBet||stake+n>balance} onChip={onChip}/>)}</ScrollView>
+ {split?<View style={{flexDirection:'row',alignItems:'center'}}><View testID="blackjack-chips-left" style={{flexDirection:'row',gap:4}}>{[10,20].map(chip)}</View><View pointerEvents="none" style={{flex:1,minWidth:88}}/><View testID="blackjack-chips-right" style={{flexDirection:'row',gap:4}}>{[50,100].map(chip)}</View></View>:<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:7,paddingHorizontal:4,flexGrow:1,justifyContent:'center'}}>{denominations.map(chip)}</ScrollView>}
  </View>;
 }

@@ -1,6 +1,190 @@
 # Decisiones de Domino Codex Online
 
+## ON-D-097 — 2026-10-13 — Aviso Domino breve y colores definitivos
+
+Fuente: aclaraciones humanas de voz. Sustituye ON-D-096 en color y espacio: ROBAR/DRAW verde#267B58; PASAR/PASS rojizo#A4453D. Aviso normal dos filas: Tu turno y última jugada; rival CPU usa nombre. Retira texto arrastrar/colocar y warning bajo mano solo Domino; timer/avatar mantienen funcionalidad. Lane52px constante entre turnos/acciones y4px separación de mano; al elegir extremo, controles reemplazan aviso y última jugada se oculta temporalmente. Estado de resultados independiente.
+
+## ON-D-098 — 2026-10-13 — Apertura Domino ligeramente inferior
+
+Fuente: petición humana explícita. useBoardCamera añade16px al centrado de apertura única y usa clamp existente para no salir del viewport. Contained additions conservan posición; crecimiento/drag/encuadre mantienen lógica. CPU/online comparten hook. Prueba nueva falla0→16 antes de implementar,57/57 cámaras/tablas después. Browser primera6/6 centro15.39px debajo centro de playing-surface (redondeo nativo).
+
+## ON-D-099 — 2026-10-13 — Check-in y etiqueta recuperable 1.0
+
+Fuente: autorización humana explícita de todos los cambios actuales y flag versión1.0 para retomarla. Commit local del candidato online-internet-prep y etiqueta Git anotada v1.0; no cambia app.json0.1.4 ni equivale a publicación. Sin push autorizado. App675/675, backend65dominio+25integración, tsc app/backend0. Pendiente siguiente petición: doble revisión invitaciones Android/iOS, instalada abre sala y sin instalar conserva invitación; APK Android autorizado condicionalmente al superar comprobaciones. Config actualiosTeamId/storesnull no acredita instalación diferida ni iOS universal links. No crear credenciales/distribución Apple sin datos/acceso necesarios.
+
+
+## ON-D-096 — 2026-10-13 — Robar y Pasar flotantes en Domino
+
+Fuente: solicitudes humanas explícitas de esta conversación. Reemplazar acciones inline por mismo FloatingAction de Poker/Blackjack, a derecha; etiqueta corta ROBAR/DRAW o PASAR/PASS, contador sigue en madera. Elección de color final rojizo Stand #A4453D sustituye verde/dorado explorados. Solo presentación local/online; conserva allowAction, validación canDraw/canPass, ack apertura/cancelación y condiciones turno/modal. Lane aviso68px preservada para no recalcular mano. Prueba nueva falla antes y pasa después;17/17 online+FloatingAction y tsc0. Suite antes del último texto/color672/672. Sin commit/push/APK/deploy.
+
+
+## ON-D-093 — 2026-10-13 — Reglas ilustradas y separación de controles de cartas
+
+Fuente: solicitudes humanas de voz en esta conversación. Aprobado: diez combinaciones de Póker de mayor a menor fuerza, ejemplos de Blackjack con figuras y ases; mantener tamaño actual tras retractación del último pedido de tamaño. Guías bilingües integradas al final de reglas CPU/lobby con cartas estáticas y valores validados por motores. BB/SB humano CPU sube20px; saldo debajo de fichas CPU Poker/Blackjack y OnlinePokerTable. No cambia apuestas/reglas/layout de mesa.
+
+## ON-D-094 — 2026-10-13 — Puntos de combinación durante la mano
+
+Fuente: solicitud humana explícita. Póker CPU/online muestra puntos en cartas propias/comunitarias de combinación actual, reemplazando borde resaltado. Etiqueta accesible distingue combinación actual de ganadora confirmada; cartas ocultas no muestran puntos. Conserva lane reservada10px y evaluación existente. Prueba reproduce falta de punto y queda aprobada.
+
+## ON-D-095 — 2026-10-13 — Fondo madera del pozo y encabezados centrados
+
+Fuente: solicitudes humanas explícitas; excepción Domino limitada a fondo selector. BoneyardPanel/OnlineDominoTable reutilizan WoodSurface bajo contenido con pointerEvents none, clipping solo decorativo, sin modificar dibujo/selección/animación. Statistics/Estadísticas reemplaza título largo únicamente en pantalla Stats. Stats/History activan centrado opcional Header con reservas simétricas100px y acciones separadas; otros consumidores mantienen comportamiento por defecto. Sin commit/push/despliegue.
+
+
+
+## ON-D-091 — 2026-10-13 — Stand automático al vencer turno Blackjack CPU
+
+Fuente humana directa por voz: al pasar tiempo del jugador seleccionar Stand automáticamente y continuar dealer. BlackjackScreen usa callback opcional ya existente de useWaitingClock solo si enabled (mano humana visible, sin pausa/reparto/modal); al30s aplica stand únicamente si current es misma identidad y faseplayer. Reutiliza engine/session/dealerStep sin cambiar reglas/pagos/duración30s. Apuestas siguen advisory; no autodeal ni apuesta forzada. Background/modales/manualpause conservan comportamiento. Pruebas antes fallan por faseplayer; después autoStand/dealerfinal, pausa restante y apuesta previa protegidos. No modifica reloj compartido ni Poker/Domino/backend.
+
+## ON-D-092 — 2026-10-13 — Texto del pozo Domino más legible
+
+Fuente humana directa por voz: primero pide pozo/número sobre madera; aclara que ubicación existente está bien y solo letras/número pequeños. Cambio limitado al Text stock-info de ComputerGameScreen:10→14px y peso600. Sin mover pozo/icono/avatar/madera ni cambiar acceso, reglas, reparto, audio o timerDomino. Browser mide14px en misma zona. Excepción estrecha Domino autorizada por petición directa. Evidencia/QR en CONTEXTO; sin commit/push/build/deploy.
+
+
+## ON-D-089 — 2026-10-13 — Continuidad explícita de la transmisión activa, sin códigos históricos
+
+Fuente humana directa por voz: primero confirma partida nueva local; después aclara que quiere continuidad como antes, sin pedir código nuevo a espectadores. Dirección final sustituye desactivación total provisional: un match recién creado continúa automáticamente solo si la partida inmediatamente anterior terminó, estaba live según servidor y este dispositivo era su controlador. Usar un código viejo del historial, retomar una partida existente o un broadcast terminado no autoriza activar otra. Se conserva generación de código distinto y setNextGame/auto-follow; Stop existente corta continuidad local. No cierre automático de broadcasts terminados implementado: se consultó como idea y conserva tradeoff de seguimiento, pendiente de diseño/autorización concreta. No se borró historial ni códigos externos.
+
+## ON-D-090 — 2026-10-13 — Código visible junto a Live
+
+Fuente humana directa: mostrar código junto a Live/You are scoring para reconocer partida actual. Barra ON-D-087 mantiene dimensiones y muestra Live · código en primera línea; estado segunda línea, Stop textual intacto. Prueba browser real host/espectador acredita rematch con nuevo código y cambio automático del espectador sin nueva entrada; no prueba física. Evidencia661tests/TS/QR en CONTEXTO; solo disco, sin commit/push/APK/deploy.
+
+
+## ON-D-087 — 2026-10-13 — Barra de transmisión integrada y separada de marcadores
+
+Fuente humana directa: funcionalidades ON-D-085/086 están bien en teléfono, pero Live/You are scoring/Stop separado no agrada; solicita un control completo más claro y atractivo con separación de paneles. Sustituye aspecto de ON-D-086: una barra temática44px con códigoLive+estado apilados a izquierda y texto Stop Broadcasting a derecha dentro de misma superficie, borde/divisor sutil, sin icono rojo de Stop separado. Reserva64px (10 arriba/abajo), descontada de ambos presupuestos de panel; pulso iconoLive conserva y Stop solo detiene transmisión, no puntuación. Evidencia660tests/browser/AndroidQR en CONTEXTO; aprobación física del aspecto nuevo pendiente.
+
+## ON-D-088 — 2026-10-13 — Color Home uniforme con Settings
+
+Fuente humana directa: icono casa mismo blanco grisáceo de Settings en todos lugares. HomeButton usa textMuted del tema y se retiran overrides dorados de sus consumidores actuales (headers, setups, CPU/Online/invitaciones tresjuegos). Solo color de casa; navegación, área44 y posición conservadas. Color sigue tema para contraste; tests navegaciones+color y suite660/660. No commit/push/build/deploy de este bloque.
+
+
+## ON-D-085 — 2026-10-13 — Papelera por equipo en Setup Match
+
+Fuente humana directa por voz: borrar nombre de equipo y jugadores de esa sección con confirmación; refinamiento aprobado agrupa papelera justo debajo de colores, cerca de esquina superior para liberar espacio de entrada. Implementado en NewMatchScreen: grupo absoluto44px, gap6, top/right8; dos campos jugadores recuperan ancho. AppDialog confirma antes de limpiar solo los tres campos del borrador seleccionado; X/cancelar conserva datos. No borra partidas/historial ni guarda cambios de configuración antes de Save. Colores/target/otro equipo conservados; vacío deshabilita papelera. Evidencia en CONTEXTO; solo disco/QR, sin commit/push/APK.
+
+## ON-D-086 — 2026-10-13 — Broadcasting conserva marcadores y reúne Live/Stop
+
+Fuente humana directa: al generar código, You are scoring empuja segundo panel/rondas y Live tapa editor; propone y confirma agrupar Live/Stop en franja, pide pulso de icono rojo. GameScreen reserva franja44 mientras comparte y resta diferencia del presupuesto de ambos paneles; Header conserva hueco44, puntos compactos muestran valor; Live abre mismo código y Stop usa stopSharing existente. Pulso scale1–1.12 aislado, se detiene al desmontar y respeta reduceMotion. Sin cambio de scoring/reglas/Firebase/roles. Browser real generó código y detuvo transmisión; pruebas y fuente Android descritas en CONTEXTO. Teléfono pendiente, sin APK/commit/push.
+
+
+## ON-D-084 — 2026-10-13 — Online coherente, cancelación y voz con controles de uso
+
+Fuente humana directa de esta conversación por voz: invitación por código idéntica Domino/Poker; Cancelar invitación mientras espera, Cancelar partida con confirmación durante juego y aviso al otro usuario, cierre sin ganador; cinco minutos sin jugada de un jugador cierra sala, sin contar heartbeat/acciones automáticas. Solicita paridad de mesas/cartas/acciones/avatar/timer con CPU y errores claros sin botones apilados. Implementación y revisión visual aún en curso; no afirmar aprobación física del nuevo conjunto. Usuario sí confirmó físicamente el panel Domino ON-D-083.
+
+Usuario autoriza activar TURN en su cuenta Cloudflare, acepta límites preventivos/alertas tras explicar que no garantizan US$20 máximo; respuesta afirmativa en voz a aceptación específica de términos Realtime. Activación realizada: oferta visible US$0 inicial, 1,000GB/mes incluidos, US$0.05/GB adicional, renovación automática. Creado TURN de pruebas, token solo secreto Worker; archivo temporal eliminado. Alerta US$20 guardada para email de facturación existente, no corta consumo. Servidor de pruebas desplegado con VoiceBudget: hasta 2,000 emisiones/mes globales, 20/día por identidad, separación30s; credenciales300s, llamada aceptada300s; app libera micrófono/peer al vencimiento y al suspender/salir. Emisiones no equivalen a ancho de banda ni dólares; identidad puede cambiar, no es tope garantizado. No commit/push/APK/stores autorizados ni ejecutados en este bloque. Evidencia y pendientes en CONTEXTO.
+
+## ON-D-083 — 2026-10-13 — Panel de menú Domino coherente con Poker
+
+Fuente humana directa por voz: trespuntos dentro partidaDomino debe abrir menú pulido como Poker; no setup/globalSettings. Implementación autorizada usa TableSettings directamente con rutas invite/accept/rules/restart y controlesexistentes; elimina menú intermedio. Restart optativo no cambia otros juegos; panelDomino se limita a altura teléfono con scrollinterno. Confirmación de reinicio sigue obligatoria y no fue ejecutada. Evidencia654tests/browser/Androidsource en CONTEXTO; teléfono pendiente. No commit/push/build/deploy.
+
+## ON-D-082 — 2026-10-13 — Alineación y padding de anuncio
+
+Fuente humana directa: alinear texto con toggle y ahorrar padding; pregunta por omisión y prevención. Corregido Text vacío remanente de ON-D-081; row directo centrado y paddingreducido. Añadida regresión y verificaciónbrowser de centros delta0. Review actualizado exige revalidación después del últimoedit y distinguir checklist de certificación independiente. Solo disco sin commit/push/deploy.
+
+## ON-D-081 — 2026-10-13 — Etiqueta y toggle suficientes para anunciar ganador
+
+Fuente humana directa: descripción debajo de Announce the winner es redundante y ocupa espacio. Quitada solo esa descripción de Settings; conserva toggle y selectorvoz. Refina ON-D-080, sin ampliar alcance ni commit/push/deploy.
+
+## ON-D-080 — 2026-10-13 — Selectores compactos y revisión de Settings
+
+Fuente humana directa: idioma juntoMusic para quitar botones grandes, vocesuna fila, compactar Appearance y aplicar skillUX. Aprobado mejorar Settings existente conservando preferencias: Language dropdown, Appearance preview única con listacompacta5opciones, voz4enfila/labels completos/target44 y headingavatar13 soloSettings. Skill MagicPath seischeckpoints aplicada a edición nativa local; evidencia y límites [UX_SETTINGS_REVIEW](UX_SETTINGS_REVIEW.md). No afecta layouts/setup/mesas ni autoriza commit/push/build/deploy; teléfono pendiente.
+
+## ON-D-079 — 2026-10-13 — Acciones selfie por iconos persistentes
+
+Fuente humana directa: trash junto a camera es más limpio que botón Clear condicional. Sustituye presentación ON-D-078; conserva operación de borrado propia, persistencia y fallback. Iconos visibles en Settings, trash disabled sin foto y cámara activa; implementación optativa preserva otros consumidores. Evidencia en CONTEXTO; solo disco sin commit/push/deploy.
+
+## ON-D-078 — 2026-10-13 — Limpiar selfie propio en Settings
+
+Fuente humana directa: solicita borrar avatar selfie desde Settings. Implementado control condicional que limpia foto/nombre guardados; selfie activo usa Yuni por defecto, otro avatar seleccionado permanece. No afecta selfie rival ni borra fotos de galería, ni altera identidad fija de sala online en curso. Se conserva bloqueo contra restauración por hidratación tardía. Evidencia651tests/TypeScript y bundle en CONTEXTO; validación física pendiente. Solo disco sin commit/push/deploy.
+
+## ON-D-077 — 2026-10-13 — Espacio de mensajes estable en Play Domino
+
+Fuente humana directa: reporta sacudida por turno al acercarse cadena al borde. Corrección autorizada en esta conversación: reservar espacio para máximo habitual de título/ayuda/acciones durante ronda en Play Domino local, adaptado a fontScale; resultado conserva layout previo. Evita resize por cambio de turno que fuerza cámara cerca del margen; no elimina fit legítimo al crecer cadena ni toca motor/audio. Evidencia y límites en CONTEXTO, teléfono pendiente; solo disco sin commit/push/deploy.
+
+## ON-D-076 — 2026-10-13 — Pista de combinación actual de Poker
+
+Fuente humana directa: pide recuperar hints de las cartas/combinación actual. Se conserva suppressión de mensajes ordinarios de ON-D-063, pero se restaura PokerHandHint encima de mano propia con categoría vigente y highlights existentes. No predice victoria frente a cartas privadas del rival; solo describe combinación humana con board público. Sin cambios de reglas, tamaños/espacios, bote o botones. Tests113/113, TypeScript0 y fuente servida por QR verificada; validación física pendiente. Guardado solo disco.
+
+## ON-D-075 — 2026-10-13 — Tres puntos preferidos para Settings del perfil
+
+Fuente humana directa: nuevo layout se ve mejor; prefiere icono trespuntos en Playing as. Sustituye texto/botónrelleno de ON-D-074 solo por icono more-vertical22; target44, acceso Settings y etiqueta accesible se conservan. Aplicado setup3juegos; sin ampliar resto. Preferencia humana prevalece sobre recomendación de label visible del reviewskill. Evidencia4tests/TypeScript/browser y contexto, sin commit/push/deploy.
+
+## ON-D-074 — 2026-10-13 — Rediseño de setups y gate UX producción
+
+Fuente humana directa: no satisfecho con resultados, pide nuevo layout y skill expertoUX para determinar producción. Sustituye distribución ON-D-072, conserva opciones/selecciones y share ON-D-073. Implementación comparte jerarquía por GameSetupLayout, perfil horizontal, rivales con marca visible, opcionesfullwidth, Play52 y métricasresponsive. MagicPath conectado, aplicado magicpath-design seischeckpoints; no evaluación independiente ni certificación. Resultado local supera revisión/pruebas, pero producción queda NO aprobada hasta validación teléfono, textosistema/accesibilidad/aceptaciónvisual y tareas reales. Exacto alcance incluye setupDomino; no reabre mesas/motores/audio ni publica. Evidencia [UX_SETUP_REVIEW](UX_SETUP_REVIEW.md) y CONTEXTO. Sin commit/push/build/deploy.
+
+## ON-D-073 — 2026-10-13 — Retornar al juego tras chooser de invitación
+
+Fuente humana directa: tras elegir compartir invitación por WhatsApp, navegar de vuelta a aplicación. Estado implementado para entradas share-only Domino/Poker y callbacks; prueba física pendiente. Completar chooser retorna mediante callback de app y conserva invitación/sala; no olvidar/cancelar sesión ni cerrar WhatsApp por fuerza. Modal dentro de partida ya cerraba correctamente y se conserva; manualCode no cambia. Nueva apertura Domino share-only reinicia su entry por requestId. No autoriza envío automático, destinatarios ni entrega; pruebas con mocks no prueban WhatsApp. Evidencia en CONTEXTO, sin commit/push/build/deploy.
+
+## ON-D-072 — 2026-10-13 — Mejor uso horizontal y tamaños uniformes en setups
+
+Fuente humana directa: más grandes imagen superior/cajasavatar, sin scroll y mínimo cambio visual al alternar juegos. Estado implementado, teléfono pendiente. Sustituye densidad104/76 de ON-D-065 solo en setups por116/90 con márgenes tight, arte52cartas/32Domino. Tres secciones de idéntica geometría, opciones existentes junto a Playing as, botón48 fijo y nota igual. Carousel horizontal conservado; sin scroll vertical de setup. Domino autorizado explícitamente en este alcance, sin cambios a su partida ni audio/reglas. No crear otras opciones ni modificar selección/persistencia. Evidencia646tests/TypeScript/browser/fuentesAndroid en CONTEXTO; no commit/push/APK/deploy.
+
+## ON-D-071 — 2026-10-13 — Centro de madera y chips separados
+
+Estado implementado, revisión física pendiente. Solicitud humana directa de avatar al medio de madera, Poker/BJ con tamaño de madera Domino y chips a ambos lados. Sustituye posición top-18 ON-D-068 y offsets de nombre ON-D-069/070. Madera94/98 según alto disponible<720 igual Domino; avatar centro xy de madera, nombre debajo en mismo contenedor; chips10/20 izquierda y50/100 derecha en Poker/BJ local y PokerOnline. Excepción Domino limitada a avatar/nombre/aviso necesario para despejarlo; conserva su tamaño de madera y juego. Split de trays optativo conserva otros consumidores. No autoriza reglas/ledger/audio ni commit/push/build/deploy. Evidencia en CONTEXTO.
+
+## ON-D-070 — 2026-10-13 — Anclar nombre al avatar al revisar bottom-center
+
+Fuente humana directa: revisar nombre porque no está al centro debajo de imagen. Implementado anclaje común de nombre e imagen en las cinco mesas; browser confirma centro común (diferencia<0.02px). Sustituye anclas independientes de ON-D-069; posición/tamaño posteriores sustituidos por ON-D-071. TypeScript y167tests pasaron antes de nueva petición; fuentes Android exactas name-anchor-live.json. No se reprodujo físicamente el fallo de teléfono; no inventar equivalencia web/nativa. Sin commit/push/build/deploy.
+
+## ON-D-069 — 2026-10-13 — Alinear nombres con avatar de ON-D-068
+
+Fuente: petición humana directa de alinear nombre con posición nueva de imagen. Estado implementado; revisión física pendiente. Autoriza nombres centrados debajo de avatar/aro en Domino, Poker y Blackjack, locales/online correspondientes, y reserva mínima antes de chips. No modifica avatar, timer, reglas ni audio. Complementa ON-D-068; evidencia167tests/TypeScript/fuentes servidas en CONTEXTO. Sin permiso commit/push/APK/deploy.
+
+## ON-D-068 — 2026-10-13 — Gaps visibles Poker y avatar inferior uniforme
+
+Estado: solicitudes humanas directas implementadas; revisión física pendiente. Corrección de cartas centrales superpuestas prevalece sobre tamaño exacto Blackjack en comunidad cuando cinco caras más gap6 no caben; conservar tamaño Blackjack privado. Sustituye únicamente margen negativo permitido en ON-D-067. Petición adicional autoriza bajar avatar Domino hacia madera y mantener posición en todas las mesas: offsettop-18 uniforme,18px más abajo, sin cambiar tamaño72, x central ni clocks. Alcance Domino explícito limitado a esta posición; Poker/BJ y modos locales/online correspondientes conservan reglas y controles. Evidencia175tests/TypeScript/fuentesAndroid servidas en CONTEXTO; no autoriza commit/push/build/deploy.
+
+## ON-D-067 — 2026-10-13 — Referencia de bote de ayer y tamaño actual Blackjack para Poker
+
+Estado: pedido humano directo implementado en Poker CPU; revisión física pendiente. El usuario solicita bote en lugar de ayer y cartas centradas; después precisa que los tamaños deben igualar Blackjack ACTUAL. Esta precisión sustituye tamaño histórico de cartas, sin cambiar Blackjack. Bote vuelve a la zona inferior izquierda del checkpoint9b853f2; x puede adaptarse mínimamente para separar mano en pantalla estrecha. Todas caras Poker CPU usan la fórmula Blackjack; comunidad centrada y con separación adaptativa para mostrar cinco cartas del mismo tamaño. Conserva reglas/contabilidad/animaciones/acciones, avatar y setup aprobados. Poker Online no recibió cambios en este bloque. Evidencia109tests/TypeScript/browser/bundle en CONTEXTO; no prueba física ni permiso commit/push/APK/deploy.
+
+## ON-D-066 — 2026-10-13 — Corregir whitespace JSX nativo en dos configuraciones
+
+Estado: fix local aprobado por solicitud directa del usuario; recarga física pendiente. Fuente: reporte «looks better but getting text string must be render ...in blackjack and pocker setting page,,,domino is ok». Alcance mínimo: quitar un espacio inline fuera de Text en cada footer Poker/Blackjack; conservar apariencia mejorada y Domino. Regresión añade guard nativo de hijos string incluyendo whitespace;14 focales aprobados, fuentes servidas por mismo QR comprobadas. No nueva funcionalidad, cambios de reglas/audio/layout ni commit/push/build/deploy. Evidencia en CONTEXTO.
+
+## ON-D-065 — 2026-10-13 — Reducir espacios y ligeramente avatares en configuración
+
+Estado: solicitud humana directa implementada; recarga física pendiente. Fuente: «There is some empty space bertween the top image text and the Playing as section, can you use that empty space to remove the scrolling and maybe use a little smaller avatar buttons». Autoriza afinar densidad de configuraciones con estilo común ya aprobado. Sustituye tamaños116×90 del bloque ON-D-064 solo en estas tres configuraciones por104×76; conserva marcos, arte superior, selecciones y pie fijo48px. Sin regreso a miniaturas44px/retirada de arte que usuario rechazó. Componentes compartidos usan opción tight, consumidores no solicitados conservan default; juegos en mesa/reglas/audio/timers intactos.
+
+358×640 navegador normal: no scroll vertical necesario, todas opciones y botón visibles. Mantener fallback desplazable para pantallas menores/texto aumentado; no ocultar opciones ni afirmar prueba física. Evidencia y mismo QR en CONTEXTO. Sin refactor amplio, commit/push/build/deploy/publicación.
+
+## ON-D-064 — 2026-10-13 — Aspecto común de Domino en las configuraciones
+
+Estado: petición humana directa implementada localmente; distribución aprobada expresamente, revisión física final pendiente. Confirmación posterior DIRECTA: «Aspecto de Domino con botón de inicio siempre visible». Se acepta la primera opción ya aplicada, con contenido desplazable cuando la pantalla lo requiera. Fuente: dos mensajes humanos de este chat rechazan avatares demasiado pequeños/compactos en Poker y piden recuperar imagen superior y el mismo look and feel en configuraciones Domino/Poker/Blackjack. Sustituye SOLO la reducción44/48px de avatares y retirada del arte superior de ON-D-063. Tamaños/marcos propios y del selector vuelven al patrón Domino116×90; se conserva ilustración de cada juego. Pie de inicio48px fijo/coherente, opciones existentes conservadas; sin reglas/audio ni funciones nuevas. PlayingIdentity/OpponentChoices vuelven a tamaños originales, variante de DealerChoices solo para lobby Blackjack; picker de mesa intacto.
+
+Compromiso de implementación: con tamaños originales e ilustración no se garantiza todo en una pantalla pequeña; contenido puede desplazarse, botón de iniciar siempre visible. Se consultó opcionalmente distribución original con pie fijo o dos columnas; no hubo respuesta al terminar, se aplica primera opción por prioridad del último pedido. No atribuir aprobación humana al compromiso ni declarar satisfecha la solicitud anterior de cero scroll. Evidencia y mismo QR en CONTEXTO. No commit/push/APK/publicación/despliegue; cambios visuales de mesas ON-D-063 conservados.
+
+## ON-D-063 — 2026-10-13 — Avatares/timer comunes y correcciones visuales Poker/Blackjack
+
+Estado: aprobada directamente e implementada localmente; nueva revisión física pendiente. Fuente: mensajes humanos de voz de 01a13655-b854-7843-92c4-b8264ef3ddd1 y dos confirmaciones DIRECTAS en este chat tras rechazo automático: «Sí, autorizo esos ajustes visuales en los tres juegos» y «Sí, autorizo compactar la configuración de Póker». Última síntesis incluye expresamente Domino, Poker y Blackjack: avatar mayor centrado entre madera/paño y timer alrededor. Sustituye solo ubicación/tamaño visual de ON-D-062; tiempos, pause/resume, pulso10s Domino/Poker y advisory Blackjack conservados. Excepción visual Domino estrecha: no reglas/estrategia/audio ni otros recursos.
+
+Poker: separar bote/rival, centrar cartas, conservar posiciones de All-in/Check/Fold y demás acciones; quitar mensajes ordinarios de zona del avatar. Corrección de banca invisible reportada durante edición: capas del paño no empujan madera y se retira reserva derecha obsoleta. Configuración Poker compacta conserva identidades/rival/fichas/opciones y deja Play Poker visible en una pantalla normal. Blackjack: conservar y centrar mensajes como Place Your Bet sobre avatar. No autoriza otras funcionalidades, refactor amplio, commit/push/APK/despliegue. Evidencia/QR/pendientes en CONTEXTO; no convertir navegador/mocks/bundle en validación física.
+
+## ON-D-062 — 2026-10-13 — Layout, avatar y paridad de turno con aviso a 10 segundos
+
+Estado: **aprobada e implementada localmente; revisión humana Browser pendiente**. Fuente: cuatro correcciones pedidas por Yuni en chat de voz `01a13538-28ff-7902-bc72-c2c9c87d2319`, transmitidas por coordinador; decisión final humana transmitida «Al agotarse el tiempo pasa al siguiente jugador» en CPU y Online; respuestas directas en este ejecutor «Conservar avance y avisar antes de 0», «A los 10 segundos restantes» y «Dejar voz pendiente por ahora». No refactor amplio, código de otros proyectos, commit, push, APK o despliegue autorizados.
+
+Alcance: separar sombras/cartas comunitarias del rival en Poker Online; madera con proporción CPU del mismo candidato; avatar ampliado al lugar del contador con aro de 30s en Domino/Poker CPU y Online. A 10s, aviso al dueño del turno indicando que el otro espera y latido visual suave, sin añadir audio/vibración; detener con acción, turno, pausa, ocultamiento o 0, y respetar reduced motion. A 0, Domino cede turno sin mover fichas/puntuar/bloquear ronda; Poker Check legal o Fold. No pase ilegal. Sustituye para Domino/Poker CPU la política advisory de ON-D-048 y la idea intermedia de aviso después de 0; nunca avisar de turno terminado. Blackjack solo local y tracking quedan fuera de esta paridad. Cambios mínimos; historial y diffs anteriores preservados.
+
+Voz Internet: **aplazada explícitamente**, no corregida ni habilitada por estas validaciones. Config pública TURN_KEY_ID vacía y credencial pública no verificada; activación requiere configuración server-side segura de Cloudflare TURN y autorización propia del bloque externo. No secretos en fuente/bundle, no creación de claves ni deploy. MSI: diagnóstico separado limitado a versión/host local; no evidencia para atribuir TimeoutError al juego ni afirmar conectividad remota.
+
+Implementación/evidencia/fuentes exactas y preview local en [CONTEXTO](CONTEXTO.md#2026-10-13--correcciones-locales-para-revisión-en-browser). Decisiones anteriores conservadas, incluida ON-D-061 que habilita cambios definidos en esta conversación. Pruebas automáticas, navegador local y confirmación física siguen separados.
+
+## ON-D-061 — 2026-10-13 — Descongelamiento acotado y correcciones mínimas
+
+Estado: **aprobada; correcciones concretas pendientes de definición**. Fuente humana: Yuni en chat de voz `01a13538-28ff-7902-bc72-c2c9c87d2319`, transmitida por el coordinador a este ejecutor. Tras revisar el navegador: «estoy viendo los mismos problemas online que vi en el teléfono. Vamos a descongelar la aplicación para hacer algunos cambios». Después aclara que el proyecto posiblemente necesitará un refactor completo, que no se implementará todavía: primero arreglar los errores con los mínimos cambios necesarios. Reporte físico es declaración humana; todavía no se describieron errores ni se confirmó matriz de dispositivos/redes/casos.
+
+Sustituye el congelamiento de [ON-D-060](#on-d-060--2026-10-12--checkpoint-local-y-congelamiento-renovado) solo para los cambios que el usuario defina en esta conversación de Domino Online. No pedir autorización repetida por cada edición comprendida en ese alcance. Prioridad: reproducción y correcciones mínimas necesarias, preservando comportamiento ajeno y cambios existentes. No autoriza funcionalidades no pedidas, refactor amplio, commit, push, despliegue, publicación o APK. No aplica a otros proyectos ni convierte pendientes históricos en implementaciones autorizadas.
+
+Refactor completo: **posibilidad aplazada**, no decisión de ejecutarlo. Filosofía organizativa en [COMPANY_OS](<C:/Development/Organization/COMPANY_OS.md>), sin duplicarla aquí. Hoy solo se actualiza continuidad del candidato servido, HEAD `9b853f2419af486b3ea3afd84f6e4f421010f525`. Evidencia y próximo paso en [CONTEXTO](CONTEXTO.md).
+
 ## ON-D-060 — 2026-10-12 — Checkpoint local y congelamiento renovado
+
+Estado posterior: congelamiento sustituido de forma acotada por [ON-D-061](#on-d-061--2026-10-13--descongelamiento-acotado-y-correcciones-mínimas). Se conserva la decisión y evidencia histórica.
 
 Fuente humana directa verificada en chat APK para prueba online: Yuni pide resumen de todos los trabajos y pendientes iPhone para mañana, confirma tener APK Android, solicita check-in al código y ordena no hacer más cambios hasta recibir indicación después de probarlo. Autoriza checkpoint/commit LOCAL del candidato Internet acumulado y continuidad, no push/PR/merge/publicación/nuevos builds/despliegues ni fixes. Versión segura significa punto recuperable, sin certificación de seguridad o preparación productiva.
 
@@ -65,6 +249,8 @@ Retirados botón/overlay de invitación de BlackjackScreen y montaje del listene
 Fuente: petición humana directa transmitida por chat raíz. Aprobado: pozo local Blackjack abajo a izquierda de cartas, pila única proporcional al bote Poker actual, fichas aterrizando por capa y Clear transparente centrado debajo con toque44px. Sustituye ubicación central de ON-D-046; conserva importes, ledger, Dealer/Player grandes iguales, Deal/Repeat Bet/Clear y baraja52 nueva por mano. Poker permanece como referencia visual sin cambios de sus fichas. Implementación en BlackjackScreen y betPileGeometry; pruebas focalizadas39/39. Verificación navegador320/390 en curso.
 
 ## ON-D-048 / 2026-10-11 — Timers silenciosos y latido visual
+
+Política CPU Domino/Poker advisory sustituida por [ON-D-062](#on-d-062--2026-10-13--layout-avatar-y-paridad-de-turno-con-aviso-a-10-segundos); resto de esta decisión histórica conservado.
 
 Fuente: nueva instrucción humana directa en conversación raíz. SUSTITUYE los recordatorios sonoros/hápticos15s/5s de ON-D-045 y la solicitud intermedia de conservar esa cadencia. Ningún timer debe emitir sonido o vibración: al0, latido visual suave continuo solo en reloj visible y turno/espera local activo; termina al actuar/cambiar turno/salir/overlaypausa/background. Reduced motion: rojo estático. CPU sigue sin acción automática; autoridad/timeout online intactos. Música, voz, sonidos/haptics de fichas y otros eventos ajenos no cambian.
 

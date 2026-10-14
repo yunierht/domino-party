@@ -1,6 +1,6 @@
 import type { Intent, AttentionKind } from './room.ts';
 export type Command = { commandId: string; epoch: string; revision: number; round: number } &
-  (Intent | { type: 'approve' } | { type: 'start' } | { type: 'ready' } | { type: 'nextRound' } | {type:'pauseTurnTimer'} | {type:'resumeTurnTimer'} | {type:'openBoneyard'} | {type:'cancelBoneyard'} | {type:'holdResult'} | {type:'releaseResult'} | {type:'attention';kind:AttentionKind});
+  (Intent | {type:'leave'} | { type: 'approve' } | { type: 'start' } | { type: 'ready' } | { type: 'nextRound' } | {type:'pauseTurnTimer'} | {type:'resumeTurnTimer'} | {type:'openBoneyard'} | {type:'cancelBoneyard'} | {type:'holdResult'} | {type:'releaseResult'} | {type:'attention';kind:AttentionKind});
 export function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('invalid_request');
   return value as Record<string, unknown>;
@@ -25,7 +25,7 @@ export function command(value: unknown): Command {
     if(o.kind!=='wave'&&o.kind!=='knock'&&o.kind!=='look')throw new Error('invalid_request');
     result={...base,type,kind:o.kind};
   }
-  else if (type === 'approve' || type === 'start' || type === 'ready' || type === 'nextRound' || type === 'pass' || type==='pauseTurnTimer' || type==='resumeTurnTimer' || type==='openBoneyard' || type==='cancelBoneyard' || type==='holdResult' || type==='releaseResult') result = { ...base, type };
+  else if (type==='leave' || type === 'approve' || type === 'start' || type === 'ready' || type === 'nextRound' || type === 'pass' || type==='pauseTurnTimer' || type==='resumeTurnTimer' || type==='openBoneyard' || type==='cancelBoneyard' || type==='holdResult' || type==='releaseResult') result = { ...base, type };
   else throw new Error('invalid_request');
   if (Object.keys(o).some(key => !(key in result))) throw new Error('invalid_request');
   return result;

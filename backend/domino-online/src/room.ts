@@ -4,6 +4,7 @@ import type { Game, Player, End, ScoringMode } from '../../../src/computer/engin
 // Transport policy defaults, independent of the frozen rules engine.
 export const LEASE_MS = 30_000;
 export const GRACE_MS = 120_000;
+export const INACTIVITY_MS = 300_000;
 export const WAITING_MS = 15 * 60_000;
 export const TURN_MS = 30_000;
 export const RESULT_MS = 3_000;
@@ -38,6 +39,7 @@ export interface Room {
   winner: Player | null; closeReason: string | null;
   target: number; mode: ScoringMode; roundReady: Player[]; lobbyReady: Player[];
   invitation?: { avatars: { human: string; computer: string | null }; turnTimer?:true;autoNextRound?:true;quickActions?:true;customAvatars?:true;photos?:Record<Player,string|null> };
+  lastActivity?: Record<Player,number>;
   turnClock?: TurnClock;
   resultClock?:ResultClock;
   attention?:Attention;
@@ -47,6 +49,14 @@ export function actor(room: Room, hash: string): Player {
   if (room.seats.human.secretHash === hash) return 'human';
   if (room.seats.computer?.secretHash === hash) return 'computer';
   throw new Error('unauthorized');
+}
+export function recordPlayActivity<T extends Room>(room:T,hash:string,now:number):T {
+  const player=actor(room,hash);return {...room,lastActivity:{...(room.lastActivity??{human:now,computer:now}),[player]:now}};
+}
+export function leaveRoom<T extends Room>(room:T,hash:string):T {
+  actor(room,hash);if(room.phase==='closed')return room;
+  if(room.phase==='completed')throw Error('not_playing');
+  return {...room,phase:'closed',closeReason:'left',winner:null,turnClock:undefined,resultClock:undefined,attention:undefined,revision:room.revision+1};
 }
 function open(room: Room) { if (room.phase === 'closed') throw new Error('closed'); }
 function hostOnly(room: Room, hash: string) { if (actor(room, hash) !== 'human') throw new Error('host_only'); }
@@ -89,7 +99,7 @@ export function startRoom(room: Room, hash: string, now: number, random: () => n
   if (room.phase !== 'waiting') throw new Error('already_started');
   if (room.seats.human.leaseUntil <= now || room.seats.computer.leaseUntil <= now) throw new Error('not_connected');
   const game = deal(room.seats.human.name, room.target, random, undefined, room.mode);
-  return synchronizeClock(room,{ ...room, game, slotIds: [...game.stockSlots], phase: 'playing', revision: room.revision + 1 },now);
+  return synchronizeClock(room,{ ...room, game, slotIds: [...game.stockSlots],lastActivity:{human:now,computer:now}, phase: 'playing', revision: room.revision + 1 },now);
 }
 export function readyRoom(room: Room, hash: string, now: number, random: () => number): Room {
   open(room); const player=actor(room,hash);
@@ -233,7 +243,9 @@ export function advancePresence(room: Room, now: number): Room {
   if (room.phase === 'closed' || room.phase === 'completed') return room;
   if (room.phase === 'waiting') return now < room.createdAt + WAITING_MS ? room
     : { ...room, phase: 'closed', closeReason: 'waiting_expired', revision: room.revision + 1 };
+  if(room.lastActivity && Object.values(room.lastActivity).some(last=>now-last>=INACTIVITY_MS))return {...room,phase:'closed',closeReason:'inactivity_timeout',winner:null,turnClock:undefined,resultClock:undefined,attention:undefined,revision:room.revision+1};
   const next = structuredClone(room);
+  next.lastActivity??={human:now,computer:now};
   for (const player of ['human','computer'] as const) {
     const s = next.seats[player];
     if (s && s.absentSince === null && now >= s.leaseUntil) {
@@ -243,7 +255,7 @@ export function advancePresence(room: Room, now: number): Room {
   if (Object.values(next.seats).some(s => s?.closeAt !== null && s && now >= s.closeAt!)) {
     next.phase = 'closed'; next.closeReason = 'reconnect_timeout'; next.winner = null;
   } else next.phase = Object.values(next.seats).some(s => s?.absentSince !== null) ? 'paused' : 'playing';
-  const changed = next.phase !== room.phase || (['human','computer'] as const).some(p => next.seats[p]?.absentSince !== room.seats[p]?.absentSince);
+  const changed = !room.lastActivity || next.phase !== room.phase || (['human','computer'] as const).some(p => next.seats[p]?.absentSince !== room.seats[p]?.absentSince);
   if (!changed) return room;
   next.revision++; return next;
 }
@@ -278,6 +290,7 @@ export function deadline(room: Room): number | null {
   if (room.phase === 'closed' || room.phase === 'completed') return null;
   if (room.phase === 'waiting') return room.createdAt + WAITING_MS;
   return Math.min(...Object.values(room.seats).filter((s): s is Seat => !!s).map(s => s.closeAt ?? s.leaseUntil),
+    room.lastActivity ? Math.min(...Object.values(room.lastActivity))+INACTIVITY_MS : Infinity,
     room.phase==='playing' && room.invitation?.turnTimer ? room.turnClock?.deadline??Infinity : Infinity,
     room.phase==='playing' && room.invitation?.autoNextRound ? room.resultClock?.deadline??Infinity : Infinity);
 }

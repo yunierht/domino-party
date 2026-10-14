@@ -1,1 +1,1 @@
-export {default,DominoRoom,ManualCodes,PokerRoom} from './worker.ts';
+export {default,VoiceBudget,DominoRoom,ManualCodes,PokerRoom} from './worker.ts';

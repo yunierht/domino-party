@@ -19,3 +19,5 @@ for(const variant of ['OpponentCarousel','OpponentChoices'])test(`${variant}: Ri
  if(scroll.length)assert.equal(scroll[0].props.horizontal,true);
  await act(()=>root.unmount());
 });
+
+test('setup carousel enlarges avatars while preserving selection and swipe sizing',async()=>{let r;try{await act(()=>r=create(React.createElement(choices.OpponentCarousel,{tight:true,selected:'rigo',onSelect(){},es:false})));assert.equal(r.root.findByType('ScrollView').props.snapToInterval,124);for(const b of r.root.findAllByType('Pressable')){assert.equal(b.props.style.width,116);assert.equal(b.findByType('Image').props.style.height,90);}}finally{await act(()=>r?.unmount());}});

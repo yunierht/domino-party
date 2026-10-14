@@ -25,8 +25,8 @@ for(const variant of ['DominoAvatarChoices','DominoAvatarCarousel','OnlinePlayer
 
 for(const variant of ['DominoAvatarChoices','DominoAvatarCarousel','OnlinePlayerAvatarPicker'])test(`${variant} places selfie first and saves it separately`,async()=>{
  const mod=load(variant==='OnlinePlayerAvatarPicker'?'../online/OnlinePlayerAvatarPicker.tsx':'./DominoAvatarChoices.tsx',{'react-native':{View:'View',ScrollView:'ScrollView',Pressable:'Pressable',Text:'Text',Image:'Image'},'./tableTheme':{TABLE:{}},'../computer/tableTheme':{TABLE:{}}});
- let selected,saved,root;await act(()=>{root=create(React.createElement(mod[variant],{selected:'selfie',photo:'saved',onSelect:id=>{selected=id;},onSavePhoto:photo=>{saved=photo;},es:true}));});
- try{const selfie=root.root.findByType('SelfieAvatarChoice');assert.equal(selfie.props.selected,true);assert.equal(selfie.props.photo,'saved');const parent=selfie.parent;assert.ok(parent.children[0]===selfie,'selfie is the first choice');
+ let selected,saved,root;const clear=()=>{};await act(()=>{root=create(React.createElement(mod[variant],{selected:'selfie',photo:'saved',onSelect:id=>{selected=id;},onSavePhoto:photo=>{saved=photo;},onClearPhoto:clear,es:true}));});
+ try{const selfie=root.root.findByType('SelfieAvatarChoice');assert.equal(selfie.props.selected,true);assert.equal(selfie.props.photo,'saved');if(variant==='OnlinePlayerAvatarPicker')assert.equal(selfie.props.onClear,clear);const parent=selfie.parent;assert.ok(parent.children[0]===selfie,'selfie is the first choice');
   await act(()=>selfie.props.onSelect());assert.equal(selected,'selfie');await act(()=>selfie.props.onSave('new'));assert.equal(saved,'new');
  }finally{await act(()=>root.unmount());}
 });
@@ -73,6 +73,8 @@ test('selfie preferences restore independently, invalid photos cannot select sel
   await act(()=>value.setPlayerAvatarPhoto('data:image/svg+xml,bad'));assert.equal(value.playerAvatarPhoto,own);
   await act(()=>value.setPlayerAvatarId('sofia'));assert.equal(value.playerAvatarPhoto,own);await act(()=>value.setPlayerAvatarId('selfie'));assert.equal(value.playerAvatarId,'selfie');
   assert.equal(saved.get('dominoes:onlinePlayerAvatar'),'selfie');assert.equal(saved.get('dominoes:onlinePlayerAvatarPhoto'),own);assert.equal(saved.get('dominoes:onlineDominoOpponentPhoto'),rival);
+  await act(()=>value.clearPlayerAvatarPhoto());assert.equal(value.playerAvatarPhoto,null);assert.equal(value.playerAvatarName,null);assert.equal(value.playerAvatarId,'yuni');assert.equal(saved.get('dominoes:onlinePlayerAvatarPhoto'),null);assert.equal(saved.get('dominoes:onlinePlayerAvatarName'),null);assert.equal(saved.get('dominoes:onlinePlayerAvatar'),'yuni');assert.equal(value.dominoOpponentPhoto,rival);assert.equal(value.dominoOpponentName,'Rival');await act(()=>value.setPlayerAvatarId('selfie'));assert.equal(value.playerAvatarId,'yuni');
+  await act(()=>value.setPlayerAvatarPhoto(own,'Own'));await act(()=>value.setPlayerAvatarId('sofia'));await act(()=>value.clearPlayerAvatarPhoto());assert.equal(value.playerAvatarId,'sofia');assert.equal(value.playerAvatarPhoto,null);
  }finally{await act(()=>root.unmount());}
 });
 
@@ -86,5 +88,16 @@ test('a confirmed selfie before hydration cannot be overwritten by an older stor
   await act(async()=>{for(const[key,resolve]of pending)resolve(key.endsWith('Photo')?old:key==='dominoes:computerOpponent'?'rigo':'selfie');});
   assert.equal(value.playerAvatarId,'selfie');assert.equal(value.playerAvatarPhoto,fresh);assert.equal(value.dominoOpponentId,'selfie');assert.equal(value.dominoOpponentPhoto,fresh);
   assert.equal(saved.get('dominoes:onlinePlayerAvatarPhoto'),fresh);assert.equal(saved.get('dominoes:onlineDominoOpponentPhoto'),fresh);
+ }finally{await act(()=>root.unmount());}
+});
+
+test('clearing a selfie before hydration cannot restore an older saved selfie',async()=>{
+ const pending=new Map(),saved=new Map(),photo='data:image/jpeg;base64,/9j/OLD';
+ const mod=load('./ComputerGameContext.tsx',{'./engine':{},'./DrinkGift':{useReducedMotion:()=>false},'./drinkGiftLifecycle':{claimOpponentDrinkExpiry:()=>null,scheduleDrinkGiftExpiry:()=>undefined},'./opponentDrink':{canOpponentDrink:()=>false},'./drinks':{},'../storage/storage':{loadJSON:key=>new Promise(resolve=>pending.set(key,resolve)),saveJSON:async(key,value)=>saved.set(key,value)}});
+ let value,root;function Probe(){value=mod.useComputerGame();return null;}
+ await act(async()=>{root=create(React.createElement(mod.ComputerGameProvider,null,React.createElement(Probe)));});try{
+  await act(()=>{value.setPlayerAvatarPhoto(photo,'Selfie');value.clearPlayerAvatarPhoto();});
+  await act(async()=>{for(const[key,resolve]of pending)resolve(key.endsWith('Photo')?photo:key.endsWith('Name')?'Old selfie':key==='dominoes:computerOpponent'?'rigo':'selfie');});
+  assert.equal(value.playerAvatarPhoto,null);assert.equal(value.playerAvatarName,null);assert.equal(value.playerAvatarId,'yuni');assert.equal(saved.get('dominoes:onlinePlayerAvatarPhoto'),null);assert.equal(value.dominoOpponentPhoto,photo);
  }finally{await act(()=>root.unmount());}
 });

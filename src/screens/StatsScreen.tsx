@@ -22,7 +22,7 @@ export function StatsScreen() {
 
   return (
     <ScrollView contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}>
-      <Header title={t.statsTitle} />
+      <Header centeredTitle title={lang==='es'?'Estadísticas':'Statistics'} />
 
       {!hasData ? (
         <Card style={{ alignItems: 'center', paddingVertical: s(34) }}>

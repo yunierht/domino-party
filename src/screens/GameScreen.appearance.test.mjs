@@ -17,23 +17,23 @@ async function setup(canEdit=true){
  const theme={'../theme/ThemeContext':{useTheme:()=>({theme:THEMES.carbon,s:n=>n})}};
  const i18n={'../i18n/I18nContext':{useI18n:()=>({lang:'en',t:STRINGS.en})}};
  const appearance={'../state/useTrackingAppearance':{useTrackingAppearance,TRACKING_COLORS:colors}};
- const rn={Text:'Text',View:'View',Pressable:'Pressable',ScrollView:'ScrollView',Modal:'Modal',ActivityIndicator:'Loader',Alert:{alert(){}},Share:{share:async()=>{}},useWindowDimensions:()=>({width:320,height:640}),Easing:{quad:x=>x,out:x=>x,in:x=>x}};
+ const rn={AccessibilityInfo:{isReduceMotionEnabled:async()=>false,addEventListener:()=>({remove(){}})},Text:'Text',View:'View',Pressable:'Pressable',ScrollView:'ScrollView',Modal:'Modal',ActivityIndicator:'Loader',Alert:{alert(){}},Share:{share:async()=>{}},useWindowDimensions:()=>({width:320,height:640}),Easing:{quad:x=>x,out:x=>x,in:x=>x}};
  const animation=()=>({start(){},stop(){}});
- rn.Animated={View:'AnimatedView',Value:class{constructor(v){this.v=v;}setValue(v){this.v=v;}},createAnimatedComponent:v=>v,timing:animation,spring:animation,sequence:animation};
+ rn.Animated={View:'AnimatedView',Value:class{constructor(v){this.v=v;}setValue(v){this.v=v;}},createAnimatedComponent:v=>v,timing:animation,spring:animation,sequence:animation,loop:animation};
  const {TrackingAppearanceControls}=load('../components/TrackingAppearanceControls.tsx',{react:React,'react-native':rn,...theme,...i18n,...appearance});
  const {GameScreen}=load('./GameScreen.tsx',{
   react:React,'react-native':rn,'expo-linear-gradient':{LinearGradient:'Gradient'},'@expo/vector-icons':{Feather:'Icon',MaterialCommunityIcons:'Icon'},
   'react-native-safe-area-context':{useSafeAreaInsets:()=>({top:0,bottom:0})},'expo-haptics':{selectionAsync:async()=>{},impactAsync:async()=>{},notificationAsync:async()=>{},ImpactFeedbackStyle:{Medium:1},NotificationFeedbackType:{Success:1}},
   ...theme,...i18n,...appearance,
-  '../state/GameContext':{useGame:()=>({currentMatch:match,canEdit,amController:false,liveMeta:null,addRound:(...v)=>actions.push(['add',...v]),editRound:(...v)=>actions.push(['edit',...v]),deleteRound:(...v)=>actions.push(['delete',...v]),createMatch:(...v)=>actions.push(['reset',...v])})},
+  '../state/GameContext':{useGame:()=>({currentMatch:match,canEdit,amController:canEdit,liveReady:true,liveMeta:null,stopSharing:()=>{delete match.shareCode;store.update({style:nextTrackingStyle(store.getSnapshot().style)});},shareMatch:async()=>{match.shareCode="TEST12";store.update({style:store.getSnapshot().style});},addRound:(...v)=>actions.push(['add',...v]),editRound:(...v)=>actions.push(['edit',...v]),deleteRound:(...v)=>actions.push(['delete',...v]),createMatch:(...v)=>actions.push(['reset',...v])})},
   '../state/PrefsContext':{usePrefs:()=>({announceWinner:false,sound:false,voice:'announcer'})},
   '../nav/NavContext':{useNav:()=>({go(s){actions.push(['go',s]);},back(){actions.push(['back']);},openWatch(){},openSetup(){actions.push(['setup']);},goHome(){actions.push(['home']);}})},
-  '../components/ui':{Button:'Button'},'../components/Header':{Header:({leftAction,...p})=>React.createElement('Header',p,leftAction)},'../components/RoundEditor':{RoundEditor:'RoundEditor'},'../components/TargetEditor':{TargetEditor:'TargetEditor'},'../components/Toast':{Toast:'Toast'},'../components/AppDialog':{AppDialog:'Dialog'},
+  '../components/ui':{Button:'Button'},'../components/Header':{Header:({leftAction,...p})=>React.createElement('Header',p,leftAction,p.right)},'../components/RoundEditor':{RoundEditor:'RoundEditor'},'../components/TargetEditor':{TargetEditor:'TargetEditor'},'../components/Toast':{Toast:'Toast'},'../components/AppDialog':{AppDialog:'Dialog'},
   '../components/TrackingColorButton':{TrackingColorButton:'ColorButton'},'../components/TrackingFinishDialog':{TrackingFinishDialog:'FinishDialog'},'../components/MatchPresentation':{MatchTeamBadge:'Badge',MatchPanelBevel:'Bevel'},
   '../components/trackingLayout':load('../components/trackingLayout.ts'),'../components/TrackingCounter':{TrackingCounter:'Counter',trackingButtonGradient:()=>['#fff','#eee','#ddd']},
   '../components/TrackingAppearanceControls':{TrackingAppearanceControls},
   '../announce/voice':{speakWinner(){}},'../sound/sounds':{initSounds(){},playTap(){},playWin(){}},
-  'react-native-qrcode-svg':'QR','../firebase/config':{isFirebaseConfigured:false},'../config/links':{joinUrl:()=>''},'../types':types,
+  'react-native-qrcode-svg':'QR','../firebase/config':{isFirebaseConfigured:true},'../config/links':{joinUrl:()=>''},'../types':types,
  });
  let r;await act(()=>{r=create(React.createElement(GameScreen));});
  const choose=async label=>{const control=r.root.findAllByType('Pressable').find(p=>p.props.accessibilityLabel===label);assert.ok(control,label);await act(()=>control.props.onPress());};
@@ -140,5 +140,11 @@ test('appearance controls have full-height sibling hit areas and cannot route in
   await act(()=>chip.props.onPress());assert.equal(h.r.root.findByType('RoundEditor').props.round.id,'r1');assert.equal(h.r.root.findByType('RoundEditor').props.visible,true);
   await act(()=>h.r.root.findByType('RoundEditor').props.onClose());
   assert.deepEqual(h.match,before);assert.deepEqual(h.actions,[]);
+ }finally{await h.close();}
+});
+
+test('generating broadcast code budgets its Live and Stop lane, keeps both panels visible and restores space on stop',async()=>{
+ const h=await setup();try{const panels=()=>h.r.root.findAll(e=>typeof e.type==='function'&&e.type.name==='TeamPanel');const before=panels().map(p=>p.props.panelHeight),size=h.r.root.findAllByType('Counter').map(c=>c.props.size);
+ await h.choose(STRINGS.en.shareGame);assert.equal(h.match.shareCode,'TEST12');const lane=h.r.root.findByProps({testID:'tracking-live-status-lane'});assert.equal(lane.props.style.height,64);const gap=load('../components/trackingLayout.ts').trackingSetupHeaderGap(640);assert.deepEqual(panels().map(p=>p.props.panelHeight),before.map(n=>n-(64-gap)/2));assert.equal(panels()[1].props.panelHeight*2+64+load('../components/trackingLayout.ts').trackingFirstCardTop(640,n=>n)-gap+14,640);assert.equal(h.r.root.findByProps({testID:'tracking-stop-broadcast'}).props.accessibilityLabel,STRINGS.en.stopBroadcasting);assert.equal(h.r.root.findAllByProps({testID:'tracking-broadcast-button'}).length,0);assert.equal(h.r.root.findAllByProps({testID:'tracking-data-row'}).length,2);await act(()=>h.r.root.findByProps({testID:'tracking-stop-broadcast'}).props.onPress());assert.equal(h.match.shareCode,undefined);assert.deepEqual(panels().map(p=>p.props.panelHeight),before);
  }finally{await h.close();}
 });

@@ -10,6 +10,7 @@ export class VoiceController {
  private sessionId='';private remoteId:string|null=null;private call:VoiceCall|null=null;private consent:string|null=null;private dismissed:string|null=null;
  private remoteReady=false;private descriptionSent=false;private outgoingIce:VoiceIce[]=[];private incomingIce:VoiceIce[]=[];
  private cursor=0;private timer:ReturnType<typeof setInterval>|null=null;private connectingTimer:ReturnType<typeof setTimeout>|null=null;private pumping=false;
+ private callLimitTimer:ReturnType<typeof setTimeout>|null=null;
  private sendQueue:Promise<unknown>=Promise.resolve();
  constructor(private epoch:string,private seat:'human'|'computer',private relay:(request:VoiceRequest)=>Promise<VoiceReply>,private platform:VoicePlatform,private id:()=>string){}
  subscribe(listener:(state:VoiceState)=>void){this.listeners.add(listener);listener(this.state);return()=>{this.listeners.delete(listener);};}
@@ -17,7 +18,7 @@ export class VoiceController {
  private request(message?:VoiceMessage){return this.relay({epoch:this.epoch,sessionId:this.sessionId,after:this.cursor,...(message?{message}:{})});}
  listen(){if(this.listening)return;this.listening=true;if(!this.sessionId)this.sessionId=this.id();this.timer=setInterval(()=>{void this.pump();},1500);void this.pump();}
  async suspend(){this.listening=false;if(this.timer)clearInterval(this.timer);this.timer=null;await this.stop();}
- private release(){this.generation++;this.peerGeneration++;if(this.connectingTimer)clearTimeout(this.connectingTimer);this.connectingTimer=null;this.pc?.close();this.pc=null;this.media?.stop();this.media=null;this.remoteId=null;this.remoteReady=false;this.descriptionSent=false;this.outgoingIce=[];this.incomingIce=[];}
+ private release(){if(this.callLimitTimer)clearTimeout(this.callLimitTimer);this.callLimitTimer=null;this.generation++;this.peerGeneration++;if(this.connectingTimer)clearTimeout(this.connectingTimer);this.connectingTimer=null;this.pc?.close();this.pc=null;this.media?.stop();this.media=null;this.remoteId=null;this.remoteReady=false;this.descriptionSent=false;this.outgoingIce=[];this.incomingIce=[];}
  async start(){
   if(!['off','error','ended'].includes(this.state.phase))return;
   if(!this.sessionId)this.sessionId=this.id();
@@ -66,6 +67,7 @@ export class VoiceController {
   }
   const ownSession=call.caller===this.seat?call.callerSession:call.calleeSession;
   if(ownSession!==this.sessionId||this.consent!==call.id||!this.media)return;
+  if(!this.callLimitTimer)this.callLimitTimer=setTimeout(()=>{void this.stop();this.emit({phase:'ended',error:'duration_limit',muted:false});},300000);
   this.call=call;this.media.mute(this.state.muted);await this.setPeer(reply.peer);
   for(const event of reply.messages){if(event.id<=this.cursor)continue;await this.receive(event.message);this.cursor=event.id;}
  }

@@ -1,3 +1,4 @@
+import {CodeInvitationScreen} from './OnlineCancellation';
 import {InvitationShareOptions} from './InvitationShareOptions';
 import {PlayingIdentity} from '../components/PlayingIdentity';
 import {GoldPressable} from '../components/GoldPressable';
@@ -16,7 +17,7 @@ import {vault,credential} from './credentialStorage';
 import {sharePayload} from './invitationLink';
 import type {VoiceRequest} from './voiceProtocol';
 
-type Props={initialName:string;initialTarget:number;initialMode:'points'|'wins';initialAvatar?:DominoAvatarId;initialAvatarPhoto?:string|null;entry?:'invite'|'accept';requestId?:number;onBack:()=>void;visible?:boolean;onStarted?:()=>void;invitationCode?:string;inviteOnly?:boolean};
+type Props={initialName:string;initialTarget:number;initialMode:'points'|'wins';initialAvatar?:DominoAvatarId;initialAvatarPhoto?:string|null;entry?:'invite'|'accept';requestId?:number;onBack:()=>void;visible?:boolean;onStarted?:()=>void;invitationCode?:string;inviteOnly?:boolean;manualOnly?:boolean};
 function unavailableRoom(state:ClientState){return state.view?.phase==='closed'||['room_missing','not_found','closed','room_closed'].includes(state.error??'');}
 function Action({id,label,onPress,disabled=false,secondary=false}:{id:string;label:string;onPress:()=>void;disabled?:boolean;secondary?:boolean}){
  return <GoldPressable finish gold={!secondary} testID={id} accessibilityRole="button" accessibilityLabel={label} accessibilityState={{disabled}} disabled={disabled} onPress={onPress}
@@ -26,7 +27,7 @@ function Action({id,label,onPress,disabled=false,secondary=false}:{id:string;lab
 }
 
 /** Own identity and server snapshots only; the retained offline game never crosses this boundary. */
-export function OnlineFriendScreen({initialName,initialTarget,initialMode,initialAvatar='yuni',initialAvatarPhoto=null,entry='accept',requestId=0,onBack,visible=true,onStarted,invitationCode,inviteOnly=false}:Props){
+export function OnlineFriendScreen({initialName,initialTarget,initialMode,initialAvatar='yuni',initialAvatarPhoto=null,entry='accept',requestId=0,onBack,visible=true,onStarted,invitationCode,inviteOnly=false,manualOnly=false}:Props){
  const {lang}=useI18n(),es=lang==='es',tr=(a:string,b:string)=>es?a:b;
  const endpoint=useMemo(()=>{try{return onlineEndpoint(process.env.EXPO_PUBLIC_DOMINO_ONLINE_URL);}catch{return null;}},[]);
  const client=useMemo(()=>endpoint?new OnlineClient(vault,httpTransport(endpoint),credential,endpoint):null,[endpoint]);
@@ -35,6 +36,7 @@ export function OnlineFriendScreen({initialName,initialTarget,initialMode,initia
  const [loaded,setLoaded]=useState(false),[code,setCode]=useState(invitationCode??''),[notice,setNotice]=useState<string|null>(null);
  const [replacing,setReplacing]=useState(false),replacementPending=useRef(false);
  const [shareOpen,setShareOpen]=useState(false),[invitationStarted,setInvitationStarted]=useState(false);
+ useEffect(()=>{if(inviteOnly)setInvitationStarted(false);},[inviteOnly,requestId]);
  const [retrying,setRetrying]=useState(false);
  useEffect(()=>{
   if(notice!==tr('Compartir cancelado.','Sharing cancelled.')&&notice!==tr('Invitación copiada.','Invitation copied.'))return;
@@ -79,7 +81,7 @@ export function OnlineFriendScreen({initialName,initialTarget,initialMode,initia
  },[state.view?.phase]);
  useEffect(()=>{autoAttempted.current=false;setNotice(null);setCode(invitationCode??'');},[requestId,invitationCode]);
  useEffect(()=>{
-  if(inviteOnly||!client||!loaded||!visible||entry!=='invite'||autoAttempted.current||state.view||state.canResume||state.busy||state.error||!initialName.trim())return;
+  if(manualOnly||inviteOnly||!client||!loaded||!visible||entry!=='invite'||autoAttempted.current||state.view||state.canResume||state.busy||state.error||!initialName.trim())return;
   autoAttempted.current=true;
   void client.create(initialName.trim(),initialTarget,initialMode,{avatar:initialAvatar,...(initialAvatar==='selfie'&&initialAvatarPhoto?{avatarPhoto:initialAvatarPhoto}:{}),turnTimer:true,autoNextRound:true,quickActions:true,customAvatars:true});
  },[inviteOnly,client,loaded,visible,entry,requestId,state.view,state.canResume,state.busy,state.error,initialName,initialTarget,initialMode,initialAvatar,initialAvatarPhoto]);
@@ -136,8 +138,9 @@ export function OnlineFriendScreen({initialName,initialTarget,initialMode,initia
   }
   await client.join(initialName.trim(),code,{avatar:initialAvatar,...(initialAvatar==='selfie'&&initialAvatarPhoto?{avatarPhoto:initialAvatarPhoto}:{}),acceptInvitation:true});
  }
- if(inviteOnly&&!invitationStarted)return visible?<View style={{flex:1,backgroundColor:C.background}}><Header title={tr('Invitar amigo','Invite a friend')} reserveThemeSpace={false} onBackPress={leave}/>{loaded&&<InvitationShareOptions es={es} prepare={prepareInvitation}/>}</View>:null;
- if(v&&v.phase!=='waiting'&&!unavailable&&(!invitationCode||v.code===invitationCode))return visible?<><OnlineDominoTable view={v} enabled={!disabled&&state.status==='connected'} resultControlEnabled={loaded&&state.status==='connected'} es={es} error={error} notice={notice} onShare={()=>{void share();}} voiceRelay={voiceRelay} voiceAvailable={loaded&&state.status==='connected'&&v.phase==='playing'}
+ if(manualOnly&&entry==='invite'&&(!v||v.phase==='waiting')&&!unavailableRoom(state))return visible?<CodeInvitationScreen es={es} ready={loaded} onBack={onBack} prepare={prepareInvitation} onCancel={async()=>{if(!client)return false;autoAttempted.current=true;await client.command({type:'leave'});if(client.state.view?.phase!=='closed'||client.state.error)return false;await client.forget();onBack();return true;}}/>:null;
+ if(inviteOnly&&!invitationStarted)return visible?<View style={{flex:1,backgroundColor:C.background}}><Header title={tr('Invitar amigo','Invite a friend')} reserveThemeSpace={false} onBackPress={leave}/>{loaded&&<InvitationShareOptions es={es} prepare={prepareInvitation} onDone={()=>{setInvitationStarted(true);onBack();}}/>}</View>:null;
+ if(v&&v.phase!=='waiting'&&(!unavailable||v.phase==='closed'&&['left','inactivity_timeout'].includes(v.closeReason??''))&&(!invitationCode||v.code===invitationCode))return visible?<><OnlineDominoTable view={v} enabled={!disabled&&state.status==='connected'} resultControlEnabled={loaded&&state.status==='connected'} es={es} error={error} notice={notice} onShare={()=>{void share();}} voiceRelay={voiceRelay} voiceAvailable={loaded&&state.status==='connected'&&v.phase==='playing'}
   onAction={async action=>{if(!client)return false;if(action.type==='holdResult'||action.type==='releaseResult'){client.setResultHeld(action.type==='holdResult');return true;}if(client.state.busy)return false;await client.command(action);return client.state.status==='connected'&&!client.state.error;}} onBack={leave}/>{sharing}</>:null;
  const input={backgroundColor:C.surface,borderColor:C.line,borderWidth:1,borderRadius:12,color:C.ivory,padding:12,fontSize:16,minHeight:48} as const;
  const panel={gap:12,borderWidth:1,borderColor:C.line,borderRadius:18,padding:16,backgroundColor:C.surface} as const;

@@ -11,5 +11,6 @@ export function useLocalTurnClock(game:Game|null,setGame:Dispatch<SetStateAction
  const allowAction=()=>{if(game&&expireLocalTurn(game,ref.current,performance.now())!==game){guardedSetGame(current=>current);return false;}return true;};
  const pause=(value:boolean)=>{const current=ref.current;if(!current)return;ref.current=syncLocalClock(current,game,performance.now(),paused,boneyardOpen);if(ref.current)ref.current={...ref.current,manualPaused:value};refresh(n=>n+1);};
  const c=ref.current;
+ useEffect(()=>{if(paused||!c||c.deadline===null)return;const timer=setTimeout(()=>{const p=latest.current;if(!p.paused)guardedSetGame(current=>current);},Math.max(0,c.deadline-performance.now()));return()=>clearTimeout(timer);},[c?.deadline,paused,guardedSetGame]);
  return{setGame:guardedSetGame,allowAction,pause:()=>{if(allowAction())pause(true);},resume:()=>pause(false),clock:c?{durationMs:30000,remainingMs:c.remainingMs,deadline:c.deadline,serverNow:now,paused:c.deadline===null}:null};
 }

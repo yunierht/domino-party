@@ -1,6 +1,6 @@
 import {act as bet,legalActions,newHand} from '../../../src/poker/engine.ts';
 import type {Action,Card,PokerGame,Seat} from '../../../src/poker/engine.ts';
-import {createRoom,joinRoom,actor,advancePresence,heartbeat as presenceHeartbeat,disconnect as presenceDisconnect,deadline as presenceDeadline} from './room.ts';
+import {leaveRoom,recordPlayActivity,createRoom,joinRoom,actor,advancePresence,heartbeat as presenceHeartbeat,disconnect as presenceDisconnect,deadline as presenceDeadline} from './room.ts';
 import type {Room} from './room.ts';
 export {actor};
 export type Settings={startingChips:5000;timeout:'check-fold'};
@@ -29,7 +29,7 @@ export function join(room:PokerRoomState,hash:string,name:string,now:number,iden
  const joined=joinRoom({...room,invitation:undefined},hash,name,now);
  const amount=room.settings.startingChips;
  const poker=newHand(undefined,random,{human:amount,computer:amount});
- return synchronize(room,{...room,...joined,game:null,poker,approved:true,phase:'playing',lobbyReady:['human','computer'],
+ return synchronize(room,{...room,...joined,game:null,poker,approved:true,phase:'playing',lastActivity:{human:now,computer:now},lobbyReady:['human','computer'],
   invitation:{...room.invitation!,avatars:{human:room.invitation!.avatars.human,computer:validated.invitation!.avatars.human},
    photos:{human:room.invitation!.photos!.human,computer:validated.invitation!.photos!.human}},revision:joined.revision+1},now);
 }
@@ -63,9 +63,8 @@ function following(room:PokerRoomState,now:number,random:()=>number):PokerRoomSt
  return synchronize(room,{...room,poker:newHand(room.poker,random),revision:room.revision+1,roundReady:[],resultTimer:null},now);
 }
 export function command(room:PokerRoomState,hash:string,intent:PokerIntent,now:number,random:()=>number):PokerRoomState{
- const seat=actor(room,hash);playing(room);
+ const seat=actor(room,hash);if(intent.type==='leave')return {...leaveRoom(room,hash),clock:null,resultTimer:null};playing(room);
  if(['fold','check','call','raise'].includes(intent.type))return action(room,hash,intent as Action,now);
- if(intent.type==='leave')return {...room,phase:'closed',closeReason:'left',winner:null,clock:null,resultTimer:null,revision:room.revision+1};
  if(intent.type==='rebuy'){
   if(!room.poker!.result||room.poker!.stacks[seat]!==0||![500,1000,2000].includes(intent.amount))throw Error('illegal_action');
   return {...room,poker:{...room.poker!,stacks:{...room.poker!.stacks,[seat]:intent.amount}},revision:room.revision+1};

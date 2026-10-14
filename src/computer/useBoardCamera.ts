@@ -38,7 +38,10 @@ export function useBoardCamera(board: Tile[], openingId: string | null, width: n
       values.x.setValue(adjusted.x); values.y.setValue(adjusted.y);
     }
     const bounds=chainBounds(board,openingId,chainMetrics(2048,4096),false);
-    const target = reset?fitBoardCamera(bounds,{width,height},{width:2048,height:4096},current.current,true):reconcileBoardCamera(bounds,{width,height},{width:2048,height:4096},planned,previous.current,manual.current);
+    let target = reset?fitBoardCamera(bounds,{width,height},{width:2048,height:4096},current.current,true):reconcileBoardCamera(bounds,{width,height},{width:2048,height:4096},planned,previous.current,manual.current);
+    // Lower the opening slightly, then preserve it until the chain needs fitting.
+    // Reuse the normal bounds clamp so small viewports retain their safety margin.
+    if(reset&&board.length===1)target=fitBoardCamera(bounds,{width,height},{width:2048,height:4096},{...target,y:target.y+16});
     previous.current = { width, height, count: board.length, round };
     if (newRound||firstPlacement||firstMeasured) {
       // A fresh round must not inherit zoom if its layout interrupts an animation.

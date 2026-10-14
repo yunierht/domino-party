@@ -1,6 +1,6 @@
 import type {VoiceCall,VoiceCallCommand} from '../../../src/online/voiceProtocol.ts';
 export function expireVoiceCall(call:VoiceCall|null,now:number):VoiceCall|null{
- return call?.status==='ringing'&&now>=call.expiresAt?{...call,status:'ended',reason:'expired'}:call;
+ return call&&call.status!=='ended'&&now>=call.expiresAt?{...call,status:'ended',reason:call.status==='accepted'?'duration_limit':'expired'}:call;
 }
 export function updateVoiceCall(previous:VoiceCall|null,actor:{seat:'human'|'computer';sessionId:string},command:VoiceCallCommand,now:number):VoiceCall{
  const call=expireVoiceCall(previous,now);
@@ -17,7 +17,7 @@ export function updateVoiceCall(previous:VoiceCall|null,actor:{seat:'human'|'com
   if(command.type==='leave'||command.type==='cancel'||command.type==='reject')return call;
   throw Error('voice_call_ended');
  }
- if(command.type==='accept')return call.status==='accepted'?call:{...call,status:'accepted',calleeSession:actor.sessionId};
+ if(command.type==='accept')return call.status==='accepted'?call:{...call,status:'accepted',calleeSession:actor.sessionId,expiresAt:now+300000};
  if(command.type==='reject'||command.type==='cancel'){
   if(call.status!=='ringing')throw Error('voice_call_ended');
   return{...call,status:'ended',reason:command.type==='reject'?'rejected':'cancelled'};

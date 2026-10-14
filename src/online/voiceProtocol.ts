@@ -1,7 +1,7 @@
 export interface VoiceIce {candidate:string;sdpMid:string|null;sdpMLineIndex:number|null}
 export type VoiceCallCommand={type:'call'|'accept'|'reject'|'cancel'|'leave';callId:string};
 export type VoiceMessage=VoiceCallCommand|{type:'offer'|'answer';callId:string;sdp:string;target:string}|{type:'ice';callId:string;candidate:VoiceIce;target:string};
-export interface VoiceCall {id:string;caller:'human'|'computer';callerSession:string;calleeSession:string|null;expiresAt:number;status:'ringing'|'accepted'|'ended';reason:'cancelled'|'rejected'|'expired'|'disconnected'|null}
+export interface VoiceCall {id:string;caller:'human'|'computer';callerSession:string;calleeSession:string|null;expiresAt:number;status:'ringing'|'accepted'|'ended';reason:'cancelled'|'rejected'|'expired'|'duration_limit'|'disconnected'|null}
 export interface VoiceRequest {epoch:string;sessionId:string;after:number;message?:VoiceMessage}
 export interface VoiceReply {peer:string|null;messages:{id:number;message:VoiceMessage}[];call:VoiceCall|null}
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;

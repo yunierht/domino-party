@@ -14,7 +14,7 @@
     "PUBLIC_ORIGIN": "https://domino-online-internet-test.domino-party.workers.dev",
     "ALLOWED_WEB_ORIGINS": "[]",
     "LINKS_HOST": "domino-online-internet-test.domino-party.workers.dev",
-    "TURN_KEY_ID": ""
+    "TURN_KEY_ID": "ba4c0f6e38c3a0fdd9dff72caae9096d"
   },
   "observability": {
     "enabled": false
@@ -32,6 +32,10 @@
       {
         "class_name": "PokerRoom",
         "name": "POKER_ROOMS"
+      },
+      {
+        "name": "VOICE_BUDGET",
+        "class_name": "VoiceBudget"
       }
     ]
   },
@@ -52,6 +56,12 @@
       "tag": "v3-poker",
       "new_sqlite_classes": [
         "PokerRoom"
+      ]
+    },
+    {
+      "tag": "v5-voice-budget",
+      "new_sqlite_classes": [
+        "VoiceBudget"
       ]
     }
   ],

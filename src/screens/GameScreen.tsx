@@ -7,7 +7,7 @@ import {TrackingCounter,trackingButtonGradient} from '../components/TrackingCoun
 import {useTrackingAppearance} from '../state/useTrackingAppearance';
 import type {TrackingStyle,TrackingColor} from '../state/trackingAppearanceStore';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, Easing, Modal, Pressable, ScrollView, Share, Text, useWindowDimensions, View } from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, Alert, Animated, Easing, Modal, Pressable, ScrollView, Share, Text, useWindowDimensions, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Feather,MaterialCommunityIcons} from '@expo/vector-icons';
@@ -133,7 +133,9 @@ export function GameScreen() {
   const pulseA = danger && leadId === teamA.id;
   const pulseB = danger && leadId === teamB.id;
   const isShared = !!match.shareCode;
-  const panelBudget=(availableHeight-trackingFirstCardTop(availableHeight,s)-s(4)-s(10))/2;
+  const headerGap=trackingSetupHeaderGap(availableHeight);
+  const liveStatusHeight=isShared?Math.max(headerGap,64):headerGap;
+  const panelBudget=(availableHeight-trackingFirstCardTop(availableHeight,s)-(liveStatusHeight-headerGap)-s(4)-s(10))/2;
   const dialSize=Math.min(s(216),width-s(36)-s(136),Math.max(88,panelBudget-s(141)-Math.max(...nameHeights)-s(6)));
   const nameColumnWidth=Math.max(s(80),Math.min(width-s(24),660)-s(12)-3-2*(Math.max(44,s(44))+s(12)));
   const measureNames=(index:0|1,measured:number)=>{if(measured>0)setNameHeights(previous=>Math.abs(previous[index]-measured)<1?previous:index===0?[measured,previous[1]]:[previous[0],measured]);};
@@ -217,22 +219,22 @@ export function GameScreen() {
         <View style={{marginBottom:-s(16)}}><Header
           reserveThemeSpace={false}
           onBackPress={openSetup}
-          title={`${t.target}: ${match.targetScore}`}
+          title={width<390?String(match.targetScore):`${t.target}: ${match.targetScore}`}
           onTitlePress={canEdit && !finished ? () => setTargetOpen(true) : undefined}
           showTitleEditHint={false}
           right={
             <View style={{ flexShrink: 0, flexDirection: 'row', alignItems: 'center', gap: s(2), marginLeft: s(4) }}>
+              {isShared?<View style={{width:44,height:44}}/>:(
               <Pressable
                 onPress={onSharePress}
                 accessibilityRole="button"
                 accessibilityLabel={match.shareCode ? t.live : t.shareGame}
-                hitSlop={headerActionHitSlop}
+                testID="tracking-broadcast-button"
                 style={{
+                  width:44,height:44,justifyContent:'center',
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: compactHeaderActions ? 0 : s(5),
-                  paddingHorizontal: compactHeaderActions ? s(6) : s(11),
-                  paddingVertical: compactHeaderActions ? s(6) : s(10),
+                  gap:0,
                   borderRadius: 999,
                   backgroundColor: match.shareCode ? c.surfaceAlt : 'transparent',
                 }}
@@ -242,14 +244,12 @@ export function GameScreen() {
                 ) : match.shareCode ? (
                   <>
                     <Feather name="radio" size={s(20)} color={c.danger} />
-                    {!compactHeaderActions && (
-                      <Text style={{ color: c.danger, fontWeight: '900', fontSize: s(13) }}>{t.live}</Text>
-                    )}
                   </>
                 ) : (
                   <Feather name="radio" size={s(24)} color={c.textMuted} />
                 )}
               </Pressable>
+              )}
               <Pressable
                 onPress={() => go('history')}
                 accessibilityRole="button"
@@ -271,60 +271,23 @@ export function GameScreen() {
             </View>
           }
         /></View>
-        <View style={{height:trackingSetupHeaderGap(availableHeight)}}/>
-
-        {/* Live control status */}
-        {isShared && (
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: s(10),
-              backgroundColor: c.surface,
-              borderRadius: theme.radius + 4,
-              padding: s(14),
-              marginBottom: s(16),
-              borderWidth: 1,
-              borderColor: c.border,
-            }}
-          >
-            <View
-              style={{
-                width: s(10),
-                height: s(10),
-                borderRadius: s(5),
-                backgroundColor: amController ? c.primary : c.textMuted,
-              }}
-            />
-            <Text style={{ flex: 1, color: c.text, fontSize: s(14), fontWeight: '700' }}>
-              {!liveReady
-                ? t.syncing
-                : amController
-                ? t.youAreScoring
-                : t.currentlyScoring.replace('{name}', liveMeta?.controllerName ?? '')}
-            </Text>
-            {liveReady && !amController &&
-              (myPending ? (
-                <Text style={{ color: c.textMuted, fontSize: s(12), fontStyle: 'italic' }}>
-                  {t.waitingApproval}
-                </Text>
-              ) : (
-                <GoldPressable
-                  onPress={() => requestControl()}
-                  style={{
-                    backgroundColor: c.primary,
-                    borderRadius: 999,
-                    paddingHorizontal: s(12),
-                    paddingVertical: s(8),
-                  }}
-                >
-                  <Text style={{ color: c.onPrimary, fontSize: s(13), fontWeight: '800' }}>
-                    {t.requestToScore}
-                  </Text>
-                </GoldPressable>
-              ))}
-          </View>
-        )}
+        <View testID="tracking-live-status-lane" style={{height:liveStatusHeight,justifyContent:'center'}}>
+          {isShared&&<View testID="tracking-broadcast-control" style={{height:44,flexDirection:'row',alignItems:'center',borderRadius:14,borderWidth:1,borderColor:c.border,backgroundColor:c.surface,overflow:'hidden',marginHorizontal:4}}>
+            <Pressable testID="tracking-live-code" onPress={onSharePress} accessibilityRole="button" accessibilityLabel={t.live} accessibilityHint={lang==='es'?'Muestra el código para compartir':'Shows the code to share'} style={{height:44,flex:1,minWidth:0,flexDirection:'row',gap:8,alignItems:'center',paddingHorizontal:10}}>
+              <BroadcastIndicator active={liveReady} color={c.danger}/>
+              <View style={{flex:1,minWidth:0}}><Text style={{color:c.primary,fontSize:10,lineHeight:12,fontWeight:'900',letterSpacing:.5}}>{t.live} · {match.shareCode}</Text>
+                <Text numberOfLines={1} accessibilityLiveRegion="polite" style={{color:c.textMuted,fontSize:11,lineHeight:14,fontWeight:'600'}}>{!liveReady?t.syncing:amController?t.youAreScoring:t.currentlyScoring.replace('{name}',liveMeta?.controllerName??'')}</Text>
+              </View>
+            </Pressable>
+            {amController&&<Pressable testID="tracking-stop-broadcast" onPress={()=>stopSharing(match.id)} accessibilityRole="button" accessibilityLabel={t.stopBroadcasting} style={{width:114,height:44,alignItems:'center',justifyContent:'center',paddingHorizontal:8,borderLeftWidth:1,borderLeftColor:c.border,backgroundColor:c.surfaceAlt}}>
+              <Text numberOfLines={2} style={{color:c.text,fontSize:11,lineHeight:14,fontWeight:'700',textAlign:'center'}}>{t.stopBroadcasting}</Text>
+            </Pressable>}
+            {liveReady&&!amController&&(myPending?<Text numberOfLines={1} style={{maxWidth:'45%',color:c.textMuted,fontSize:11}}>{t.waitingApproval}</Text>:
+              <GoldPressable onPress={()=>requestControl()} accessibilityRole="button" style={{minHeight:44,justifyContent:'center',backgroundColor:c.primary,borderRadius:12,paddingHorizontal:8}}>
+                <Text style={{color:c.onPrimary,fontSize:12,fontWeight:'800'}}>{t.requestToScore}</Text>
+              </GoldPressable>)}
+          </View>}
+        </View>
 
         <View style={{flexDirection:'column',gap:s(10)}}>
         <TeamPanel
@@ -471,6 +434,19 @@ export function GameScreen() {
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+function BroadcastIndicator({active,color}:{active:boolean;color:string}){
+  const pulse=useRef(new Animated.Value(1)).current;
+  useEffect(()=>{
+    let disposed=false;let animation:Animated.CompositeAnimation|undefined;
+    const apply=(reduced:boolean)=>{animation?.stop();pulse.setValue(1);if(disposed||!active||reduced)return;
+      animation=Animated.loop(Animated.sequence([Animated.timing(pulse,{toValue:1.12,duration:480,useNativeDriver:true}),Animated.timing(pulse,{toValue:1,duration:680,useNativeDriver:true})]));animation.start();};
+    AccessibilityInfo.isReduceMotionEnabled().then(apply).catch(()=>apply(true));
+    const subscription=AccessibilityInfo.addEventListener('reduceMotionChanged',apply);
+    return()=>{disposed=true;animation?.stop();pulse.setValue(1);subscription.remove();};
+  },[active,pulse]);
+  return <Animated.View pointerEvents="none" style={{width:20,height:20,alignItems:'center',justifyContent:'center',transform:[{scale:pulse}]}}><Feather name="radio" size={18} color={color}/></Animated.View>;
+}
 
 function TeamPanel({
   match,

@@ -9,5 +9,8 @@ export function syncLocalClock(previous:LocalClock|null,game:Game|null,now:numbe
  if(!boneyardOpen)next={...next,boneyardOpen:false,drawn:false};
  return{...next,deadline:paused||next.manualPaused||(boneyardOpen&&!next.drawn)?null:now+next.remainingMs};
 }
-/** CPU timeout is advisory only; legal game actions remain with the human. */
-export function expireLocalTurn(game:Game,clock:LocalClock|null,now:number):Game{return game;}
+/** Match the Online timeout: yield once without tiles, score or blocked-round passes. */
+export function expireLocalTurn(game:Game,clock:LocalClock|null,now:number):Game{
+ if(!clock||game.result||clock.round!==game.round||clock.turn!==game.turn||clock.deal!==game.stockSlots||clock.manualPaused||clock.deadline===null||now<clock.deadline)return game;
+ return {...game,turn:game.turn==='human'?'computer':'human',passes:0,last:{player:game.turn,kind:'pass'}};
+}

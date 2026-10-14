@@ -21,14 +21,15 @@ export function RaiseControls({value,min,max,base,enabled,es,selectionKey,vertic
  },[value,min,max,base,enabled,valid,selectionKey]);
  return <View testID="poker-raise-controls" style={{width:vertical?70:undefined,flexDirection:vertical?'column':'row',alignItems:'center',justifyContent:'center'}}><GoldPressable gold={false} accessibilityRole="button" disabled={!enabled} onPress={()=>{cancel();onClear();}} style={{width:vertical?70:undefined,paddingHorizontal:vertical?4:8,paddingVertical:vertical?6:8,backgroundColor:'transparent'}}><Text style={{color:C.muted,fontSize:12,textAlign:'center'}}>{es?'Limpiar':'Clear'}</Text></GoldPressable><GoldPressable finish gold={false} testID="poker-confirm-raise" accessibilityRole="button" accessibilityHint={`${es?'Subida mínima':'Minimum raise'} ${Math.min(min,max)}`} accessibilityState={{disabled:!enabled||!valid}} disabled={!enabled||!valid} onPress={confirm} style={{width:vertical?70:undefined,paddingHorizontal:vertical?4:8,paddingVertical:vertical?6:8,backgroundColor:'transparent',opacity:enabled&&valid?1:.4}}><Text style={{fontWeight:'700',fontSize:12,color:C.goldLight,textAlign:'center'}}>{es?'Confirmar':'Confirm'}</Text></GoldPressable></View>;
 }
-export function ChipRaiseTray({value,max,enabled,onAdd,balance=max-value}:RaiseProps&{balance?:number}){
+export function ChipRaiseTray({value,max,enabled,onAdd,balance=max-value,split=false,chipWidth=64}:RaiseProps&{balance?:number;split?:boolean;chipWidth?:number}){
  const counts=bankrollCounts(balance);
+ const chip=(n:number)=><PokerChip key={n} width={chipWidth} n={n} count={counts[n]??0} disabled={!enabled||value+n>max} onAdd={onAdd}/>;
  return <View testID="poker-chip-tray" style={{gap:0,paddingTop:0}}>
- <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:7,paddingHorizontal:4,flexGrow:1,justifyContent:'center'}}>{[10,20,50,100].map(n=><PokerChip key={n} n={n} count={counts[n]??0} disabled={!enabled||value+n>max} onAdd={onAdd}/>)}</ScrollView>
+ {split?<View style={{flexDirection:'row',alignItems:'center'}}><View testID="poker-chips-left" style={{flexDirection:'row',gap:4}}>{[10,20].map(chip)}</View><View pointerEvents="none" style={{flex:1,minWidth:88}}/><View testID="poker-chips-right" style={{flexDirection:'row',gap:4}}>{[50,100].map(chip)}</View></View>:<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:7,paddingHorizontal:4,flexGrow:1,justifyContent:'center'}}>{[10,20,50,100].map(chip)}</ScrollView>}
  </View>;
 }
 
-function PokerChip({n,count,disabled,onAdd}:{n:number;count:number;disabled:boolean;onAdd:(n:number,source:React.RefObject<View|null>)=>void}){
+function PokerChip({n,count,disabled,onAdd,width=64}:{width?:number;n:number;count:number;disabled:boolean;onAdd:(n:number,source:React.RefObject<View|null>)=>void}){
  const source=useRef<View>(null);
- return <Pressable ref={source} testID={`poker-chip-${n}`} accessibilityRole="button" accessibilityLabel={`${n}`} accessibilityState={{disabled}} disabled={disabled} onPress={()=>{if(!disabled)onAdd(n,source);}} style={{width:64,height:68,alignItems:'center',opacity:1}}><BankrollChipFace amount={n} count={count}/></Pressable>;
+ return <Pressable ref={source} testID={`poker-chip-${n}`} accessibilityRole="button" accessibilityLabel={`${n}`} accessibilityState={{disabled}} disabled={disabled} onPress={()=>{if(!disabled)onAdd(n,source);}} style={{width,height:68,alignItems:'center',opacity:1}}><BankrollChipFace amount={n} count={count}/></Pressable>;
 }

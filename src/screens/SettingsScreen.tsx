@@ -1,6 +1,6 @@
 import {useNav} from '../nav/NavContext';
 import {GoldPressable} from '../components/GoldPressable';
-import React from 'react';
+import React,{useState} from 'react';
 import { Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
@@ -24,10 +24,12 @@ export function SettingsScreen() {
   const {back,canGoBack}=useNav();
   const { theme, themeName, setThemeName, s } = useTheme();
   const { t, lang, setLang } = useI18n();
-  const {playerAvatarId,setPlayerAvatarId,playerAvatarPhoto,playerAvatarName,setPlayerAvatarPhoto} = useComputerGame();
+  const {playerAvatarId,setPlayerAvatarId,playerAvatarPhoto,playerAvatarName,setPlayerAvatarPhoto,clearPlayerAvatarPhoto} = useComputerGame();
   const { announceWinner, setAnnounceWinner, voice, setVoice, sound, setSound, tableMusic, setTableMusic,tableMusicTrack,ready } = usePrefs();
   useTableMusic(ready&&tableMusic,tableMusicTrack);
   const c = theme.colors;
+  const [languageOpen,setLanguageOpen]=useState(false);
+  const [appearanceOpen,setAppearanceOpen]=useState(false);
 
   const voiceMeta: { id: VoiceStyle; label: string }[] = [
     { id: 'announcer', label: t.voiceAnnouncer },
@@ -45,163 +47,60 @@ export function SettingsScreen() {
   ];
 
   const langMeta: { code: Lang; label: string }[] = [
-    { code: 'en', label: t.english },
-    { code: 'es', label: t.spanish },
+    { code: 'en', label: 'English' },
+    { code: 'es', label: 'Español' },
   ];
 
   return (
     <ScrollView contentContainerStyle={{ padding: s(20), paddingBottom: s(40) }}>
       <Header title={t.settings} showBack={false} leftAction={canGoBack?<Pressable testID="settings-back" accessibilityRole="button" accessibilityLabel={lang==='es'?'Volver':'Back'} onPress={back} style={{width:44,height:44,justifyContent:'center',alignItems:'center'}}><Feather name="arrow-left" size={22} color={c.primary}/></Pressable>:undefined}/>
 
-      <View testID="settings-music-row" style={{flexDirection:'row',alignItems:'center',gap:s(12)}}>
-        <Text style={{color:c.textMuted,fontSize:s(13),fontWeight:'800',textTransform:'uppercase',letterSpacing:.8}}>{lang === 'es' ? 'Música' : 'Music'}</Text>
-        <Switch accessibilityLabel={lang === 'es' ? 'Música' : 'Music'} value={tableMusic} onValueChange={setTableMusic} trackColor={{false:c.border,true:c.primary}} thumbColor="#fff" />
+      <View testID="settings-music-row" style={{flexDirection:'row',alignItems:'center',gap:s(8),justifyContent:'space-between'}}>
+        <View style={{flexDirection:'row',alignItems:'center',gap:s(8)}}><Text style={{color:c.textMuted,fontSize:s(13),fontWeight:'800',textTransform:'uppercase',letterSpacing:.8}}>{lang === 'es' ? 'Música' : 'Music'}</Text><Switch accessibilityLabel={lang === 'es' ? 'Música' : 'Music'} value={tableMusic} onValueChange={setTableMusic} trackColor={{false:c.border,true:c.primary}} thumbColor="#fff" /></View>
+        <Pressable testID="settings-language-selector" accessibilityRole="button" accessibilityLabel={lang==='es'?'Idioma: Español':'Language: English'} accessibilityState={{expanded:languageOpen}} onPress={()=>{setLanguageOpen(open=>!open);setAppearanceOpen(false);}} style={{minHeight:44,flexShrink:1,flexDirection:'row',alignItems:'center',gap:6,paddingHorizontal:10,borderRadius:theme.radius,borderWidth:1,borderColor:c.border,backgroundColor:c.surface}}><Feather name="globe" size={16} color={c.primary}/><Text numberOfLines={1} style={{color:c.text,fontSize:s(14),fontWeight:'600',flexShrink:1}}>{lang==='es'?'Español':'English'}</Text><Feather name={languageOpen?'chevron-up':'chevron-down'} size={16} color={c.textMuted}/></Pressable>
       </View>
+      {languageOpen?<View testID="settings-language-menu" style={{alignSelf:'flex-end',width:160,marginTop:4,borderRadius:theme.radius,borderWidth:1,borderColor:c.border,backgroundColor:c.surface}}>{langMeta.map(l=><Pressable key={l.code} testID={'settings-language-'+l.code} accessibilityRole="button" accessibilityLabel={l.label} accessibilityState={{selected:lang===l.code}} onPress={()=>{setLang(l.code);setLanguageOpen(false);}} style={{minHeight:44,paddingHorizontal:12,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}><Text style={{color:c.text,fontSize:s(14),fontWeight:lang===l.code?'700':'400'}}>{l.label}</Text>{lang===l.code?<Feather name="check" size={18} color={c.primary}/>:null}</Pressable>)}</View>:null}
       <MusicChoices es={lang === 'es'} settingsAppearance={{text:c.text,surface:c.surface,border:c.border,primary:c.primary,radius:theme.radius,fontFamily:theme.fontFamily}}/>
       <View testID="settings-default-avatar" style={{marginBottom:s(24)}}>
-        <OnlinePlayerAvatarPicker label={lang==='es'?'Tu avatar por defecto':'Your default avatar'} es={lang==='es'} selected={playerAvatarId} onSelect={setPlayerAvatarId} photo={playerAvatarPhoto} photoName={playerAvatarName} onSavePhoto={setPlayerAvatarPhoto}/>
+        <OnlinePlayerAvatarPicker labelSize={13} label={lang==='es'?'Tu avatar por defecto':'Your default avatar'} es={lang==='es'} selected={playerAvatarId} onSelect={setPlayerAvatarId} photo={playerAvatarPhoto} photoName={playerAvatarName} onSavePhoto={setPlayerAvatarPhoto} onClearPhoto={clearPlayerAvatarPhoto}/>
       </View>
-      {/* Language */}
-      <SectionLabel>{t.language}</SectionLabel>
-      <View style={{ flexDirection: 'row', gap: s(12) }}>
-        {langMeta.map((l) => {
-          const selected = lang === l.code;
-          return (
-            <GoldPressable finish gold={selected}
-              key={l.code}
-              onPress={() => setLang(l.code)}
-              style={{
-                flex: 1,
-                paddingVertical: s(16),
-                borderRadius: theme.radius,
-                alignItems: 'center',
-                backgroundColor: selected ? c.primary : c.surface,
-                borderWidth: selected ? 0 : 1,
-                borderColor: c.border,
-              }}
-            >
-              <Text style={{ color: selected ? c.onPrimary : c.text, fontSize: s(16), fontWeight: '700' }}>
-                {l.label}
-              </Text>
-            </GoldPressable>
-          );
-        })}
-      </View>
-
       {/* Appearance */}
-      <View style={{ height: s(24) }} />
       <SectionLabel>{t.appearance}</SectionLabel>
-      <View style={{ gap: s(12) }}>
-        {themeMeta.map((m) => {
-          const tdef = THEMES[m.name];
-          const selected = themeName === m.name;
-          return (
-            <Pressable key={m.name} onPress={() => setThemeName(m.name)}>
-              <Card
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  borderWidth: 2,
-                  borderColor: selected ? c.primary : c.border,
-                }}
-              >
-                {/* Swatch preview */}
-                {tdef.background ? (
-                  <View
-                    style={{
-                      width: s(54),
-                      height: s(54),
-                      borderRadius: tdef.radius,
-                      overflow: 'hidden',
-                      marginRight: s(14),
-                      borderWidth: 1,
-                      borderColor: c.border,
-                    }}
-                  >
-                    <Background theme={tdef} width={s(54)} height={s(54)} />
-                  </View>
-                ) : (
-                  <LinearGradient
-                    colors={tdef.colors.gradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={{
-                      width: s(54),
-                      height: s(54),
-                      borderRadius: tdef.radius,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginRight: s(14),
-                    }}
-                  >
-                    <DominoTile size={s(22)} a={6} b={4} />
-                  </LinearGradient>
-                )}
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: c.text, fontSize: s(17), fontWeight: '800' }}>{m.title}</Text>
-                  <Text style={{ color: c.textMuted, fontSize: s(13), marginTop: s(2) }}>{m.desc}</Text>
-                </View>
-                <View
-                  style={{
-                    width: s(24),
-                    height: s(24),
-                    borderRadius: s(12),
-                    borderWidth: 2,
-                    borderColor: selected ? c.primary : c.border,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {selected && (
-                    <View
-                      style={{ width: s(12), height: s(12), borderRadius: s(6), backgroundColor: c.primary }}
-                    />
-                  )}
-                </View>
-              </Card>
-            </Pressable>
-          );
-        })}
-      </View>
+      <Pressable testID="settings-appearance-selector" accessibilityRole="button" accessibilityLabel={t.appearance+': '+themeMeta.find(m=>m.name===themeName)?.title} accessibilityState={{expanded:appearanceOpen}} onPress={()=>{setAppearanceOpen(open=>!open);setLanguageOpen(false);}} style={{minHeight:68,padding:10,borderRadius:theme.radius,borderWidth:1,borderColor:c.border,backgroundColor:c.surface,flexDirection:'row',alignItems:'center',gap:12}}>
+        <View style={{width:44,height:44,flexShrink:0,overflow:'hidden',borderRadius:8}}>{theme.background?<Background theme={theme} width={44} height={44}/>:<LinearGradient colors={c.gradient} style={{width:44,height:44}}/>}</View>
+        <View style={{flex:1,minWidth:0,gap:3}}><Text style={{color:c.text,fontSize:s(16),fontWeight:'700'}}>{themeMeta.find(m=>m.name===themeName)?.title}</Text><Text style={{color:c.textMuted,fontSize:s(13),lineHeight:s(18)}}>{themeMeta.find(m=>m.name===themeName)?.desc}</Text></View>
+        <View style={{width:24,flexShrink:0,alignItems:'center'}}><Feather name={appearanceOpen?'chevron-up':'chevron-down'} size={20} color={c.primary}/></View>
+      </Pressable>
+      {appearanceOpen?<View testID="settings-theme-menu" style={{marginTop:6,borderRadius:theme.radius,borderWidth:1,borderColor:c.border,backgroundColor:c.surface,overflow:'hidden'}}>{themeMeta.map(m=>{const chosen=themeName===m.name,tdef=THEMES[m.name];return <Pressable key={m.name} testID={'settings-theme-'+m.name} accessibilityRole="button" accessibilityLabel={m.title} accessibilityState={{selected:chosen}} onPress={()=>{setThemeName(m.name);setAppearanceOpen(false);}} style={{minHeight:48,paddingHorizontal:10,paddingVertical:6,flexDirection:'row',alignItems:'center',gap:12}}><View style={{width:32,height:32,flexShrink:0,borderRadius:6,overflow:'hidden'}}>{tdef.background?<Background theme={tdef} width={32} height={32}/>:<LinearGradient colors={tdef.colors.gradient} style={{width:32,height:32}}/>}</View><Text style={{flex:1,color:c.text,fontSize:s(14),fontWeight:chosen?'700':'400'}}>{m.title}</Text><View style={{width:24,flexShrink:0,alignItems:'center'}}>{chosen?<Feather name="check" size={18} color={c.primary}/>:null}</View></Pressable>;})}</View>:null}
 
       {/* Winner announcement */}
       <View style={{ height: s(24) }} />
       <SectionLabel>{t.announcer}</SectionLabel>
-      <Card>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View style={{ flex: 1, paddingRight: s(12) }}>
-            <Text style={{ color: c.text, fontSize: s(16), fontWeight: '700' }}>{t.announceWinnerTitle}</Text>
-            <Text style={{ color: c.textMuted, fontSize: s(13), marginTop: s(3), lineHeight: s(18) }}>
-              {t.announceWinnerDesc}
-            </Text>
-          </View>
-          <Switch
-            value={announceWinner}
-            onValueChange={setAnnounceWinner}
-            trackColor={{ false: c.border, true: c.primary }}
-            thumbColor="#fff"
-          />
+      <Card style={{paddingVertical:10,paddingHorizontal:12}}>
+        <View testID="settings-announcer-toggle" style={{ minHeight:44,flexDirection:'row',alignItems:'center' }}>
+          <Text style={{flex:1,paddingRight:12,color:c.text,fontSize:s(16),lineHeight:s(20),fontWeight:'700'}}>{t.announceWinnerTitle}</Text>
+          <Switch accessibilityLabel={t.announceWinnerTitle} value={announceWinner} onValueChange={setAnnounceWinner} trackColor={{false:c.border,true:c.primary}} thumbColor="#fff" />
         </View>
 
         {announceWinner && (
           <>
-            <View style={{ height: 1, backgroundColor: c.border, marginVertical: s(14), opacity: 0.6 }} />
-            <Text style={{ color: c.textMuted, fontSize: s(13), fontWeight: '700', marginBottom: s(10) }}>
+            <View style={{ height: 1, backgroundColor: c.border, marginVertical: s(8), opacity: 0.6 }} />
+            <Text style={{ color: c.textMuted, fontSize: s(13), fontWeight: '700', marginBottom: s(6) }}>
               {t.voiceLabel}
             </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: s(8) }}>
+            <View testID="settings-voice-options" style={{ flexDirection: 'row', gap: s(6) }}>
               {voiceMeta.map((v) => {
                 const selected = voice === v.id;
                 return (
                   <GoldPressable finish gold={selected}
-                    key={v.id}
+                    key={v.id} accessibilityRole="button" accessibilityLabel={v.label} accessibilityState={{selected}}
                     onPress={() => {
                       setVoice(v.id);
                       previewVoice(v.id);
                     }}
                     style={{
-                      paddingHorizontal: s(16),
-                      height: s(42),
+                      flex:v.id==='announcer'?2:v.id==='robot'?1.2:1, minWidth:44, paddingHorizontal: s(4),
+                      minHeight:44,
                       borderRadius: theme.radius,
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -210,7 +109,7 @@ export function SettingsScreen() {
                       borderColor: selected ? c.primary : c.border,
                     }}
                   >
-                    <Text style={{ color: selected ? c.onPrimary : c.text, fontSize: s(14), fontWeight: '800' }}>
+                    <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.8} style={{ color: selected ? c.onPrimary : c.text, fontSize: s(13), fontWeight: '800' }}>
                       {v.label}
                     </Text>
                   </GoldPressable>
@@ -219,7 +118,7 @@ export function SettingsScreen() {
             </View>
             <Pressable
               onPress={() => previewVoice(voice)}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: s(8), marginTop: s(14) }}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: s(8), marginTop: s(8),minHeight:44 }}
               hitSlop={8}
             >
               <Feather name="volume-2" size={s(18)} color={c.primary} />

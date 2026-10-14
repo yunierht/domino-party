@@ -2,7 +2,7 @@ export type Seat='human'|'computer';
 export type Tile={id:string;a:number;b:number};
 export type AttentionKind='wave'|'knock'|'look';
 export interface AttentionEvent {id:string;from:Seat;kind:AttentionKind;sentAt:number;expiresAt:number}
-export type Action={type:'approve'|'ready'|'nextRound'|'pass'|'pauseTurnTimer'|'resumeTurnTimer'|'openBoneyard'|'cancelBoneyard'|'holdResult'|'releaseResult'}|{type:'play';tileId:string;end:'left'|'right'}|{type:'draw';slot:string}|{type:'attention';kind:AttentionKind};
+export type Action={type:'leave'|'approve'|'ready'|'nextRound'|'pass'|'pauseTurnTimer'|'resumeTurnTimer'|'openBoneyard'|'cancelBoneyard'|'holdResult'|'releaseResult'}|{type:'play';tileId:string;end:'left'|'right'}|{type:'draw';slot:string}|{type:'attention';kind:AttentionKind};
 export interface TurnClock {durationMs:number;remainingMs:number;deadline:number|null;serverNow:number;paused:boolean}
 export interface ResultClock {durationMs:number;remainingMs:number;deadline:number|null;serverNow:number;heldBy:Seat[]}
 export interface OnlineView {

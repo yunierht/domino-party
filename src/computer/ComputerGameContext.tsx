@@ -32,6 +32,7 @@ const Context = createContext<{
   playerAvatarPhoto: string | null;
   playerAvatarName: string | null;
   setPlayerAvatarPhoto: (photo: string, name?:string) => void;
+  clearPlayerAvatarPhoto: () => void;
   dominoOpponentPhoto: string | null;
   dominoOpponentName: string | null;
   setDominoOpponentPhoto: (photo: string, name?:string) => void;
@@ -67,6 +68,11 @@ export function ComputerGameProvider({ children }: { children: React.ReactNode }
     playerChosen.current = true; ownPhotoRef.current = photo;
     updatePlayerPhoto(photo); updatePlayerAvatarId('selfie');
     if(name!==undefined)updatePlayerName(normalizeAvatarName(name));
+  }, []);
+  const clearPlayerAvatarPhoto = React.useCallback(() => {
+    playerChosen.current = true; ownPhotoRef.current = null;
+    updatePlayerPhoto(null); updatePlayerName(null);
+    updatePlayerAvatarId(current => current === 'selfie' ? 'yuni' : current);
   }, []);
   const setDominoOpponentPhoto = React.useCallback((photo: string,name?:string) => {
     if (!isValidAvatarPhoto(photo)||(name!==undefined&&!normalizeAvatarName(name))) return;
@@ -163,7 +169,7 @@ export function ComputerGameProvider({ children }: { children: React.ReactNode }
     if(captured)setDrinkGift(current=>current===captured?null:current);
     setExpiringDrink(null);
   }, []);
-  return <Context.Provider value={{ opponentDrink, cancelOpponentConsumption, drinkExpiring: !!drinkGift && drinkGift === expiringDrink, drinkGift, setDrinkGift, game, localTurnClockRef, setGame, opponentId, setOpponentId, dominoOpponentId, setDominoOpponentId, playerAvatarId, setPlayerAvatarId, playerAvatarPhoto, playerAvatarName,setPlayerAvatarPhoto, dominoOpponentPhoto,dominoOpponentName, setDominoOpponentPhoto, start: (name, target, mode) => { setExpiringDrink(null); setDrinkGift(null); setGame(deal(name, target, Math.random, undefined, mode)); } }}>
+  return <Context.Provider value={{ opponentDrink, cancelOpponentConsumption, drinkExpiring: !!drinkGift && drinkGift === expiringDrink, drinkGift, setDrinkGift, game, localTurnClockRef, setGame, opponentId, setOpponentId, dominoOpponentId, setDominoOpponentId, playerAvatarId, setPlayerAvatarId, playerAvatarPhoto, playerAvatarName,setPlayerAvatarPhoto,clearPlayerAvatarPhoto, dominoOpponentPhoto,dominoOpponentName, setDominoOpponentPhoto, start: (name, target, mode) => { setExpiringDrink(null); setDrinkGift(null); setGame(deal(name, target, Math.random, undefined, mode)); } }}>
     {children}
   </Context.Provider>;
 }
