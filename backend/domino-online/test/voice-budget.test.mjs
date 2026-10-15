@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {voiceGrantDecision} from '../src/voiceBudgetPolicy.ts';
+const now=Date.UTC(2026,9,13,12),day='2026-10-13';
+test('five-second retry succeeds and a rapid duplicate is distinct from quota exhaustion',()=>{const user={day,count:1,last:now};assert.equal(voiceGrantDecision(1,user,now+4999),'cooldown');assert.equal(voiceGrantDecision(1,user,now+5000),'granted');});
+test('sixty daily grants keep a hard monthly preventive limit without counting rejected retries',()=>{assert.equal(voiceGrantDecision(1999,{day,count:59,last:now-5000},now),'granted');assert.equal(voiceGrantDecision(1999,{day,count:60,last:now-5000},now),'daily_limit');assert.equal(voiceGrantDecision(2000,undefined,now),'monthly_limit');assert.equal(voiceGrantDecision(1,{day:'2026-10-12',count:60,last:now-5000},now),'granted');});

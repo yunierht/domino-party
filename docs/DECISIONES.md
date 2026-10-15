@@ -1,5 +1,64 @@
 # Decisiones de Domino Codex Online
 
+## ON-D-111 — 2026-10-14 — Analizador educativo Poker con información pública
+
+Fuente: usuario confirma idea de analizador y pide crear algo funcional. Autoriza feature código/tests/preview/continuidad, noAPK/commit/push/deploy. Botón/dialog CPU+Online: resultado global y tres categorías finales rivales frecuentes, ejemplos hipotéticos, Ver explicación y cartas pendientes. Cálculo solo cartas propias+board; desconocido uniforme, no mano oculta real/política CPU/estrategia apuestas. River exact990pares; antes1200simulaciones deterministas cancelables por lotes24. Etiquetas separan frecuencia categoría sobretodoscasos de odds condicionados sobrecasosdecategoría; ejemplo único no definecategoría. Turnos/relojes continúan y hint preservado. Implementado y712pruebasfull+tsc0; visualCPUcompacto browserconfirmada, teléfono yOnlinevisualpendientes. Estado/fuentes/métricas en CONTEXTO.
+
+## ON-D-112 — 2026-10-14 — Entrega Expo Go por LAN sin túnel
+
+Fuente: usuario pide cargarlo enExpoGo listo para probar. Auto-reviewrechaza túnelpúblico por exposición de bundle no autorizada. LAN alternativa autorizada, procesoExpo vivoC:/do-5486 como copia aislada exacta del candidato, depspropias; no reescribir junction5486. ManifestSDK57/app0.1.4 y siete fuentesAndroidverificadas. QRexp://192.168.1.194:8130 artefactopoker-learning-expo-qr.png, encoder/píxelesverificados; requieremismaWiFiPC. No voz nativaExpoGo; APKfix2voz permaneceanterior UI/feature. NavegadorOnlineOriginlocalhost8130 rechazadoporWorker, sin cambioCORS/deploy. Sin APK/commit/push/publicación. Usuario deberá validarExpoGo físicamente.
+
+## ON-D-108 — 2026-10-14 — Confirmación humana de voz fix2 S8/S24
+
+Usuario confirma voz bidireccional con ambos teléfonos en misma Wi-Fi y con S8 Wi-Fi/S24 datos móviles. S8 carece de SIM/datos; no afirmar dos redes móviles ni causa previa Wi-Fi probada. Ajuste fix2 se conserva; pruebas mute/fondo/límite/auriculares no se dan por confirmadas mediante esta prueba de audio.
+
+## ON-D-109 — 2026-10-14 — Aviso de voz debajo del micrófono en Domino
+
+Fuente: usuario ve Call ended debajo del avatar de Andy y pide colocarlo debajo del icono micrófono. Autorizado cambio visual acotado: online-voice-status pasa a lane izquierda80px, dos líneas, fuente12 y etiqueta accesible completa. Avatar/nombre/timer/madera/otros controles/audio intactos. Pruebas ambos asientos y ancho320/390 pasan. Solo fuente, sin nuevo APK; pendiente comprobación visual física.
+
+## ON-D-110 — 2026-10-14 — Salida Ahora no directa desde sala cerrada
+
+Fuente: usuario inicialmente propone Play against computer, después aclara que desea MISMA salida Not now del formulario de aceptar otra invitación directamente en panel anterior cerrado. Aclaración final sustituye propuesta genérica. OnlineFriendScreen panel unavailable conserva Aceptar otra invitación y añade Ahora no/Not now secundario con onBack existente, sin nuevo flujo CPU ni cambiar cleanup/partida local. Pruebas room_closed/room_missing confirman callback igual, ninguna creación/join/forget extra y disconnect al ocultar. 53 pruebas enfocadas y TypeScript0; ambos ajustes UI solo en fuente, APKfix2 previo no los incluye. Sin commit/push/despliegue/build en este bloque.
+
+## ON-D-107 — 2026-10-14 — Corrección acotada y APK local para voz S8/S24
+
+Fuente: coordinador transmite nueva autorización humana directa para ajustes mínimos de voz y APK Android local porque usuario ya no conserva anterior. Nueva prueba humana: S8 graba y reproduce con Voice Recorder, no prueba captura WebRTC. Alcance: ruta/foco/ciclo de audio y diagnóstico sin contenido, pruebas, compilación local instalable en dos teléfonos; no reglas/UI, commit/push, publicación, despliegue ni cambio numérico de versión.
+
+Implementado: InCallManager4.3.0 en copia runtime aislada, sesión Android con altavoz preferido y selección automática de auriculares disponibles, limpieza/restauración idempotente y refcount. Sin cámara, iOS sin cambio de ruta. Estadísticas agregadas para distinguir captura/transporte/reproducción, sin secretos ni grabación. TypeScript0, 696 pruebas app/scripts, firma/bundle/módulo nativo verificados. APK fix2 y LEEME en .local/expo-go-20261013 de raíz Development, detalles/hash en CONTEXTO. Metadatos0.1.4/code5 y checkpointv1.0 conservados. Falta prueba física S8/S24; posible conflicto MODE_NORMAL no declarado causa confirmada. Bluetooth requiere validación específica; primera prueba altavoces sin Bluetooth. Código/documentos sin nuevo commit/push; servidor intacto.
+
+## ON-D-106 — 2026-10-14 — Investigación de voz por dispositivo y continuidad para mañana
+
+Fuente: el usuario intercambió roles de invitación y confirmó que el Galaxy S24 no oye al S8 en ambos roles, mientras el S8 sí oye y YouTube funciona en S24. Se abandona la atribución al anfitrión. Usuario pide continuar investigando y guardar cambios/notas para retomar mañana.
+
+Estado: investigación guardada; sin corrección nueva ni APK nuevo. Falta confirmar micrófono S8 dentro de la llamada y distinguir paquetes recibidos de reproducción S24. Ruta/foco nativo y posible interferencia expo-audio son hipótesis basadas en código, no diagnóstico físico probado. Se inspeccionó InCallManager 4.3.0 sin instalarlo. Trece pruebas con mocks pasan; no acreditan audio físico. Próximos pasos y límites en CONTEXTO.md, entrada del 2026-10-14. Preservar fix1 y checkpoint v1.0; guardar contexto no implica commit/push/despliegue/publicación.
+
+## ON-D-102 — 2026-10-13 — Nombre Domino sincronizado con avatar de Ajustes
+
+Fuente: prueba física reportada por usuario: avatarYoi/nombreAndy, avatarAndy/nombreYuni, tambiénCPU al cambiar enSettings. Causa: Settings cambia playerAvatarId pero game.playerName retenido seguía viejo; invitación envía ese nombre. Provider sincroniza nombre por cambio de identidad/hidratación, conserva mano/reglas; selfie usa nombre confirmado y limpiar vuelveYuni. No reescribe perfiles de salas yacreadas: nuevas invitaciones tras actualizar. TDDreproduce y pasa; browserYoi→Andy conserva7fichasmismosIDs y cambiaheader/avatar.
+
+## ON-D-103 — 2026-10-13 — Avisos online Domino separados a derecha
+
+Fuente: reporte humano botonesdeavisar superpuestos alavatar. Wrapperwoodattention absolute right0 y centradovertical; >=360 fila138px; menores2columnas91px manteniendo44pxtap. SoloDominoOnline; no reduce hit targets ni cambiaenvío/cooldown. Pruebas de posición ytapareas pasan; confirmación teléfono pendiente.
+
+## ON-D-104 — 2026-10-13 — Voz flexible con protección y errores distintos
+
+Fuente: usuario pide flexibilizar bloqueo sin eliminarprotección; mantieneautorización de controles preventivosprevios. Diagnóstico público: primerhost/peer200 TURN, reintento inmediato429voice_usage_limit; no prueba de cuotas gratuitasagotadas ni cuál límiteexacto tocó su sesión. VoiceBudget ahora5s/60grantsdiariosporactor(hashcredencial), global2000mensual y5mincall intactos. Policypura separa cooldown/daily/monthly; no INSERT de intento rechazado. Erroresvoice_retry_later(+RetryAfter5)/voice_daily_limit/voice_monthly_limit y mensajesclientedistintos. Tests67dominio+25integración yTypeScript0; Workerdepruebas desplegadod077b3eb-9e1e-43f8-9e2f-f2d277aef6de por petición de ajustar bloqueoactivo. Públicoambosjuegos: firsthost/peer200, rapid429retry_later/5, después5.1s200, salascerradas. Sin resetcuotas/secretos ni nuevohardbillcap. Audio real todavía pendiente.
+
+## ON-D-105 — 2026-10-13 — APK fix1 para repetir prueba física
+
+Fuente: usuario confirma generar nuevoAPK con correcciones. Auto-reviewrechaza0.1.5/code6 como mutaciónrelease no solicitada; NO ejecutada ni sorteada. Alternativasegura conserva0.1.4/code5 ynombrearchivofix1. BuildRelease3m38s exit0, cuatrofuentescompiledexactas, certificado/firma/ABIs correctos. CopiaDescargas/Domino-Online-v1.0/Domino-Online-Test-v1.0-fix1-Internet.apk,202803172bytes,SHA25626C935598173558F72F11ACD8C3ECD6746BE2CEF7F8600773711ECDE2A1CE042,LEEME-fix1.txt. Usuario instalaMISMOAPKambosAndroid ycreainvitaciónNUEVA para perfilescorrectos. Sin nuevoGitcommit/tag/push; v1.0 original intacto. No uploadAPKpúblico enestebloque; onlyWorkerquota deployed. App681/681 ytsc0; physicalaudio/mics/visuals pendientes.
+
+
+## ON-D-101 — 2026-10-13 — Entrega por carpeta local/USB
+
+Fuente: autorización humana explícita de publicarAPK en enlace de pruebas, seguida de alternativa ofrecida por usuario: carpeta local y transferenciaUSB aAndroid. Se utilizaUSB, publicación aún no ejecutada; no modificaWorker/assets/URLdeAPKprevio. Copia verificada en Descargas/Domino-Online-v1.0 conLEEME. No confundir aprobación de publicación con evidencia de publicación. Checkpoint fuentev1.0 no cambia y documentos posteriores quedan sinnuevo commit.
+
+
+## ON-D-100 — 2026-10-13 — Revisión multiplataforma y APK Android autorizado
+
+Fuente: usuario solicita dos revisiones, código/enlace Android+iOS, instalada abre sala; sininstalar conserva invitación; APKAndroid tras comprobaciones. Investigación+pruebas completas registradas en [REVISION_INVITACIONES_1.0](REVISION_INVITACIONES_1.0.md). Androidcódigo/enlace listo para validar físicamente; APK del tagv1.0 generado/verificado. iOS/teamfirma/AASA y recuperaciónautomática trasinstalar pendientes; fallbackmanual explícito, no éxito automático. No registrar TeamIDinventado ni reutilizar tiendasproductionotraidentidad. La petición no equivale a autorización de crearcertificados/registrardispositivos/contratarserviciospublicacióniOS; tampoco se ejecuta uploadAPK público ni push por inferencia. Check-in localv1.0 realizado21ad0de, sourcebinaryversion0.1.4/code5 conservada. Reporte/continuidadposterioresguardadosen disco sin nuevo commit.
+
+
 ## ON-D-097 — 2026-10-13 — Aviso Domino breve y colores definitivos
 
 Fuente: aclaraciones humanas de voz. Sustituye ON-D-096 en color y espacio: ROBAR/DRAW verde#267B58; PASAR/PASS rojizo#A4453D. Aviso normal dos filas: Tu turno y última jugada; rival CPU usa nombre. Retira texto arrastrar/colocar y warning bajo mano solo Domino; timer/avatar mantienen funcionalidad. Lane52px constante entre turnos/acciones y4px separación de mano; al elegir extremo, controles reemplazan aviso y última jugada se oculta temporalmente. Estado de resultados independiente.
@@ -1073,3 +1132,39 @@ APK local implementado del candidato a1af46e: assembleRelease exitoso con toolin
 
 ## 2026-10-08 — Autorizacion directa y push completado
 Estado aprobada/ejecutada. Fuente humana directa en este chat: autorizo el push. Autoriza origin/master del candidato actual, sin force; sustituye pendiente de autorizacion directa tras rechazo automatico. Push eceedf9 confirmado en GitHub por ls-remote vivo. Cierre documental posterior incluido en la misma autorizacion; no reabre codigo congelado ni autoriza publicacion tienda/deploy. Evidencia exacta y limites en CONTEXTO.
+
+## ON-D-113 — 2026-10-14 — Entrenamiento compacto, reloj pausado y probabilidad visible
+
+Fuente: peticiones humanas directas en voz, sesión actual. Estado: implementado en candidato aislado sin commit/build/publicación nuevos; confirmación física pendiente. Sustituye en su alcance la ubicación toolbar, scroll, ejemplos rivales y reloj continuo de ON-D-111; conserva cálculo exclusivamente público y entrega LAN ON-D-112.
+
+Botón redondo sobre paño entre propias y avatar, encabezado anterior, dialogo sin scroll con titulo centrado y cartas mayores; mano actual y puntos de combinación, resultado ganar/empatar/perder, distribuciones propias/rival equivalentes sin cartas hipotéticas rivales. Texto más grande para facilitar lectura. Apertura pausa CPU; online solo turno propio con pausa confirmada y reanudación de su propia pausa, conserva pausa manual. Preflop disponible; atajo siempre visible junto a mano con porcentaje entre paréntesis, sin Ganar ni aproximación visible y ancho reservado para evitar desplazamientos al recalcular; lector de pantalla conserva significado. Alineación inferior sobre eje centrado. Usuario autoriza también8px de separación interna antes opciones en los tres lobbies, sin aumentar altura reservada ni cambiar reglas/selecciones. Evidencia y límites en CONTEXTO.
+## ON-D-114 — 2026-10-14 — Actualización de ficha existente en ambas tiendas
+
+Fuente humana directa en voz: confirma actualizar Domino Social Club en Android e iOS, Android primero. Autoriza preparación de empaquetado de actualización y revisar invitaciones entre plataformas. Restricción explícita: mantener lógica/UI probadas y limitar cambios a empaquetado y online/invitaciones. Preparación pendiente de verificación real de identidades, versiones usadas y firmas de consola; no confundir la identidad piloto con la publicada. No se ejecutó publicación, build nueva ni modificación de código en este bloque. Informe existente REVISION_INVITACIONES_1.0.md actualizado con requisitos y bloqueo de acceso. La regla original de identidad independiente pertenece al staging; cualquier perfil release debe ser explícito y preservar sus protecciones.
+## ON-D-115 — 2026-10-14 — Empaquetado publicado Android y despliegue condicionado
+
+Fuente humana directa: continuar tareas para exportar/upgrade Domino'sParty/GoogleStore sin cambiar lógica/UI. Implementado perfil condicional publicado1.0.14/code27 (último26 verificado en consola), identidad/EAS/firmasreales, piloto intacto; AAB EAS aceptada y en progreso. NoAPKcompatiblePlay ni publicación/commit/push ejecutados. Preparación asociaciones/portal ambasidentidades validada; deploy live rechazado por revisión automática por faltar autoridad clara. Autorización específica solicitadaasync, pendiente. Propuesta servidor conserva servicio/namespace existente y audiosecretos; no es creación de servidorprod separado. Ver evidencia y alcance en informe existente. Version iOS13 solo preparación, no build/últimoAppStorelive confirmados.
+## ON-D-116 — 2026-10-14 — Despliegue y publicación Android autorizados
+
+Fuente: autorización humana directa transmitida por chat origen01a13ce5-b036-7cc0-8d1f-edca4dcb5ec7: «OK, puedes continuar con esas tareas», después «Puedes ejecutar todas las tareas necesarias para publicar la aplicación en producción hoy». Autoriza despliegue específico de asociaciones/portal conservando piloto y publicada, prueba interna y envío/rollout de producción Google Play para Domino Social Club. Sustituye el gate de autoridad de ON-D-115 y la restricción anterior de no publicación general. No autoriza cambios ajenos de UI/lógica ni commit/push innecesarios. No presume pruebas físicas ni aprobación Google hoy.
+
+Worker desplegado versión662418dd-3318-4bb4-aced-0297893f6e08, bindings y namespaces conservados. HTTP200 asociaciones Android ambas identidades, AASA79C77F44DM.com.yht.dominoparty, configuración y portales válidos de ambos juegos, healthok. Evidencia backend/.local/social-club-approved-deploy.log y social-club-live-associations.json. Acción interna Saveandpublish confirmada; resultado final/producción se registrarán en CONTEXTO e informe existente tras comprobar consola.
+
+ON-D-116 resultado: Worker662418dd desplegado y HTTP verificados; internal28 disponible, Submission17 Production1.0.14(28)Fullrollout Published confirmado9:27pm14Oct en consola. APKfirmaGooglevalidada en disco. Evidencia y pruebas humanas pendientes en CONTEXTO/REVISION_INVITACIONES_1.0. Sincommit/push.
+
+## ON-D-117 — 2026-10-14 — Icono verde de ficha Google Play
+
+Fuente humana directa transmitida por chat01a13ce5-b036-7cc0-8d1f-edca4dcb5ec7: pide realizar cambio del icono. Autoriza reemplazo/publicación solo appiconmoradoporgreenexistente, sin recompilar ni metadatos ajenos. Humano confirma origenIA y autoriza declarar esa procedencia. Estado guardado/enviado; evidencia y verificaciónfinal en CONTEXTO/REVISION_INVITACIONES_1.0. Morado conservado en biblioteca.
+
+## ON-D-118 — 2026-10-14 — Placa Poker anclada al ganador
+
+Humano solicita mover victoria/fold debajo de fichas del ganador real y mejorar estilo, preservar otrosjuegos. Autoriza implementación yQRExpoGo para inspección humana; no nueva publicación/buildtienda/commit/push. ImplementadoPokerCPU/Online yempatecompartido,31tests/TS/navegadoryentregaAndroidcotejada. VerCONTEXTO para alcance ypendientes físicos. ExpoGoLANmismaWiFi solicitado; servidor se mantienevivo.
+
+## ON-D-119 — 2026-10-14 — Dirección final de placa y nombre Poker
+
+Humano sustituye ubicación de ON-D-118porDEBAJOcartasganador, fondoalgo transparente,categoríaganadorreal;foldsinrevelar/inventar. Nombrelocaldeavatar elegidoPlayingas confirmadohumano. Implementado exclusivamentePoker/32tests/TS/719suite. QRLANactualcotejadoJScompilado. Ademáshumanoautoriza iOSbuild/subida/distribuciónTESTFLIGHT, nopublicaciónpúblicaApple; perfilesybuild13/14 iniciadosprevios, snapshot13superado/no distribuido. Últimopedido limitaahora a servirQRsinretomarotrasaccionesiOS/store;continuidadenCONTEXTO.
+
+
+## ON-D-120 - 2026-10-14 - Ganancia neta Poker y relevo aislado
+
+Fuente humana directa mediante chat01a13d5f: autorizacion explicita de terminar netprofit tras pausa y mostrarlo en ExpoGo. Sustituye importe bruto del bote en la placa: nombreganador+ganancianeta, categoria/motivo separado, empate0neutral. Conserva pagos/motor/cartasocultas y ubicacion bajo cartas de ON-D-119. Implementado37tests/723app/TS/JScompilado verificados; no prueba fisica. No autoriza otrosjuegos/commit/push/build/publicacion. Auditoria acumulada y hashes en CONTEXTO; preparacion Apple va por chat aparte, no duplicarla.

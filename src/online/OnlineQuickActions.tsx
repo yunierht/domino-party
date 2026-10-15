@@ -16,8 +16,8 @@ const actions:{kind:AttentionKind;emoji:string;es:string;en:string}[]=[
 ];
 
 /** The server remains authoritative; this cooldown only prevents accidental repeat taps. */
-export function OnlineQuickActions({visible=true,enabled,supported,es,onSend,compact=false}:{
-  compact?:boolean;visible?:boolean;enabled:boolean;supported:boolean;es:boolean;
+export function OnlineQuickActions({visible=true,enabled,supported,es,onSend,compact=false,stacked=false}:{
+  stacked?:boolean;compact?:boolean;visible?:boolean;enabled:boolean;supported:boolean;es:boolean;
   onSend:(kind:AttentionKind)=>Promise<boolean>|boolean;
 }) {
   const [busy,setBusy]=useState(false),[cooling,setCooling]=useState(false);
@@ -36,7 +36,7 @@ export function OnlineQuickActions({visible=true,enabled,supported,es,onSend,com
   };
   if(!visible||!supported)return null;
   const disabled=!enabled||busy||cooling;
-  return <View testID="online-quick-actions" style={{flexDirection:'row',gap:3,alignItems:'center'}}>
+  return <View testID="online-quick-actions" style={{flexDirection:'row',gap:3,alignItems:'center',...(stacked?{width:91,flexWrap:'wrap' as const,justifyContent:'flex-end' as const}:{})}}>
     {actions.map(action=><GoldPressable finish gold={false} finishColor="#805438" surfaceStyle={compact?{top:6,bottom:6,left:6,right:6,borderRadius:16,borderColor:'#A77A51',borderWidth:2}:undefined} key={action.kind} testID={`online-attention-${action.kind}`}
       accessibilityRole="button" accessibilityLabel={es?action.es:action.en} accessibilityState={{disabled}}
       disabled={disabled} onPress={()=>void send(action.kind)}

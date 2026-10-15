@@ -55,6 +55,46 @@
         "simulator": false,
         "buildConfiguration": "Release"
       }
+    },
+    "social-club-android-update": {
+      "extends": "online-android-internet-internal",
+      "distribution": "store",
+      "credentialsSource": "remote",
+      "env": {
+        "DOMINO_ONLINE_LINKS_CONFIG": "config/social-club-update.json",
+        "EXPO_PUBLIC_DOMINO_ONLINE_SCHEME": "dominoparty"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
+    },
+    "social-club-android-update-apk": {
+      "extends": "social-club-android-update",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "social-club-ios-testflight": {
+      "extends": "online-ios-internet-internal",
+      "distribution": "store",
+      "credentialsSource": "remote",
+      "env": {
+        "DOMINO_ONLINE_LINKS_CONFIG": "config/social-club-update.json",
+        "EXPO_PUBLIC_DOMINO_ONLINE_SCHEME": "dominoparty"
+      },
+      "ios": {
+        "simulator": false,
+        "buildConfiguration": "Release"
+      }
+    }
+  },
+  "submit": {
+    "social-club-ios-testflight": {
+      "ios": {
+        "ascAppId": "6793746031",
+        "appleTeamId": "79C77F44DM"
+      }
     }
   }
 }

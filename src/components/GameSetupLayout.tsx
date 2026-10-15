@@ -28,7 +28,7 @@ export function GameSetupLayout({game,es,header,renderArt,renderOpponents,option
      <Text style={{color:C.ivory,fontSize:16,lineHeight:20,fontWeight:'600'}}>{game==='blackjack'?(es?'Elige tu dealer':'Choose your dealer'):(es?'Elige tu rival':'Choose your opponent')}</Text>
      {renderOpponents(g.roomy)}
     </View>
-    <View testID="setup-options" style={{minHeight:g.options,gap:6}}>
+    <View testID="setup-options" style={{minHeight:g.options,gap:6,paddingTop:8}}>
      <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',gap:8}}><Text style={{color:C.ivory,fontSize:14,lineHeight:18,fontWeight:'600'}}>{optionTitle}</Text>{optionDetail?<Text style={{color:C.muted,fontSize:13,lineHeight:18}}>{optionDetail}</Text>:null}</View>
      {options}
     </View>

@@ -1,0 +1,27 @@
+{
+  "application": "domino-social-club-update",
+  "purpose": "release",
+  "origin": "https://domino-online-internet-test.domino-party.workers.dev",
+  "scheme": "dominoparty",
+  "native": {
+    "version": "1.0.14",
+    "androidVersionCode": 28,
+    "iosBuildNumber": "14",
+    "easProjectId": "4ca6648b-ec5a-4b08-b425-519db3c4ebd7"
+  },
+  "android": {
+    "package": "com.yht.dominoparty",
+    "sha256": [
+      "26:E1:ED:66:7D:08:6E:B5:35:64:73:B6:A0:BC:9F:E8:C2:C6:39:99:05:10:97:72:66:F3:CD:3E:A3:95:D0:8C",
+      "91:96:CD:BD:9B:EC:74:03:B8:19:FE:73:4B:7F:FD:75:57:4B:FA:DD:25:2D:B2:BE:0D:BF:CD:46:97:BD:31:C1"
+    ]
+  },
+  "ios": {
+    "bundleIdentifier": "com.yht.dominoparty",
+    "teamId": "79C77F44DM"
+  },
+  "stores": {
+    "android": "https://play.google.com/store/apps/details?id=com.yht.dominoparty",
+    "ios": "https://apps.apple.com/app/id6793746031"
+  }
+}

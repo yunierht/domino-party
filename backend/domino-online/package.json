@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:domain": "node --test test/cancellation.test.mjs test/domain.test.mjs test/invitation.test.mjs test/turn-clock.test.mjs test/result-clock.test.mjs test/attention.test.mjs test/selfie.test.mjs test/voice-call.test.mjs test/manual-code.test.mjs test/poker-domain.test.mjs test/poker-invitation.test.mjs test/blackjack-game.test.mjs test/blackjack-room.test.mjs",
+    "test:domain": "node --test test/voice-budget.test.mjs test/cancellation.test.mjs test/domain.test.mjs test/invitation.test.mjs test/turn-clock.test.mjs test/result-clock.test.mjs test/attention.test.mjs test/selfie.test.mjs test/voice-call.test.mjs test/manual-code.test.mjs test/poker-domain.test.mjs test/poker-invitation.test.mjs test/blackjack-game.test.mjs test/blackjack-room.test.mjs",
     "build": "node scripts/build.mjs",
     "test:integration": "npm run build && node --test test/cancellation.integration.test.mjs test/integration.test.mjs test/voice.integration.test.mjs test/manual.integration.test.mjs test/poker.integration.test.mjs test/blackjack.integration.test.mjs",
     "test": "npm run test:domain && npm run test:integration",

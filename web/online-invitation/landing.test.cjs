@@ -10,7 +10,7 @@ test('platform detection covers Android/iPhone/iPadOS but remains a synthetic JS
 });
 function windowFixture(config){
  const nodes={},events={},timers=new Map(),redirects=[],copied=[];let next=0;
- for(const id of ['status','room','copy-code','copy-link','open','install','return','scope'])nodes[id]={hidden:['open','install','return'].includes(id),disabled:true,events:{},addEventListener(type,fn){this.events[type]=fn;}};
+ for(const id of ['status','room','copy-code','copy-link','open','open-pilot','install','return','scope'])nodes[id]={hidden:['open','open-pilot','install','return'].includes(id),disabled:true,events:{},addEventListener(type,fn){this.events[type]=fn;}};
  const document={hidden:false,getElementById:id=>nodes[id],addEventListener:(type,fn)=>{events[type]=fn;}};
  const w={ONLINE_INVITATION_CONFIG:config,document,location:{href:'https://staging.example.test/online/invite?onlineRoom=ABCDEF0123',origin:'https://staging.example.test',replace:url=>redirects.push(url)},navigator:{userAgent:'Android',clipboard:{writeText:async text=>copied.push(text)}},addEventListener:(type,fn)=>{events[type]=fn;},setTimeout:fn=>{const id=++next;timers.set(id,fn);return id;},clearTimeout:id=>timers.delete(id)};
  return{w,nodes,events,timers,redirects,copied};
@@ -27,3 +27,5 @@ test('configured store fallback uses the platform URL, but opening app, copying 
 });
 
 test('Poker shares the public path but opens only Poker, never Domino',()=>{const v=invitation('https://staging.example.test/online/invite?pokerRoom=ABCDEF0123');assert.equal(v.game,'poker');assert.equal(v.code,'ABCDEF0123');assert.throws(()=>invitation('https://staging.example.test/online/invite?pokerRoom=ABCDEF0123&onlineRoom=ABCDEF0123'));});
+
+test('published candidate keeps explicit pilot opening and the same game/code without automatic store diversion',()=>{const f=windowFixture({purpose:'release',origin:'https://staging.example.test',scheme:'dominoparty',secondaryScheme:'domino-online-test',automaticStoreFallback:false,stores:{android:'https://play.google.com/store/apps/details?id=com.yht.dominoparty'}});f.w.location.href='https://staging.example.test/online/invite?pokerRoom=ABCDEF0123';mount(f.w);assert.equal(f.nodes.open.href,'dominoparty://online?pokerRoom=ABCDEF0123');assert.equal(f.nodes['open-pilot'].href,'domino-online-test://online?pokerRoom=ABCDEF0123');assert.equal(f.nodes['open-pilot'].hidden,false);assert.equal(f.timers.size,0);assert.equal(f.nodes.install.href,f.w.ONLINE_INVITATION_CONFIG.stores.android);});

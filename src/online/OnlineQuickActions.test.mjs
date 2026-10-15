@@ -81,3 +81,5 @@ test('unmount cancels delayed knock; fresh wave plays once with normal motion',a
  reduced=false;effects=[];const wave=await mount(OnlineAttentionNotice,noticeProps({event:event('wave','wave')}));
  try{assert.deepEqual(effects,['tap','motion']);}finally{await act(()=>wave.unmount());reduced=true;t.mock.timers.reset();}
 });
+
+test('narrow right lane wraps without reducing the forty-four pixel tap targets',async()=>{const r=await mount(OnlineQuickActions,{enabled:true,supported:true,es:true,onSend:()=>true,compact:true,stacked:true});try{assert.equal(r.root.findByProps({testID:'online-quick-actions'}).props.style.width,91);assert.equal(r.root.findByProps({testID:'online-quick-actions'}).props.style.flexWrap,'wrap');assert.ok(r.root.findAllByType('Pressable').every(p=>p.props.style({pressed:false}).width===44));}finally{await act(()=>r.unmount());}});

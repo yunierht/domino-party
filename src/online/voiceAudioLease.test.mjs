@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import ts from 'typescript';
+function load(){const m={exports:{}};new Function('module','exports',ts.transpileModule(readFileSync(new URL('./voiceAudioLease.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(m,m.exports);return m.exports;}
+test('call audio uses speaker default with automatic headset routing and restores only after final owner',()=>{const events=[];const lease=load().createVoiceAudioLease({start:options=>events.push(['start',options]),stop:()=>events.push(['stop'])});const first=lease.acquire(),second=lease.acquire();assert.deepEqual(events,[['start',{media:'video',auto:true}]]);first();first();assert.equal(events.length,1);second();assert.deepEqual(events.at(-1),['stop']);const third=lease.acquire();assert.equal(events.length,3);third();});
+test('failed route start is cleaned up and does not retain an owner',()=>{let fail=true,stops=0,starts=0;const lease=load().createVoiceAudioLease({start(){starts++;if(fail)throw Error('route');},stop(){stops++;}});assert.throws(()=>lease.acquire(),/route/);assert.equal(stops,1);fail=false;lease.acquire()();assert.equal(starts,2);assert.equal(stops,2);});

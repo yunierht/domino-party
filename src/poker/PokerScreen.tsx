@@ -1,3 +1,5 @@
+import {usePokerWinEstimate} from './usePokerWinEstimate';
+import {PokerLearningControl} from './PokerLearningControl';
 import {PokerHandRankings} from './PokerHandRankings';
 import {useTableVisible} from '../components/GameSettingsBoundary';
 import {HomeButton} from '../components/HomeButton';
@@ -62,7 +64,7 @@ export function PokerScreen(){
  const humanBalance=useRef<View>(null),computerBalance=useRef<View>(null),collectedPot=useRef<View>(null),collecting=useRef<import('./engine').PokerGame|null>(null),remaining=useRef(0);
  const completedFlights=useRef(new Set<number>());
  const [progress,setProgress]=useState({human:0,computer:0});
- const {pokerCollected,setPokerCollected,pokerStartingChips,pokerName,poker:g,setPoker,pokerShown:shown,setPokerShown:setShown,switchTarget}=useTableGame();const {game:domino,opponentId,setOpponentId,playerAvatarId,playerAvatarPhoto}=useComputerGame();
+ const {pokerCollected,setPokerCollected,pokerStartingChips,pokerName,poker:g,setPoker,pokerShown:shown,setPokerShown:setShown,switchTarget}=useTableGame();const {game:domino,opponentId,setOpponentId,playerAvatarId,playerAvatarPhoto,playerAvatarName}=useComputerGame();
  const trackedPot=g?(g.result?.pot??g.total.human+g.total.computer):0;const [potChips,setPotChips]=useState<number[]>(()=>chipAmounts(trackedPot));const potAmount=useRef(trackedPot),potHand=useRef(g?.hand);
  useLayoutEffect(()=>{if(!g)return;const desired=g.result?.pot??g.total.human+g.total.computer;const previous=potAmount.current;const newHand=potHand.current!==g.hand;const selected=selectedChips;setPotChips(current=>{if(newHand||desired<previous)return chipAmounts(desired);const needed=desired-current.reduce((sum,n)=>sum+n,0);if(needed<10)return current;return [...current,...(selected.reduce((sum,n)=>sum+n,0)===desired-previous&&g.last?.player==='human'?selected:chipAmounts(needed))];});potAmount.current=desired;potHand.current=g.hand;},[g]);
  const {lang}=useI18n();const es=lang==='es';const {back,go}=useNav();const {tableMusic,tableMusicTrack,tileSound,ready}=usePrefs();useTableMusic(ready&&tableMusic,tableMusicTrack);
@@ -76,14 +78,16 @@ export function PokerScreen(){
  const [acceptInvite,setAcceptInvite]=useState(false);const [manualInvite,setManualInvite]=useState(false);const [invite,setInvite]=useState(false);const [drinks,setDrinks]=useState(false);const drinkSelectionLock=useRef(false);
  const [active,setActive]=useState(AppState.currentState==='active');const [picker,setPicker]=useState(false);const [settings,setSettings]=useState(false);const [rules,setRules]=useState(false);const [reset,setReset]=useState(false);const [raise,setRaise]=useState('40');const [error,setError]=useState('');
  const presentation=g?`${g.hand}-${g.board.length}`:'';const dealing=shown!==presentation;
- const paused=!tableVisible||!!switchTarget||picker||rules||settings||reset||drinks||invite||manualInvite||acceptInvite||!active;const [holding,setHolding]=useState(false);const resultHold=useRef(false);const deferredCollections=useRef(new Set<number>());
+ const winEstimate=usePokerWinEstimate({hero:g?.holes.human??[],board:g?.board??[]},tableVisible&&active&&!dealing&&!g?.result);
+ const [learningOpen,setLearningOpen]=useState(false);
+ const basePaused=!tableVisible||!!switchTarget||picker||rules||settings||reset||drinks||invite||manualInvite||acceptInvite||!active;const paused=basePaused||learningOpen;const [holding,setHolding]=useState(false);const resultHold=useRef(false);const deferredCollections=useRef(new Set<number>());
  useEffect(()=>{resultHold.current=false;setHolding(false);deferredCollections.current.clear();},[g?.hand]);
  useEffect(()=>{if(paused){resultHold.current=false;setHolding(false);}},[paused]);
  const mounted=useRef(true),currentGame=useRef(g);currentGame.current=g;
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;resultHold.current=false;flightGeneration.current++;};},[]);
  const showResult=usePokerResultTransition(g,paused||dealing,pokerCollected===g,next=>{setShown('');setPoker(current=>current===g&&!resultHold.current?next:current);},holding,resultHold);
  const {name:blackjackName}=useBlackjack();
- const opponent=OPPONENTS.find(o=>o.id===opponentId)??OPPONENTS[0];const name=pokerName||blackjackName||domino?.playerName||(es?'Tú':'You');
+ const opponent=OPPONENTS.find(o=>o.id===opponentId)??OPPONENTS[0];const name=playerAvatarId==='selfie'?(playerAvatarName||'Selfie'):(DOMINO_AVATARS.find(a=>a.id===playerAvatarId)?.name??DOMINO_AVATARS[0].name);
  const drink=usePokerDrink(opponentId,g?.result??null,!paused);
  const waitingForHuman=!!g&&!g.result&&g.turn==='human'&&g.stacks.human>0&&!paused&&!dealing&&!holding;
  const waitingClock=useWaitingClock(g,'poker-turn',waitingForHuman,identity=>{setPoker(current=>{if(current!==identity||current.result||current.turn!=='human')return current;const legal=legalActions(current,'human');return act(current,'human',{type:legal.canCheck?'check':'fold'});});});
@@ -125,7 +129,7 @@ export function PokerScreen(){
  const provisional=!result&&g.turn==='human'&&selectedChips.length&&selectionGame.current===g?Math.max(0,raiseValue-g.bets.human):0;
  const displayBalance=(seat:'human'|'computer')=>Math.round(g.stacks[seat]-(seat==='human'?provisional:0)-(collectingPending?awards[seat]*(1-progress[seat]):0));
  const feltHeight=Math.max(0,panelHeight-48-footerHeight),cardHeight=cardWidth*1.43+10;
- const communityTop=Math.max(heroHeight+(usableHeight<720?0:usableHeight<900?15:30)+cardHeight+8,Math.min((heroHeight-15+feltHeight)/2-cardHeight/2,feltHeight-42-7-cardHeight*2-8));
+ const communityTop=Math.max(showResult&&result?.winner==='computer'?heroHeight+(usableHeight<720?0:usableHeight<900?15:30)+rivalWidth*1.43+70:0,heroHeight+(usableHeight<720?0:usableHeight<900?15:30)+cardHeight+8,Math.min((heroHeight-15+feltHeight)/2-cardHeight/2,feltHeight-42-7-cardHeight*2-8));
  const potLeft=Math.min(40,Math.max(12,Math.floor((window.width-(2*ownWidth+7))/2-76)));
  const potBottom=pokerPotBottom(panelHeight,footerHeight,handBottom,window.width<300,usableHeight<720);
  const visiblePot=result?(pokerCollected===g||collecting.current===g?0:result.pot):pot;
@@ -156,7 +160,7 @@ export function PokerScreen(){
  </View>
  <View testID="poker-rival-lane" style={{height:usableHeight<720?64:95.5,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:9,paddingVertical:7,minHeight:usableHeight<720?64:82,marginRight:0}}>
 
- <View testID="poker-rival-cards" style={{position:'absolute',top:usableHeight<720?0:usableHeight<900?15:30,left:'50%',marginLeft:-(2*rivalWidth+6)/2,flexDirection:'row',gap:6}}>{g.holes.computer.map((card,i)=><View key={`${g.hand}-computer-${i}`}><PokerCard winnerLabel={es?'Carta de combinación ganadora':'Winning combination card'} animate={dealing&&g.board.length===0} winning={winners.includes('computer')&&marked(card)} card={result?.reason==='showdown'?card:undefined} back={result?.reason!=='showdown'} width={rivalWidth} originX={80} delay={i*280}/><CardDealSound sound={ready&&tileSound} active={dealing&&!paused&&g.board.length===0} delay={i*280}/></View>)}</View>
+ <View testID="poker-rival-cards" style={{position:'absolute',top:usableHeight<720?0:usableHeight<900?15:30,left:'50%',marginLeft:-(2*rivalWidth+6)/2,flexDirection:'row',gap:6}}>{g.holes.computer.map((card,i)=><View key={`${g.hand}-computer-${i}`}><PokerCard winnerLabel={es?'Carta de combinación ganadora':'Winning combination card'} animate={dealing&&g.board.length===0} winning={winners.includes('computer')&&marked(card)} card={result?.reason==='showdown'?card:undefined} back={result?.reason!=='showdown'} width={rivalWidth} originX={80} delay={i*280}/><CardDealSound sound={ready&&tileSound} active={dealing&&!paused&&g.board.length===0} delay={i*280}/></View>)}{showResult&&!dealing&&result?.winner==='computer'?<View testID="poker-result-footer" pointerEvents="none" style={{position:'absolute',top:rivalWidth*1.43+16,left:'50%',marginLeft:-Math.min(240,window.width-32)/2,width:Math.min(240,window.width-32),zIndex:16}}><PokerResultBanner key={g.hand} compact celebrate result={describePokerResult(g,es,opponent.name,name)} paused={paused||holding}/></View>:null}</View>
  <Text style={{position:'absolute',right:18,color:C.goldLight,fontSize:10}}>{g.dealer==='computer'?'Ⓓ · SB':'BB'}{g.bets.computer?` · ${g.bets.computer}`:''}</Text></View>
  <View style={{position:'absolute',top:communityTop,left:0,right:0,alignItems:'center',justifyContent:'center'}}>
  <View testID="poker-community-cards" style={{flexDirection:'row',gap:0}}>{Array.from({length:5},(_,i)=>{
@@ -169,7 +173,8 @@ export function PokerScreen(){
 
  </View>
 
- <View pointerEvents="none" style={{position:'absolute',bottom:42+14+ownWidth*1.43+10,left:0,right:0}}><PokerHandHint visible={!result&&!dealing} text={`${es?'Tu mano':'Your hand'} · ${currentCategory}`} fontScale={window.fontScale}/></View>
+ <View testID="poker-learning-position" style={{display:result?'none':'flex',position:'absolute',bottom:0,left:'50%',marginLeft:-22,width:44,height:44,zIndex:20}}><PokerLearningControl hero={g.holes.human} board={g.board} es={es} enabled={!basePaused&&!dealing&&!g.result} onOpen={()=>{setLearningOpen(true);return true;}} onClose={()=>setLearningOpen(false)}/></View>
+ <View pointerEvents="none" style={{position:'absolute',bottom:42+14+ownWidth*1.43+10,left:0,right:0}}><PokerHandHint visible={!result&&!dealing} text={`${es?'Tu mano':'Your hand'} · ${currentCategory}`} chance={winEstimate?"("+winEstimate.win.toFixed(1)+"%)":"(…)"} chanceLabel={(es?"Probabilidad de ganar: ":"Winning chance: ")+(winEstimate?winEstimate.win.toFixed(1)+"%":es?"calculando":"calculating")} fontScale={window.fontScale}/></View>
  <View style={{position:'absolute',bottom:42,left:0,right:0,flexDirection:'row',justifyContent:'center',alignItems:'center',gap:18,paddingVertical:7,minHeight:82}}><View ref={ownCards} collapsable={false} testID="poker-own-cards" onLayout={()=>{root.current?.measureInWindow((_rx,ry)=>ownCards.current?.measureInWindow((_x,y,_w,h)=>setHandBottom(y+h-ry)));}} style={{flexDirection:'row',gap:7,transform:[{translateY:0}]}}>{g.holes.human.map((card,i)=><View key={`${g.hand}-human-${i}`}><PokerCard winnerLabel={es?'Carta de combinación ganadora':'Winning combination card'} animate={dealing&&g.board.length===0} winning={winners.includes('human')&&marked(card)} combination={liveMarked(card)} combinationLabel={es?'Carta de tu combinación actual':'Card in your current combination'} card={card} width={ownWidth} originX={80} delay={140+i*280}/><CardDealSound sound={ready&&tileSound} active={dealing&&!paused&&g.board.length===0} delay={140+i*280}/></View>)}</View><Text testID="poker-human-blind-label" style={{position:'absolute',right:18,color:C.goldLight,fontSize:11,transform:[{translateY:-20}]}}>{g.dealer==='human'?'Ⓓ · SB':'BB'}{g.bets.human?` · ${g.bets.human}`:''}</Text></View>
 
 
@@ -177,7 +182,7 @@ export function PokerScreen(){
 
  <View ref={computerBalance} collapsable={false} style={{position:'absolute',left:32,top:heroHeight+14,zIndex:12}}><SeatChipPile testID="poker-computer-pile" amount={displayBalance('computer')} name={opponent.name} hideName piles={3}/></View>
  <View testID="poker-message-overlay" pointerEvents={showResult?"box-none":"none"} style={{position:'absolute',left:0,right:0,bottom:0,zIndex:16,minHeight:64,paddingVertical:1,paddingLeft:12,paddingRight:12,justifyContent:'center'}}>
- {showResult&&!dealing?<View testID="poker-result-footer" pointerEvents="none" style={{width:'100%'}}><PokerResultBanner key={g.hand} result={describePokerResult(g,es,opponent.name)} paused={paused||holding}/></View>:null}
+ {showResult&&!dealing&&result?.winner!=='computer'?<View testID="poker-result-footer" pointerEvents="none" style={{position:'absolute',bottom:0,left:'50%',marginLeft:-Math.min(240,window.width-32)/2,width:Math.min(240,window.width-32)}}><PokerResultBanner key={g.hand} compact celebrate={result?.winner==='human'} result={describePokerResult(g,es,opponent.name,name)} paused={paused||holding}/></View>:null}
  <ResultHoldButton visible={showResult&&!dealing} presentationKey={g.result?g:null} id="poker-result-hold" holding={holding} disabled={paused} onHold={beginHold} onRelease={releaseHold} es={es}/>
  <View style={{alignItems:'center',paddingHorizontal:enabled?106:0}}>{error&&!result?<Text accessibilityLiveRegion='polite' style={{color:'#F0A899',fontSize:11,textAlign:'center'}}>{error}</Text>:null}</View>
  </View>
@@ -188,7 +193,7 @@ export function PokerScreen(){
 
  <View ref={humanBalance} collapsable={false} testID="poker-player-balance" style={{position:'absolute',bottom:2,right:12,zIndex:26}}><Text style={{color:C.goldLight,fontSize:13,fontWeight:'700'}}>{'$'+displayBalance('human').toLocaleString()}</Text></View>
  <View testID="poker-player-chip-position" style={{position:'absolute',top:10,left:12,right:12}}><ChipRaiseTray split chipWidth={Math.min(64,(window.width-120)/4)} balance={displayBalance('human')} value={raiseValue} min={legal.minTo} max={legal.maxTo} base={g.currentBet} enabled={enabled&&legal.canRaise} es={es} onAdd={addChip} onClear={()=>{raiseRef.current=g.bets.human;setRaise(String(g.bets.human));setSelectedChips([]);selectionIndex.current=0;setLanded(new Set());flightGeneration.current++;setFlights([]);}} onConfirm={()=>{if(validRaise)send({type:'raise',to:raiseValue});}}/></View>
- <View testID="poker-cpu-clock" style={{position:'absolute',top:'50%',marginTop:-36,left:'50%',marginLeft:-36,height:72,width:72,alignItems:'center',justifyContent:'center',zIndex:25}}><OnlineTurnTimer size={72} circularOnly avatar={playerAvatarId==='selfie'&&playerAvatarPhoto?{uri:playerAvatarPhoto}:DOMINO_AVATARS.find(a=>a.id===playerAvatarId)?.image??DOMINO_AVATARS[0].image} avatarLabel={name} avatarTestID="table-player-avatar" attentionKey={`poker-cpu:${waitingClock.generation}`} clock={g.turn==='human'&&!g.result?waitingClock.clock:null} enabled={waitingForHuman} es={es} onPause={waitingClock.pause} onResume={waitingClock.resume}/><Text testID="table-player-name" accessibilityLabel={name} numberOfLines={1} style={{position:'absolute',top:69,left:-8,width:88,maxWidth:88,textAlign:'center',lineHeight:14,color:C.ivory,fontSize:12,fontWeight:'600'}}>{name}</Text></View>
+ <View testID="poker-avatar-axis" pointerEvents="box-none" style={{position:'absolute',top:'50%',marginTop:-36,left:0,right:0,height:72,alignItems:'center',zIndex:25}}><View testID="poker-cpu-clock" style={{height:72,width:72,alignItems:'center',justifyContent:'center'}}><OnlineTurnTimer size={72} circularOnly avatar={playerAvatarId==='selfie'&&playerAvatarPhoto?{uri:playerAvatarPhoto}:DOMINO_AVATARS.find(a=>a.id===playerAvatarId)?.image??DOMINO_AVATARS[0].image} avatarLabel={name} avatarTestID="table-player-avatar" attentionKey={`poker-cpu:${waitingClock.generation}`} clock={g.turn==='human'&&!g.result?waitingClock.clock:null} enabled={waitingForHuman} es={es} onPause={waitingClock.pause} onResume={waitingClock.resume}/><Text testID="table-player-name" accessibilityLabel={name} numberOfLines={1} style={{position:'absolute',top:69,left:-8,width:88,maxWidth:88,textAlign:'center',lineHeight:14,color:C.ivory,fontSize:12,fontWeight:'600'}}>{name}</Text></View></View>
  {result&&!showResult&&bankruptSeat(g)?<View testID='poker-bankrupt-continuation' style={{position:'absolute',top:-48,right:12,width:156,minHeight:46}}><PokerContinuation game={g} es={es} blocked={dealing||paused||collectingPending} names={{human:name,computer:opponent.name}} onContinue={next=>{setShown('');setPoker(current=>current===g?next:current);}}/></View>:null}
 
 

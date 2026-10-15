@@ -7,7 +7,7 @@ import type { DrinkGift } from './drinks';
 import { normalizeDrinkGift } from './drinks';
 import { OPPONENTS } from './opponents';
 import type { OpponentId } from './opponents';
-import { isDominoAvatarId, DominoAvatarId } from './dominoAvatars';
+import { DOMINO_AVATARS, isDominoAvatarId, DominoAvatarId } from './dominoAvatars';
 import { isValidAvatarPhoto } from '../online/avatarPhoto';
 import { normalizeAvatarName } from '../online/avatarIdentity';
 import type {LocalClock} from './localTurnClock';
@@ -143,6 +143,11 @@ export function ComputerGameProvider({ children }: { children: React.ReactNode }
   const drinkEvent = useRef<{ actor: DominoAvatarId; result: Result | null }>({ actor: dominoOpponentId, result: null });
   const seenDrinkResults = useRef(new WeakSet<Result>());
   const [game, setGame] = useState<Game | null>(null);
+  useEffect(()=>{
+    if(!avatarsLoaded)return;
+    const name=playerAvatarId==='selfie'?(playerAvatarName||'Selfie'):(DOMINO_AVATARS.find(a=>a.id===playerAvatarId)?.name??DOMINO_AVATARS[0].name);
+    setGame(current=>current&&current.playerName!==name?{...current,playerName:name}:current);
+  },[playerAvatarId,playerAvatarName,avatarsLoaded]);
   const localTurnClockRef=useRef<LocalClock|null>(null);
   const reducedMotion = useReducedMotion();
   useEffect(() => {

@@ -18,6 +18,10 @@
   byId('return').hidden=false;
   const scheme=/^[a-z][a-z0-9+.-]*$/.test(c.scheme)&&!['http','https','javascript','data','file','intent'].includes(c.scheme)?c.scheme:null;
   if(scheme&&c.purpose!=='preview'){byId('open').href=scheme+'://online?'+(invite.game==='poker'?'pokerRoom':'onlineRoom')+'='+invite.code;byId('open').hidden=false;}
+  const pilot=byId('open-pilot');
+  if(pilot&&c.scheme==='dominoparty'&&c.secondaryScheme==='domino-online-test'){
+   pilot.href='domino-online-test://online?'+(invite.game==='poker'?'pokerRoom':'onlineRoom')+'='+invite.code;pilot.hidden=false;
+  }
   const device=platform(window.navigator),store=device&&c.stores?.[device];
   let fallbackTimer=null;const cancelStoreRedirect=()=>{if(fallbackTimer!==null)window.clearTimeout(fallbackTimer);fallbackTimer=null;};
   if(store){const s=new URL(store);if(s.protocol==='https:'&&!s.username&&!s.password&&['play.google.com','apps.apple.com'].includes(s.hostname)){byId('install').href=s.href;byId('install').hidden=false;}}
@@ -28,6 +32,7 @@
   // OS verified app/universal links decide whether the installed app opens.
   // Only verified configured store URLs enable automatic fallback; staging defaults to manual installation.
   byId('open').addEventListener('click',cancelStoreRedirect);
+  if(pilot)pilot.addEventListener('click',cancelStoreRedirect);
   doc.addEventListener('visibilitychange',()=>{if(doc.hidden)cancelStoreRedirect();});
   window.addEventListener('pagehide',cancelStoreRedirect);
   if(c.automaticStoreFallback===true&&!byId('install').hidden)fallbackTimer=window.setTimeout(()=>{if(!doc.hidden)window.location.replace(store);},1600);

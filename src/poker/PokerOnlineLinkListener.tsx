@@ -8,7 +8,7 @@ import {parsePokerInvitation} from './pokerInvitation';
 export function PokerOnlineLinkListener(){
  const nav=useNav(),latest=useRef(nav);latest.current=nav;
  useEffect(()=>{let alive=true,warm=false;
-  const open=(url:string|null)=>{if(!alive||!url)return;const base=process.env.EXPO_PUBLIC_POKER_ONLINE_INVITE_BASE||process.env.EXPO_PUBLIC_DOMINO_ONLINE_INVITE_BASE||(Platform.OS==='web'?`${window.location.origin}/`:undefined),code=parsePokerInvitation(url,base,appConfig.expo.scheme),current=latest.current;if(!code||current.screen==='pokerOnline'&&current.pendingPokerCode===code)return;current.openPokerOnline(code);};
+  const open=(url:string|null)=>{if(!alive||!url)return;const base=process.env.EXPO_PUBLIC_POKER_ONLINE_INVITE_BASE||process.env.EXPO_PUBLIC_DOMINO_ONLINE_INVITE_BASE||(Platform.OS==='web'?`${window.location.origin}/`:undefined),code=parsePokerInvitation(url,base,(process.env.EXPO_PUBLIC_DOMINO_ONLINE_SCHEME||appConfig.expo.scheme)),current=latest.current;if(!code||current.screen==='pokerOnline'&&current.pendingPokerCode===code)return;current.openPokerOnline(code);};
   const subscription=Linking.addEventListener('url',event=>{warm=true;open(event.url);});
   void Linking.getInitialURL().then(url=>{if(!warm)open(url);}).catch(()=>{});
   return()=>{alive=false;subscription.remove();};
