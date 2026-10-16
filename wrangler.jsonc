@@ -2,7 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "domino-party",
   "compatibility_date": "2026-06-24",
+  "build": {
+    "command": "node web/landing-preview/build-production.mjs"
+  },
   "assets": {
-    "directory": "docs"
+    "directory": ".local/web-site-release/site"
   }
 }

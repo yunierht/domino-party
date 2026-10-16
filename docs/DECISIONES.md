@@ -1303,3 +1303,41 @@ Correo autorizado UNA VEZ al estar disponible para testers, destinatario yunielh
 ## 2026-10-15 - Entrega interna RC31 completada
 
 Aplicada autorizacionhumana de RC: codigo aprobado integrado/pusheado en8f653bb, tagv1.0.14-rc.1 sinmover. Solo canalinterno existente publicado31; produccion28/iOS intactos. AAB validado y APK universal firmadoGoogle obtenidos, referencias/hashes/evidencia en CONTEXTO. No nueva aprobacionfisica inferida de compilacion/Play. Correo de disponibilidad ya enviado por coordinador con evidenciaSENT reportada; no duplicar. Proximopaso es prueba real dostelefonos, no rediseno. Documentacionfinal puede tener commitseparado autorizado; no alterar codigo/tagRC.
+
+## 2026-10-16 — Propuesta visual web centrada en seguir partidas
+
+Fuente: dirección humana transmitida por chat `01a145cb-087e-7b70-8d98-edad16b0fe00`. Autoriza ejemplo local de landing moderna con imágenes actuales, acción principal seguir por código/enlace y sin CTA de descarga; precisa conservar la barra superior (sustituye interpretación de retirarla), con secciones de una misma página y legales discretos. Logo circular de mayor tamaño y exterior transparente, emblema conservado. Estado: candidato aislado en `web/landing-preview`, render revisado según CONTEXTO; aprobación estética e integración pendientes. No autoriza publicar, commit/push ni cambios en app/Android/juegos. Historial de congelamiento y permisos de entrega Android permanece independiente.
+
+Precisión humana posterior, misma fuente: prefiere diseño original con TRES teléfonos superpuestos y animación. Rechaza hero de monitor del primer ejemplo; sustituido por DOM/recursos/movimiento originales en candidato local. Demás solicitudes vigentes; revisión visual humana de esta nueva propuesta pendiente. No publicación.
+
+Precisión humana adicional: botón superior de seguimiento AMARILLO/dorado abre popup para aceptar código/enlace; retirar formulario inline «¿Tienes un código de partida?». Centrar texto `SOCIAL CLUB` bajo `DOMINO` junto al emblema, sin regenerar logo. Implementado solo en candidato con diálogo existente, preservando seguimiento/visor/contratos. Mantener tres teléfonos originales y navbar; sin publicación/Git/Android.
+
+Nueva solicitud humana extiende candidato al visor: score e historial de partidas ganadas simultáneos en pantalla/TV, preferentemente al lado, móvil apilado. Autorizado reutilizar datos/lector reales existentes sin backend nuevo ni modificar contratos o partida. Implementado panel local de resultados terminados; con referencia compartida usa lector existente, sin ella indica ausencia de historial anterior. Botón ya no sustituye marcador por otra página. QA local con fixture identificado y dobles; acceso al visor público activo rechazado por revisión automática, no prueba live nueva. No publicación/Git/Android.
+
+Precisiones posteriores sustituyen panel siempre visible/foco: Historial abre/cierra lateral, cerrado inicialmente, marcador recupera tamaño/composición al cerrar. Ganados/Perdidos derivados de registros reales recibidos, sin fabricar archivo. Mantener QR compacto y cambiar su título por `Follow on your phone` / `Sigue en tu teléfono`, quitando descripción Scan… y conservando enlace generado. Implementado en candidato y verificado con datos de ejemplo/dobles; no prueba física ni publicación.
+
+Precisión adicional: botón Historial amarillo mientras abierto y normal al cerrar. Implementado por `aria-expanded`, sincronizado con toggle. Fallo humano de segundo toque no reproducido en versión servida, comprobados ciclos repetidos; fuente/evidencia en CONTEXTO, no afirmar reproducción o causa caché confirmada.
+
+Última dirección humana web: «spinner» se refiere a rueda de puntuación y NO loader; autoriza tres tipos existentes del teléfono (engranaje/velocímetro/planetario), iconos para forma y color incluyendo borde/acento tarjeta, puntos/restantes dentro y nombres/equipo/jugadores arriba con rueda centrada. Mapeo de fuente app y QA en CONTEXTO; sin editar app. Rechaza tabla0/1 y cajas exteriores grandes del historial: sustituida por tarjetas compactas estilo `HistoryScreen`, ganador arriba, dos equipos con totales oro/rojo lado a lado, orden/fecha auténticos; sin inventar resultado. Logo header algo mayor y texto debajo centrado. Implementado en candidato local; no cambia autorización de publicación/Git/Android.
+
+Refinamiento final de densidad: quitar línea Target/Meta y número de rondas de tarjetas de historial; mantener objetivo/restantes del marcador principal, winnername/equipos/totales/fecha. Implementado solo presentación de candidato.
+
+Nueva dirección TV: ampliar ruedas/números principales y moderadamente tarjetas score para lectura lejana; no agrandar historial. Sugerencia posterior permite nombres/equipo/jugadores arribaizquierda dentro tarjeta si libera espacio, conservando rueda centrada. Implementado responsivo, sin ocultar overflow ni datos por quitar scrollbar; no prueba física de TV.
+
+Marca vertical solicitada también en encabezado VISOR de partida, no únicamente portada. Reporte humano confirmado: `.watch-brand` seguía en fila56px. Corregido96px desktop/80móvil, nombre debajo centrado; validación browser en la misma vista y captura en CONTEXTO. No publicación.
+
+Usuario amplía legibilidad TV a puntos por ronda de franja inferior de tarjetas score: texto mayor y alineadoizquierda, sin modificar datos/orden/suma; implementado con wrap y scrolllocal, responsivo. No se agranda historial de resultados.
+
+Precisión: quitar sufijo visual points/puntos de chips por ronda para ganar espacio, manteniendo etiqueta completa accesible y cálculo/objetivo/restantes intactos. Aplicado en rendercomún del candidato, no parche de fixture. Reporte humano de paridad pendiente de identificar su URL, sin autorización de publicación implícita.
+
+Dirección posterior tv06: ruedas aún mayores aprovechando espacio superior; alinear primera TARJETA de historial con SVG real, sin label Shared results interpuesto y sin offset TV en móvil. Implementado con token geométrico compartido. Restyle visual autorizado solo History/EN/ES/speaker: grupo oscuro coherente, SVG sin emojis, estado amarillo, etiquetas/foco y callbacks conservados. Usuario confirma usa IAB del chat principal; no asumir Chrome o caché, abrir revisión identificada nueva para comparar sin tocar partida anterior. Fuente y límites en CONTEXTO; sin publicación.
+
+Corrección humana explícita tv07 SUSTITUYE anclaSVG de tv06: top de primera tarjeta HISTORIAL == top exterior de tarjetas EQUIPO que contienen ruedas. Sin offset basado en rueda/label. Quitar símbolo delante de History/Historial, texto limpio; resto barra moderna aceptado. Implementado y comprobado delta0 en navegador; no publicación.
+
+tv08 SUSTITUYE aproximaciones de marca/toolbar del visor: copiar EXACTO bloque de marca aprobado de landing (letrero pequeño de dos líneas) a Follow sin cambiar landing; mismo HTML/assets y estilo compartido, paridad render exacta escritorio/móvil comprobada. Toolbar se adapta a controles sencillos landing con línea seleccionada dorada inferior y texto, SIN pills/relleno/sombra; última dirección reemplaza relleno amarillo anterior, conserva señales selected y callbacks. Historial ancla tv07 sigue vigente. Candidato local, sin publicar/Git/app.
+
+### 2026-10-16 — Aprobación y publicación del candidato web tv08
+
+Fuente: autorización humana explícita transmitida por chat coordinador `01a145cb-087e-7b70-8d98-edad16b0fe00`: aprobar candidato, realizar check-in/commit web y publicar ahora en `dominoparty.com`, servicio Cloudflare existente; push solo si el flujo real lo requiere. Sustituye el límite previo noGit/noPublicación únicamente para esta entrega web. No autoriza Android, backend, gameplay, tiendas, versiones, DNS o servicios nuevos.
+
+Preparación: promover HTML/CSS/JS revisados, conservar recursos y lector real, retirar TODO fixture/ramas de preview del paquete público y excluir documentos internos mediante allowlist. Servicio real comprobado como Worker `domino-party` con dominio personalizado existente; despliegue directo no necesita push. Registrar resultado, versión previa y límites de validación en CONTEXTO. Sesión autenticada local disponible; no pedir ni guardar tokens en chat/repositorio.

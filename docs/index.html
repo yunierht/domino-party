@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Domino Social Club | Dominoes Scorekeeper</title>
+  <title>Domino Social Club | Follow a live game</title>
   <meta name="description" content="Domino Social Club is a clean dominoes scorekeeper for local matches, live score sharing, team history, and no account required." />
   <meta name="theme-color" content="#0A0B0A" />
   <link rel="canonical" href="https://dominoparty.com/" />
@@ -346,154 +346,69 @@
       .live-page { padding-top: 10px; }
     }
   </style>
+<link rel="stylesheet" href="/landing/landing.css" />
+<link rel="stylesheet" href="/landing/watch-history.css" />
+<link rel="stylesheet" href="/landing/watch-dials.css" />
+<link rel="stylesheet" href="/landing/watch-toolbar.css" />
+<link rel="stylesheet" href="/landing/brand-lockup.css" />
 </head>
 <body>
   <header class="nav" id="site-header">
     <div class="wrap nav-inner">
-      <a class="brand" href="/">
-        <img src="img/icon.png?v=social-club" alt="" />
-        <span>Domino Social Club</span>
-      </a>
-      <nav class="nav-links" aria-label="Main navigation">
-        <a href="#score">Score</a>
-        <a href="#live">Live sharing</a>
-        <a href="#screens">Screens</a>
-        <a href="/privacy/">Privacy</a>
-        <a href="/legal/" data-site-key="legal">Legal</a>
-      </nav>
-      <div class="site-lang-toggle" role="group" aria-label="Website language"><button type="button" data-site-lang="en" aria-pressed="true">EN</button><button type="button" data-site-lang="es" aria-pressed="false">ES</button></div>
-      <button class="button follow" type="button" data-follow-open>Follow a game</button>
+      <a class="brand" href="/" aria-label="Domino Social Club home"><img src="/landing/logo-circle.svg" alt=""/><span>DOMINO<small>SOCIAL CLUB</small></span></a>
+      <nav class="landing-nav" aria-label="Main navigation"><a href="#score">Score</a><a href="#experience-title">Live sharing</a><a href="#screens">Screens</a></nav>
+      <div class="header-right"><div class="site-lang-toggle" role="group" aria-label="Website language"><button type="button" data-site-lang="en" aria-pressed="true">EN</button><button type="button" data-site-lang="es" aria-pressed="false">ES</button></div><button class="header-follow" type="button" data-follow-open>Follow a game <span aria-hidden="true">↗</span></button></div>
     </div>
   </header>
   <main id="marketing-page">
-    <section class="hero">
-      <div class="wrap hero-grid">
-        <div>
-          <h1>Score together. Follow live.</h1>
-          <p class="lead">Score every point. Let friends watch in real time.</p>
-	          <div class="cta-row" id="download">
-	            <button class="button follow" type="button" data-follow-open>Follow a game</button>
-	            <a class="button secondary" id="store-cta" href="https://play.google.com/store/apps/details?id=com.yht.dominoparty" target="_blank" rel="noopener">Get the app</a>
-          </div>
-        </div>
-        <div class="showcase" aria-label="Domino Social Club app screenshots">
-          <div class="screen-wall" tabindex="0" aria-label="Domino Social Club app screen preview">
-            <img class="phone-shot setup" src="img/screens/new-game.jpg" alt="Set up a Domino Social Club match" />
-            <img class="phone-shot home" src="img/screens/home.jpg" alt="Domino Social Club home" />
-            <img class="phone-shot score" src="img/screens/score-board.jpg" alt="Active live dominoes scoreboard" />
-          </div>
-        </div>
-        <div class="trust-strip" aria-label="App highlights">
-          <div class="trust"><span class="trust-icon">2</span><span><b>Two teams</b>Fast local scoring</span></div>
-          <div class="trust"><span class="trust-icon">●</span><span><b>Live sharing</b>Watch with a game code</span></div>
-          <div class="trust"><span class="trust-icon">✓</span><span><b>Private by default</b>No account or ads</span></div>
+    <section class="lobby wrap" id="score" aria-labelledby="lobby-title">
+      <div class="lobby-copy">
+        <div class="eyebrow"><span class="status-dot" aria-hidden="true"></span><span>A seat at every table.</span></div>
+        <h1 id="lobby-title">Score together. Follow live.</h1>
+        <p class="lobby-lead">Follow every point. Stay close to the game.</p>
+        <div class="lobby-notes"><span><i aria-hidden="true">✓</i> No account needed</span><span><i aria-hidden="true">✓</i> Made for the big screen</span></div>
+      </div>
+      <div class="showcase" aria-label="Domino Social Club app screenshots">
+        <div class="screen-wall" tabindex="0" aria-label="Domino Social Club app screen preview">
+          <img class="phone-shot setup" src="img/screens/new-game.jpg" alt="Set up a Domino Social Club match" />
+          <img class="phone-shot home" src="img/screens/home.jpg" alt="Domino Social Club home" />
+          <img class="phone-shot score" src="img/screens/score-board.jpg" alt="Active live dominoes scoreboard" />
         </div>
       </div>
     </section>
-    <section class="section" id="score">
-      <div class="wrap">
-        <div class="section-header">
-          <h2>A scoreboard made for the way dominoes is actually played.</h2>
-          <p>Two teams, four players, custom targets, round history, and big score rings that make the table easy to read from across the room.</p>
-        </div>
-        <div class="feature-grid">
-          <article class="feature"><div class="icon">15</div><h3>Tap in points</h3><p>Add each round quickly, then edit a hand if the table changes its mind.</p></article>
-          <article class="feature"><div class="icon">QR</div><h3>Share live</h3><p>Start a broadcast and show a QR code so friends can follow the score.</p></article>
-          <article class="feature"><div class="icon">W</div><h3>Track wins</h3><p>Keep match history and remember the rivalries that keep coming back.</p></article>
-          <article class="feature"><div class="icon">ES</div><h3>English and Spanish</h3><p>Switch language and table style from settings whenever you want.</p></article>
-        </div>
-        <p class="legal-note" data-site-key="verifyNotice">Score and history tools are for convenience. Independently verify official scores, standings, and tournament records.</p>
-      </div>
+    <section class="experience wrap" aria-labelledby="experience-title">
+      <div class="experience-intro"><span class="eyebrow">FROM THEIR TABLE TO YOUR SCREEN</span><h2 id="experience-title">One game.<br/>Everyone connected.</h2><p>A shared code is all it takes to follow along.</p></div>
+      <div class="experience-card" id="screens"><span class="step-number">01 / SHARE</span><h3>It starts at the table.</h3><p>The scorer shares a game code or link.</p><div class="shot-window"><img src="/img/screens/share-score.jpg" alt="Existing app screen for sharing a game with a QR code" loading="lazy"/></div></div>
+      <div class="experience-card"><span class="step-number">02 / FOLLOW</span><h3>Let the score tell the story.</h3><p>Watch the scoreboard from your browser.</p><div class="shot-window"><img src="/img/screens/score-board.jpg" alt="Existing Domino Social Club scoreboard screen" loading="lazy"/></div></div>
     </section>
-    <section class="section" id="live">
-      <div class="wrap split">
-        <div>
-          <div class="section-header">
-            <h2>One scorer. Everyone watching live.</h2>
-            <p>Live sharing is built for family tables, tournament corners, and anyone waiting on the next hand.</p>
-          </div>
-          <div class="live-list">
-            <div class="live-step"><div class="icon">1</div><div><strong>Start broadcasting</strong><p>The app creates a short code and QR for that match.</p></div></div>
-            <div class="live-step"><div class="icon">2</div><div><strong>Friends scan</strong><p>They follow score changes from their own phones in real time.</p></div></div>
-            <div class="live-step"><div class="icon">3</div><div><strong>Stop when done</strong><p>Keep the match local, private, and under your control.</p></div></div>
-          </div>
-        </div>
-        <img class="phone-shot" src="img/screens/share-score.jpg" alt="QR code screen for sharing a live game" />
-      </div>
-    </section>
-    <section class="section" id="screens">
-      <div class="wrap">
-        <div class="section-header center">
-          <h2>Designed like a dark domino table.</h2>
-          <p>Gold controls, red and green scoring moments, and real match screens that stay readable while the game gets loud.</p>
-        </div>
-        <div class="gallery">
-          <figure><img src="img/screens/home.jpg" alt="Home screen" /><figcaption>Home</figcaption></figure>
-          <figure><img src="img/screens/new-game.jpg" alt="New match screen" /><figcaption>New match</figcaption></figure>
-          <figure><img src="img/screens/score-board.jpg" alt="Score board screen" /><figcaption>Score board</figcaption></figure>
-          <figure><img src="img/screens/share-score.jpg" alt="Share score screen" /><figcaption>Live QR</figcaption></figure>
-          <figure><img src="img/screens/settings.jpg" alt="Settings screen" /><figcaption>Settings</figcaption></figure>
-        </div>
-      </div>
-    </section>
-    <section class="section">
-      <div class="wrap">
-        <div class="section-header">
-          <h2>Choose the board.</h2>
-          <p>Switch the table look to match the night.</p>
-        </div>
-        <div class="themes">
-          <div class="theme"><div class="swatch" style="background: #111412;"><span class="chip" style="background:#d7ad55"></span><span class="chip" style="background:#e05243"></span></div><strong>Boxed Dots</strong><span>Graphite boxes, gold and red accents.</span></div>
-          <div class="theme"><div class="swatch" style="background: #050705;"><span class="chip" style="background:#101010"></span><span class="chip" style="background:#f1d17b"></span></div><strong>Carbon Fiber</strong><span>Deep black table texture.</span></div>
-          <div class="theme"><div class="swatch" style="background: #0d281b;"><span class="chip" style="background:#1f7a52"></span><span class="chip" style="background:#d7ad55"></span></div><strong>Casino</strong><span>Green felt and warm buttons.</span></div>
-          <div class="theme"><div class="swatch" style="background: #102047;"><span class="chip" style="background:#284e9d"></span><span class="chip" style="background:#e05243"></span></div><strong>Cuban Board</strong><span>Blue, red, and classic table energy.</span></div>
-        </div>
-      </div>
-    </section>
-    <section class="section">
-      <div class="wrap privacy-band">
-        <div><h2>No account. No ads.</h2><p>Game data stays on your device unless you choose to share a live match. Live sharing uses Firebase only for app functionality.</p></div>
-        <a class="button secondary" href="/privacy/">Read privacy policy</a>
-      </div>
-    </section>
+    <div class="closing-line wrap"><span class="status-dot"></span><span>Good company. Great games. Every point together.</span><button type="button" data-follow-open>Take your seat <span aria-hidden="true">↗</span></button></div>
   </main>
-  <footer id="site-footer">
-    <div class="wrap foot">
-      <div class="brand"><img src="img/icon.png?v=social-club" alt="" /><span>Domino Social Club</span></div>
-	      <div class="foot-links">
-        <a href="/privacy/">Privacy</a>
-        <a href="/legal/" data-site-key="legal">Legal</a>
-        <a href="mailto:Yunierht@yahoo.com">Contact</a>
-        <a href="https://play.google.com/store/apps/details?id=com.yht.dominoparty" target="_blank" rel="noopener">Google Play</a>
-        <a href="https://apps.apple.com/app/id6793746031" target="_blank" rel="noopener">App Store</a>
-      </div>
-      <div>Copyright 2026 YHT</div>
-    </div>
-  </footer>
+  <footer id="site-footer"><div class="wrap foot"><span>© 2026 YHT · Domino Social Club</span><div class="foot-links"><a href="/privacy/">Privacy</a><a href="/legal/">Legal</a><a href="mailto:Yunierht@yahoo.com">Contact</a></div></div></footer>
+
   <main class="live-page" id="live-page" hidden>
     <div class="watch-shell">
       <div class="watch-topbar">
         <button class="back-button" type="button" id="watch-back" aria-label="Back to Domino Social Club home">← <span id="watch-back-text">Back</span></button>
         <div class="watch-actions">
-          <button class="sound-button" type="button" id="watch-history" aria-label="Open match history">⌁ <span id="watch-history-text">History</span></button>
+          <button class="sound-button" type="button" id="watch-history" aria-expanded="false" aria-controls="watch-results-panel" aria-label="Open match history"><span id="watch-history-text">History</span></button>
           <button class="board-style-button" type="button" id="board-style-button" aria-label="Change appearance. Current: Boxed Dots"><span class="board-style-icon" aria-hidden="true">↻</span></button><span class="board-style-name" id="board-style-label" aria-live="polite">Boxed Dots</span>
           <div class="lang-toggle" role="group" aria-label="Board language"><button type="button" data-watch-lang="en" aria-pressed="true">EN</button><button type="button" data-watch-lang="es" aria-pressed="false">ES</button></div>
           <button class="sound-button" type="button" id="sound-toggle" aria-pressed="false" aria-label="Enable winner sound">🔇</button>
         </div>
-        <div class="watch-brand"><img src="img/icon.png?v=social-club" alt="" /><span>Domino Social Club</span></div>
+        <div class="watch-brand"><img src="/landing/logo-circle.svg" alt=""/><span>DOMINO<small>SOCIAL CLUB</small></span></div>
       </div>
       <div class="live-board" id="live-board" aria-live="polite">
         <div class="live-meta"><span class="live-dot" id="live-dot"></span><span id="live-status">LIVE</span><span aria-hidden="true">·</span><span id="live-code"></span></div>
         <div class="winner-celebration" id="winner-celebration" role="status" hidden><span class="winner-cup" aria-hidden="true">🏆</span><span><span class="winner-kicker" id="winner-kicker">Winner</span><span class="winner-name" id="winner-name"></span></span></div>
-        <div class="score-grid">
-          <section class="team-card" id="team-a-card"><div class="team-name" id="team-a-name"></div><div class="team-score" id="team-a-score">0</div><div class="team-needed" id="team-a-needed"></div><div class="team-players" id="team-a-players"></div><ol class="team-history" id="team-a-rounds" aria-label="Team A scoring rounds"></ol></section>
-          <section class="team-card" id="team-b-card"><div class="team-name" id="team-b-name"></div><div class="team-score" id="team-b-score">0</div><div class="team-needed" id="team-b-needed"></div><div class="team-players" id="team-b-players"></div><ol class="team-history" id="team-b-rounds" aria-label="Team B scoring rounds"></ol></section>
+        <div class="watch-overview"><div class="watch-current"><div class="score-grid">
+          <section class="team-card" id="team-a-card"><div class="watch-team-identity"><div class="team-name" id="team-a-name"></div><div class="team-players" id="team-a-players"></div></div><div class="team-score" id="team-a-score">0</div><div class="team-needed" id="team-a-needed"></div><ol class="team-history" id="team-a-rounds" aria-label="Team A scoring rounds"></ol></section>
+          <section class="team-card" id="team-b-card"><div class="watch-team-identity"><div class="team-name" id="team-b-name"></div><div class="team-players" id="team-b-players"></div></div><div class="team-score" id="team-b-score">0</div><div class="team-needed" id="team-b-needed"></div><ol class="team-history" id="team-b-rounds" aria-label="Team B scoring rounds"></ol></section>
         </div>
         <section class="watch-share" aria-labelledby="watch-share-title">
           <div class="watch-qr"><canvas id="watch-qr" width="176" height="176" role="img" aria-label="QR code to follow this game on the Domino Social Club website"></canvas></div>
-          <div><h2 id="watch-share-title">Share this live game</h2><p id="watch-share-copy">Scan to follow this scoreboard on another phone.</p></div>
+          <div><h2 id="watch-share-title">Share this live game</h2><p id="watch-share-copy" hidden>Scan to follow this scoreboard on another phone.</p></div>
         </section>
-        <p class="live-updated" id="live-updated"></p>
+        <p class="live-updated" id="live-updated"></p></div><aside class="watch-results-panel" id="watch-results-panel" tabindex="-1" aria-labelledby="watch-results-title" hidden><h2 id="watch-results-title">Match history</h2><p id="watch-results-status" role="status"></p><div id="watch-results"></div></aside></div>
       </div>
     </div>
 	  </main>
@@ -524,7 +439,7 @@
       </div>
       <form class="code-form" id="follow-form" novalidate>
         <label class="sr-only" id="follow-code-label" for="follow-code">Live game code</label>
-        <input class="code-input" id="follow-code" name="code" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="6" placeholder="ABCD" aria-describedby="follow-error" />
+        <input class="code-input" id="follow-code" name="code" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="200" placeholder="Code or game link" aria-describedby="follow-error" />
         <button class="button primary" id="watch-submit" type="submit">Watch live</button>
       </form>
       <p class="form-error" id="follow-error" role="alert"></p>
@@ -546,7 +461,7 @@
       var isIPadOS = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
       var platform = /android/i.test(ua) ? "android" : /iPad|iPhone|iPod/i.test(ua) || isIPadOS ? "ios" : "";
       var storeCta = document.getElementById("store-cta");
-      if (platform === "ios") storeCta.href = "https://apps.apple.com/app/id6793746031";
+      if (storeCta && platform === "ios") storeCta.href = "https://apps.apple.com/app/id6793746031";
       if (platform) {
         document.querySelectorAll("[data-store]").forEach(function (link) {
           var preferred = link.getAttribute("data-store") === platform;
@@ -573,7 +488,6 @@
       var stopHistorySubscription = null;
       var historyReturnToWatch = false;
       var historyStatsVisible = true;
-      var localHistoryFixtureId = "LOCALHISTORYFIXTURE01";
       var activeCode = "";
       var currentGame = null;
       var soundEnabled = false;
@@ -588,7 +502,7 @@
         en: {
           back:"Back", backLabel:"Back to Domino Social Club home", boardStyle:"Board style", boardDesc:"Choose how this scoreboard looks on this device.", close:"Close",
           live:"LIVE", final:"FINAL", ended:"BROADCAST ENDED", lost:"CONNECTION LOST", winner:"Winner", teamA:"Team A", teamB:"Team B", finalScore:"Final score", toWin:"to win", noRounds:"No scoring rounds yet", points:"points",
-          shareTitle:"Share this live game", shareCopy:"Scan to open this game in the Domino Social Club app.", target:"Target", updates:"Updates automatically", qrLabel:"QR code to open live game {code} in the Domino Social Club app",
+          shareTitle:"Follow on your phone", shareCopy:"Scan to open this game in the Domino Social Club app.", target:"Target", updates:"Updates automatically", qrLabel:"QR code to open live game {code} in the Domino Social Club app",
           followTitle:"Follow a live game", followDesc:"Enter the live code shown on the scorer's phone to watch the scoreboard update here.", liveCode:"Live game code", watchLive:"Watch live", connecting:"Connecting to the game…",
           invalid:"Enter the 4–6 character code from the scorer's phone.", notFound:"No shared game was found with that code. Check the code and try again.", loadError:"The live game could not be loaded. Check your connection and try again.",
           soundOn:"Mute winner sound", soundOff:"Enable winner sound", history:"History", historyForGame:"Match history", historyUnavailable:"This live game does not include a shared-history link. Ask the organizer for their private history link or key.", boxDesc:"Graphite dots and gold trim", carbonDesc:"Sport carbon weave", cueDesc:"Cuban-inspired board", usaDesc:"Stars and stripes board"
@@ -596,7 +510,7 @@
         es: {
           back:"Volver", backLabel:"Volver al inicio de Domino Social Club", boardStyle:"Estilo de mesa", boardDesc:"Elige cómo se ve este marcador en este dispositivo.", close:"Cerrar",
           live:"EN VIVO", final:"FINAL", ended:"TRANSMISIÓN FINALIZADA", lost:"CONEXIÓN PERDIDA", winner:"Ganador", teamA:"Equipo A", teamB:"Equipo B", finalScore:"Puntuación final", toWin:"para ganar", noRounds:"Aún no hay rondas con puntos", points:"puntos",
-          shareTitle:"Comparte esta partida", shareCopy:"Escanea para abrir esta partida en la app Domino Social Club.", target:"Meta", updates:"Se actualiza automáticamente", qrLabel:"Código QR para abrir la partida en vivo {code} en la app Domino Social Club",
+          shareTitle:"Sigue en tu teléfono", shareCopy:"Escanea para abrir esta partida en la app Domino Social Club.", target:"Meta", updates:"Se actualiza automáticamente", qrLabel:"Código QR para abrir la partida en vivo {code} en la app Domino Social Club",
           followTitle:"Sigue una partida en vivo", followDesc:"Ingresa el código que aparece en el teléfono de quien anota para ver el marcador aquí.", liveCode:"Código de partida", watchLive:"Ver en vivo", connecting:"Conectando con la partida…",
           invalid:"Ingresa el código de 4 a 6 caracteres del teléfono de quien anota.", notFound:"No se encontró una partida compartida con ese código. Revísalo e inténtalo de nuevo.", loadError:"No se pudo cargar la partida en vivo. Revisa tu conexión e inténtalo de nuevo.",
           soundOn:"Silenciar sonido de victoria", soundOff:"Activar sonido de victoria", history:"Historial", historyForGame:"Historial de la partida", historyUnavailable:"Esta partida en vivo no incluye un enlace de historial compartido. Pide al organizador su enlace privado o clave de historial.", boxDesc:"Puntos grafito y borde dorado", carbonDesc:"Trama deportiva de carbono", cueDesc:"Mesa inspirada en Cuba", usaDesc:"Mesa de barras y estrellas"
@@ -605,7 +519,7 @@
       function S() { return boardStrings[watchLang]; }
       function updateSoundButton() {
         var button = document.getElementById("sound-toggle");
-        button.textContent = soundEnabled ? "🔊" : "🔇";
+        button.innerHTML = soundEnabled ? "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M11 5 6 9H3v6h3l5 4V5Z\"/><path d=\"M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14\"/></svg>" + "<span>" + (watchLang === "es" ? "Sonido" : "Sound on") + "</span>" : "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M11 5 6 9H3v6h3l5 4V5Z\"/><path d=\"m16 9 5 6m0-6-5 6\"/></svg>" + "<span>" + (watchLang === "es" ? "Silencio" : "Muted") + "</span>";
         button.setAttribute("aria-pressed", String(soundEnabled));
         button.setAttribute("aria-label", soundEnabled ? S().soundOn : S().soundOff);
       }
@@ -683,9 +597,10 @@
         livePage.hidden = false;
         document.body.classList.add("watching");
         if (wasHidden) window.scrollTo(0, 0);
-        if (wasHidden && !location.search.includes("previewScore=1")) history.pushState({ watching: true }, "", "#watch-" + code);
+        if (wasHidden) history.pushState({ watching: true }, "", "#watch-" + code);
       }
       function showMarketingPage() {
+        stopWatchHistorySubscription();
         window.stopDominoGameSubscription && window.stopDominoGameSubscription();
         board.classList.remove("ready");
         livePage.hidden = true;
@@ -793,7 +708,6 @@
         historyReturnToWatch=!!fromWatch;
         historyStatsVisible=true;
         document.querySelector(".history-tabs").hidden=false;
-        if ((location.hostname === "127.0.0.1" || location.hostname === "localhost") && spaceId === localHistoryFixtureId) { showLocalHistoryPreview(historyReturnToWatch); return; }
         activeHistorySpace=spaceId; if(dialog.open)dialog.close();if(historyDialog.open)historyDialog.close();siteHeader.hidden=true;marketingPage.hidden=true;siteFooter.hidden=true;livePage.hidden=true;historyPage.hidden=false;document.body.classList.remove("watching");document.getElementById("history-loading").hidden=false;document.getElementById("history-list-view").hidden=true;document.getElementById("history-stats-view").hidden=true;applyHistoryLanguage();if(stopHistorySubscription)stopHistorySubscription();window.subscribeToDominoHistory(spaceId,function(records){historyRecords=records;document.getElementById("history-loading").hidden=true;document.getElementById("history-list-view").hidden=false;renderHistory();renderHistoryStats();},function(){document.getElementById("history-loading").textContent=HS().error;}).then(function(stop){stopHistorySubscription=stop;});window.scrollTo(0,0);
       }
       function parseHistoryKey(value){try{var url=new URL(value);value=url.searchParams.get("history")||"";}catch(_){}value=String(value||"").trim();return /^[A-Za-z0-9]{16,32}$/.test(value)?value:"";}
@@ -808,6 +722,140 @@
         if (game.finishedAt == null || !game.winnerTeamId) return null;
         return (game.teams || []).find(function (team) { return team.id === game.winnerTeamId; }) || null;
       }
+// Injected inside the existing viewer closure: reuse its data helpers and history reader.
+var watchHistoryState = {key:null,records:[],status:'idle',stop:null,epoch:0,open:false};
+function toggleWatchHistory() {
+  var state=watchHistoryState, panel=document.getElementById('watch-results-panel'), button=document.getElementById('watch-history');
+  state.open=!state.open;
+  livePage.classList.toggle('history-open',state.open);
+  panel.hidden=!state.open;
+  button.setAttribute('aria-expanded',String(state.open));
+  if(state.open) syncWatchHistory();
+  else {
+    if(panel.contains(document.activeElement)) button.focus({preventScroll:true});
+    stopWatchHistorySubscription();
+  }
+}
+function stopWatchHistorySubscription() {
+  watchHistoryState.epoch++;
+  if (watchHistoryState.stop) watchHistoryState.stop();
+  watchHistoryState.stop = null;
+  watchHistoryState.key = null;
+  watchHistoryState.records = [];
+  watchHistoryState.status = 'idle';
+}
+function renderWatchHistory() {
+  var es = watchLang === 'es', state = watchHistoryState;
+  var list = document.getElementById('watch-results');
+  var status = document.getElementById('watch-results-status');
+  document.getElementById('watch-results-title').textContent = es ? 'Historial de partidas' : 'Match history';
+  var records = state.records.filter(function(record){return record.finishedAt!=null;});
+  var current = followedGameRecord();
+  // A shared archive has its own match IDs; do not duplicate the current result under its live code.
+  if (!state.key && current && completedWinner(currentGame)) records = [current].concat(records);
+  status.textContent = state.status === 'loading' ? (es ? 'Cargando historial compartido…' : 'Loading shared history…')
+    : state.status === 'error' ? (es ? 'No se pudo cargar el historial compartido. El marcador sigue disponible.' : 'Shared history could not be loaded. The scoreboard is still available.')
+    : state.status === 'unshared' ? (es ? 'Esta partida no comparte resultados anteriores.' : 'Previous results are not shared with this game.')
+    : records.length ? (es ? 'Resultados compartidos · más recientes primero' : 'Shared results · latest first')
+    : (es ? 'Aún no hay partidas terminadas compartidas.' : 'No completed shared games yet.');
+  status.hidden=state.status==='ready'&&records.length>0;
+  list.innerHTML = records.map(function(record) {
+    var teams = record.teams || [], totals = recordTotals(record), winner = teams.find(function(team) {return team.id === record.winnerTeamId;});
+    var time=record.createdAt == null?record.finishedAt:record.createdAt;
+    var date = time == null ? '' : new Date(Number(time)).toLocaleDateString(es?'es':'en',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    return '<article class="watch-result"><div class="watch-result-head"><span>'+(winner?(es?'Ganador':'Winner')+': <b>'+esc(historyTeamName(winner,teams.indexOf(winner),HS()))+'</b>':(es?'Sin ganador registrado':'No winner recorded'))+'</span><time>'+esc(date)+'</time></div>'
+      + '<div class="watch-result-pair">'+teams.slice(0,2).map(function(team,index) {return (index?'<span class="watch-result-divider" aria-hidden="true">—</span>':'')+'<div class="watch-result-side '+historyScoreClass(record,team,index,totals)+'"><b>'+esc(historyTeamName(team,index,HS()))+'</b><strong>'+Number(totals[index]||0)+'</strong><small>'+esc((team.players || []).filter(Boolean).join(' · '))+'</small></div>';}).join('')+'</div>'
+      + '</article>';
+  }).join('');
+}
+function syncWatchHistory() {
+  var state = watchHistoryState, key = historySpaceForLiveGame();
+  if (!state.open) return;
+  if (state.key === key) {renderWatchHistory();return;}
+  stopWatchHistorySubscription();
+  state.key = key;
+  state.status = key ? 'loading' : 'unshared';
+  renderWatchHistory();
+  if (!key) return;
+  var epoch = state.epoch;
+  function failed() {if (epoch !== state.epoch) return;state.status='error';renderWatchHistory();}
+  try {
+    Promise.resolve(window.subscribeToDominoHistory(key,function(records) {
+      if (epoch !== state.epoch) return;
+      state.records = records;
+      state.status = 'ready';
+      renderWatchHistory();
+    },failed)).then(function(stop) {
+      if (epoch !== state.epoch) {if(typeof stop === 'function') stop();return;}
+      state.stop = typeof stop === 'function' ? stop : null;
+    }).catch(failed);
+  } catch (_) {failed();}
+}
+
+// Web SVG adaptation of TrackingCounter's classic dial, using the viewer's score model.
+var watchDialFractions = {};
+var watchDialStyles=['robotic','speedometer','orbital'], watchDialColorOrder=['green','yellow','blue','red'];
+var watchDialColors={yellow:'#D7A63D',green:'#65C59A',red:'#AA463B',blue:'#68B9F5'};
+var watchDialAppearance={style:'robotic',teamAColor:'yellow',teamBColor:'red'};
+try {
+  var savedDials=JSON.parse(localStorage.getItem('domino-watch-dials-v1')||'null');
+  if(savedDials){if(watchDialStyles.includes(savedDials.style))watchDialAppearance.style=savedDials.style;['teamAColor','teamBColor'].forEach(function(key){if(watchDialColorOrder.includes(savedDials[key]))watchDialAppearance[key]=savedDials[key];});}
+} catch (_) {}
+function updateWatchDialAppearance(key,values) {
+  watchDialAppearance[key]=values[(values.indexOf(watchDialAppearance[key])+1)%values.length];
+  try {localStorage.setItem('domino-watch-dials-v1',JSON.stringify(watchDialAppearance));}catch(_){}
+  if(currentGame)renderWatchDials(currentGame);
+}
+function renderWatchDials(game) {
+  (game.teams || []).slice(0,2).forEach(function(team,index) {
+    var key=index?'b':'a', host=document.getElementById('team-'+key+'-score');
+    var score=teamTotal(game,team.id), target=Number(game.targetScore||0), remaining=Math.max(0,target-score);
+    var style=watchDialAppearance.style, speedometer=style==='speedometer',orbital=style==='orbital';
+    var colorKey=index?'teamBColor':'teamAColor',color=watchDialColors[watchDialAppearance[colorKey]];
+    host.style.color=color;
+    host.dataset.dialStyle=style;
+    var fraction=target>0?Math.min(1,Math.max(0,score/target)):0;
+    var length=speedometer?Math.PI*92*1.5:orbital?Math.PI*(3*(85+62)-Math.sqrt((3*85+62)*(85+3*62))):Math.PI*146;
+    var previous=watchDialFractions[team.id] == null ? fraction : watchDialFractions[team.id];
+    watchDialFractions[team.id]=fraction;
+    var marks=Array.from({length:speedometer?21:40},function(_,i){
+      var major=i%5===0, angle=(speedometer?-135+i*13.5:i*9)*Math.PI/180, start=speedometer?(major?70:78):(major?91:94),end=speedometer?85:98;
+      return '<line x1="'+(100+Math.sin(angle)*start)+'" y1="'+(100-Math.cos(angle)*start)+'" x2="'+(100+Math.sin(angle)*end)+'" y2="'+(100-Math.cos(angle)*end)+'" stroke="'+(major?(speedometer?'#F5F0E4':'currentColor'):'#657682')+'" stroke-width="'+(major?1.8:1)+'"/>';
+    }).join('');
+    host.setAttribute('role','img');
+    host.setAttribute('aria-label',team.name+': '+score+' / '+target+'; '+remaining+(watchLang==='es'?' para ganar':' to win'));
+    host.innerHTML='<svg viewBox="0 0 200 200" aria-hidden="true" focusable="false"><defs><radialGradient id="watch-dial-'+key+'" cx=".34" cy=".24" r=".78"><stop offset="0" stop-color="#2B3540"/><stop offset=".65" stop-color="#151D26"/><stop offset="1" stop-color="#050A10"/></radialGradient></defs><circle cx="100" cy="100" r="98" fill="#0B141B" stroke="#75818B" stroke-width="1.5"/><circle cx="100" cy="100" r="84" fill="url(#watch-dial-'+key+')" stroke="#050A10" stroke-width="3"/>'+marks+'<circle cx="100" cy="100" r="60" fill="#111A23" stroke="#53616B" stroke-width="2"/><path d="M100 27 A73 73 0 1 1 99.999 27 Z" fill="none" stroke="#30404D" stroke-width="9"/><path class="dial-progress" d="M100 27 A73 73 0 1 1 99.999 27 Z" fill="none" stroke="currentColor" stroke-width="9" stroke-dasharray="'+length+'" stroke-dashoffset="'+(length*(1-previous))+'" stroke-linecap="round"/></svg><span class="dial-values" aria-hidden="true"><strong>'+score+'</strong><small>'+remaining+'</small></span>';
+    var arc=host.querySelector('.dial-progress');
+    if(orbital){
+      host.querySelector('svg').innerHTML='<defs><radialGradient id="orbital-'+key+'" cx=".34" cy=".24" r=".78"><stop offset="0" stop-color="#2B3540"/><stop offset=".65" stop-color="#151D26"/><stop offset="1" stop-color="#050A10"/></radialGradient></defs><ellipse cx="100" cy="100" rx="99" ry="65" transform="rotate(-16 100 100)" fill="#182638" stroke="#7399AC" stroke-width="2"/><ellipse cx="100" cy="100" rx="91" ry="61" transform="rotate(16 100 100)" fill="none" stroke="currentColor" stroke-width="2" opacity=".5"/><ellipse cx="100" cy="100" rx="77" ry="54" fill="url(#orbital-'+key+')" stroke="#526C80" stroke-width="2"/><path d="M100 38 A85 62 0 1 1 99.999 38 Z" fill="none" stroke="#30404D" stroke-width="9"/><path class="dial-progress" d="M100 38 A85 62 0 1 1 99.999 38 Z" fill="none" stroke="currentColor" stroke-width="9" stroke-dasharray="'+length+'" stroke-dashoffset="'+(length*(1-previous))+'" stroke-linecap="round"/>';
+      arc=host.querySelector('.dial-progress');
+    } else if(speedometer) {
+      var svg=host.querySelector('svg');
+      svg.querySelector('circle[r="84"]').setAttribute('r','90');
+      svg.querySelector('circle[r="60"]').remove();
+      var paths=svg.querySelectorAll('path');
+      paths.forEach(function(path){path.setAttribute('d','M34.946 165.054 A92 92 0 1 1 165.054 165.054');path.setAttribute('stroke-width','5');});
+      var scale=[25,50,75].map(function(value){var angle=(-135+value*2.7)*Math.PI/180;return '<text x="'+(100+Math.sin(angle)*56)+'" y="'+(105-Math.cos(angle)*56)+'" text-anchor="middle" fill="#E9E7DF" font-size="14">'+Math.round(target*value/100)+'</text>';}).join('');
+      svg.insertAdjacentHTML('beforeend',scale+'<g transform="rotate('+(-135+fraction*270)+' 100 100)"><path d="M97 101 L98 39 L100 30 L102 39 L103 101 Z" fill="currentColor"/><line x1="100" y1="100" x2="100" y2="43" stroke="#FFF4D8" stroke-width="1" opacity=".7"/></g><circle cx="100" cy="100" r="6" fill="#ADB8C0" stroke="#091018" stroke-width="2"/><rect x="50" y="125" width="100" height="52" rx="9" fill="#0B131B" stroke="#43505C"/>');
+      arc.setAttribute('stroke-dasharray',String(length));
+      arc.setAttribute('stroke-dashoffset',String(length*(1-previous)));
+    }
+    requestAnimationFrame(function(){arc.style.strokeDashoffset=String(length*(1-fraction));});
+    var card=document.getElementById('team-'+key+'-card'),controls=card.querySelector('.dial-controls');
+    card.style.setProperty('--dial-color',color);
+    if(!controls){
+      controls=document.createElement('div');controls.className='dial-controls';
+      controls.innerHTML='<button type="button" class="dial-color"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1-3.7 1 1 0 0 1 1-1.7h2A4 4 0 0 0 21 12a9 9 0 0 0-9-9Z"/><circle cx="7" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></button><button type="button" class="dial-shape"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18a9 9 0 1 1 16 0M12 13l5-5M6 14h1M17 14h1M12 5v1"/><circle cx="12" cy="13" r="1"/></svg></button>';
+      controls.querySelector('.dial-color').addEventListener('click',function(){updateWatchDialAppearance(colorKey,watchDialColorOrder);});
+      controls.querySelector('.dial-shape').addEventListener('click',function(){updateWatchDialAppearance('style',watchDialStyles);});
+      card.appendChild(controls);
+    }
+    controls.querySelector('.dial-color').style.setProperty('--dial-choice',color);
+    controls.querySelector('.dial-color').setAttribute('aria-label',(watchLang==='es'?'Cambiar color de ':'Change color of ')+team.name+': '+watchDialAppearance[colorKey]);
+    controls.querySelector('.dial-shape').setAttribute('aria-label',(watchLang==='es'?'Cambiar marcador: ':'Change counter style: ')+style);
+  });
+}
+
       function renderGame(game, code) {
         currentGame = game;
         var s = S();
@@ -842,7 +890,7 @@
           } else {
             teamRounds.forEach(function (round) {
               var item = document.createElement("li");
-              item.textContent = Number(round.points || 0) + " " + s.points;
+              item.textContent = String(Number(round.points || 0)); item.setAttribute("aria-label", Number(round.points || 0) + " " + s.points);
               list.appendChild(item);
             });
           }
@@ -859,6 +907,8 @@
         loading.classList.remove("active");
         showWatchPage(code);
         board.classList.add("ready");
+        renderWatchDials(game);
+        syncWatchHistory();
         if (game.nextCode && isFinal && game.nextCode !== activeCode) {
           activeCode = game.nextCode;
           codeInput.value = activeCode;
@@ -897,14 +947,7 @@
           totals:teams.slice(0,2).map(function(team){return teamTotal(currentGame,team.id);})
         };
       }
-      function showFollowedGameHistory(){
-        var record=followedGameRecord();
-        if(!record) return;
-        historyReturnToWatch=true; historyStatsVisible=true; historyRecords=[record]; activeHistorySpace="";
-        if(dialog.open) dialog.close(); siteHeader.hidden=true; marketingPage.hidden=true; siteFooter.hidden=true; livePage.hidden=true; historyPage.hidden=false;
-        document.getElementById("history-loading").hidden=true; document.getElementById("history-list-view").hidden=false; document.getElementById("history-stats-view").hidden=true; document.querySelector(".history-tabs").hidden=true;
-        applyHistoryLanguage(); window.scrollTo(0,0);
-      }
+      function showFollowedGameHistory(){toggleWatchHistory();}
 
       document.querySelectorAll("[data-follow-open]").forEach(function (button) {
         button.addEventListener("click", function () {
@@ -926,7 +969,7 @@
         if (event.target === dialog) dialog.close();
       });
       codeInput.addEventListener("input", function () {
-        codeInput.value = codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+        codeInput.removeAttribute("aria-invalid");
         error.textContent = "";
       });
       document.getElementById("board-style-button").addEventListener("click", cycleWatchTheme);
@@ -976,6 +1019,7 @@
         "One scorer. Everyone watching live.":"Una persona anota. Todos siguen en vivo.","Live sharing is built for family tables, tournament corners, and anyone waiting on the next hand.":"El seguimiento en vivo está hecho para mesas familiares, torneos y quienes esperan la próxima mano.","Start broadcasting":"Inicia la transmisión","The app creates a short code and QR for that match.":"La app crea un código corto y un QR para la partida.","Friends scan":"Tus amigos escanean","They follow score changes from their own phones in real time.":"Siguen los cambios desde sus teléfonos en tiempo real.","Stop when done":"Detén al terminar","Keep the match local, private, and under your control.":"Mantén la partida local, privada y bajo tu control.",
         "Designed like a dark domino table.":"Diseñado como una mesa oscura de dominó.","Gold controls, red and green scoring moments, and real match screens that stay readable while the game gets loud.":"Controles dorados, momentos rojos y verdes, y pantallas legibles aun cuando sube el ruido.","Home":"Inicio","New match":"Nueva partida","Score board":"Marcador","Live QR":"QR en vivo","Settings":"Ajustes","Choose the board.":"Elige la mesa.","Switch the table look to match the night.":"Cambia el aspecto de la mesa para cada noche.","Graphite boxes, gold and red accents.":"Cuadros grafito con detalles dorados y rojos.","Deep black table texture.":"Textura de mesa negra profunda.","Green felt and warm buttons.":"Fieltro verde y botones cálidos.","Blue, red, and classic table energy.":"Azul, rojo y la energía clásica de la mesa.","No account. No ads.":"Sin cuenta. Sin anuncios.","Game data stays on your device unless you choose to share a live match. Live sharing uses Firebase only for app functionality.":"Los datos permanecen en tu dispositivo salvo que compartas una partida en vivo. Firebase se usa solo para esa función.","Read privacy policy":"Leer política de privacidad","Contact":"Contacto","Score and history tools are for convenience. Independently verify official scores, standings, and tournament records.":"Las herramientas de puntuación e historial son prácticas, pero verifica independientemente los resultados, posiciones y registros oficiales de torneos."
       };
+      Object.assign(siteSpanish, {"Follow every point. Stay close to the game.":"Sigue cada punto. Vive la partida de cerca.","A seat at every table.":"Un lugar en cada mesa.","The game is there.":"La partida está allá.","Be here for it.":"Vívela desde aquí.","Follow the score. Feel every round. Bring the table to your screen, wherever you are.":"Sigue el marcador. Vive cada ronda. Lleva la mesa a tu pantalla, estés donde estés.","Have a game code?":"¿Tienes un código de partida?","Enter the code or paste a link shared by the scorer.":"Introduce el código o pega el enlace que te compartieron.","No account needed":"Sin crear una cuenta","Made for the big screen":"Ideal para pantallas grandes","THE BEST SEAT IS YOURS":"EL MEJOR LUGAR ES EL TUYO","SCOREBOARD PREVIEW":"EJEMPLO DE MARCADOR","FRIENDS AT THE TABLE":"AMIGOS EN LA MESA","Target":"Meta","Team Gold":"Equipo Oro","Team Red":"Equipo Rojo","POINTS":"PUNTOS","Every round. Together.":"Cada ronda. Juntos.","Your phone. Your monitor. Your front-row seat.":"Tu teléfono. Tu monitor. Tu primera fila.","FROM THEIR TABLE TO YOUR SCREEN":"DE SU MESA A TU PANTALLA","One game.":"Una partida.","Everyone connected.":"Todos conectados.","A shared code is all it takes to follow along.":"Solo necesitas un código compartido para seguirla.","01 / SHARE":"01 / COMPARTE","02 / FOLLOW":"02 / SIGUE","It starts at the table.":"Todo empieza en la mesa.","The scorer shares a game code or link.":"Quien anota comparte el código o enlace de la partida.","Let the score tell the story.":"Cada punto cuenta una historia.","Watch the scoreboard from your browser.":"Sigue el marcador desde tu navegador.","Good company. Great games. Every point together.":"Buena compañía. Grandes partidas. Cada punto, juntos.","Take your seat":"Toma tu lugar"});
       var siteSpanishAttrs = { "Main navigation":"Navegación principal", "Website language":"Idioma del sitio web", "Domino Social Club app screenshots":"Capturas de la aplicación Domino Social Club", "Domino Social Club app screen preview":"Vista previa de pantallas de Domino Social Club", "App highlights":"Funciones destacadas", "Set up a Domino Social Club match":"Configurar una partida de Domino Social Club", "Domino Social Club home":"Inicio de Domino Social Club", "Active live dominoes scoreboard":"Marcador activo de dominó en vivo", "QR code screen for sharing a live game":"Pantalla de código QR para compartir una partida en vivo", "Home screen":"Pantalla de inicio", "New match screen":"Pantalla de nueva partida", "Score board screen":"Pantalla del marcador", "Share score screen":"Pantalla para compartir la puntuación", "Settings screen":"Pantalla de ajustes" };
       var siteAttrItems = [];
       [siteHeader, marketingPage, siteFooter].forEach(function (root) { root.querySelectorAll("[aria-label],[alt]").forEach(function (element) { ["aria-label","alt"].forEach(function (attr) { var value = element.getAttribute(attr); if (siteSpanishAttrs[value]) siteAttrItems.push({ element: element, attr: attr, en: value }); }); }); });
@@ -997,58 +1041,23 @@
       applyWatchLanguage(false);
       applySiteLanguage(watchLang, false);
 
-      function showLocalHistoryPreview(fromWatch) {
-        historyReturnToWatch=!!fromWatch;
-        activeHistorySpace = localHistoryFixtureId;
-        historyRecords = [
-          { id:"preview-1",sourceMatchId:"preview-1",teams:[{id:"a",name:"Team Gold",players:["Mia","Luis"]},{id:"b",name:"Team Red",players:["Ana","Carlos"]}],rounds:[{id:"r1",winnerTeamId:"a",points:35},{id:"r2",winnerTeamId:"b",points:20},{id:"r3",winnerTeamId:"a",points:75}],totals:[110,20],targetScore:100,winnerTeamId:"a",createdAt:1776560400000,finishedAt:1776563100000,boardTheme:"Carbon Fiber" },
-          { id:"preview-2",sourceMatchId:"preview-2",teams:[{id:"c",name:"Los Primos",players:["Raúl","José"]},{id:"d",name:"Club Centro",players:["Elena","Sol"]}],rounds:[{id:"r1",winnerTeamId:"d",points:40},{id:"r2",winnerTeamId:"c",points:25},{id:"r3",winnerTeamId:"d",points:65}],totals:[25,105],targetScore:100,winnerTeamId:"d",createdAt:1776474000000,finishedAt:1776477000000,boardTheme:"Casino" }
-        ];
-        siteHeader.hidden=true;marketingPage.hidden=true;siteFooter.hidden=true;livePage.hidden=true;historyPage.hidden=false;
-        document.getElementById("history-loading").hidden=true;document.getElementById("history-list-view").hidden=false;document.getElementById("history-stats-view").hidden=true;
-        applyHistoryLanguage();
-      }
-
       window.addEventListener("load", function () {
-        if ((location.hostname === "127.0.0.1" || location.hostname === "localhost") && new URLSearchParams(location.search).get("previewHistory") === "1" && new URLSearchParams(location.search).get("previewScore") !== "1") {
-          showLocalHistoryPreview();
-          return;
-        }
-        // Local-only sample state used to review the full-window scoreboard design.
-        if ((location.hostname === "127.0.0.1" || location.hostname === "localhost") && new URLSearchParams(location.search).get("previewScore") === "1") {
-          activeCode = "A7K9";
-          var previewWinner = new URLSearchParams(location.search).get("previewWinner") === "1";
-          renderGame({
-            code: activeCode, live: true, controllerName: "Yunier", targetScore: 100,
-            teams: [
-              { id: "a", name: "Team Gold", players: ["Mia", "Luis"] },
-              { id: "b", name: "Team Red", players: ["Ana", "Carlos"] }
-            ],
-            rounds: [
-              { id: "1", winnerTeamId: "a", points: 15 },
-              { id: "2", winnerTeamId: "b", points: 22 },
-              { id: "3", winnerTeamId: "a", points: 40 }
-            ].concat(previewWinner ? [{ id: "4", winnerTeamId: "a", points: 50 }] : []),
-            winnerTeamId: previewWinner ? "a" : null,
-            finishedAt: previewWinner ? 1776643200000 : null
-          }, activeCode);
-        } else {
-          var params=new URLSearchParams(location.search);
-          var linkedHistory = parseHistoryKey(params.get("history") || "");
-          var linkedCode = (params.get("watch") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
-          if (linkedCode.length >= 4) {
-            activeHistorySpace=linkedHistory;
-            activeCode = linkedCode;
-            codeInput.value = linkedCode;
-            dialog.showModal();
-            loading.classList.add("active");
-            window.subscribeToDominoGame(linkedCode, handleGame, handleError);
-          } else if (linkedHistory) {
-            showHistoryPage(linkedHistory,false);
-          }
+        var params=new URLSearchParams(location.search);
+        var linkedHistory=parseHistoryKey(params.get("history") || "");
+        var hashCode=location.hash.match(/^#watch-([A-Z0-9]{4,6})$/i);
+        var linkedCode=(params.get("watch") || (hashCode ? hashCode[1] : "")).toUpperCase();
+        if (/^[A-Z0-9]{4,6}$/.test(linkedCode)) {
+          activeHistorySpace=linkedHistory;
+          activeCode=linkedCode;
+          codeInput.value=linkedCode;
+          dialog.showModal();
+          loading.classList.add("active");
+          window.subscribeToDominoGame(linkedCode,handleGame,handleError);
+        } else if (linkedHistory) {
+          showHistoryPage(linkedHistory,false);
         }
       });
     })();
   </script>
-</body>
+<script src="/landing/follow-entry.js"></script></body>
 </html>
