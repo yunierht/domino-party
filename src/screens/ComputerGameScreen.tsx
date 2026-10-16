@@ -391,7 +391,7 @@ function LocalComputerGameScreen({showInvite,onInvite}:{showInvite:boolean;onInv
         {game.hands.human.map((tile, index) => {
           const ends = legalEnds(game, 'human', tile);
           const enabled = humanTurn && ends.length > 0;
-          return <DealtTile key={tile.id} {...dealPresentation} index={index} side="human" distance={windowSize.width}><DraggableDomino tile={tile} size={handSize} enabled={enabled && !showRules} selected={selected === tile.id} revealed={!!game.result} dragging={drag?.tile.id === tile.id}
+          return <DealtTile key={tile.id} {...dealPresentation} index={index} side="human" distance={windowSize.width}><DraggableDomino tile={tile} gestureKey={game} size={handSize} enabled={enabled && !showRules} selected={selected === tile.id} revealed={!!game.result} dragging={drag?.tile.id === tile.id}
             onTap={() => { if (enabled) { if (ends.length === 1 || game.hands.human.length === 1) place(tile.id, ends[0]); else setSelected(tile.id); } }} onCancel={cancelDrag}
             onDrag={point => {
               if (!enabled) { cancelDrag(); return; }
@@ -401,10 +401,11 @@ function LocalComputerGameScreen({showInvite,onInvite}:{showInvite:boolean;onInv
               setDrag({ tile, point });
             }}
             onDrop={point => {
+              if (dragId.current !== tile.id) { cancelDrag(); return; }
               if (!enabled) { cancelDrag(); return; }
               const origin = tableOrigin.current;
               const allowed = legalEnds(game, 'human', tile).map(end => ({ end, point: slot(offsets[end], metrics) }));
-              const end = origin ? resolveScreenDrop({ x: point.x - origin.x, y: point.y - origin.y }, allowed, tableSize, metrics, camera.current.current) : null;
+              const end = origin ? resolveScreenDrop({ x: point.x - origin.x, y: point.y - origin.y }, allowed, tableSize, metrics, camera.current.current, true) : null;
               if (end) place(tile.id, end); else cancelDrag();
             }} /></DealtTile>;
         })}
@@ -419,7 +420,7 @@ function LocalComputerGameScreen({showInvite,onInvite}:{showInvite:boolean;onInv
         <View style={{width:80,flexShrink:0}}/>
 
       </View>
-      <View testID="local-wood-timer" style={{position:'absolute',top:'50%',marginTop:-36,left:'50%',marginLeft:-36,height:72,width:72,alignItems:'center',justifyContent:'center',zIndex:25}}><DominoTurnTimer size={72} circularOnly avatar={playerAvatarId==='selfie'&&playerAvatarPhoto?{uri:playerAvatarPhoto}:ownAvatar.image} avatarLabel={ownAvatarName} avatarTestID="local-domino-own-avatar" attentionKey={`local-domino:${game.round}:${game.turn}:${game.board.length}:${game.hands.human.length}:${game.stock.length}`} clock={game.turn==='human'&&!dealPresentation.dealing&&appActive?localTimer.clock:null} enabled={!localClockPaused&&!showStock&&game.turn==='human'&&!game.result} es={es} onPause={localTimer.pause} onResume={localTimer.resume}/><Text testID="local-domino-own-name" accessibilityLabel={ownAvatarName} numberOfLines={1} style={{position:'absolute',top:69,left:-8,width:88,maxWidth:88,textAlign:'center',lineHeight:14,color:C.ivory,fontSize:12,fontWeight:'600'}}>{ownAvatarName}</Text></View>
+<View testID="domino-avatar-axis" pointerEvents="box-none" style={{position:'absolute',top:'50%',marginTop:-36,left:0,right:0,height:72,alignItems:'center',zIndex:25}}><View testID="local-wood-timer" style={{height:72,width:72,alignItems:'center',justifyContent:'center'}}><DominoTurnTimer size={72} showIdleRing circularOnly avatar={playerAvatarId==='selfie'&&playerAvatarPhoto?{uri:playerAvatarPhoto}:ownAvatar.image} avatarLabel={ownAvatarName} avatarTestID="local-domino-own-avatar" attentionKey={`local-domino:${game.round}:${game.turn}:${game.board.length}:${game.hands.human.length}:${game.stock.length}`} clock={game.turn==='human'&&!dealPresentation.dealing&&appActive?localTimer.clock:null} enabled={!localClockPaused&&!showStock&&game.turn==='human'&&!game.result} es={es} onPause={localTimer.pause} onResume={localTimer.resume}/><Text testID="local-domino-own-name" accessibilityLabel={ownAvatarName} numberOfLines={1} style={{position:'absolute',top:69,left:-8,width:88,maxWidth:88,textAlign:'center',lineHeight:14,color:C.ivory,fontSize:12,fontWeight:'600'}}>{ownAvatarName}</Text></View></View>
     </View>
     {drag && <View pointerEvents="none" style={{ position: 'absolute', zIndex: 100, elevation: 20,
       left: drag.point.x - rootOrigin.current.x - (handSize + 4) / 2, top: drag.point.y - rootOrigin.current.y - handSize - 2, opacity: 0.95 }}>

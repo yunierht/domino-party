@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect,useRef } from 'react';
 import { PanResponder, Platform, View } from 'react-native';
 import { DominoTile } from './DominoTile';
 import type { Tile } from './engine';
@@ -7,6 +7,7 @@ import { usePrefs } from '../state/PrefsContext';
 import * as Haptics from 'expo-haptics';
 
 interface Props {
+  gestureKey?:unknown;
   tile: Tile;
   enabled: boolean;
   selected: boolean;
@@ -32,22 +33,25 @@ export function DraggableDomino(props: Props) {
   };
   const latest = useRef(props);
   latest.current = props;
-  const moved = useRef(false);
+  const moved = useRef(false), active=useRef(false),gestureKey=useRef(props.gestureKey);
+  useEffect(()=>{if(active.current&&(!props.enabled||gestureKey.current!==props.gestureKey)){active.current=false;latest.current.onCancel();}},[props.enabled,props.gestureKey]);
   const responder = useRef(PanResponder.create({
     onStartShouldSetPanResponder: () => latest.current.enabled,
     onMoveShouldSetPanResponder: () => latest.current.enabled,
     onPanResponderGrant: event => {
-      if (!latest.current.enabled) { latest.current.onCancel(); return; }
-      moved.current = false;
+      if (!latest.current.enabled) { active.current=false;latest.current.onCancel(); return; }
+      active.current=true;gestureKey.current=latest.current.gestureKey;moved.current = false;
       selectFeedback();
       latest.current.onDrag(windowPoint(event.nativeEvent.pageX, event.nativeEvent.pageY));
     },
     onPanResponderMove: (_event, gesture) => {
-      if (!latest.current.enabled) { latest.current.onCancel(); return; }
+      if(!active.current||gestureKey.current!==latest.current.gestureKey){active.current=false;latest.current.onCancel();return;}
+      if (!latest.current.enabled) { active.current=false;latest.current.onCancel(); return; }
       if (Math.abs(gesture.dx) + Math.abs(gesture.dy) > 7) moved.current = true;
       latest.current.onDrag(windowPoint(gesture.moveX, gesture.moveY));
     },
     onPanResponderRelease: (event, gesture) => {
+      if(!active.current)return;active.current=false;if(gestureKey.current!==latest.current.gestureKey||!latest.current.enabled){latest.current.onCancel();return;}
       if (moved.current && latest.current.enabled) latest.current.onDrop(windowPoint(gesture.moveX, gesture.moveY));
       else {
         latest.current.onCancel();
@@ -55,7 +59,7 @@ export function DraggableDomino(props: Props) {
       }
     },
     onPanResponderTerminationRequest: () => false,
-    onPanResponderTerminate: () => latest.current.onCancel(),
+    onPanResponderTerminate: () => {active.current=false;latest.current.onCancel();},
   })).current;
   const { tile, enabled, selected, revealed, size = 29, dragging = false } = props;
   return <View {...responder.panHandlers} pointerEvents={enabled ? 'auto' : 'none'} accessible accessibilityRole="button" aria-disabled={!enabled}

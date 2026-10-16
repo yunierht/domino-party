@@ -16,8 +16,8 @@ const actions:{kind:AttentionKind;emoji:string;es:string;en:string}[]=[
 ];
 
 /** The server remains authoritative; this cooldown only prevents accidental repeat taps. */
-export function OnlineQuickActions({visible=true,enabled,supported,es,onSend,compact=false,stacked=false}:{
-  stacked?:boolean;compact?:boolean;visible?:boolean;enabled:boolean;supported:boolean;es:boolean;
+export function OnlineQuickActions({visible=true,enabled,supported,es,onSend,compact=false,stacked=false,kinds,appearance='default'}:{
+  kinds?:readonly AttentionKind[];appearance?:'default'|'poker';stacked?:boolean;compact?:boolean;visible?:boolean;enabled:boolean;supported:boolean;es:boolean;
   onSend:(kind:AttentionKind)=>Promise<boolean>|boolean;
 }) {
   const [busy,setBusy]=useState(false),[cooling,setCooling]=useState(false);
@@ -37,13 +37,13 @@ export function OnlineQuickActions({visible=true,enabled,supported,es,onSend,com
   if(!visible||!supported)return null;
   const disabled=!enabled||busy||cooling;
   return <View testID="online-quick-actions" style={{flexDirection:'row',gap:3,alignItems:'center',...(stacked?{width:91,flexWrap:'wrap' as const,justifyContent:'flex-end' as const}:{})}}>
-    {actions.map(action=><GoldPressable finish gold={false} finishColor="#805438" surfaceStyle={compact?{top:6,bottom:6,left:6,right:6,borderRadius:16,borderColor:'#A77A51',borderWidth:2}:undefined} key={action.kind} testID={`online-attention-${action.kind}`}
+    {actions.filter(action=>!kinds||kinds.includes(action.kind)).map(action=><GoldPressable finish={appearance!=='poker'} gold={false} finishColor="#805438" surfaceStyle={compact?{top:6,bottom:6,left:6,right:6,borderRadius:16,borderColor:'#A77A51',borderWidth:2}:undefined} key={action.kind} testID={`online-attention-${action.kind}`}
       accessibilityRole="button" accessibilityLabel={es?action.es:action.en} accessibilityState={{disabled}}
       disabled={disabled} onPress={()=>void send(action.kind)}
       style={({pressed})=>({width:44,height:44,alignItems:'center',justifyContent:'center',borderRadius:22,
-        ...(compact?{}:{backgroundColor:pressed?'#765036':'#805438',borderWidth:2,borderColor:'#A77A51',borderTopColor:'#BE8F65',borderBottomColor:'#553A27',borderBottomWidth:pressed?1:3}),
+        ...(appearance==='poker'?{backgroundColor:'#205541',borderWidth:1,borderColor:C.gold}:compact?{}:{backgroundColor:pressed?'#765036':'#805438',borderWidth:2,borderColor:'#A77A51',borderTopColor:'#BE8F65',borderBottomColor:'#553A27',borderBottomWidth:pressed?1:3}),
         transform:[{translateY:pressed?1:0}],opacity:disabled ? .55 : 1})}>
-      <View pointerEvents="none" style={compact?{width:32,height:32,borderRadius:16,alignItems:'center',justifyContent:'center',backgroundColor:'transparent',borderWidth:2,borderColor:'#A77A51',borderTopColor:'#BE8F65',borderBottomColor:'#553A27'}:undefined}><Text accessible={false} style={{fontSize:compact?16:20}}>{action.emoji}</Text></View>
+      <View pointerEvents="none" style={appearance==='poker'?undefined:compact?{width:32,height:32,borderRadius:16,alignItems:'center',justifyContent:'center',backgroundColor:'transparent',borderWidth:2,borderColor:'#A77A51',borderTopColor:'#BE8F65',borderBottomColor:'#553A27'}:undefined}><Text accessible={false} style={{fontSize:compact?16:20}}>{action.emoji}</Text></View>
     </GoldPressable>)}
   </View>;
 }

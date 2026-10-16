@@ -99,8 +99,8 @@ export function chainSlot(offset: number, metrics: ReturnType<typeof boardMetric
   return { ...p, x: metrics.width / 2 + p.x * scale, y: metrics.height / 2 + p.y * scale * 0.86, scale };
 }
 /** Nearest legal end anywhere in the board; exact ties consistently favor left. */
-export function resolveDrop(point: Point, targets: { end: End; point: Point }[], metrics: { width: number; height: number }): End | null {
-  if (!Number.isFinite(point.x) || !Number.isFinite(point.y) || point.x < 0 || point.y < 0 || point.x > metrics.width || point.y > metrics.height) return null;
+export function resolveDrop(point: Point, targets: { end: End; point: Point }[], metrics: { width: number; height: number }, allowOutside=false): End | null {
+  if (!Number.isFinite(point.x) || !Number.isFinite(point.y) || (!allowOutside && (point.x < 0 || point.y < 0 || point.x > metrics.width || point.y > metrics.height))) return null;
   return [...targets].sort((a, b) => {
     const distance = Math.hypot(point.x - a.point.x, point.y - a.point.y) - Math.hypot(point.x - b.point.x, point.y - b.point.y);
     return distance || (a.end === b.end ? 0 : a.end === 'left' ? -1 : 1);
@@ -108,11 +108,11 @@ export function resolveDrop(point: Point, targets: { end: End; point: Point }[],
 }
 
 /** Compare in viewport pixels so pan/zoom never change the valid drop surface. */
-export function resolveScreenDrop(point: Point, targets: { end: End; point: Point }[], viewport: { width: number; height: number }, canvas: { width: number; height: number }, camera: BoardCamera): End | null {
+export function resolveScreenDrop(point: Point, targets: { end: End; point: Point }[], viewport: { width: number; height: number }, canvas: { width: number; height: number }, camera: BoardCamera, allowOutside=false): End | null {
   return resolveDrop(point, targets.map(target => ({ end: target.end, point: {
     x: viewport.width / 2 + camera.x + (target.point.x - canvas.width / 2) * camera.scale,
     y: viewport.height / 2 + camera.y + (target.point.y - canvas.height / 2) * camera.scale,
-  } })), viewport);
+  } })), viewport, allowOutside);
 }
 
 export interface BoardCamera { x: number; y: number; scale: number }

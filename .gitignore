@@ -50,3 +50,6 @@ yarn-error.*
 /.release-build/
 /.idea/
 *expo-qr*.png
+
+# Local worktrees, audit evidence and release binaries are not source.
+/.local/

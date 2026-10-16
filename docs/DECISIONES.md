@@ -1168,3 +1168,134 @@ Humano sustituye ubicación de ON-D-118porDEBAJOcartasganador, fondoalgo transpa
 ## ON-D-120 - 2026-10-14 - Ganancia neta Poker y relevo aislado
 
 Fuente humana directa mediante chat01a13d5f: autorizacion explicita de terminar netprofit tras pausa y mostrarlo en ExpoGo. Sustituye importe bruto del bote en la placa: nombreganador+ganancianeta, categoria/motivo separado, empate0neutral. Conserva pagos/motor/cartasocultas y ubicacion bajo cartas de ON-D-119. Implementado37tests/723app/TS/JScompilado verificados; no prueba fisica. No autoriza otrosjuegos/commit/push/build/publicacion. Auditoria acumulada y hashes en CONTEXTO; preparacion Apple va por chat aparte, no duplicarla.
+
+## 2026-10-15 — Correcciones solicitadas durante pruebas Android
+
+Fuente: usuario en voz en esta conversación. Autoriza corregir los siete fallos Poker enumerados y conservar la lista para revisión; separar aceptación por código, aceptación por enlace y creación; toolbar bajo cartas con análisis, micrófono y un solo Knock knock, estilo análisis. La sugerencia de controles Domino en madera se conserva como propuesta, no amplía modificaciones al juego congelado. Primer bloque de aceptación implementado y probado; toolbar, área segura y capas pendientes. Registro de casos/validación en CONTEXTO.md. Sin nueva autorización de commit/push/publicación pública por preguntar cómo actualizar los dispositivos de prueba.
+
+
+### 2026-10-15 — Implementación de fila Poker autorizada
+
+Usuario solicita explícitamente agente para revisar e implementar fila de análisis, llamada y Knock debajo de cartas. Implementada con banda reservada, tres targets44 y un único Knock; apuestas, Hold y recompra con espacio separado. Voz activa conserva ancho mediante salida por pulsación larga/accesibilidad; defaults de componentes compartidos intactos. Estado y límites de verificación en CONTEXTO, pendiente teléfono.
+
+## 2026-10-15 — Entrega de prueba solo Android y aviso autorizado
+
+Fuente humana directa en voz y dirección de correo confirmada después por escrito: retomar los siete fallos, delegar revisión/implementación, preparar y subir actualización solo Android a Google Play para probar en teléfonos reales y avisar por correo cuando esté disponible. Autoriza build/upload/canal de prueba existente necesarios para esa entrega; no nueva Apple, commit/push ni promoción pública antes de validación. Sustituye pendiente de autoridad de distribución del bloque anterior; no amplía a funcionalidades no enumeradas. Estado: código integrado y763tests pasan, buildAndroid29 encola; distribución y aviso pendientes de disponibilidad real. Evidencia y lista en CONTEXTO.md.
+
+### Cierre de entrega Android del 15 de octubre
+
+Autorización ejecutada: código29 disponible en canalinternoPlay y correoúnico enviado; seguimiento desactivado. Fuente/pruebas/AAB/consola/envío diferenciados en CONTEXTO. No nueva Apple/producción pública/commit/push; evaluación física de los siete puntos pendiente del usuario.
+
+
+## 2026-10-15 - Ajustes Poker y entrega Android30 al canal interno
+
+Fuente: autorizaciones humanas directas voz transmitidas por01a13d5f/01a14157. Sustituye para appearancePoker la salida solo longpress por cruz visible y mic ultimo; habilita vuelo de fichas online y feedback provisional. Aprobado Call bloqueado durante draft y X/check accesibles junto pot, con elevacion minima y temporizador3s conservado. No cambia reglas de apuestas ni confirmacion automatica valida. Autoriza ademas build/update GooglePlay SOLO canal de prueba existente para telefonos; no produccion masiva/iOS/commit/push. Estado implementado/tests/archivo verificados; build30 en progreso, distribucion pendiente segun CONTEXTO.
+
+
+Cierre de la entrega Android30: autorizacion ejecutada en mismo canalinternoPlay, Available to internal testers verificado15Oct17:25. AABmismafirma/paquete/code30 validado y fuentes estables; no promocionproduccion/iOS/commit/push. Evidencia y prueba fisica pendiente en CONTEXTO.
+
+
+## 2026-10-15 - Minimo visible online y correccion fisica de confirmacion en ambos Poker
+
+Autorizacion humana directa voz: prototipo minimo/seleccion/feedback enExpo, despues confirma pot/confirmar tapado porALLIN enCPUyonline yautoriza corregirambos. Online: minimo visible, atajo selecciona aporte faltante, excepcion allincorto clara; mismo motor/confirmacion/auto3s. Ambos: X/check bajo bote elevado, totalconfirmadoexplicito yzonas separadas. Sustituye ubicacion lateral del controlonline anterior y posicionlocalbaja. Implementado52foco/759src/TS; bundle actual comprobado, telefono pendiente. No nueva build/store/commit/push. VerCONTEXTO para alcanceexacto, archivos yQR.
+
+
+## 2026-10-15 - Sustitucion final del prototipo de apuesta Poker
+
+Aprobacionhumana directa voz01a14157: NO botonMinimo/ventana, NO sliderhorizontal ni ampliar madera, NO confirm/cancelarjuntoPot. Slidervertical inferiorizquierda SOBREmadera, asa unicaRAISE+importe dinamico; acciones confirm/limpiar enareadisponible, reglas/auto3sconservadasconpausadedrag. Madera94/98canonica3juegosobligatoria. RestaurarBuymeadrink aubicacionanterior (reportefisico defecto). Sustituye propuestasminonline/horizontal/top-left registradasantes, conserva historia. ImplementadoenCPU/online yservidoExpo segunCONTEXTO; novideorecibido/nopruebafisicadeultimocodigo, sin store/build/commitpush. No reabrirDomino/BJ.
+
+
+## 2026-10-15 - Control de subida Poker basado en referencia visual
+
+Fuente: nuevas instrucciones humanas de voz01a14157 y Screenshot_20261015_204123_Mega Hit Poker.jpg, inspeccionada. Sustituye Clear/Confirm por una sola accion RAISE con importe: permite ejecutar minimo legal directamente sin arrastrar, o seleccion actual; saldo corto muestra ALL-IN legal. Mantiene autoconfirmacion3s despues de soltar, nunca durante arrastre; sin presets adicionales. Carril vertical izquierda, abajo sobre madera, acabado purpura/oro y maximo ALL-IN arriba; no copiar marca/recursos. La ultima precision humana es BAJAR ligeramente, sustituye interpretacion anterior de subir. Madera94/98, bebida, avatar/timer, voz, cartas, motor y otrosjuegos se conservan. Alcance Expo ambos modos, sin build/store/commit/push. Evidencia actual en CONTEXTO.
+
+
+## 2026-10-15 - Acabado verde del asa Poker
+
+Autorizacionhumana voz01a14157: reemplaza paleta purpura por verde y forma/acabado de RAISE en el asa movil; mejora carril integrado conservando gestos/reglas. Implementado soloPokerRaiseSlider usando acabado existente sinmodificar compartidos. Alineacion de tresacciones requiere precision por conflictogeometrico conelementos congelados, pregunta pendiente segunCONTEXTO. Sin nuevaentregaPlay/build/commitpush.
+
+
+## 2026-10-15 - Direccion humana final de acciones, saldo y slider Poker
+
+Sustituye las propuestas de fila de tres acciones y RAISE independiente: usuario rechaza duplicado; RAISE existe solo dentro del asa movil. Posicion minima alineada con Fold abajo (ultimo margen inferior4px), desplazamiento arriba aumenta apuesta; verde normal y dorado ALL-IN al maximo, sin encabezado fijo ni$enasa. Asa de mismo tamano/tipografia queCall/Fold y carril algo mas largo. Check/Fold separados6px; Hold existente tambien abajo, sin nueva funcion. Saldo unico legible en madera entreRaise/avatar, pote+total un poco abajo/inward junto cartas; blinds dentroverde. Fuente: precisiones humanas voz01a14157, incluidas observacionesfisicas de Raisealto ysaldoilegible. No invalidar observaciones contests. Sin cambios demotor/otrosjuegos ni Play/build/commitpush. Evidencia y limites en CONTEXTO. La pregunta anterior de alineacion queda RESUELTA por esta instruccion, no repetirla.
+
+
+## 2026-10-15 - Direccion FINAL y excepciones puntuales del bloque Expo
+
+Fuente: autorizaciones humanas directas voz01a14157. Sustituye propuestas intermedias: RAISE soloasa, textoINLINE sin$, tapimporte una vez o drag+3s, verde/goldALL-IN, guia fina COMPLETA inicialmente ylectorbase dinamico12px detrasasa al inicio (NO lector lateral ni guia solo trailing). Entrada/salida260ms sin interaccion oculta; acciones abajo con margenFold4 ygap6; saldo legible, pote abajoizquierda, blinds dentroverde. Call aceptado vuela importeREAL, Raise/check no vuelo, payout/reparto se conservan. Madera94/98 ycontrolesajenos intactos.
+
+Excepcion explicita Domino congelado: conjuntoavatar/reloj/nombre al ejePoker enlocal/online; RELEASEdrag al extremoLEGALmascercano desde cualquier coordenadafinita sin hitamarillo, conservando cancelacion/estado/turno/servidor/aperturaD052/audio/rival; aroinicial doradoestatico sinclock mediante opt-in sin alterar tiempos. No autoriza otros cambiosDomino. Blackjack autoriza identidadperfil yconjuntoanclado local; no activar mesaonline antigua.
+
+El usuario midio cartasBJ con regla y confirmo igualdad previa; discrepancia cerrada. AUTORIZACION POSTERIOR de diseño: perspectiva leve solo cartasPROPIAS PokerCPU/online yBJlocal, misma medida entrejuegos por dispositivo, round(base*1.08); dealer/rival baseline. Helpermatematico minimo, sin PlayingCard global/activos/chips/reglas; scroll manoslargas mantiene escala. No nuevosplit.
+
+Gate de entrega: ultima pruebaExpoGo ANTES de decidir APK/AAB/GooglePlay. Auditoriaonline autorizada con fuente/pruebasUI-domain/navegacion, no sustituye prueba física en dosdispositivos. Sin nueva build/Play/deploy/commitpush. CONTEXTO contiene estado final/evidencia; historia previa conservada.
+
+
+## 2026-10-15 - Notas historicas de raiz preservadas antes de integrar RC
+
+Fuente: snapshot Git codex/root-before-rc-20261015 (3faac1c). Estas notas previas se conservan literalmente; no sustituyen las decisiones finales posteriores. La copia original completa tambien esta preservada en Git y root-before-rc-source.zip.
+
+### 2026-10-12 — Remisión a ON-D-060 del candidato Internet
+
+Nueva instrucción humana de cierre: guardar resumen, crear checkpoint LOCAL y congelar TODO código Online actual hasta recibir nuevas instrucciones después de probar APK. La decisión canónica ON-D-060 y resumen están en los documentos existentes de `C:\Users\yunie\.codex\worktrees\online-internet-prep\Dominos Codex Online`; checkpoint `9b853f2419af486b3ea3afd84f6e4f421010f525`, rama `codex/online-internet-checkpoint-014`. Sustituye en este alcance el desbloqueo conversacional ON-D-016; lecturas/pruebas permitidas, pendientes no autorizan fixes. No push/publicación/nuevos builds/deploys. Véase puntero CONTEXTO; este registro solo remite a la decisión del candidato y conserva historia/diffs de raíz.
+
+
+Actualizado: 2026-10-09 (America/New_York). Registro propio en `C:\Development\Dominos Codex Online`. Las nuevas entradas usan prefijo `ON-` para distinguirlas de IDs heredados de Pro, conservando este documento único.
+
+
+### ON-D-028 / 2026-10-09 — Voz opcional Online
+
+Estado: **implementada y verificada localmente con audio sintético; validación física/remota pendiente**. Fuente directa: opción para hablar mientras juegan, icono junto al jugador. Preferencia confirmada por herramienta de pregunta: conversación continua con silenciar. Entrada voluntaria, micrófono apagado hasta toque, silencio y salida explícitos; voz separada de autoridad de partida y de sonidos de fichas. No autorización de grabar conversaciones, activar micrófono personal durante pruebas, transmitir a contactos, contratar TURN/servicios ni desplegar. Evidencia y límites en CONTEXTO: conexión, mute, salida y reconexión en dos navegadores locales; sin TURN, binario nativo ni prueba audible real. Estos pendientes impiden considerar validada la voz entre teléfonos/redes distintas.
+
+
+### ON-D-029 / 2026-10-09 — Llamada con aceptación dentro de la partida
+
+Estado: **implementada; pruebas locales aprobadas, APK nueva pendiente**. Fuente: autorización humana transmitida por chat coordinador 01a12235-0430-7de2-ad2a-b554d7bbec70 tras prueba de voz del piloto. Sustituye en ON-D-028 la activación manual independiente de ambos: tocar micrófono llama al rival, quien recibe su nombre y Aceptar/Rechazar. Receptor escucha señalización sin adquirir audio; permisos/captura únicamente al aceptar. Iniciador espera con cancelar; su pista permanece silenciada hasta aceptación. Voz continua conserva mute y salir. Sin notificación OS/background, grabación, TURN/servicios, commit/push ni deploy.
+
+Decisión de implementación: espera30s medida por servidor, conexión20s en cliente; caducidad sin respuesta y cierre explícito permiten reintentar. Primera petición serializada gana si ambos llaman, sin aceptación implícita. Sala/epoch/callId/sesiones autentican negociación y consentimiento; reintentos recientes no reviven llamadas anteriores. Desconexión de partida termina voz; reconexión exige llamada nueva. Evidencia y archivos de integración en CONTEXTO.
+
+
+### ON-D-030 / 2026-10-09 — Madera compacta e identidad centrada solo Online
+
+Estado: **implementada y verificada en navegador; prueba física nueva pendiente**. Fuente: ampliación humana explícita transmitida por el mismo coordinador. Reloj a derecha, avatar propio centrado con nombre debajo y ancho reservado, madera aproximadamente30% menor. Sustituye ubicación de ON-D-027 únicamente en Online; mesa local conserva su diseño. Mínimo94px compacto/98px grande frente a133/138; contenido adicional crece sin recorte. Micrófono y pozo a izquierda, acciones de turno/avisos encima de la mano para liberar madera. Sin cambios de reglas, manos, scoring, sonido ni juegos ajenos. Avatares catálogo/selfie y nombres completos en accesibilidad conservados.
+
+
+### ON-D-031 / 2026-10-09 — Recuperación estable de cámara Domino
+
+Estado: **implementada con regresión y reproducción navegador**. Fuente humana transmitida por coordinador01a12235-0430-7de2-ad2a-b554d7bbec70: mano de2filas toma espacio y cadena no recupera al volver a1. Corrección autorizada en Domino local/Online de esta carpeta. Mantener cámara adecuada durante jugadas; recuperar escala/centro cuando vuelve espacio real, sin sondeo. Política: cambios de viewport>=4px, recuperación de escala>=10% y>=.025, tolerancia de centro12px/8%; ajustes subpixel no reinician transición. Animación320ms, reducida0ms; pan manual preservado hasta Center/nueva ronda. Objetivo de animación separado del valor intermedio evita reinicios por snapshots equivalentes. Mano usa espacio medido de madera/controles para conservar superficie de cadena y no recortar con avisos largos. No altera motor/IA/recursos.
+
+
+### ON-D-032 / 2026-10-09 — Alias de seis cifras para entrada manual
+
+Estado: **implementado y verificado localmente**. Aclaración humana sustituye propuesta inicial de cambiar identificadores: seis cifras SOLO manual, canonical10hex/enlaces anteriores intactos. Registro autoritativo SQLite separado MANUAL_CODES, RNG criptográfico uniforme, ceros iniciales, reserva atómica y8intentos de colisión. Alias público, no credencial; aceptación explícita y tokens privados/membresía conservados. Validez24h y rechazo si sala cerrada; mapeo nunca se reasigna a otra sala (espacio finito1millón). Renovación exclusivamente a la misma sala. Límites específicos:12resoluciones por credencial/min,300global/min y60nuevas asignaciones/min; fallos cuentan y filas de intentos acotadas. UI admite6cifras y10hex; Share muestra alias junto a enlace canónico. Sin provider, billing ni deploy. Conservar registro al integrar, no borrarlo para reutilizar códigos.
+
+
+### ON-D-033 / 2026-10-09 — Paridad final de madera local/Online
+
+Estado: **implementada; prueba física nueva pendiente**. Fuente humana final: referencia Online aprobada, avatar en CENTRO ABSOLUTO con nombre debajo también contra computadora. Sustituye petición intermedia de zona izquierda; no conservar esa propuesta. Extiende ON-D-030 a local; mínimo94/98px en ambos, avatar44px (incremento moderado desde42), nombre hasta2líneas con ancho reservado. Reloj mantiene lado actual derecho y se centra verticalmente en toda madera, conforme confirmación humana posterior. Franja puede crecer para mensajes/avisos y mano se adapta al espacio real. Sin cambiar rival/mesa/fichas/otros juegos.
+
+
+### ON-D-034 / 2026-10-09 — Reloj local de treinta segundos
+
+Estado: **implementado y probado**. Fuente: SÍ humano explícito a reloj y cesión automática también contra computadora. Tiempo30s por turno; vencer cede al rival, sin sumar puntos ni pases de bloqueo, sin ganador artificial. Comando local aislado conserva manos/pozo/cadena y no modifica motor/estrategia. Pausa manual, menús/segundo plano, reparto, aterrizaje/robo animado y resultados/Hold. Pozo sigue dirección Online: abrir pausa/restablece30; primer robo reanuda30; siguientes robos del mismo turno no reinician. Guarda restante en contexto durante navegación; reparto nuevo reinicia incluso con igual ronda/jugador. Identidad de reparto y actualización funcional evitan callbacks antiguos/jugada tardía/doble timeout. Reloj local monotónico en memoria, sin autoridad remota ni persistencia tras cerrar proceso. Reloj Online conserva política ON-D-012: cede turno sin contabilizar bloqueo; no se cambió esa regla.
+
+
+### ON-D-035 / 2026-10-09 — Acabado canónico de botones dorados
+
+Estado: **implementado y verificado representativamente**. Autorización humana de ESTILO para toda app de esta carpeta, incluidos Poker/Blackjack/Tracking, no su lógica ni otros proyectos. Fuente visual exacta: ui.Button primary usado por Nueva Partida de Home. Colores/brillo/sombra compartidos en primaryButtonFinish; GoldPressable conserva controles, textos/tamaños, refs, callbacks, estados y accesibilidad. Referencia Home conserva diseño; consumidores reciben misma superficie, respetando dimensiones/jerarquía propias. Excluye fichas/chips, cartas, relojes, indicadores, paletas, avatares, botones rojos/verdes y secundarios sin relleno dorado. Inventario/consumidores y evidencia en CONTEXTO.
+
+
+### ON-D-036 / 2026-10-09 — Avisos pequeños dentro de madera junto al reloj
+
+Estado: **implementado y probado**. Petición humana sustituye ubicación de acciones rápidas encima de mano en ON-D-030: Te toca/Toc toc/¿Estás ahí? DENTRO de madera, junto a reloj. Caras visuales32px, zona táctil44px y etiquetas completas; solo jugador que espera, cooldown3s/feedback intactos. Avatar continúa centrado y voz/pozo accesibles. Madera adapta altura si hay avisos/estado de voz. No añadir avisos al rival IA local. Sin overlay de botones sobre cadena/mano.
+
+
+
+
+## 2026-10-15 - Release candidate aprobado y nueva entrega Android autorizada
+
+El usuario confirma pruebas ExpoGo positivas y aprueba visualmente el candidato completo; autoriza expresamente check-in+push, actualizar fuente de carpeta principal Online preservando divergencias, marcar RC, generar paqueteAndroid/APK y publicar SOLO canal INTERNO existente GooglePlay para probar dostelefonos. Esta autorizacion sustituye el gate anterior noGit/noBuild/noPlay; no incluye iOS ni produccion publica. RC previsto v1.0.14-rc.1, versionName1.0.14/code31 tras consola AUTENTICADA: mayorbundle30 e interno30 disponible15Oct17:25, produccion28. Firma/paquete existentes se conservan.
+
+Antes de integrar: raiz master e135055, candidato codex/poker-device-fixes c4bdaf1+diff aprobado. Raiz preservada en snapshot Git codex/root-before-rc-20261015=3faac1cac1dd9a63580f7339b96b00b67bf0d2dd y archivo .local/release-candidate-20261015/root-before-rc-source.zip (158archivos). No hay rutasfuente exclusivas de raiz ausentes del candidato; diferencias son versiones anteriores de fuentes presentes. Historialdocumental exclusivo se integra por apendice, sin borrado. Se excluiran .local/node_modules/secretos/artefactos del commit/build. 762pruebas yTypeScript del UI aprobado pasan, auditoriaonline fuente/integracion completada; fisicaonline/nativa siguependiente. Se requiere verificar paridadraiz/candidato antes de compilar.
+
+Correo autorizado UNA VEZ al estar disponible para testers, destinatario yunielht@yahoo.com. La coordinacion del chat humano original conserva el envio; este executor no debe enviarlo en paralelo. Registrar disponibilidad y devolver estado listo para notificar, sin afirmar correo enviado hasta evidenciaSENT.

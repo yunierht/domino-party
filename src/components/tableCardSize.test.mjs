@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {tablePlayerCardWidth} from './tableCardSize.ts';
+test('foreground cards add about eight percent on supported phone widths without changing proportions or the dealer baseline',()=>{for(const width of [320,360,390,412])for(const height of [640,719,720,844]){const baseline=Math.min(height<720?60:74,(width-52)/4),own=tablePlayerCardWidth(width,height);assert.ok(own/baseline>=1.06&&own/baseline<=1.1);assert.ok(2*own+7<width-120);}});
