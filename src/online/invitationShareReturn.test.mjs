@@ -1,0 +1,52 @@
+// Real invitation screens, Share component, clients and room domains; Android lifecycle/network/storage are controlled doubles.
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import React from 'react';import {create,act} from 'react-test-renderer';import ts from 'typescript';
+import {OnlineClient} from './client.ts';import {PokerOnlineClient} from '../poker/PokerOnlineClient.ts';import * as domino from '../../backend/domino-online/src/room.ts';import * as poker from '../../backend/domino-online/src/pokerRoom.ts';import {pokerInvitation} from '../poker/pokerInvitation.ts';import {sharePayload} from './invitationLink.ts';
+import {confirmWaitingGuest} from './savedRoomRecovery.ts';
+globalThis.IS_REACT_ACT_ENVIRONMENT=true;
+const code='ABCDEF0123',hostToken='a'.repeat(64),guestToken='b'.repeat(64),endpoint='http://localhost';
+function compile(file,deps,interval=()=>1){const m={exports:{}};new Function('require','module','exports','setInterval','clearInterval',ts.transpileModule(fs.readFileSync(new URL(file,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React,esModuleInterop:true}}).outputText)(id=>{if(!(id in deps))throw Error('Missing '+id);return deps[id]},m,m.exports,interval,()=>{});return m.exports;}
+async function fixture(game,shareTiming){
+ const isPoker=game==='poker',domain=isPoker?poker:domino,calls=[],nodes=[];let room,now=1,finishShare;
+ const transport={async request(path,token,body){calls.push({path,token,body});if(path===(isPoker?'/poker/rooms':'/rooms'))room=isPoker?poker.create(code,'epoch',token,body.name,now,{startingChips:5000,timeout:'check-fold'},body):domino.createRoom(code,'epoch',token,body.name,now,100,'points',body.invitation);
+  else if(path.endsWith('/join'))room=isPoker?poker.join(room,token,body.name,now,body,()=>.5):domino.joinRoom(room,token,body.name,now,body,()=>.5);
+  else if(path.endsWith('/commands')&&!isPoker){if(body.type==='approve')room=domino.approveGuest(room,token);else if(body.type==='ready')room=domino.readyRoom(room,token,now,()=>.5);}
+  else if(path.endsWith('/heartbeat'))room=domain.heartbeat(room,token,now,()=>.5);
+  else if(path.endsWith('/disconnect'))room=domain.disconnect(room,token,now,()=>.5);
+  return {...(isPoker?poker.view(room,token,now):domino.project(room,token)),manualCode:'123456'};
+ }};
+ async function mount(role){
+  let saved=null,client,tick,appState='active';const appEvents=new Set(),token=role==='host'?hostToken:guestToken,shares=[];
+  const vault={read:async()=>structuredClone(saved),write:async v=>{saved=structuredClone(v)},clear:async()=>{saved=null}};
+  const Client=isPoker?PokerOnlineClient:OnlineClient;class CapturedClient extends Client{constructor(){super(vault,transport,async()=>token,endpoint);client=this;}}
+  const rn={View:'View',Text:'Text',TextInput:'TextInput',ScrollView:'ScrollView',Pressable:'Pressable',Modal:({visible,children})=>visible?children:null,Platform:{OS:'android'},BackHandler:{addEventListener:()=>({remove(){}})},AppState:{get currentState(){return appState},addEventListener:(_event,fn)=>{appEvents.add(fn);return{remove:()=>appEvents.delete(fn)}}},Share:{share:async content=>{shares.push(content);if(shareTiming!=='before-background'&&role==='host')await new Promise(resolve=>finishShare=resolve);return{action:'sharedAction'}}}};
+  const common={'./savedRoomRecovery':{confirmWaitingGuest},react:React,'react-native':rn,'../components/GoldPressable':{GoldPressable:'Pressable'},'../computer/tableTheme':{TABLE:{}},'./transport':{httpTransport:()=>transport},'../online/transport':{httpTransport:()=>transport},'./endpoint':{onlineEndpoint:()=>endpoint},'../online/endpoint':{onlineEndpoint:()=>endpoint},'./credentialStorage':{vault,credential:async()=>token},'../online/credentialStorage':{vault,credential:async()=>token},'../poker/pokerCredentialStorage':{vault,credential:async()=>token},'./pokerCredentialStorage':{vault,credential:async()=>token},'./client':{OnlineClient:CapturedClient},'./PokerOnlineClient':{PokerOnlineClient:CapturedClient},'../components/PlayingIdentity':{PlayingIdentity:'Identity'},'./PlayingIdentity':{PlayingIdentity:'Identity'},'./useCodeInvitation':{useCodeInvitation:()=>({accept:f=>f(),busy:false,prompt:null})},'../online/useCodeInvitation':{useCodeInvitation:()=>({accept:f=>f(),busy:false,prompt:null})},'./useOnlineGameTransfer':{useOnlineGameTransfer:()=>({requestSwitch(){},prompt:null})},'../online/useOnlineGameTransfer':{useOnlineGameTransfer:()=>({requestSwitch(){},prompt:null})},'../i18n/I18nContext':{useI18n:()=>({lang:'en'})},'../nav/NavContext':{useNav:()=>nav},'@expo/vector-icons':{Feather:'Icon'},'../../app.json':{expo:{scheme:'dominoparty'}},'../computer/ComputerGameContext':{useComputerGame:()=>({playerAvatarId:role==='host'?'yuni':'yoi'})},'../computer/dominoAvatars':{DOMINO_AVATARS:[{id:'yuni',name:'Ana'},{id:'yoi',name:'Luis'}]},'./pokerInvitation':{pokerInvitation},'./invitationLink':{sharePayload},'./OnlinePokerTable':{OnlinePokerTable:'OnlinePokerTable'},'./OnlineDominoTable':{OnlineDominoTable:'OnlineDominoTable'},'../components/Header':{Header:'Header'},'../components/HomeButton':{HomeButton:'HomeButton'},'./OnlinePlayerAvatarPicker':{},'../online/OnlinePlayerAvatarPicker':{},'./OnlineCancellation':{CodeInvitationScreen:'CodeInvitationScreen'},'../online/OnlineCancellation':{CodeInvitationScreen:'CodeInvitationScreen'},'../online/OnlineConnectionNotice':{OnlineConnectionNotice:'OnlineConnectionNotice'}};
+  const nav={pendingPokerCode:role==='guest'?code:null,clearPokerCode(){nav.pendingPokerCode=null},back(){},openPokerOnline(){}};
+  const share=compile('./InvitationShareOptions.tsx',common).InvitationShareOptions;
+  common['./InvitationShareOptions']={InvitationShareOptions:share};common['../online/InvitationShareOptions']={InvitationShareOptions:share};
+  const Screen=compile(isPoker?'../poker/PokerOnlineScreen.tsx':'./OnlineFriendScreen.tsx',common,fn=>{tick=fn;return 1})[isPoker?'PokerOnlineScreen':'OnlineFriendScreen'];
+  function Wrapper(){const [visible,setVisible]=React.useState(true);return React.createElement(Screen,isPoker?{inviteOnly:role==='host'}:{initialName:role==='host'?'Ana':'Luis',initialTarget:100,initialMode:'points',initialAvatar:role==='host'?'yuni':'yoi',entry:role==='host'?'invite':'accept',invitationCode:role==='guest'?code:undefined,inviteOnly:role==='host',visible,onBack:()=>setVisible(false),onStarted:()=>setVisible(true)});}
+  let tree;await act(async()=>{tree=create(React.createElement(Wrapper))});
+  const node={tree,shares,get saved(){return saved},get client(){return client},async state(next){appState=next;now++;await act(async()=>{for(const fn of appEvents)fn(next)})},async tick(){now++;await act(async()=>{tick();for(let i=0;i<20;i++)await Promise.resolve()})},async accept(){await act(async()=>tree.root.findByProps({testID:isPoker?'poker-online-accept':'online-join'}).props.onPress())},close:()=>act(()=>tree.unmount())};nodes.push(node);return node;
+ }
+ return{mount,calls,get room(){return room},finishShare:()=>act(async()=>finishShare?.()),close:async()=>{for(const n of nodes.reverse())await n.close()}};
+}
+for(const game of ['poker','domino'])for(const timing of ['before-background','after-background','after-return'])for(const accepted of ['while-away','after-return'])test(`${game}: Share resolves ${timing}, guest accepts ${accepted}, direct app return opens the same room`,async()=>{
+ const f=await fixture(game,timing);try{
+  const host=await f.mount('host');assert.equal(host.shares.length,1,JSON.stringify({state:host.client.state,calls:f.calls}));assert.ok(host.shares[0].message.includes(game==='poker'?'pokerRoom='+code:'onlineRoom='+code));
+  await host.state('background');if(timing==='after-background')await f.finishShare();
+  const guest=await f.mount('guest');
+  if(accepted==='while-away'){await guest.accept();assert.equal(guest.client.state.error,game==='poker'?'not_connected':null);if(game==='domino')assert.equal(f.room.phase,'waiting');}
+  await host.state('active');if(timing==='after-return')await f.finishShare();assert.equal(host.client.state.status,'connected');
+  if(accepted==='after-return')await guest.accept();else await guest.tick();
+  await host.tick();
+  if(game==='domino'&&accepted==='while-away'){assert.equal(f.room.phase,'waiting','return alone must not imply host consent');await act(()=>confirmWaitingGuest(host.client));await guest.tick();await host.tick();}
+  assert.equal(guest.client.state.error,null,'an explicitly accepted invitation must recover when its host returns');
+  assert.equal(guest.client.state.view?.seat,'computer');assert.equal(host.client.state.view?.seat,'human');
+  assert.equal(host.client.state.view?.code,guest.client.state.view?.code);assert.equal(f.room.phase,'playing');
+  assert.equal(guest.tree.root.findAllByType(game==='poker'?'OnlinePokerTable':'OnlineDominoTable').length,1);
+  assert.equal(host.tree.root.findAllByType(game==='poker'?'OnlinePokerTable':'OnlineDominoTable').length,1);
+  assert.equal(host.saved.token,hostToken);assert.equal(guest.saved.token,guestToken);
+  assert.equal(f.calls.filter(c=>c.path===(game==='poker'?'/poker/rooms':'/rooms')).length,1);
+  assert.equal(f.calls.filter(c=>c.path.endsWith('/join')&&c.token===hostToken).length,0,'host never joins as guest');
+ }finally{await f.close()}
+});

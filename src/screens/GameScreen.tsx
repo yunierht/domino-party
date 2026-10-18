@@ -1,3 +1,7 @@
+import {TrackingTeamRecord} from '../components/TrackingTeamRecord';
+import {trackingTeamRecord} from '../stats/trackingTeamRecord';
+import type {TrackingRecord} from '../stats/trackingTeamRecord';
+import {useSharedTrackingHistory} from '../state/useSharedTrackingHistory';
 import {GoldPressable} from '../components/GoldPressable';
 import {MatchPanelBevel} from '../components/MatchPresentation';
 import {trackingSetupHeaderGap,trackingFirstCardTop} from '../components/trackingLayout';
@@ -42,6 +46,7 @@ export function GameScreen() {
   const appearance=useTrackingAppearance();
   const {
     currentMatch,
+    matches: localMatches,
     addRound,
     editRound,
     deleteRound,
@@ -59,6 +64,8 @@ export function GameScreen() {
     approveControl,
     denyControl,
   } = useGame();
+  const sharedRecords=useSharedTrackingHistory(currentMatch?.sharedHostId?currentMatch.historySpaceId:undefined);
+  const recordSource=currentMatch?.sharedHostId?sharedRecords:localMatches;
   const {go,back,openWatch,openSetup,goHome}=useNav();
   const c = theme.colors;
 
@@ -137,7 +144,7 @@ export function GameScreen() {
   const liveStatusHeight=isShared?Math.max(headerGap,64):headerGap;
   const panelBudget=(availableHeight-trackingFirstCardTop(availableHeight,s)-(liveStatusHeight-headerGap)-s(4)-s(10))/2;
   const dialSize=Math.min(s(216),width-s(36)-s(136),Math.max(88,panelBudget-s(141)-Math.max(...nameHeights)-s(6)));
-  const nameColumnWidth=Math.max(s(80),Math.min(width-s(24),660)-s(12)-3-2*(Math.max(44,s(44))+s(12)));
+  const nameColumnWidth=Math.max(s(80),Math.min(width-s(24),660)-s(12)-3-2*(Math.max(88,s(88))+s(12)));
   const measureNames=(index:0|1,measured:number)=>{if(measured>0)setNameHeights(previous=>Math.abs(previous[index]-measured)<1?previous:index===0?[measured,previous[1]]:[previous[0],measured]);};
   const myPending = liveMeta?.pendingRequest?.uid === liveUid;
   // Keep enough horizontal room for the tappable target on narrow phones.
@@ -293,6 +300,7 @@ export function GameScreen() {
         <TeamPanel
           match={match}
           team={teamA}
+          record={recordSource?trackingTeamRecord(recordSource,teamA.name):null}
           colorChoice={appearance.teamAColor}
           onCycleStyle={appearance.cycleStyle}
           onCycleColor={()=>appearance.cycleTeamColor('A')}
@@ -316,6 +324,7 @@ export function GameScreen() {
         <TeamPanel
           match={match}
           team={teamB}
+          record={recordSource?trackingTeamRecord(recordSource,teamB.name):null}
           colorChoice={appearance.teamBColor}
           onCycleStyle={appearance.cycleStyle}
           onCycleColor={()=>appearance.cycleTeamColor('B')}
@@ -449,6 +458,7 @@ function BroadcastIndicator({active,color}:{active:boolean;color:string}){
 }
 
 function TeamPanel({
+  record,
   match,
   team,
   color,
@@ -471,6 +481,7 @@ function TeamPanel({
   onAdd,
   onEditRound,
 }: {
+  record: TrackingRecord|null;
   match: Match;
   team: Team;
   color: string;
@@ -529,6 +540,7 @@ function TeamPanel({
     <Animated.View testID={`tracking-marker-panel-${team.id===match.teams[0].id?'A':'B'}`}
       style={{minHeight:panelHeight,backgroundColor:c.surface,borderRadius:s(18),borderWidth:1.5,borderColor:color,overflow:'hidden',shadowColor:'#000',shadowOpacity:.45,shadowRadius:s(16),shadowOffset:{width:0,height:s(9)},elevation:9,transform:[{scale:pressScale},{scale:winBeat}]}}>
       <MatchPanelBevel color={color} radius={s(18)}/>
+      <TrackingTeamRecord record={record}/>
       {[{top:s(7),left:s(7),borderTopWidth:2,borderLeftWidth:2},{top:s(7),right:s(7),borderTopWidth:2,borderRightWidth:2},{bottom:s(7),left:s(7),borderBottomWidth:2,borderLeftWidth:2},{bottom:s(7),right:s(7),borderBottomWidth:2,borderRightWidth:2}].map((corner,i)=><View key={i} pointerEvents="none" style={{position:'absolute',width:s(10),height:s(10),borderColor:color,opacity:.7,...corner}}/>)}
       <View testID="tracking-panel-controls" pointerEvents="box-none" style={{position:'absolute',top:s(8),right:s(6),width:controlSize,height:controlSize*2+s(6),zIndex:3}}>
           <Pressable testID="tracking-style-cycle" accessibilityRole="button" accessibilityLabel={`${lang==='es'?'Cambiar marcador':'Change counter style'}: ${dialStyle}`} onPress={event=>{event?.stopPropagation();onCycleStyle();}} style={{position:'absolute',top:controlSize+s(6),right:0,width:controlSize,height:controlSize,alignItems:'center',justifyContent:'center',borderRadius:s(10),backgroundColor:c.surfaceAlt,borderWidth:1,borderColor:c.border}}><MaterialCommunityIcons name="gauge" size={22} color={c.textMuted}/></Pressable>

@@ -1,3 +1,6 @@
+import {invitationAvailable} from './invitationGames';
+import {roomTransfer,existingDestination,destinationPresence} from './roomTransfer';
+import type {TransferPlan} from './gameTransfer';
 import {recordPlayActivity} from './room.ts';
 import {DurableObject} from 'cloudflare:workers';
 import * as poker from './pokerRoom.ts';
@@ -8,7 +11,7 @@ type Reply={status:number;body:PokerView|{error:string}};
 type Command={commandId:string;epoch:string;revision:number;round:number}&PokerIntent;
 const error=(value:unknown):{status:number;body:{error:string}}=>{
  const message=value instanceof Error?value.message:'internal_error';
- const allowed=['unauthorized','not_found','closed','paused','room_full','not_connected','invalid_request','invalid_settings','invalid_name','invalid_avatar','invalid_avatar_photo','invitation_acceptance_required','already_started','not_playing','not_your_turn','illegal_action','round_not_finished','attention_own_turn','attention_cooldown','stale_revision','stale_round','stale_epoch','command_conflict','receipt_capacity','rate_limited','collision','Not your turn','Invalid raise','Must call or fold','Nothing to call','voice_replaced','voice_peer_missing','voice_capacity','voice_call_missing','voice_call_forbidden','voice_call_ended','invalid_voice'];
+ const allowed=['unauthorized','not_found','closed','paused','room_full','not_connected','invalid_request','invalid_settings','invalid_name','invalid_avatar','invalid_avatar_photo','invitation_acceptance_required','already_started','not_playing','not_your_turn','illegal_action','round_not_finished','transfer_pending','attention_own_turn','attention_cooldown','stale_revision','stale_round','stale_epoch','command_conflict','receipt_capacity','rate_limited','collision','Not your turn','Invalid raise','Must call or fold','Nothing to call','voice_replaced','voice_peer_missing','voice_capacity','voice_call_missing','voice_call_forbidden','voice_call_ended','invalid_voice'];
  const safe=allowed.includes(message)?message:'internal_error';return {status:safe==='unauthorized'?401:safe==='not_found'?404:safe==='rate_limited'?429:safe.startsWith('invalid_')?400:safe==='internal_error'?500:409,body:{error:safe}};
 };
 const json=(reply:Reply)=>Response.json(reply.body,{status:reply.status,headers:{'cache-control':'no-store','x-content-type-options':'nosniff'}});
@@ -35,6 +38,14 @@ export class PokerRoom extends DurableObject<Cloudflare.Env>{
   ctx.storage.sql.exec('CREATE TABLE IF NOT EXISTS voice_call(id INTEGER PRIMARY KEY,data TEXT NOT NULL)');
   ctx.storage.sql.exec('CREATE TABLE IF NOT EXISTS voice_calls_seen(id TEXT PRIMARY KEY,created INTEGER NOT NULL)');
  }
+ async invitationAvailable(){return invitationAvailable(this.load(),Date.now());}
+ async transfer(hash:string,input:unknown){return roomTransfer(this.ctx,this.env,'poker',hash,input,()=>this.load(),r=>this.save(r),poker.advance,poker.heartbeat,r=>this.schedule(r),(h,n)=>this.limit(h,n));}
+ async receiveTransfer(plan:TransferPlan):Promise<void>{await this.ctx.storage.transaction(async()=>{
+  if(existingDestination(this.load(),plan))return;
+  const now=Date.now();let room=poker.create(plan.code,crypto.randomUUID(),plan.hashes.human,plan.names.human,now,{startingChips:5000,timeout:'check-fold'},{avatar:plan.avatars.human,...(plan.photos.human?{avatarPhoto:plan.photos.human}:{})});
+  room=poker.join(room,plan.hashes.computer,plan.names.computer,now,{avatar:plan.avatars.computer,acceptInvitation:true,...(plan.photos.computer?{avatarPhoto:plan.photos.computer}:{})},secureRandom);
+  room=destinationPresence(room,plan,now);if(room.clock)room.clock={...room.clock,deadline:null,remainingMs:30000};this.save(room);await this.schedule(room);
+ });}
  protected load():PokerRoomState|null{const row=this.ctx.storage.sql.exec<{data:string}>('SELECT data FROM room WHERE id=1').toArray()[0];return row?JSON.parse(row.data) as PokerRoomState:null;}
  private save(room:PokerRoomState){this.ctx.storage.sql.exec('INSERT INTO room(id,data) VALUES(1,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data',JSON.stringify(room));
   if(room.phase!=='playing'){this.ctx.storage.sql.exec('DELETE FROM voice_peers');this.ctx.storage.sql.exec('DELETE FROM voice_events');

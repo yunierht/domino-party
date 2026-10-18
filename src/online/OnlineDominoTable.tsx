@@ -1,3 +1,5 @@
+import {TableSettings} from '../computer/TableSettings';
+import {GameSwitchButton} from '../poker/TableGameContext';
 import {FloatingAction} from '../blackjack/FloatingAction';
 import {CancelRoomControl,RoomClosedNotice} from './OnlineCancellation';
 import {ResultHoldButton} from '../components/ResultHoldButton';
@@ -5,7 +7,8 @@ import {HomeButton} from '../components/HomeButton';
 import {GoldPressable} from '../components/GoldPressable';
 import {DealtTile} from '../computer/RoundDeal';
 import {useOnlineDeal} from './useOnlineDeal';
-import {OnlineTurnTimer} from './OnlineTurnTimer';
+import {OnlineTurnTimer,OnlineElapsedTurnTimer} from './OnlineTurnTimer';
+import {DominoRoundAudit} from '../computer/DominoRoundAudit';
 import {OnlineRoundResult} from './OnlineRoundResult';
 import {OnlineQuickActions,OnlineAttentionNotice} from './OnlineQuickActions';
 import React,{useEffect,useMemo,useRef,useState} from 'react';
@@ -32,7 +35,7 @@ import {ModalCloseButton} from '../components/ModalCloseButton';
 import {OnlineVoiceControl} from './OnlineVoiceControl';
 import type {VoiceRelay} from './OnlineVoiceControl';
 
-export function OnlineDominoTable({view:v,enabled,resultControlEnabled=enabled,es,onAction,onBack,onShare,error,notice,voiceRelay,voiceAvailable=false}:{view:OnlineView;enabled:boolean;resultControlEnabled?:boolean;es:boolean;onAction:(action:Action)=>Promise<boolean>|void;onBack:()=>void;onShare?:()=>void;error:string|null;notice?:string|null;voiceRelay?:VoiceRelay;voiceAvailable?:boolean}){
+export function OnlineDominoTable({view:v,enabled,resultControlEnabled=enabled,es,onAction,onBack,onShare,error,notice,voiceRelay,voiceAvailable=false,onSwitchGame}:{onSwitchGame?:()=>void;view:OnlineView;enabled:boolean;resultControlEnabled?:boolean;es:boolean;onAction:(action:Action)=>Promise<boolean>|void;onBack:()=>void;onShare?:()=>void;error:string|null;notice?:string|null;voiceRelay?:VoiceRelay;voiceAvailable?:boolean}){
  const prefs=usePrefs(),windowSize=useWindowDimensions(),insets=useSafeAreaInsets();
  const dealPresentation=useOnlineDeal(v.round,!v.board.length&&!v.last&&!v.result,prefs.ready,prefs.tileSound);
  const text=COMPUTER_STRINGS[es?'es':'en'];
@@ -108,6 +111,7 @@ export function OnlineDominoTable({view:v,enabled,resultControlEnabled=enabled,e
  const hit=(point:Point)=>tableOrigin.current?resolveScreenDrop({x:point.x-tableOrigin.current.x,y:point.y-tableOrigin.current.y},targets,tableSize,metrics,camera.current.current):null;
  const play=(tileId:string,end:'left'|'right')=>{if(!humanTurn)return;setSelected(null);cancel();sendAction({type:'play',tileId,end});};
  const tally=(v.mode==='wins'?v.wins:v.scores)??{human:0,computer:0};
+ const winningTileVisible=!!(v.result&&!v.result.blocked&&v.last?.kind==='play');
  const result=v.result?(v.result.winner==='tie'?text.tie:`${v.names[v.winner??v.result.winner]} ${v.winner?text.wonMatch:text.wonRound}`):'';
  const status=error??stockError??(v.phase==='paused'?(es?'Partida pausada\nEsperando reconexión':'Game paused\nWaiting for reconnection'):v.phase==='closed'?(es?'Sala cerrada\nSin ganador':'Room closed\nNo winner'):result||(v.turn===local?text.yourTurn:`${es?'Turno de':'Turn of'} ${v.names[rival]}`));
  const button=(label:string,press:()=>void,disabled=false)=><GoldPressable finish accessibilityRole="button" accessibilityLabel={label} disabled={disabled} accessibilityState={{disabled}} onPress={press} style={({pressed})=>({minHeight:44,paddingHorizontal:18,paddingVertical:11,borderRadius:12,backgroundColor:C.gold,borderWidth:1,borderColor:C.goldLight,justifyContent:'center',alignItems:'center',opacity:disabled?.35:pressed?.8:1})}><Text style={{color:C.background,fontWeight:'700',fontSize:13}}>{label}</Text></GoldPressable>;
@@ -124,12 +128,12 @@ export function OnlineDominoTable({view:v,enabled,resultControlEnabled=enabled,e
    <DominoTableBackground opponentHeight={opponentHeight} gift={null} es={es} finished={false}/>
    <View pointerEvents="none" accessible={false} style={{position:'absolute',top:(opponentHeight-15+height-48-94)/2-42.5,left:42,right:42,height:85}}><TableStamp title="DOMINO" engraved/></View>
    <View style={{height:opponentHeight,flexDirection:'row-reverse',alignItems:'flex-end',paddingHorizontal:12,gap:6}}>
-    <View style={{width:82}}/>
+    <View style={{width:82,alignSelf:'flex-start',marginTop:14}}>{onSwitchGame&&<GameSwitchButton targetMode="poker" onSelect={onSwitchGame} disabled={!resultControlEnabled}/>}</View>
     <View testID="online-rival-avatar" accessibilityLabel={`${v.names[rival]}`} style={{flex:1,minWidth:44,height:opponentHeight}}><OpponentDrinkingAvatar opponentId={opponentPhoto?'selfie':opponent.id} name={v.names[rival]??''} gift={null} invitation={null} source={opponentPhoto?{uri:opponentPhoto}:opponent.image} height={opponentHeight} es={es}/></View>
-    <View style={{width:82,alignSelf:'flex-start',marginTop:14}}><Text style={{color:C.gold,fontSize:11,textAlign:'center'}}>ONLINE</Text></View>
+    <View style={{width:82,alignSelf:'flex-start',marginTop:14}}><Text style={{color:C.gold,fontSize:11,textAlign:'center'}}>ONLINE</Text><View testID="online-opponent-clock" style={{alignItems:'center',marginTop:6}}><OnlineElapsedTurnTimer clock={resultControlEnabled&&['playing','paused'].includes(v.phase)&&v.turn===rival&&!v.result?v.presentation?.turnClock??null:null} es={es}/></View></View>
    </View>
-   <View testID="hidden-opponent-hand" style={{alignItems:'center',height:25,justifyContent:'center'}}><View style={{flexDirection:'row',gap:3}}>{Array.from({length:Math.min(10,v.opponentCount)},(_,i)=><DealtTile key={i} {...dealPresentation} index={i} side="computer" distance={windowSize.width}><View style={{width:15,height:24,borderRadius:2,borderWidth:1,borderColor:'#D5CAB0',backgroundColor:'#8E9A7C'}}/></DealtTile>)}<Text style={{color:C.muted,fontSize:10,marginLeft:3}}>{v.opponentCount}</Text></View></View>
-   <View ref={tableRef} collapsable={false} testID="playing-surface" {...pan.panHandlers} onLayout={e=>{const {width,height}=e.nativeEvent.layout;if(width>0&&height>0)setTableSize({width,height});}} style={{flex:1,marginHorizontal:12,minHeight:80,overflow:'hidden'}}>
+   {v.result?.opponentHand?<DominoRoundAudit hands={{[local]:v.hand,[rival]:v.result.opponentHand} as Record<'human'|'computer',Tile[]>} result={v.result} names={{human:v.names.human??'',computer:v.names.computer??''}} mode={v.mode} es={es}/>:<View testID="hidden-opponent-hand" style={{alignItems:'center',height:25,justifyContent:'center'}}><View style={{flexDirection:'row',gap:3}}>{Array.from({length:Math.min(10,v.opponentCount)},(_,i)=><DealtTile key={i} {...dealPresentation} index={i} side="computer" distance={windowSize.width}><View style={{width:15,height:24,borderRadius:2,borderWidth:1,borderColor:'#D5CAB0',backgroundColor:'#8E9A7C'}}/></DealtTile>)}<Text style={{color:C.muted,fontSize:10,marginLeft:3}}>{v.opponentCount}</Text></View></View>}
+   <View ref={tableRef} collapsable={false} testID="playing-surface" {...pan.panHandlers} onLayout={e=>{const {width,height}=e.nativeEvent.layout;if(width>0&&height>0)setTableSize({width,height});}} style={{flex:1,marginHorizontal:12,minHeight:80,overflow:winningTileVisible?'visible':'hidden',zIndex:winningTileVisible?20:0,elevation:winningTileVisible?20:0}}>
     <Animated.View testID="board-camera" pointerEvents="box-none" style={{position:'absolute',left:(tableSize.width-metrics.width)/2,top:(tableSize.height-metrics.height)/2,width:metrics.width,height:metrics.height,transform:[{translateX:camera.values.x},{translateY:camera.values.y},{scale:camera.values.scale}]}}>
      <AnchoredBoard onPresented={board=>setPresented(board.map(t=>t.id).join(','))} key={v.round} board={v.board} openingId={opening} metrics={metrics} available={available} hovered={drag?hit(drag.point):null} showMatching={prefs.matchingTiles} arrivingId={v.last?.kind==='play'?v.last.tile?.id:null} winningId={v.result&&!v.result.blocked&&v.last?.kind==='play'?v.last.tile?.id:null} contactContext={{round:v.round,actor:v.last?.player,turn:v.turn,lastKind:v.last?.kind}} leftLabel={text.left} rightLabel={text.right} openLabel={`${v.names[v.turn??local]} ${text.openFreely}`} onEnd={end=>{if(active)play(active.id,end);}}/>
     </Animated.View>
@@ -178,7 +182,8 @@ export function OnlineDominoTable({view:v,enabled,resultControlEnabled=enabled,e
   <Modal visible={stock} transparent animationType="fade" onRequestClose={closeStock}><View style={{flex:1,justifyContent:'center',padding:18,backgroundColor:'rgba(2,12,10,0.52)'}}><View style={{maxWidth:420,width:'100%',alignSelf:'center',borderRadius:18,borderWidth:2,borderColor:C.gold,padding:14,paddingTop:60,backgroundColor:'#704329'}}><View pointerEvents="none" accessible={false} style={{position:'absolute',inset:0,borderRadius:16,overflow:'hidden'}}><WoodSurface/></View><ModalCloseButton finish testID="online-boneyard-cancel" es={es} disabled={!enabled||stockBusy} onPress={closeStock}/><Text style={{color:C.goldLight,textAlign:'center',fontSize:17,marginBottom:12}}>{es?'Elige una ficha del pozo':'Choose a tile from the boneyard'}</Text><ScrollView contentContainerStyle={{flexDirection:'row',flexWrap:'wrap',justifyContent:'center',gap:8}}>{v.stock.map((slot,i)=><Pressable key={slot} accessibilityRole="button" accessibilityLabel={`${es?'Ficha boca abajo':'Face-down tile'} ${i+1}`} disabled={!enabled||stockBusy||!v.canDraw} onPress={()=>requestStock({type:'draw',slot})} style={{width:36,height:64,borderRadius:5,borderWidth:2,borderColor:'#CEBD96',backgroundColor:'#F7F0DA'}}/>)}</ScrollView>
    {(error||stockError||v.phase==='paused')&&<Text accessibilityRole="alert" style={{color:C.ivory,textAlign:'center',marginTop:10}}>{error??stockError??status}</Text>}
   </View></View></Modal>
-  <Modal visible={menu||rules} transparent animationType="fade" onRequestClose={()=>{setMenu(false);setRules(false);}}><View style={{flex:1,justifyContent:'center',padding:24,backgroundColor:'rgba(2,12,10,0.82)'}}><View style={{maxHeight:'85%',borderRadius:24,padding:24,paddingTop:64,backgroundColor:C.surface,borderWidth:1,borderColor:C.line,gap:12}}>
+  <TableSettings visible={menu} es={es} roomCode={v.manualCode??v.code} onClose={()=>setMenu(false)} onRules={()=>{setMenu(false);setRules(true);}}/>
+  <Modal visible={rules} transparent animationType="fade" onRequestClose={()=>{setMenu(false);setRules(false);}}><View style={{flex:1,justifyContent:'center',padding:24,backgroundColor:'rgba(2,12,10,0.82)'}}><View style={{maxHeight:'85%',borderRadius:24,padding:24,paddingTop:64,backgroundColor:C.surface,borderWidth:1,borderColor:C.line,gap:12}}>
    <ModalCloseButton finish testID="online-menu-close" es={es} onPress={()=>{setMenu(false);setRules(false);}}/>
    {rules?<ScrollView><Text style={{color:C.ivory,fontSize:15,lineHeight:25}}>{text.rules}</Text></ScrollView>:<><Text selectable style={{color:C.goldLight,textAlign:'center'}}>{v.manualCode?`${es?'Código manual':'Manual code'}: ${v.manualCode}`:v.code}</Text>{button(text.showRules,()=>setRules(true))}</>}
   </View></View></Modal>

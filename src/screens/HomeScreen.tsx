@@ -1,3 +1,4 @@
+import {SavedOnlineRoomReturn} from '../online/SavedOnlineRoomReturn';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -50,6 +51,8 @@ export function HomeScreen() {
 
       {/* Logo */}
       <Logo spinTrigger={logoSpin} height={height < 700 ? 155 : 190} />
+
+      <SavedOnlineRoomReturn/>
 
       {activeMatch ? (
         <ResumeMatchCard match={activeMatch} onResume={() => go('game')} onNewMatch={newTrackingMatch}>
@@ -170,7 +173,8 @@ function ResumeMatchCard({
               team={match.teams[1]}
               score={scoreB}
               target={match.targetScore}
-              color={c.teamB}            />
+              color={c.teamB}
+            />
           </Pressable>
           <View style={{ marginTop: s(16), flexDirection: 'row', gap: s(10) }}>
             <Animated.View testID="resume-button-pulse" style={{ flex: 1, transform: [{ scale: attention }] }}>
@@ -191,11 +195,13 @@ function HomeScoreSide({
   team,
   score,
   target,
-  color,}: {
+  color,
+}: {
   team: Team;
   score: number;
   target: number;
-  color: string;}) {
+  color: string;
+}) {
   const { theme, s } = useTheme();
   const c = theme.colors;
   const caption = String(Math.max(0, target - score));

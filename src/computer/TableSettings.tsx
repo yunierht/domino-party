@@ -9,7 +9,7 @@ import { TABLE as C } from './tableTheme';
 import { MusicChoices } from '../sound/MusicChoices';
 import {ModalCloseButton} from '../components/ModalCloseButton';
 
-export function TableSettings({ visible, es, onClose, onRules, onInvite, onAcceptInvitation, onRestart, matching = true }: { onRestart?:()=>void; onAcceptInvitation?: () => void; onInvite?: () => void; onRules?: () => void; matching?: boolean; visible: boolean; es: boolean; onClose: () => void }) {
+export function TableSettings({ roomCode, visible, es, onClose, onRules, onInvite, onAcceptInvitation, onRestart, matching = true }: { roomCode?:string; onRestart?:()=>void; onAcceptInvitation?: () => void; onInvite?: () => void; onRules?: () => void; matching?: boolean; visible: boolean; es: boolean; onClose: () => void }) {
   const prefs = usePrefs();
   const controls = [
     { label: es ? 'Música' : 'Music', icon: 'music' as const, value: prefs.tableMusic, set: prefs.setTableMusic },
@@ -25,6 +25,7 @@ export function TableSettings({ visible, es, onClose, onRules, onInvite, onAccep
             <ModalCloseButton finish es={es} positioned={false} onPress={onClose}/>
           </View>
           <ScrollView style={{ flexShrink: 1 }}>
+            {roomCode&&<Text testID="table-settings-room-code" selectable style={{color:C.goldLight,textAlign:'center',marginBottom:16}}>{es?'Código de sala: ':'Room code: '}{roomCode}</Text>}
             <View style={{ flexDirection: 'row', gap: 10 }}>
               {controls.map(control => <Pressable key={control.label} accessibilityRole="switch" accessibilityLabel={control.label} accessibilityState={{ checked: control.value }} aria-checked={control.value} onPress={() => control.set(!control.value)} style={{ flex: 1, alignItems: 'center', gap: 8 }}>
                 <LinearGradient colors={control.value ? ['#EACD8D', '#AB7934'] : ['#34453C', '#172C23']} style={{ width: '100%', aspectRatio: 1, maxWidth: 92, borderRadius: 18, overflow:'hidden', borderWidth: 1, borderColor: control.value ? C.goldLight : C.line, alignItems: 'center', justifyContent: 'center' }}>

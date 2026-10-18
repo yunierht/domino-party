@@ -1,3 +1,4 @@
+import {advanceTransfer,transferBlocksNext} from './gameTransfer.ts';
 import {act as bet,legalActions,newHand} from '../../../src/poker/engine.ts';
 import type {Action,Card,PokerGame,Seat} from '../../../src/poker/engine.ts';
 import {leaveRoom,recordPlayActivity,createRoom,joinRoom,actor,advancePresence,heartbeat as presenceHeartbeat,disconnect as presenceDisconnect,deadline as presenceDeadline} from './room.ts';
@@ -81,6 +82,7 @@ export function command(room:PokerRoomState,hash:string,intent:PokerIntent,now:n
   return {...room,revision:room.revision+1,resultTimer:{heldBy,remainingMs,deadline:heldBy.length?null:now+remainingMs}};
  }
  if(intent.type==='nextHand'){
+  if(transferBlocksNext(room))throw Error('transfer_pending');
   if(!room.poker!.result)throw Error('round_not_finished');
   const roundReady=room.roundReady.includes(seat)?room.roundReady:[...room.roundReady,seat];
   const next={...room,roundReady,revision:room.revision+1};
@@ -95,9 +97,9 @@ export function command(room:PokerRoomState,hash:string,intent:PokerIntent,now:n
  throw Error('illegal_action');
 }
 export function advance(room:PokerRoomState,now:number,random:()=>number):PokerRoomState{
- const presence=advancePresence(room,now);let next=synchronize(room,{...room,...presence,game:null},now);
+ room=advanceTransfer(room,now);const presence=advancePresence(room,now);let next=synchronize(room,{...room,...presence,game:null},now);
  if(next.phase!=='playing')return next;
- if(next.poker?.result&&next.resultTimer?.deadline!=null&&next.resultTimer.deadline<=now)return following(next,now,random);
+ if(!transferBlocksNext(next)&&next.poker?.result&&next.resultTimer?.deadline!=null&&next.resultTimer.deadline<=now)return following(next,now,random);
  if(next.clock?.deadline!=null&&next.clock.deadline<=now){
   const seat=next.poker!.turn,legal=legalActions(next.poker!,seat);
   next=action(next,next.seats[seat]!.secretHash,{type:legal.canCheck?'check':'fold'},now);
@@ -113,7 +115,7 @@ export function disconnect(room:PokerRoomState,hash:string,now:number):PokerRoom
 export function deadline(room:PokerRoomState):number|null{
  const presence=presenceDeadline(room);if(presence===null)return null;
  const result=room.poker?.result&&Object.values(room.poker.stacks).every(n=>n>0)?room.resultTimer?.deadline:null;
- return Math.min(presence,room.phase==='playing'?room.clock?.deadline??Infinity:Infinity,room.phase==='playing'?result??Infinity:Infinity);
+ return Math.min(presence,room.phase==='playing'?room.clock?.deadline??Infinity:Infinity,room.phase==='playing'&&!transferBlocksNext(room)?result??Infinity:Infinity);
 }
 export function view(room:PokerRoomState,hash:string,now:number){
  const seat=actor(room,hash),rival:Seat=seat==='human'?'computer':'human',g=room.poker;

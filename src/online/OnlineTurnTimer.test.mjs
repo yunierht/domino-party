@@ -15,6 +15,17 @@ async function setup(clock){
  return{renderer,actions,timers,reminders,async app(value){await act(()=>listeners.forEach(fn=>fn(value)));},async visibility(value){visible=value;await act(()=>renderer.update(React.createElement(module.exports.OnlineTurnTimer,props)));},async advance(ms){now+=ms;await act(()=>{for(const timer of [...timers.values()])timer();});},async update(patch){Object.assign(props,patch);await act(()=>renderer.update(React.createElement(module.exports.OnlineTurnTimer,props)));},seconds(){return renderer.root.findByProps({testID:'online-turn-seconds'}).props.children;},async close(){await act(()=>renderer.unmount());}};
 }
 const active={durationMs:30000,remainingMs:30000,deadline:1030000,serverNow:1000000,paused:false};
+test('elapsed display starts at zero, freezes with server pause, resets and never offers controls',async()=>{
+ const h=await setup(active);try{
+  await h.update({elapsedOnly:true,enabled:false});assert.equal(h.seconds(),0);
+  assert.equal(h.renderer.root.findAllByType('Pressable').length,0);assert.equal(h.renderer.root.findAllByType('Image').length,0);assert.equal(h.renderer.root.findAllByType('Feather').length,0);
+  await h.advance(5500);assert.equal(h.seconds(),5);
+  await h.update({clock:{...active,remainingMs:24000,paused:true,deadline:null,serverNow:1006000}});await h.advance(10000);assert.equal(h.seconds(),6);assert.equal(h.timers.size,0);
+  await h.update({clock:{...active,serverNow:1020000,deadline:1050000}});assert.equal(h.seconds(),0);
+  await h.advance(40000);assert.equal(h.seconds(),30);assert.deepEqual(h.actions,[]);
+  await h.update({clock:null});assert.equal(h.renderer.toJSON(),null);
+ }finally{await h.close();}
+});
 test('the ring counts from snapshot receipt on a monotonic clock and expiry never advances the turn',async()=>{
  const h=await setup(active);try{
   assert.equal(h.seconds(),30);assert.equal(h.timers.size,1);const full=h.renderer.root.findByProps({testID:'online-turn-progress'}).props;

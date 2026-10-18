@@ -1,3 +1,5 @@
+import {advanceTransfer,transferBlocksNext} from './gameTransfer.ts';
+import type {Transfer} from './gameTransfer.ts';
 import { deal, play, drawOrPass, legalEnds, matchWinner } from '../../../src/computer/engine.ts';
 import type { Game, Player, End, ScoringMode } from '../../../src/computer/engine.ts';
 
@@ -31,6 +33,9 @@ export type Intent = { type: 'play'; tileId: string; end: End }
   | { type: 'draw'; slot: string } | { type: 'pass' };
 type Seat = { secretHash: string; name: string; leaseUntil: number; absentSince: number | null; closeAt: number | null };
 export interface Room {
+  transfer?:Transfer;
+  transferIds?:string[];
+  incomingTransfer?:{id:string;source:string;sourceEpoch:string};
   code: string; epoch: string; revision: number;
   manualCode?:string;manualCodeExpires?:number;
   phase: 'waiting' | 'playing' | 'paused' | 'completed' | 'closed';
@@ -38,7 +43,7 @@ export interface Room {
   approved: boolean; createdAt: number; game: Game | null; slotIds: string[];
   winner: Player | null; closeReason: string | null;
   target: number; mode: ScoringMode; roundReady: Player[]; lobbyReady: Player[];
-  invitation?: { avatars: { human: string; computer: string | null }; turnTimer?:true;autoNextRound?:true;quickActions?:true;customAvatars?:true;photos?:Record<Player,string|null> };
+  invitation?: { avatars: { human: string; computer: string | null }; turnTimer?:true;autoNextRound?:true;quickActions?:true;customAvatars?:true;hostReturn?:true;photos?:Record<Player,string|null> };
   lastActivity?: Record<Player,number>;
   turnClock?: TurnClock;
   resultClock?:ResultClock;
@@ -64,12 +69,12 @@ function seat(hash: string, name: string, now: number): Seat {
   if (!name.trim() || name.length > 40 || /[\u0000-\u001f\u007f]/.test(name)) throw new Error('invalid_name');
   return { secretHash: hash, name: name.trim(), leaseUntil: now + LEASE_MS, absentSince: null, closeAt: null };
 }
-export function createRoom(code: string, epoch: string, hash: string, name: string, now: number, target = 100, mode: ScoringMode = 'points', invitation?: {avatar:string;turnTimer?:boolean;autoNextRound?:boolean;quickActions?:boolean;customAvatars?:boolean;avatarPhoto?:string}): Room {
+export function createRoom(code: string, epoch: string, hash: string, name: string, now: number, target = 100, mode: ScoringMode = 'points', invitation?: {avatar:string;turnTimer?:boolean;autoNextRound?:boolean;quickActions?:boolean;customAvatars?:boolean;hostReturn?:boolean;avatarPhoto?:string}): Room {
   if (!Number.isSafeInteger(target) || target < 1 || target > 10000 || !['points','wins'].includes(mode)) throw new Error('invalid_settings');
   const avatar=invitation?avatarId(invitation.avatar):undefined,photo=invitation?avatarPhoto(avatar!,invitation.avatarPhoto,invitation.customAvatars===true):null;
   return { code, epoch, revision: 0, phase: 'waiting', seats: { human: seat(hash, name, now), computer: null },
     approved: false, createdAt: now, game: null, slotIds: [], winner: null, closeReason: null, target, mode, roundReady: [], lobbyReady: [],
-    ...(invitation ? {invitation:{avatars:{human:avatar!,computer:null},...(invitation.turnTimer?{turnTimer:true as const}:{}),...(invitation.autoNextRound?{autoNextRound:true as const}:{}),...(invitation.quickActions?{quickActions:true as const}:{}),...(invitation.customAvatars?{customAvatars:true as const,photos:{human:photo,computer:null}}:{})}} : {}) };
+    ...(invitation ? {invitation:{avatars:{human:avatar!,computer:null},...(invitation.turnTimer?{turnTimer:true as const}:{}),...(invitation.autoNextRound?{autoNextRound:true as const}:{}),...(invitation.quickActions?{quickActions:true as const}:{}),...(invitation.hostReturn?{hostReturn:true as const}:{}),...(invitation.customAvatars?{customAvatars:true as const,photos:{human:photo,computer:null}}:{})}} : {}) };
 }
 export function joinRoom(room: Room, hash: string, name: string, now: number, acceptance?: {avatar:string;acceptInvitation:boolean;avatarPhoto?:string}, random:()=>number=Math.random): Room {
   open(room);
@@ -80,9 +85,10 @@ export function joinRoom(room: Room, hash: string, name: string, now: number, ac
   if (room.invitation) {
     if (!acceptance?.acceptInvitation) throw new Error('invitation_acceptance_required');
     const avatar=avatarId(acceptance.avatar),photo=avatarPhoto(avatar,acceptance.avatarPhoto,room.invitation.customAvatars===true);
-    next={...next,approved:true,lobbyReady:['human','computer'],invitation:{...room.invitation,avatars:{human:room.invitation.avatars.human,computer:avatar},
+    const waitingForHost=room.invitation.hostReturn===true&&room.seats.human.leaseUntil<=now;
+    next={...next,approved:!waitingForHost,lobbyReady:waitingForHost?['computer']:['human','computer'],invitation:{...room.invitation,avatars:{human:room.invitation.avatars.human,computer:avatar},
       ...(room.invitation.customAvatars?{photos:{human:room.invitation.photos?.human??null,computer:photo}}:{})}};
-    return startRoom(next,room.seats.human.secretHash,now,random);
+    return waitingForHost?next:startRoom(next,room.seats.human.secretHash,now,random);
   }
   if(acceptance?.avatar==='selfie'||acceptance?.avatarPhoto!==undefined)throw new Error('invalid_avatar');
   return next;
@@ -134,6 +140,7 @@ export function act(room: Room, hash: string, intent: Intent, now=Date.now()): R
 }
 export function nextRound(room: Room, hash: string, random: () => number, now=Date.now()): Room {
   open(room); const player = actor(room, hash);
+  if(transferBlocksNext(room))throw Error('transfer_pending');
   if (room.phase !== 'playing' || !room.game?.result || room.winner) throw new Error('round_not_finished');
   if (room.invitation?.autoNextRound) throw new Error('auto_round_waiting');
   if (!room.invitation && room.roundReady.includes(player)) return room;
@@ -170,10 +177,11 @@ function synchronizeTurnClock(before:Room,after:Room,now:number):Room {
 }
 /** Advance once per server observation. A late alarm cannot consume unseen turns. */
 export function advanceRoom(room:Room,now:number,random:()=>number=Math.random):Room {
+  room=advanceTransfer(room,now);
   const presence=advancePresence(room,now);
   let next=synchronizeClock(room,presence,now);
   if (next!==presence && next.revision===room.revision) next={...next,revision:next.revision+1};
-  if (next.phase==='playing' && next.game?.result && !next.winner && next.resultClock?.deadline!=null && next.resultClock.deadline<=now) {
+  if (!transferBlocksNext(next) && next.phase==='playing' && next.game?.result && !next.winner && next.resultClock?.deadline!=null && next.resultClock.deadline<=now) {
     return dealFollowingRound(next,random,now);
   }
   if (next.phase==='playing' && next.game && !next.game.result && next.turnClock?.deadline!==null
@@ -254,7 +262,7 @@ export function advancePresence(room: Room, now: number): Room {
   }
   if (Object.values(next.seats).some(s => s?.closeAt !== null && s && now >= s.closeAt!)) {
     next.phase = 'closed'; next.closeReason = 'reconnect_timeout'; next.winner = null;
-  } else next.phase = Object.values(next.seats).some(s => s?.absentSince !== null) ? 'paused' : 'playing';
+  } else next.phase = transferBlocksNext(next)||Object.values(next.seats).some(s => s?.absentSince !== null) ? 'paused' : 'playing';
   const changed = !room.lastActivity || next.phase !== room.phase || (['human','computer'] as const).some(p => next.seats[p]?.absentSince !== room.seats[p]?.absentSince);
   if (!changed) return room;
   next.revision++; return next;
@@ -265,7 +273,7 @@ export function heartbeat(room: Room, hash: string, now: number, random:()=>numb
   const next = structuredClone(current), s = next.seats[player]!;
   const wasAbsent = s.absentSince !== null;
   s.leaseUntil = now + LEASE_MS; s.absentSince = null; s.closeAt = null;
-  if (next.phase === 'paused' && !Object.values(next.seats).some(item => item?.absentSince !== null)) next.phase = 'playing';
+  if (next.phase === 'paused' && !transferBlocksNext(next) && !Object.values(next.seats).some(item => item?.absentSince !== null)) next.phase = 'playing';
   if (wasAbsent) next.revision++;
   return advanceRoom(synchronizeClock(current,next,now),now,random);
 }
@@ -292,7 +300,7 @@ export function deadline(room: Room): number | null {
   return Math.min(...Object.values(room.seats).filter((s): s is Seat => !!s).map(s => s.closeAt ?? s.leaseUntil),
     room.lastActivity ? Math.min(...Object.values(room.lastActivity))+INACTIVITY_MS : Infinity,
     room.phase==='playing' && room.invitation?.turnTimer ? room.turnClock?.deadline??Infinity : Infinity,
-    room.phase==='playing' && room.invitation?.autoNextRound ? room.resultClock?.deadline??Infinity : Infinity);
+    !transferBlocksNext(room) && room.phase==='playing' && room.invitation?.autoNextRound ? room.resultClock?.deadline??Infinity : Infinity);
 }
 export function project(room: Room, hash: string, now=Date.now()) {
   const player = actor(room, hash), rival = player === 'human' ? 'computer' : 'human', g = room.game;
@@ -316,7 +324,7 @@ export function project(room: Room, hash: string, now=Date.now()) {
     opponentCount: g?.hands[rival].length ?? 0,
     stock: room.slotIds.flatMap((id, i) => g?.stock.some(t => t.id === id) ? [`slot-${i}`] : []),
     scores: g?.scores ?? null, wins: g?.wins ?? null, mode: room.mode, target: room.target,
-    result: g?.result ?? null, roundReady: room.roundReady, lobbyReady:room.lobbyReady,
+    result: g?.result ? {...g.result,opponentHand:g.hands[rival]} : null, roundReady: room.roundReady, lobbyReady:room.lobbyReady,
     legalMoves, canDraw:!!g && room.phase==='playing' && !g.result && g.turn===player && !legalMoves.length && !!g.stock.length,
     canPass:!!g && room.phase==='playing' && !g.result && g.turn===player && !legalMoves.length && !g.stock.length,
     last: !g?.last ? null : g.last.kind === 'draw' ? { player: g.last.player, kind: 'draw' } : g.last };

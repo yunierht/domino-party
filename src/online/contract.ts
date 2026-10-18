@@ -12,7 +12,7 @@ export interface OnlineView {
   names:Record<Seat,string|null>;approved:boolean;closeReason:string|null;winner:Seat|null;reconnectDeadline:(number|null)[];
   round:number;turn:Seat|null;board:Tile[];hand:Tile[];opponentCount:number;stock:string[];
   scores:Record<Seat,number>|null;wins:Record<Seat,number>|null;mode:'points'|'wins';target:number;
-  result:{winner:Seat|'tie';points:number;blocked:boolean}|null;roundReady:Seat[];lobbyReady:Seat[];
+  result:{winner:Seat|'tie';points:number;blocked:boolean;opponentHand?:Tile[]}|null;roundReady:Seat[];lobbyReady:Seat[];
   legalMoves:{tileId:string;ends:('left'|'right')[]}[];canDraw:boolean;canPass:boolean;
   last:{player:Seat;kind:'play'|'pass'|'draw';tile?:Tile}|null;
 }
@@ -81,7 +81,12 @@ export function parseView(input:unknown):OnlineView{
   if(new Set([...hand,...board].map(t=>t.id)).size!==hand.length+board.length)throw Error('invalid_snapshot');
   const stock=array(r.stock).map(str);if(stock.some(s=>!/^slot-\d+$/.test(s)))throw Error('invalid_snapshot');
   let result:OnlineView['result']=null;
-  if(r.result!==null){const v=record(r.result);result={winner:v.winner==='tie'?'tie':seat(v.winner),points:num(v.points),blocked:bool(v.blocked)};}
+  if(r.result!==null){const v=record(r.result);result={winner:v.winner==='tie'?'tie':seat(v.winner),points:num(v.points),blocked:bool(v.blocked)};
+    if('opponentHand'in v){const opponentHand=array(v.opponentHand).map(tile);
+      if(opponentHand.length!==num(r.opponentCount)||new Set([...hand,...board,...opponentHand].map(t=>t.id)).size!==hand.length+board.length+opponentHand.length)throw Error('invalid_snapshot');
+      result.opponentHand=opponentHand;
+    }
+  }
   let last:OnlineView['last']=null;
   if(r.last!==null){const v=record(r.last);if(v.kind!=='play'&&v.kind!=='pass'&&v.kind!=='draw')throw Error('invalid_snapshot');
     if(v.kind==='draw'&&'tile'in v)throw Error('invalid_snapshot');
@@ -95,6 +100,6 @@ export function parseView(input:unknown):OnlineView{
     roundReady:array(r.roundReady).map(seat),lobbyReady:array(r.lobbyReady).map(seat),legalMoves,canDraw:bool(r.canDraw),canPass:bool(r.canPass),last};
 }
 export interface PendingCommand {commandId:string;epoch:string;revision:number;round:number;action:Action}
-export interface Session {endpoint:string;token:string;name:string;code?:string;pendingJoin?:string;acceptance?:{avatar:string;acceptInvitation:boolean;avatarPhoto?:string};pendingCreate?:{target:number;mode:'points'|'wins';invitation?:{avatar:string;turnTimer?:boolean;autoNextRound?:boolean;quickActions?:boolean;customAvatars?:boolean;avatarPhoto?:string}};pendingCommand?:PendingCommand}
+export interface Session {cancelledInvitation?:true;endpoint:string;token:string;name:string;code?:string;pendingJoin?:string;acceptance?:{avatar:string;acceptInvitation:boolean;avatarPhoto?:string};pendingCreate?:{target:number;mode:'points'|'wins';invitation?:{avatar:string;turnTimer?:boolean;autoNextRound?:boolean;quickActions?:boolean;customAvatars?:boolean;hostReturn?:boolean;avatarPhoto?:string}};pendingCommand?:PendingCommand}
 export interface Vault {read():Promise<Session|null>;write(value:Session):Promise<void>;clear():Promise<void>}
 export interface Transport {request(path:string,token:string,body?:unknown):Promise<unknown>}

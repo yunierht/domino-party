@@ -1,3 +1,7 @@
+import {TrackingTeamRecord} from '../components/TrackingTeamRecord';
+import {trackingTeamRecord} from '../stats/trackingTeamRecord';
+import type {TrackingRecord} from '../stats/trackingTeamRecord';
+import {useSharedTrackingHistory} from '../state/useSharedTrackingHistory';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Easing, Modal, Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -413,6 +417,7 @@ function LiveBoard({
   const { theme, s } = useTheme();
   const { t } = useI18n();
   const c = theme.colors;
+  const records=useSharedTrackingHistory(game.historySpaceId);
   const match = sharedToMatch(game);
   const [teamA, teamB] = match.teams;
   const totalA = teamTotal(match, teamA.id);
@@ -481,9 +486,9 @@ function LiveBoard({
         </View>
       )}
 
-      <ReadOnlyTeam match={match} team={teamA} color={c.teamA} total={totalA} toWin={pointsToWin(match, teamA.id)} leading={leadId === teamA.id && !finished} isWinner={match.winnerTeamId === teamA.id} pulse={danger && leadId === teamA.id} intensity={intensity} />
+      <ReadOnlyTeam record={records?trackingTeamRecord(records,teamA.name):null} match={match} team={teamA} color={c.teamA} total={totalA} toWin={pointsToWin(match, teamA.id)} leading={leadId === teamA.id && !finished} isWinner={match.winnerTeamId === teamA.id} pulse={danger && leadId === teamA.id} intensity={intensity} />
       <View style={{ height: s(14) }} />
-      <ReadOnlyTeam match={match} team={teamB} color={c.teamB} total={totalB} toWin={pointsToWin(match, teamB.id)} leading={leadId === teamB.id && !finished} isWinner={match.winnerTeamId === teamB.id} pulse={danger && leadId === teamB.id} intensity={intensity} />
+      <ReadOnlyTeam record={records?trackingTeamRecord(records,teamB.name):null} match={match} team={teamB} color={c.teamB} total={totalB} toWin={pointsToWin(match, teamB.id)} leading={leadId === teamB.id && !finished} isWinner={match.winnerTeamId === teamB.id} pulse={danger && leadId === teamB.id} intensity={intensity} />
 
       <View style={{ marginTop: s(10) }}>
         <Text style={{ color: c.textMuted, fontSize: s(12), textAlign: 'center', marginVertical: s(12) }}>
@@ -566,6 +571,7 @@ function parseWatchCode(value: string) {
 }
 
 function ReadOnlyTeam({
+  record,
   match,
   team,
   color,
@@ -576,6 +582,7 @@ function ReadOnlyTeam({
   pulse,
   intensity,
 }: {
+  record: TrackingRecord|null;
   match: Match;
   team: Team;
   color: string;
@@ -643,7 +650,8 @@ function ReadOnlyTeam({
           backgroundColor: 'rgba(255,255,255,0.14)',
         }}
       />
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <TrackingTeamRecord record={record}/>
+      <View style={{ flexDirection: 'row', alignItems: 'center',marginTop:s(40) }}>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: s(8) }}>
             <View style={{ width: s(14), height: s(14), borderRadius: s(7), backgroundColor: color }} />

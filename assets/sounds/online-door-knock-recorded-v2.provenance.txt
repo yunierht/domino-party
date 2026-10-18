@@ -1,0 +1,19 @@
+{
+  "source": "https://bigsoundbank.com/toc-sur-une-porte-legere-s0374.html",
+  "download": "https://bigsoundbank.com/UPLOAD/bwf-en/0374.wav",
+  "title": "Knock on a light door",
+  "author": "Joseph SARDIN",
+  "license": "CC0 public domain; commercial app redistribution/editing allowed; attribution optional per source page",
+  "sourceSha256": "7aaffc0864b2b59c61840c826114e8790285a337e8f47e777c3c704bd99dca07",
+  "cropStartSeconds": 4.045458333333333,
+  "durationSeconds": 0.16,
+  "gain": 0.8337659033078881,
+  "fadeInMs": 1,
+  "fadeOutMs": 12,
+  "sampleRate": 48000,
+  "channels": 1,
+  "bits": 16,
+  "sha256": "a694d3fae21506db3acb3db75342d29b1125ad46ed796f067a821e36c08bfc9d",
+  "previewSeconds": 0.42,
+  "notes": "Single real recorded door impact only. Existing notice repeats at180ms; do not double-trigger a double recording. No synthesis."
+}

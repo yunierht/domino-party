@@ -9,7 +9,7 @@ export function PokerCard({winning=false,combination=false,combinationLabel="Car
  // Reserve a ten-pixel lane even before showdown so markers never shift cards.
  return <View style={{width,height:width*1.43+10,position:'relative'}}>
   {slot&&(!props.card||!landed)?<View testID="poker-card-placeholder" pointerEvents="none" accessible={false} style={{position:'absolute',top:0,left:0,width,height:width*1.43}}><PlayingCard width={width} animate={false}/></View>:null}
-  {props.card||props.back?<PlayingCard {...props} onLanded={()=>{setLanded(true);props.onLanded?.();}}/>:null}
+  {props.card||props.back?<PlayingCard {...props} fixedBack={props.back||props.fixedBack} onLanded={()=>{setLanded(true);props.onLanded?.();}}/>:null}
   {visibleWinner?<View testID="poker-winning-dot" pointerEvents="none" accessible accessibilityLabel={winning?winnerLabel:combinationLabel} style={{position:'absolute',top:width*1.43+3,left:width/2-3,width:6,height:6,borderRadius:3,backgroundColor:'#E9C873'}}/>:null}
  </View>;
 }

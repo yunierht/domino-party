@@ -14,8 +14,8 @@ test('the table owner preserves offline state and the waiting online session acr
  function Local(props){const [marker]=React.useState(()=>++mounts.local);React.useEffect(()=>()=>{unmounts.local++;},[]);return React.createElement('Local',{...props,marker});}
  function Online(props){const [marker]=React.useState(()=>++mounts.online);React.useEffect(()=>()=>{unmounts.online++;},[]);return React.createElement('Online',{...props,marker});}
  const game={playerName:'Juni',target:100,scoringMode:'points',hands:{human:['private AI hand'],computer:['never send']}};
- const output={};new Function('React','useState','useComputerGame','View','LocalComputerGameScreen','OnlineFriendScreen','exports',
-  ts.transpileModule(wrapper.getText(parsed),{compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS}}).outputText)(React,React.useState,()=>({game,opponentId:'diego',playerAvatarId:'yuni'}),'View',Local,Online,output);
+ const output={};new Function('React','useState','useComputerGame','View','LocalComputerGameScreen','OnlineFriendScreen','useI18n','HostGuestPrompt','exports',
+  ts.transpileModule(wrapper.getText(parsed),{compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS}}).outputText)(React,React.useState,()=>({game,opponentId:'diego',playerAvatarId:'yuni'}),'View',Local,Online,()=>({lang:'es'}),'HostGuestPrompt',output);
  let tree;await act(()=>{tree=create(React.createElement(output.ComputerGameScreen));});
  try{
   assert.equal(tree.root.findAllByType('Online').length,0);

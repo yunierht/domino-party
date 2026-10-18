@@ -252,3 +252,17 @@ export function playRoundDeal(): () => void {
 /** Approved card excerpt uses only the Poker/Blackjack pool. */
 export {prepareCardAudio} from './cardAudio';
 export function playCardDeal(): () => void {return playPreparedCard();}
+
+/** Recorded CC0 door impact reserved for the remote online Knock notice. */
+export function playOnlineKnock() {
+  let player:AudioPlayer|null=null,subscription:{remove():void}|undefined;
+  let configured=false,started=false,disposed=false,timeout:ReturnType<typeof setTimeout>|undefined;
+  const stop=()=>{if(disposed)return;disposed=true;clearTimeout(timeout);subscription?.remove();try{player?.pause();player?.remove();}catch{}};
+  const start=()=>{if(disposed||started||!configured||!player||!(player.isLoaded||player.duration>0))return;started=true;player.volume=1;player.play();};
+  try{
+    player=createAudioPlayer(require('../../assets/sounds/online-door-knock-recorded-v2.wav'),{downloadFirst:true});
+    subscription=player.addListener('playbackStatusUpdate',status=>{if(status.didJustFinish)stop();else start();});
+    timeout=setTimeout(stop,1500);
+    void configureAudio().then(()=>{configured=true;start();}).catch(stop);
+  }catch{stop();}
+}

@@ -1,3 +1,6 @@
+import {retireCancelledInvitation} from '../online/cancelInvitation.ts';
+import {parseGameTransfer,saveTransferredSession} from '../online/gameTransfer.ts';
+import type {GameTransfer} from '../online/gameTransfer.ts';
 import {parseIceConfiguration} from '../online/iceConfiguration.ts';
 import {parsePokerView} from './onlineContract.ts';
 import {SessionGeneration} from '../online/sessionGeneration.ts';
@@ -6,44 +9,71 @@ import type {Transport} from '../online/contract';
 import type {VoiceRequest,VoiceReply} from '../online/voiceProtocol';
 export interface PokerClientState {view:PokerOnlineView|null;busy:boolean;status:'idle'|'connected'|'disconnected';error:string|null;canResume:boolean}
 export class PokerOnlineClient {
- private session:PokerSession|null=null;private listeners=new Set<(state:PokerClientState)=>void>();
+ private session:PokerSession|null=null;
+ private cancelledCreates=new Set<string>();private listeners=new Set<(state:PokerClientState)=>void>();
  private lifetime:SessionGeneration;
  private held:boolean|null=null;private holding=false;private refreshing=false;
  state:PokerClientState={view:null,busy:false,status:'idle',error:null,canResume:false};
  private vault:PokerVault;private transport:Transport;private credential:()=>Promise<string>;private endpoint:string;
  constructor(vault:PokerVault,transport:Transport,credential:()=>Promise<string>,endpoint:string){this.vault=vault;this.lifetime=new SessionGeneration(vault);this.transport=transport;this.credential=credential;this.endpoint=endpoint;}
+ async exchangeGame(input:Record<string,unknown>){const generation=this.lifetime.capture(),s=this.require();if(!s.code)throw Error('no_session');const raw=await this.transport.request('/poker/rooms/'+s.code+'/transfer',s.token,input);this.lifetime.assert(generation);return parseGameTransfer(raw);}
+ async proposeGame(target:'domino'|'poker'){const generation=this.lifetime.capture(),s=this.require();if(!s.code)throw Error('no_session');this.accept(await this.transport.request('/poker/rooms/'+s.code,s.token),generation);const v=this.state.view;if(!v)throw Error('no_session');return this.exchangeGame({type:'propose',id:await this.credential(),target,epoch:v.epoch,revision:v.revision});}
+ async saveGameTransfer(t:GameTransfer,vault:import('../online/contract').Vault){const generation=this.lifetime.capture(),s=this.require();const v=this.state.view;if(!v||t.epoch!==v.epoch)throw Error('stale_epoch');await saveTransferredSession(this.transport,s,t,vault,()=>this.lifetime.assert(generation),v.seat);}
  subscribe(fn:(state:PokerClientState)=>void){this.listeners.add(fn);fn(this.state);return()=>{this.listeners.delete(fn);};}
  private emit(patch:Partial<PokerClientState>){this.state={...this.state,...patch};for(const fn of this.listeners)fn(this.state);}
  private accept(raw:unknown,generation:number){this.lifetime.assert(generation);const view=parsePokerView(raw),old=this.state.view;if(this.session?.code&&view.code!==this.session.code||old&&(old.epoch!==view.epoch||old.seat!==view.seat))throw Error('invalid_snapshot');if(!old||view.revision>=old.revision)this.emit({view,status:'connected',error:null});}
  private async persist(session:PokerSession,generation:number){await this.lifetime.storage(()=>this.vault.write(session),generation);this.session=session;this.emit({canResume:true});}
  private require(){if(!this.session)throw Error('no_session');return this.session;}
  private async run(task:(generation:number)=>Promise<void>,newSession=false){if(this.state.busy)return;const generation=newSession?this.lifetime.advance():this.lifetime.capture();if(newSession){this.held=null;this.holding=false;this.refreshing=false;}this.emit({busy:true,error:null});try{await task(generation);}catch(e){if(this.lifetime.current(generation))this.emit({error:e instanceof Error?e.message:'connection_error',status:'disconnected'});}finally{if(this.lifetime.current(generation)){this.emit({busy:false});void this.flushHold();}}}
- private async readSaved(generation:number){const value=await this.lifetime.storage(()=>this.vault.read(),generation) as PokerSession|null;if(value&&(value.endpoint!==this.endpoint||!/^[a-f0-9]{64}$/.test(value.token)))throw Error('storage_error');this.session=value;this.emit({canResume:!!value,...(!value?{view:null}:{})});}
+ private async readSaved(generation:number){const value=await this.lifetime.storage(()=>this.vault.read(),generation) as PokerSession|null;if(value&&(value.endpoint!==this.endpoint||!/^[a-f0-9]{64}$/.test(value.token)))throw Error('storage_error');this.session=value;this.emit({canResume:!!value&&!value.cancelledInvitation,...(!value||value.cancelledInvitation?{view:null}:{})});if(value?.cancelledInvitation)void this.retireInvitation(value);}
  async load(){const generation=this.lifetime.capture();try{await this.readSaved(generation);}catch{if(this.lifetime.current(generation))this.emit({error:'storage_error'});}}
  async create(name:string,avatar:string,avatarPhoto?:string){await this.run(async generation=>{this.emit({view:null});await this.persist({endpoint:this.endpoint,token:await this.credential(),name,pendingCreate:{target:100,mode:'points',invitation:{avatar,...(avatarPhoto?{avatarPhoto}:{})}}},generation);await this.recover(generation);},true);}
- async join(name:string,code:string,avatar:string,avatarPhoto?:string){await this.run(async generation=>{if(!/^(?:\d{6}|[A-F0-9]{10})$/.test(code))throw Error('invalid_code');this.emit({view:null});await this.persist({endpoint:this.endpoint,token:await this.credential(),name,pendingJoin:code,acceptance:{avatar,acceptInvitation:true,...(avatarPhoto?{avatarPhoto}:{})}},generation);await this.recover(generation);},true);}
+ // Probe only after explicit acceptance; never replace a saved seat on an uncertain read.
+ private async reuseInvitation(target:string,generation:number){
+  const saved=this.session;if(!saved||saved.cancelledInvitation)return false;
+  if(saved.pendingJoin===target){await this.recover(generation);return true;}
+  if(!saved.code)return false;
+  let view:ReturnType<typeof parsePokerView>;
+  try{view=parsePokerView(await this.transport.request('/poker/rooms/'+saved.code,saved.token));}
+  catch(error){this.lifetime.assert(generation);if(['not_found','room_missing','unauthorized'].includes(error instanceof Error?error.message:''))return false;throw error;}
+  this.lifetime.assert(generation);
+  if(view.code!==target&&view.manualCode!==target)return false;
+  this.accept(view,generation);await this.recover(generation);return true;
+ }
+ async join(name:string,code:string,avatar:string,avatarPhoto?:string){await this.run(async generation=>{
+    if(await this.reuseInvitation(code,generation))return;if(!/^(?:\d{6}|[A-F0-9]{10})$/.test(code))throw Error('invalid_code');this.emit({view:null});await this.persist({endpoint:this.endpoint,token:await this.credential(),name,pendingJoin:code,acceptance:{avatar,acceptInvitation:true,...(avatarPhoto?{avatarPhoto}:{})}},generation);await this.recover(generation);},true);}
  private async recover(generation:number){this.lifetime.assert(generation);let s=this.require();
-  if(s.pendingCreate){const raw=await this.transport.request('/poker/rooms',s.token,{name:s.name,...s.pendingCreate.invitation});this.lifetime.assert(generation);const v=parsePokerView(raw);s={endpoint:s.endpoint,token:s.token,name:s.name,code:v.code};await this.persist(s,generation);this.accept(v,generation);}
+  if(s.cancelledInvitation){this.emit({view:null,busy:false,status:'idle',error:null,canResume:false});return;}
+  if(s.pendingCreate){const raw=await this.transport.request('/poker/rooms',s.token,{name:s.name,...s.pendingCreate.invitation});const v=parsePokerView(raw);if(!this.lifetime.current(generation)&&this.cancelledCreates.delete(s.token))void this.retireInvitation({...s,cancelledInvitation:true},v);this.lifetime.assert(generation);s={endpoint:s.endpoint,token:s.token,name:s.name,code:v.code};await this.persist(s,generation);this.accept(v,generation);}
   if(s.pendingJoin){let raw:unknown;try{raw=await this.transport.request(`/poker/${/^\d{6}$/.test(s.pendingJoin)?'manual':'rooms'}/${s.pendingJoin}/join`,s.token,{name:s.name,...s.acceptance});}catch(error){this.lifetime.assert(generation);const reason=error instanceof Error?error.message:'';if(this.session===s&&!s.code&&['not_found','room_missing','invalid_code','closed','room_closed','room_full','unauthorized','invalid_request','invitation_acceptance_required','already_started'].includes(reason)){await this.lifetime.storage(()=>this.vault.clear(),generation);this.session=null;this.held=null;this.emit({view:null,canResume:false});}throw error;}this.lifetime.assert(generation);const v=parsePokerView(raw);s={endpoint:s.endpoint,token:s.token,name:s.name,code:v.code};await this.persist(s,generation);this.accept(v,generation);}
   if(s.pendingPokerCommand)await this.sendPending(generation);this.lifetime.assert(generation);s=this.require();
   if(s.code&&!['closed','completed'].includes(this.state.view?.phase??''))this.accept(await this.transport.request(`/poker/rooms/${s.code}/heartbeat`,s.token,{}),generation);
   const v=this.state.view;if(this.held===null&&v?.presentation.resultClock?.heldBy.includes(v.seat))this.setResultHeld(false);
  }
  async resume(){await this.run(async generation=>{await this.readSaved(generation);await this.recover(generation);});}
- async refresh(){if(this.state.busy||this.refreshing||!this.session?.code||this.session.pendingPokerCommand)return;const generation=this.lifetime.capture(),session=this.session;this.refreshing=true;try{const raw=await this.transport.request(`/poker/rooms/${session.code}/heartbeat`,session.token,{});if(this.lifetime.current(generation)&&this.session?.token===session.token&&this.session.code===session.code){this.accept(raw,generation);void this.flushHold();}}catch(error){if(this.lifetime.current(generation)&&this.session?.token===session.token&&this.session.code===session.code)this.emit({status:'disconnected',error:error instanceof Error?error.message:'connection_error'});}finally{if(this.lifetime.current(generation))this.refreshing=false;}}
+ async refresh(){if(this.state.busy||this.refreshing||!this.session?.code||this.session.cancelledInvitation||this.session.pendingPokerCommand)return;const generation=this.lifetime.capture(),session=this.session;this.refreshing=true;try{const raw=await this.transport.request(`/poker/rooms/${session.code}/heartbeat`,session.token,{});if(this.lifetime.current(generation)&&this.session?.token===session.token&&this.session.code===session.code){this.accept(raw,generation);void this.flushHold();}}catch(error){if(this.lifetime.current(generation)&&this.session?.token===session.token&&this.session.code===session.code)this.emit({status:'disconnected',error:error instanceof Error?error.message:'connection_error'});}finally{if(this.lifetime.current(generation))this.refreshing=false;}}
  async command(action:PokerOnlineAction){await this.run(async generation=>{const s=this.require(),v=this.state.view;if(!s.code||!v)throw Error('no_session');if(s.pendingPokerCommand){await this.recover(generation);return;}await this.persist({...s,pendingPokerCommand:{commandId:await this.credential(),epoch:v.epoch,revision:v.revision,round:v.round,action}},generation);await this.sendPending(generation);});}
  private async sendPending(generation:number,rebase=true){this.lifetime.assert(generation);const s=this.require(),p=s.pendingPokerCommand;if(!p||!s.code)return;
   try{this.accept(await this.transport.request(`/poker/rooms/${s.code}/commands`,s.token,{commandId:p.commandId,epoch:p.epoch,revision:p.revision,round:p.round,...p.action}),generation);await this.persist({...s,pendingPokerCommand:undefined},generation);}
   catch(e){this.lifetime.assert(generation);const code=e instanceof Error?e.message:'';
    if(code==='stale_revision'&&rebase&&['holdResult','releaseResult'].includes(p.action.type)){const raw=await this.transport.request(`/poker/rooms/${s.code}`,s.token);this.lifetime.assert(generation);const latest=parsePokerView(raw);this.accept(latest,generation);if(latest.epoch===p.epoch&&latest.round===p.round&&latest.result&&latest.phase==='playing'){await this.persist({...s,pendingPokerCommand:{...p,commandId:await this.credential(),revision:latest.revision}},generation);await this.sendPending(generation,false);return;}}
-   if(['stale_revision','stale_epoch','stale_round','illegal_action','paused','closed','not_playing','not_your_turn','Invalid raise','Not your turn','Must call or fold','Nothing to call','attention_cooldown','attention_own_turn','command_conflict','round_not_finished','invalid_request'].includes(code)){await this.persist({...s,pendingPokerCommand:undefined},generation);this.accept(await this.transport.request(`/poker/rooms/${s.code}`,s.token),generation);}throw e;
+   if(['stale_revision','stale_epoch','stale_round','illegal_action','paused','closed','not_playing','not_your_turn','Invalid raise','Not your turn','Must call or fold','Nothing to call','attention_cooldown','attention_own_turn','command_conflict','round_not_finished','transfer_pending','invalid_request'].includes(code)){await this.persist({...s,pendingPokerCommand:undefined},generation);this.accept(await this.transport.request(`/poker/rooms/${s.code}`,s.token),generation);}throw e;
   }
  }
  setResultHeld(held:boolean){if(!this.state.view?.result)return;this.held=held;void this.flushHold();}
  private async flushHold(){if(this.holding||this.state.busy||this.state.status!=='connected')return;const generation=this.lifetime.capture();this.holding=true;try{while(this.lifetime.current(generation)&&this.held!==null&&!this.state.busy&&this.state.status==='connected'){const held=this.held,v=this.state.view;if(!v?.result||!v.presentation.resultClock){this.held=null;return;}if(v.phase!=='playing'||v.presentation.resultClock.heldBy.includes(v.seat)===held)return;await this.command({type:held?'holdResult':'releaseResult'});if(!this.lifetime.current(generation)||this.state.error)return;}}finally{if(this.lifetime.current(generation))this.holding=false;}}
  async iceConfiguration(){const generation=this.lifetime.capture(),saved=this.require(),view=this.state.view;if(!saved.code||!view||view.phase!=='playing')throw Error('not_playing');const raw=await this.transport.request('/poker/rooms/'+saved.code+'/ice',saved.token,{epoch:view.epoch});this.lifetime.assert(generation);return parseIceConfiguration(raw,process.env.EXPO_PUBLIC_ONLINE_MODE??'lan');}
  async voice(request:VoiceRequest):Promise<VoiceReply>{const generation=this.lifetime.capture(),s=this.require();if(!s.code)throw Error('no_session');const reply=await this.transport.request(`/poker/rooms/${s.code}/voice`,s.token,request) as VoiceReply;this.lifetime.assert(generation);return reply;}
- private async notifyDisconnect(s:PokerSession|null){if(s?.code)try{await this.transport.request(`/poker/rooms/${s.code}/disconnect`,s.token,{});}catch{}}
+ private retireInvitation(session:PokerSession,lateRoom?:ReturnType<typeof parsePokerView>){return retireCancelledInvitation({session,vault:this.vault,transport:this.transport,prefix:'/poker',parse:parsePokerView,credential:this.credential,storage:task=>this.lifetime.storage(task)},lateRoom);}
+ async cancelInvitation(){
+  if(this.state.view&&this.state.view.phase!=='waiting')return;
+  const saved=this.session;if(saved?.pendingCreate)this.cancelledCreates.add(saved.token);this.lifetime.advance();this.held=null;this.holding=false;this.refreshing=false;
+  const cancelled=saved?{...saved,cancelledInvitation:true as const}:null;this.session=cancelled;
+  this.emit({view:null,busy:false,status:'idle',error:null,canResume:false});
+  await this.lifetime.storage(()=>cancelled?this.vault.write(cancelled):this.vault.clear());
+  if(cancelled?.code)void this.retireInvitation(cancelled);
+ }
+ private async notifyDisconnect(s:PokerSession|null){if(s?.code&&!s.cancelledInvitation)try{await this.transport.request(`/poker/rooms/${s.code}/disconnect`,s.token,{});}catch{}}
  async disconnect(){const s=this.session,generation=this.lifetime.advance();this.held=false;this.holding=false;this.refreshing=false;this.emit({busy:false,status:'disconnected'});await this.notifyDisconnect(s);if(this.lifetime.current(generation))this.emit({status:'disconnected'});}
  async forget(){const s=this.session,generation=this.lifetime.advance();this.session=null;this.held=null;this.holding=false;this.refreshing=false;this.emit({view:null,busy:false,status:'idle',canResume:false,error:null});const clearing=this.lifetime.storage(()=>this.vault.clear());await Promise.all([clearing,this.notifyDisconnect(s)]);if(this.lifetime.current(generation))this.emit({view:null,busy:false,status:'idle',canResume:false,error:null});}
 }

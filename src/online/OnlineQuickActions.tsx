@@ -4,7 +4,7 @@ import {Animated,Pressable,Text,Vibration,View} from 'react-native';
 import {useReducedMotion} from '../computer/DrinkGift';
 import {TABLE as C} from '../computer/tableTheme';
 import {usePrefs} from '../state/PrefsContext';
-import {playTap,playTileContact} from '../sound/sounds';
+import {playTap,playOnlineKnock} from '../sound/sounds';
 import type {AttentionEvent,AttentionKind,Seat} from './contract';
 
 const monotonicNow=()=>typeof performance!=='undefined'&&typeof performance.now==='function'?performance.now():Date.now();
@@ -77,8 +77,8 @@ export function OnlineAttentionNotice({event,localSeat,serverNow,es,supported=tr
     const current=preferences.current;
     if(current.ready&&event.kind==='wave'&&current.sound)playTap();
     if(current.ready&&event.kind==='knock'){
-      if(current.tileSound){playTileContact({source:'online-attention'});
-        if(remaining>180)knock.current=setTimeout(()=>{knock.current=null;if(active.current===event.id&&preferences.current.ready&&preferences.current.tileSound)playTileContact({source:'online-attention'});},180);}
+      if(current.tileSound){playOnlineKnock();
+        if(remaining>180)knock.current=setTimeout(()=>{knock.current=null;if(active.current===event.id&&preferences.current.ready&&preferences.current.tileSound)playOnlineKnock();},180);}
       if(current.vibration)Vibration.vibrate(30);
     }
   },[event?.id,event?.from,event?.kind,event?.sentAt,event?.expiresAt,localSeat,serverNow,supported,dismissalKey]);

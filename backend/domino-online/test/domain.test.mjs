@@ -10,6 +10,19 @@ function ready(random = () => 0.5) {
   room = approveGuest(room, host);
   return readyRoom(readyRoom(room,host,0,random),guest,0,random);
 }
+
+test('only resolved Domino rounds reveal the rival tiles to either seat, including blocked and final rounds',()=>{
+ const initial=ready(),tile=(a,b)=>({id:`${a}-${b}`,a,b});
+ for(const [secret,seat,rival] of [[host,'human','computer'],[guest,'computer','human']]){
+  for(const phase of ['playing','paused','closed'])assert.equal(project({...initial,phase},secret,0).result,null);
+  for(const phase of ['playing','paused','completed'])for(const winner of ['human','computer','tie'])for(const blocked of [true,false]){
+   const game={...initial.game,board:[tile(0,0)],hands:{human:[tile(1,1)],computer:[tile(2,3)]},result:{winner,blocked,points:winner==='tie'?0:3}};
+   const result=project({...initial,phase,game},secret,0);
+   assert.deepEqual(result.result.opponentHand,game.hands[rival]);assert.deepEqual(result.hand,game.hands[seat]);
+   assert.equal('stockTiles'in result,false);
+  }
+ }
+});
 test('server seat projections never expose rival hand, stock identities or draw result', () => {
   const room = ready();
   const view = project(room, host);

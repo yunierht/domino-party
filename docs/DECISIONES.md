@@ -1303,3 +1303,128 @@ Correo autorizado UNA VEZ al estar disponible para testers, destinatario yunielh
 ## 2026-10-15 - Entrega interna RC31 completada
 
 Aplicada autorizacionhumana de RC: codigo aprobado integrado/pusheado en8f653bb, tagv1.0.14-rc.1 sinmover. Solo canalinterno existente publicado31; produccion28/iOS intactos. AAB validado y APK universal firmadoGoogle obtenidos, referencias/hashes/evidencia en CONTEXTO. No nueva aprobacionfisica inferida de compilacion/Play. Correo de disponibilidad ya enviado por coordinador con evidenciaSENT reportada; no duplicar. Proximopaso es prueba real dostelefonos, no rediseno. Documentacionfinal puede tener commitseparado autorizado; no alterar codigo/tagRC.
+
+## 2026-10-16 — Excepción específica: cuatro ajustes y QR Expo Go LAN
+
+Fuente: usuario en voz/chat del 16 de octubre, coordinador `01a145cb-087e-7b70-8d98-edad16b0fe00`. Estado: implementados en worktree aislado, pruebas locales; validación física pendiente. Evidencia y rutas en [CONTEXTO](CONTEXTO.md#2026-10-16--cuatro-ajustes-autorizados-candidato-expo-go-lan).
+
+Autorizado: (1) reloj circular sin imagen junto al rival, segundos transcurridos del turno existente, SOLO Poker y Dominó online; (2) mostrar fichas restantes y sumas al resolver cada mano de Dominó local/online, incluidos bloqueos/empates/final, sin revelar manos activas ni cambiar puntos; (3) por defecto conservar la pareja al pedir Poker↔Dominó, con propuesta dentro de app y una aceptación del rival; el usuario confirmó que ambos esperen al final de la mano; (4) sustituir slider Poker local/online por Raise mínimo arriba, All-in dorado debajo y +/− paso5 al lado, con saldo reubicable para evitar interferencia. Ajustar no apuesta: botón confirma respetando límites del motor. La autoconfirmación de otros selectores no se altera.
+
+La transferencia usa una mesa privada nueva, con valores iniciales ordinarios del destino (Poker5000 por asiento; Dominó100 puntos), y conserva resultado/puntuación de origen. Mensaje de consentimiento dice expresamente mesa nueva. No fusiona salas/motores ni comparte manos activas; espera lectura/Hold del resultado y llegada de ambos al destino. Rechazo/cancelación/caducidad antes de preparación conservan origen. Reintentos y concurrencia reutilizan identificador/destino/reparto; comandos viejos o ajenos no autorizan cambios. No traslada a Blackjack ni crea notificaciones OS.
+
+La autorización permite estos cambios y los datos terminales/servidor estrictamente necesarios pese al congelamiento histórico; no reabre otros aspectos de Dominó ni autoriza audio, refactors generales, commit/push, APK/AAB, deploy o tiendas. Usuario pidió QR real Expo Go del candidato completo: autorizado servidor local/LAN compatible y verificación de manifest/JS compilado. Pruebas físicas siguen pendientes. El diagnóstico de audio fue cancelado explícitamente tras localizar el usuario el ajuste específico; audio permanece intacto.
+
+### 2026-10-16 — Precisión visual posterior de Raise
+
+Fuente humana del mismo chat, tras prueba Expo Go: +/− más cerca; el hueco entre ambos centrado a la altura del centro/texto de Raise para asociarlos a Raise y no a All-in. Saldo propio centrado horizontalmente sobre Raise, conservando separación superior y cifra. Estado: implementado en Poker local/online con áreas táctiles separadas; mismo QR. Solo ajuste visual, sin ampliar autoridad de Git/distribución ni modificar apuesta o saldo rival. Evidencia actual en CONTEXTO.
+
+### 2026-10-16 — Sustitución de espera y precisiones físicas
+
+Fuente humana posterior del mismo chat vía coordinador. Sustituye política anterior: cambio Poker↔Dominó INMEDIATO al aceptar rival; suspender origen sin resolver mano/ledger, sin ganador/pago artificial. Mantener autenticación, rechazo/cancelación/caducidad e idempotencia. Implementado/pruebas backend; física pendiente.
+
++ y − solo borrador sin autoconfirmación; caras pequeñas juntas (hueco2), junto a Raise; saldo encima centrado. Toolbar completa centrada bajo cartas propias sin desplazar derecha. Cancelar debe regresar inmediatamente con red/create pendiente. Autorizado corregir rechazo invitación y adaptación concreta Poker a espacio disponible/safeareas S8/S24; sin rediseño ni cambios compartidos especulativos. Evidencia/pendientes en CONTEXTO; sin ampliar permisos Git/distribución.
+
+### 2026-10-16 — Prueba física conexión/cambio y límite de voz
+
+Fuente humana: conexión S8/S24 y cambio Poker↔Dominó en ambos sentidos funcionan en candidato Expo Go. Revisión/fix mínimo de micrófono online autorizados por fallo posterior; efectos audio no reabiertos. Solo se restaura aviso de estado/error omitido por Poker. La documentación de WebRTC establece falta de soporte Expo Go; no anunciar voz resuelta por JavaScript ni crear build sin autorización. Evidencia y límite físico en CONTEXTO.
+
+### 2026-10-16 — Knock y preferencias online autorizados
+
+Fuente humana del mismo chat: cambiar SOLO sonido remoto puño/Knock por golpes de puerta y reparar tres puntos online. Implementado Knock original sin muestras externas, manteniendo180ms/prefs/volumen/cancelación y sonidos de fichas/cartas. Dominó online reemplaza menú de código/reglas por TableSettings existente conservando ambos; Poker ya usaba panel real. Preferencias locales, sin nuevas reglas/config compartida. Verificaciones y preescucha en CONTEXTO; aprobación física de estos dos cambios pendiente. Sin ampliación Git/distribución.
+
+### 2026-10-16 — Aclaración de bordes: solo Poker online S8
+
+Fuente humana: CPU S8 correcto; fallo de tamaño/bordes al abrir online. Autorizada corrección mínima de wrapper online preservando CPU/S24/controles. Sustituido Modal con safearea independiente por capa opaca dentro del contenedor CPU existente; sin cambiar arte/motores/tamaños aprobados. Transición y cobertura web comprobadas, causa Android no reproducida directamente y confirmación física pendiente. Evidencia actual en CONTEXTO; sin nuevas autorizaciones de distribución.
+
+### 2026-10-16 — Recuperar anfitrión sin recrear invitación
+
+Fuente humana: invitado entra pero anfitrión queda invitando; autoriza corregir flujo. Pantallas aceptan estado unido incluso paused/intermedio o reapertura; Poker conserva hosting al cerrar chooser y recupera errores temporales waiting con misma credencial. Sin nuevas salas para ocultar desconexión, sin autoaceptar otra invitación ni cambiar política de errores de mesa activa. Pruebas dirigidas/JS servidos en CONTEXTO; validación física posterior pendiente. Sin permisos nuevos Git/distribución.
+
+### 2026-10-16 — Reverso también CPU; cartas online; Knock auténtico
+
+Fuente humana posterior: sincronización ya funciona; reverso incompleto también primera carga CPU Poker; cartas online mudas con sonido activo mientras Domino sí suena. Knock sí suena, pero timbre sintético no satisface y se pide buscar grabación online. Alcance actualizado: fixedBack opt-in en PokerCard común local/online, sin modificar default Blackjack/frentes; cues de cartas exclusivamente Poker online usando pool existente. Knock sustituido por recorte de grabación CC0 real de Joseph SARDIN/BigSoundBank, procedencia/licencia preservadas;2golpes con cadencia/prefs originales. Síntesis anterior queda sustituida, sin atribuir silencio a Knock. Pruebas/servido y pendientes físicos específicos en CONTEXTO. Sin ampliar distribución.
+
+### 2026-10-16 — Código autoritativo independiente del menú Poker/Dominó
+
+Fuente humana: aceptar desde Poker código de anfitrión Dominó no funciona; autoriza corregir ambos sentidos sin joins exploratorios ni mezclar sesiones. Implementado resolver autenticado de ambos namespaces existentes, solo lista juegos disponibles. Si2coinciden, usuario elige; nunca selección arbitraria ni migración de alias.1join tras resolver, identidad propia, vault/token destino separados, navegación joined (invitación aceptada) distinta de transferencia. Late respuestas/cancelación cercadas. Backend recargado SOLO LAN preservando SQLite, aviso previo, sin deploy Internet. Pruebas y paquete actual en CONTEXTO; física cruzada pendiente.
+
+Knock grabado aprobado auditivamente por humano («ya se siente ya»). No extrapolar aprobación a cartas, reverso o bordes.
+
+### 2026-10-16 — Excepción puntual recorte última ficha online
+
+Fuente humana: valoración general «todos los cambios parecen estar funcionando bien» y corte intermitente de última ficha de Dominó online al cruzar mano rival. Autorizada reparación mínima pese freeze. Aplicada a playing-surface online excepción de ganador no bloqueado ya existente CPU: overflow visible y elevación20; raíz/normal/bloqueo mantienen clip. Trayectoria, tiempo, audio, reglas y recursos intactos. Prueba geométrica roja/verde y49pruebas/servido en CONTEXTO; revalidación física pendiente, sin ampliar alcance a otras animaciones/juegos ni Git/distribución.
+
+## 2026-10-16 — Publicación autorizada SOLO Android interno del candidato actual
+
+Fuente humana: candidato actual aprobado para publicar y precisión explícita «APK», «Google Play Store», «PRIMERO con los INTERNAL TESTERS». Autoriza generar AAB válido de app existente y APK del mismo candidato, validar/conservar firma/identidad y subir/publicar canal interno existente; no producción/iOS, commit/push, correo ni nuevos servicios. Code32 elegido tras mayor31 verificado consola autenticada, versionName1.0.14 preservado. Preparación/build EAS ya iniciado sin VCS sobre worktree aprobado; raíz limpia no sustituye candidato. Despliegue backend Internet sigue requiriendo aprobación humana separada; no entregar versión dependiente incompleta. Plan/test/bindings/assets/rollback y estadoartifact en CONTEXTO; no inferir voz física desde ExpoGo/AAB.
+
+### 2026-10-16 — Backend Internet autorizado para completar entrega interna32
+
+Fuente humana explícita vía coordinador: a «Para completar la entrega Android interna, ¿autorizas desplegar el servidor de pruebas preparado, conservando sus datos actuales?» responde «Sí, autorizo». Autoriza desplegar SOLO bundle Internet auditado en Worker existente domino-online-internet-test, conservar cuatro namespaces/datos/salas/assets/secretos/configuración sin migraciones ni nuevos recursos; después verificar API/compatibilidad y completar publicación32 en canal interno ya autorizado. No producción pública/iOS/commit/push/correo ni cambios/despliegue del sitio web Preview separado. Sustituye la espera de aprobación backend del bloque anterior únicamente para esta entrega. Evidencia final y versiones en CONTEXTO.
+
+
+### 2026-10-17 — Revisión y corrección limitada a enlaces Poker/Dominó
+
+Fuente humana directa transmitida por coordinador: «Trata de limitar los cambios a solamente los enlaces para jugar online de póker y de dómino. El resto de las funcionalidades deben mantenerse porque ya está testeada y funciona bien». Autoriza diagnóstico/pruebaroja y corrección mínima de generación/compartición/recepción/navegación/aceptación de enlaces, no reescritura especulativa; código manual se conserva como regresión. No commit/push/build/deploy/publicación. Aplicado en candidato864b32: únicamenteApp.tsx mueve receptores de ambosjuegos antes del loader, tras6pruebasrojas. Nueva regresión integrada y120checks dirigidos/TS/diffcheck; alcance y pruebas físicas pendientes en CONTEXTO y REVISION_INVITACIONES_1.0. Se preservan código y diff previos; el fallo humano completo no se da por cerrado ni atribuido a versiónvieja/caché. Próxima pieza necesaria: URLexactaWhatsApp, sin volver a preguntar origen de instalación.
+
+
+### 2026-10-17 — Regreso directo desde WhatsApp y revisión visual S24
+
+Fuente humana directa vía coordinador: anfitrión debe regresar DIRECTAMENTE tras compartir, y cuando invitado acepte ambos entran automáticamente en mismapartida, sin propioenlace ni aceptarpropiasala/refreshmanual. Invitado puedeconsentir mientras hostestáWhatsApp odespuésretorno; conservarconsentimientoyfuncionesajenas. Autoriza restauraciónlimitada del flujodeenlaces, no build/deploy/Git. Implementaciónmínima: Poker reintenta únicamente pendingJoinnot_connected consentido/targetactual; Dominó conserva hostvisible alresolverShare. Reproducciónrojay60checks/TSenCONTEXTO; noéxitofísicoinferido.
+
+Aclaraciónhumana: ambosdispositivos de ESTA prueba son SamsungS24. Amplía SOLOREVISIÓN a espaciado cartas rival/dealerPoker vspropias distintoentresusS24 y posiblepoteBlackjackalto. Sinrediseño/ajuste especulativo; propuestaexactarevisableantesdeimplementar. Revisado umbralPoker720ylabelBlackjack-17; geometrías/propuestaSINaplicarenREVISION_INVITACIONES_1.0. Capturas/medidasnativas faltantes impiden atribuircausavisual. ReferenciasS8históricas conservadasenalcanceoriginal.
+
+
+### 2026-10-17 — Corrección final del reporte visual: revisar Blackjack exclusivamente
+
+Fuentehumana directa vía coordinador: «El póker ... sí se veía ... las cartas separadas ... Blackjack tenía ese problema ... No sé si el control del pote con el número afecta la posición de las cartas». Sustituye atribuciónanterior aPoker: mantener su layout probado; solo revisiónBlackjack separación dealer/propias yrelaciónconpote. Sin ajustesespeculativos/implementaciónvisual/build/deploy/commit. Verificado poteabsoluto no participaenflow y umbralBlackjack720 complicaespacio enmodelocontrolado; no causafísicaasegurada. Propuesta mínimaespacio16dpmediantecontenidocalculado quedaSINimplementar, potepropuestoprevio separadoparaoclusióneventual. CONTEXTO/informecontienenevidenciaydatomínimopendiente.
+
+
+### 2026-10-17 — Nueva entrega Android interna33 autorizada
+
+Fuente humana directa transmitida porcoordinador: «cuando ya estés segura que está funcional puedes subir los APK al Google Store para probarlos en los tester devices». Autoriza EASfirmado/app/credencialexistente yAAB(formatorequeridoPlay), versióncode siguiente trascomprobación32máximo, subir/savepublish SOLOcanal interno4701586554701115404. No producción/iOS/backend/web/commitpush/correo; no instalación/dispositivos. Candidato864bconTODOfixes32más3fixesinvitaciones; mantenerPokerlayoutcorrecto yBlackjackvisualsolo diagnóstico fuera debuild. VersionName1.0.14/code33 conservaidentidad/firma; buildviva/draft/evidenciaenCONTEXTO. Estaautoridad sustituye únicamente gateanteriornoBuild/noPlay; no aprobarfuncionamientofísicoporpasartests.
+
+
+### 2026-10-17 — Entrega interna33 completada
+
+AplicadaautorizaciónAndroidtesters:buildEASca33b98e FINISHED, AAB33validadoypublicadoSOLOcanal internoexistente/release12 Availabletointernaltesters17oct21:11NY. App/firma/versionNameexistentes, code33trasmáximo32comprobado. APKoficialGooglemismoartifactobtenidoyverificado, sinsegundacompilación.3fixesOnlineverificadosenHermesreal, TODObase32inventariadopreservado, sincambiosvisualesBlackjack/Poker. Producción/iOS/backend/web/Git/correonoampliados. Firmas/hashes/inventario/pruebaenCONTEXTOyrelease33-final.json; próxima prueba física2S24pendiente, noaprobaciónfísicainferida.
+
+
+### 2026-10-17 — Aviso Android33 y actualización TestFlight autorizados
+
+Fuentehumana directa vía coordinador: correoAndroidcuandoGooglePlaylisto, destinatario confirmado; ejecutadoúnicoGmailSENT33 trasdedupvacío. NoesperarformularioWebContact/CloudflareEmailniaviso iOSno solicitado.
+
+Aceptaciónhumanaexplícita deofertaiOS: «Sí, me gustaría, tengo un Apple device que me gustaría testearlo también ahí». AutorizaactualizarappAppleexistentecom.yht.dominoparty conMISMOcandidatoOnline3fixes, compilarfirmado/subir/asignarTestFlightbuildNumbernecesario trasverificaciónactual; noAppStoreproducción/nuevapp/backend/web/commitpush/nuevosroles/terceros/serviciospagos. ConservarAndroid33yprepararartefactoconcreto antesdepedir requisitomínimo si faltaacceso/tester. EvidenciaactualyestadoenCONTEXTO.
+
+
+### 2026-10-17 — Cierre de la entrega iOS15 autorizada
+
+Estado implementado de la autorización TestFlight anterior: misma app `com.yht.dominoparty`, versión 1.0.14 build15, procesamiento Apple Complete y grupo interno existente Domio Tester en Testing. Se conservó la asignación automática de los dos grupos existentes y se guardaron instrucciones de prueba; sin usuarios/roles/grupos nuevos ni publicación App Store. El rechazo del campo opcional EAS What to Test por plan Enterprise se resolvió guardándolo en ASC, sin compra. Fuente: consola autenticada y `.local/ios-testflight-20261017/release15-final.json`; continuidad en CONTEXTO.md. Android33 y aviso Gmail ya entregados; prueba física cruzada pendiente.
+
+
+### 2026-10-17 — Invitación nueva y nuevas entregas de prueba autorizadas
+
+Fuente humana directa en voz en chat de website ampliado a app: nueva invitación debe omitir aviso de una sesión anterior cerrada y abrir nuevoenlace tras confirmar; sala activa/incierta se conserva y error del propio enlace sigue visible. Autoriza preparar y subir Android e iOS a GooglePlayinterno/TestFlight y UN aviso a yunierht@yahoo.com al estar listos ambos. Monitor silencioso solicitado. No producciónpública/commit/push/backend. Implementación aislada preserva fuenteAndroid33/iOS15 de864b; números34/16 y compilaciones en CONTEXTO. Sin instalación ni disponibilidad nuevas inferidas de pruebas.
+
+
+Resultado17Oct: autorización de entrega completada en GooglePlayinternoAndroid34 yTestFlightiOS16 condisponibilidad verificada, APKfirmadoGoogle del mismoartifact yIPAinspeccionados. UN email autorizado enviado conSENT; no duplicar. MonitorpreparaciónconcluidoPAUSED. No producciónpública/Git/backend ni modificaciónoriginal864b. Evidencias y límitesfísicos en CONTEXTO yrelease-final.json.
+
+
+### 2026-10-17 — Aviso del anfitrión, regreso desde Inicio y entrega35/17
+
+Fuente humana directa en voz: implementar aviso de amigo que aceptó con host ausente; Entrar/Rechazar y seguir solo. «Volver a la partida» para ambos roles con sesión online vigente, sin WhatsApp ni otro código. Mostrar solo con sala recuperable y otro jugador; conservar CPU si no entra. Autoriza preparar/subir GooglePlayinterno yTestFlight existentes, identidad/firma conservadas; no producciónpública/commit/push ni nuevo email solicitado.
+
+Implementación y pruebas locales completas, builds35/17 iniciados. Aceptación offline requiere Worker opt-in preparado, sin migraciones; permiso de despliegue separado solicitado ypendiente. No reutilizar permiso backend32. Corrección al mensaje oral prematuro «puedes probarlo ya»: estos cambios aún NO están en dispositivos/tiendas. Estado/evidencia en CONTEXTO.
+
+
+Autorización posterior directa: «Ok, lo autorizo. Puedes continuar» en respuesta explícita al permiso pendiente del servidor. Autoriza desplegar SOLO el Worker de pruebas preparado, conservando salas/datos/13bindings/assets/secretos, sin migraciones ni nuevos recursos, para completar entrega35/17 interna. No producciónpública/commit/push ni correo nuevo.
+
+
+### 2026-10-18 — Publicación limitada de Ganadas/Perdidas
+
+Fuente humana directa: aprueba tarjetas con «Ganadas: 5»/«Perdidas: 2» juntos arriba izquierda; requiere Android+iOS+website. Autoriza implementación y publicación SOLO internosGooglePlay/TestFlight yweb existente, sin afectar otros componentes probados. Solicita UN correo cuando estén listos para test. Conteo usa partidas completas guardadas y misma identidad por nombre del leaderboard; no reglas/audio/Online/otrosjuegos/Firebasecontratos. Usuario no autoriza commit/push ni producción pública enstores. Sustituye aviso intermedio pendiente35/17 poravisoúnico alfinal36/18+web. Estado yevidencia enCONTEXTO.
+
+
+### 2026-10-18 — Checkpoint previo a amigos e implementación aislada autorizados
+
+Fuente humana directa: marcar/check-in todo código actual para poder deshacer la nueva función y después comenzar amigos. Autoriza commit local y marca de retorno de este candidato; no implica push/publicar la nueva función. Módulo independiente: identidad privada automática sin username/password, código público propio de amigo distinto de sala, solicitud/aceptación, lista mutua y pendientes, invitación directa con app abierta y Aceptar/Rechazar; acceso junto a compartir/online. Conservar enlaces/códigos de sala, reglas/audio/otras mesas, sin pushnotifications ni recuperación de cuenta al reinstalar en primera versión. Alta tras apps instaladas, enlace de amigo compartido una vez. Usuario confirma reconexión en dispositivos funcionando, sin versión/roles exactos; no ampliar esa prueba a Ganadas/Perdidas ni nuevo módulo. Website se respalda separado; apps se implementan exclusivamente en invitation-device-release. Backend nuevo solo local hasta autorización específica de despliegue; no migrar salas existentes.

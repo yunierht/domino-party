@@ -148,3 +148,14 @@ test('known stale HOLD is rebased within the same result but never leaks into th
  await f.client.create('Juni',100,'points');f.client.setResultHeld(true);await settle();assert.equal(requests.length,2);assert.notEqual(requests[0].commandId,requests[1].commandId);assert.equal(requests[1].revision,requests[0].revision+1);
  current={...current,revision:current.revision+1,round:current.round+1,result:null,presentation:{...current.presentation,resultClock:null}};await f.client.refresh();f.client.setResultHeld(false);await settle();assert.equal(requests.length,2);
 });
+
+test('saved room identity is available before recovery and clears on forget without exposing credentials',async()=>{
+ const token='a'.repeat(64),old='ABCDEF0123';
+ for(const identity of [{code:old},{pendingJoin:'123456'}]){
+  let saved={endpoint:'http://127.0.0.1:8791',token,name:'Juni',...identity};
+  const client=new OnlineClient({read:async()=>saved,write:async value=>{saved=value;},clear:async()=>{saved=null;}},{request:async()=>{throw Error('room_missing');}},async()=>token,'http://127.0.0.1:8791');
+  await client.load();assert.equal(client.savedRoomCode,identity.code??identity.pendingJoin);
+  await client.resume();assert.equal(client.state.error,'room_missing');assert.equal(client.savedRoomCode,identity.code??identity.pendingJoin);
+  await client.forget();assert.equal(client.savedRoomCode,undefined);assert.equal(saved,null);
+ }
+});

@@ -1,3 +1,5 @@
+import {HostGuestPrompt} from '../online/HostGuestPrompt';
+import type {WaitingGuest} from '../online/HostGuestPrompt';
 import {FloatingAction} from '../blackjack/FloatingAction';
 import {GameSetupLayout} from '../components/GameSetupLayout';
 import {useTableVisible} from '../components/GameSettingsBoundary';
@@ -11,6 +13,7 @@ import {useAvatarSetupName} from '../online/useAvatarSetupName';
 import {normalizeAvatarName} from '../online/avatarIdentity';
 import {ModalCloseButton} from '../components/ModalCloseButton';
 import {DominoTurnTitle} from '../computer/DominoTurnTitle';
+import {DominoRoundAudit} from '../computer/DominoRoundAudit';
 import {DominoResultBanner} from '../computer/DominoResultBanner';
 import {useDominoResultTransition} from '../computer/useDominoResultTransition';
 import {ResultHoldButton} from '../components/ResultHoldButton';
@@ -89,6 +92,8 @@ function Avatar({ computer = false, active = false, small = false }: { computer?
 
 export function ComputerGameScreen() {
   const { game, playerAvatarId, playerAvatarPhoto,playerAvatarName } = useComputerGame();
+  const [waitingGuest,setWaitingGuest]=useState<WaitingGuest|null>(null);
+  const {lang}=useI18n();
   const [showInvite, setShowInvite] = useState(false);
   const [hasInvite, setHasInvite] = useState(false);
   const [onlineShare,setOnlineShare]=useState(false);
@@ -100,8 +105,9 @@ export function ComputerGameScreen() {
     </View>
     {hasInvite&&<View style={{flex:1,display:showInvite?'flex':'none'}} accessibilityElementsHidden={!showInvite} importantForAccessibility={showInvite?'auto':'no-hide-descendants'}>
       <OnlineFriendScreen initialName={game?.playerName??''} initialTarget={game?.target??100} initialMode={game?.scoringMode??'points'}
-        initialAvatar={playerAvatarId} initialAvatarPhoto={playerAvatarPhoto} inviteOnly={onlineShare} manualOnly={!onlineShare&&onlineEntry==='invite'} entry={onlineEntry} requestId={onlineRequest} visible={showInvite} onBack={()=>setShowInvite(false)} onStarted={()=>setShowInvite(true)}/>
+        initialAvatar={playerAvatarId} initialAvatarPhoto={playerAvatarPhoto} inviteOnly={onlineShare} manualOnly={!onlineShare&&onlineEntry==='invite'} entry={onlineEntry} requestId={onlineRequest} visible={showInvite} onBack={()=>setShowInvite(false)} onStarted={()=>setShowInvite(true)} onGuestWaiting={setWaitingGuest}/>
     </View>}
+    <HostGuestPrompt es={lang==='es'} guest={waitingGuest?{...waitingGuest,enter:async()=>{setShowInvite(true);await waitingGuest.enter();}}:null} onDismiss={()=>setWaitingGuest(null)}/>
   </View>;
 }
 
@@ -263,7 +269,7 @@ function LocalComputerGameScreen({showInvite,onInvite}:{showInvite:boolean;onInv
   />{rules}</>;
 
   const humanTurn = placementReady && presentation.presented && !switchTarget && !dealPresentation.dealing && game.turn === 'human' && !game.result && !showStock && !showSettings;
-  const revealOpponent = !!game.result && !opponentDrink && game.hands.computer.length > 0;
+  const revealOpponent = !!game.result && !opponentDrink;
   const selectedTile = game.hands.human.find(tile => tile.id === selected);
   const winner = matchWinner(game);
   const winningTileVisible = !!(game.result && !game.result.blocked && game.last?.kind === 'play');
@@ -345,12 +351,7 @@ function LocalComputerGameScreen({showInvite,onInvite}:{showInvite:boolean;onInv
           <DrinkInviteButton es={es} compact={compact} active={appActive && !showDrinks && !showMenu && !showRestart && !showRules && !showOpponents} onPress={() => { cancelDrag(); drinkSelectionLock.current = false; setShowDrinks(true); }} />
         </View>
       </View>
-      {revealOpponent ? <View testID="round-reveal" style={{ paddingVertical: 8 }}>
-        <ScrollView horizontal showsHorizontalScrollIndicator testID="revealed-opponent-tiles"
-          contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 5, gap: 6, minWidth: '100%', justifyContent: game.hands.computer.length * (compact ? 50 : 54) <= panelWidth - 24 ? 'center' : 'flex-start', alignItems: 'center' }}>
-          {game.hands.computer.map(tile => <DominoTile key={tile.id} a={tile.a} b={tile.b} size={compact ? 40 : 44} vertical />)}
-        </ScrollView>
-      </View> : <View ref={computerHandRef} collapsable={false} testID="hidden-opponent-hand" style={{ alignItems: 'center', height: 25, justifyContent: 'center' }}>
+      {revealOpponent ? <DominoRoundAudit hands={game.hands} result={game.result} names={{human:ownAvatarName,computer:opponent.name}} mode={game.scoringMode} es={es}/> : <View ref={computerHandRef} collapsable={false} testID="hidden-opponent-hand" style={{ alignItems: 'center', height: 25, justifyContent: 'center' }}>
         <View>
           <View style={{ flexDirection: 'row', gap: 3 }}>
             {game.hands.computer.slice(0, 10).map((tile, index) => <DealtTile key={tile.id} {...dealPresentation} index={index} side="computer" distance={windowSize.width}><View testID="hidden-opponent-tile" style={{ width: 15, height: 24, borderRadius: 2, borderWidth: 1, borderColor: '#D5CAB0', backgroundColor: '#8E9A7C' }} /></DealtTile>)}

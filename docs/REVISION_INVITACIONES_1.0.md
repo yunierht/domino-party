@@ -172,3 +172,120 @@ SHA256:8127FBC7FA6DA467761B5183B20935A3A22E93E35067F0F6D5D50F16BD4475E9. Log ra�
 
 
 Entrega elegida después: carpeta C:/Users/yunie/Downloads/Domino-Online-v1.0 con APK y LEEME.txt. Usuario lo copiará porUSB. Hash de copia verificado; publicación autorizada previamente pero NO ejecutada al elegir alternativa local. Enlace público anterior permanece sin actualizar.
+
+
+## 2026-10-17 — Revisión de enlaces Android Poker/Dominó y arranque
+
+Alcance humano final: limitar cambios exclusivamente a enlaces para jugar Online de Poker y Dominó, conservar funciones probadas; sin commit/push/build/deploy/publicación. Raíz principal master a5e19a1 limpia: no es el candidato32. Trabajo aplicado únicamente en worktree864b, a5e19a1+diff aprobado preservado. Se consultaron instrucciones canónicas y documentación Expo v56 antes de editar; dependencias reales permanecen SDK57, sin actualización.
+
+### Qué está confirmado
+
+- Última entrega interna documentada: 1.0.14(32), com.yht.dominoparty, release11, 16oct16:43 Nueva York. Fuente: `.local/internal-release-20261016/release32-final.json`, captura y manifiesto fuente de786archivos. No nueva consulta a consola ni número instalado confirmado. Cabecera29 de CONTEXTO es histórica y no identifica la entrega más reciente.
+- APK32 local SHA256 `07f0cb8ff95bb0610587dace292d9eac3cfe75e16e3bb2da378b984bf34127f1`; Hermes `e131746decb471c7ad74ef160c38e74840caf6743151eaa0fb4709cb80e7fe46`. Verificados bytes actuales del APK; AAB/APK31 también comparten Hermes45a7816f5229b3128cf2d386d4162229aed99c84c97e8a86af52f03f339cba95. APK28 separado contiene `poker-online-invite` y carece de `poker-link-acceptance-screen`; APK31/32 invierten ambos marcadores. No prueba de cuál ejecuta un teléfono.
+- Reproducción EN MEMORIA con fuente21ad0de y dobles: link entrante+sesión previa+connection_error presenta crear1/aceptar1/reconexión1 y llama resume. RC31 en mismo escenario: crear0/aceptar1/reconexión0, sin resume. Demuestra el mecanismo antiguo, no identifica el binario humano ni prueba su causa actual.
+- GET públicos actuales: portal canónico, landing.js, configuration.js y assetlinks200. Landing conserva pokerRoom al producir dominoparty://online?pokerRoom=...; configuración release usa dominoparty, automaticStoreFallback=false y también ofrece piloto domino-online-test. Assetlinks asocia tanto com.yht.dominoparty como com.nextcodestudios.dominoonline.test. El manifiesto APK32 registra MainActivity/singleTask, esquema dominoparty y rutaHTTPS exacta /online/invite. Instalación tester no identifica por sí misma qué paquete resolvió el intent. No navegador ni micrófono ni sala humana consultados/modificados.
+
+### Defecto demostrado y cambio mínimo
+
+AppShell devolvía FullScreenLoader antes de montar ambos listeners cuando !ready o !loaded. Un evento cálido durante esa carga no llegaba a navegación; getInitialURL puede conservar el intent inicial del launcher, por lo que no reproduce necesariamente el nuevo evento. Prueba real de App+NavProvider+listeners+parsers, con fronteraOS/storage simulada e initialURLnull:6/6 fallan antes, quedanHome tras terminar carga. El fix mueve los DOS listeners, sin cambiar su código, a sus mismos proveedores antes de AppShell.6/6 pasan después. No se altera deduplicación ni prioridad cálido sobre inicial antiguo: el descarte de un initialPoker viejo tras un eventoDomino nuevo ya estaba protegido y es intencional; no se trató como defecto.
+
+Prueba adicional integra generador real Poker/Dominó -> función real invitationShareContent Android -> landing local real -> listeners/NavProvider reales, con IDsfixture y estadoOS simulado.12casos cubren HTTPS/esquema de landing por cold/boot-warm/ready-warm y verifican código final real de NavContext. No inyecta pendingCode ni llama openPokerOnline desde el test; tampoco prueba WhatsApp ni intentAndroid real ni sala remota.
+
+### Matriz de cobertura y límites
+
+| Tramo | Evidencia disponible | Brecha real |
+|---|---|---|
+| Crear sala, alias6cifras y código10hex | Clientes/dominio reales mediante transport/vault en memoria; pruebas previas HTTP públicas16oct | No creación humana ni nuevo backendQA en este bloque |
+| Generar enlace/texto y compartir | Generadores y payloadAndroid reales; Share nativo sustituido; códigosfixture | WhatsApp enviado/recibido real no capturado |
+| Landing y asociaciones | GET públicos200 actual; esquema/juego/certificados inspeccionados | Defaults/paquetes y verificaciónAppLinks del Android desconocidos |
+| Intent -> listener -> navegación | App real+NavProvider+listeners/parsers;18pruebas controladas de arranque/URL | Sin captura de intentAndroid; URLhumana aún ausente |
+| Sesión previa, consentimiento, retry, errores | PokerInvitationEntry y OnlineFriendScreen, UI+clientes con dobles; contratos backend reales en otras pruebas | No ejecución nativa/estadoSecureStore humano |
+| Código manual y juego correcto | useCodeInvitation con cliente/dominio real en memoria, colisiones y cancelación | No prueba física de entradaS8/S24 en este bloque |
+| Sala compartida/reconexión/cancelar | PokerOnlineClient, invitationRecovery/cancelInvitation y dominios; QAHTTP16oct histórica | Android nativo y dos teléfonos de esta prueba pendientes |
+
+Validación final:120/120 pruebas dirigidas en17archivos, TypeScript exit0, diffcheck0. Log `.local/invitation-review-20261017/targeted-tests.log`. Inventario `.local/invitation-review-20261017/candidate-delta.json`:786archivos base comprobados, ninguno ausente, SOLOApp.tsx difiere de build32; nueva prueba App.invitationBoot.test.mjs adicional. El resto del candidato32 queda preservado; no se recompiló ni se modificaron artefactos existentes. Pruebas/UI controladas no acreditan corrección física.
+
+### Diagnóstico pendiente del caso de tres botones
+
+No hay causa física confirmada. Hipótesis discriminables: (1) resolverAndroid abre otra instalación/piloto o implementación que contiene el panel antiguo; ambas identidades están asociadas al dominio. No implica que usuario instalara una versión vieja. (2) URLrecibida distinta: parserrechaza parámetros añadidos/hash/ruta distinta; landing admite slashfinal pero parser/manifiesto usan rutacanónica exacta. No se parchea esta variante sin enlacehumano/evidencia de recorrido. (3) pérdida de evento durante arranque, corregida en fuente, pero por sí sola NO explica crear+aceptar+reconectar en32. (4) error de aceptación/reanudación después del enlace: falta error/intent/estado real para atribuirlo a red/almacenamiento/servidor.
+
+Única pieza mínima siguiente: enlace EXACTO que llegó por WhatsApp, copiado como texto completo. Después contrastar su destino e intent con paquete/versionCode realmente receptores; no repetir preguntas de origeninstalación ya contestadas. Antes de otra entrega: mantener base32+fixApp trazables, nueva build solo con autorización, verificar APK/AAB contra ese inventario y ejecutar sobre ambos Android el MISMO enlace/código en ambos sentidos, cold/warm/background, sesiónvacía/previa, confirmar consentimiento y misma sala, jugar/reconectar/reintentar/cancelar. No declarar resuelto todo el fallo ni sugerir reescritura sin esa evidencia.
+
+
+## 2026-10-17 — Ampliación: WhatsApp, regreso directo y revisión visual S24
+
+Nueva evidencia humana: AMBOS dispositivos de esta prueba son Samsung S24; las menciones históricas S8 pertenecen a otras pruebas. El invitado abre enlace y queda esperando; tocar el anfitrión su propio enlace permite conectar, pero regresar directamente desde WhatsApp no. Se retira como requisito inmediato pedir URLexacta: la diferencia de retorno permite investigar/restaurar el flujo. Criterio autorizado: el anfitrión vuelve directamente y ambos llegan automáticamente a la MISMA mesa cuando el invitado consiente, tanto si acepta mientras anfitrión sigue fuera como después. No autoaceptar enlaces nuevos ni crear otra sala. Revisión visual adicional Poker/Blackjack autorizada, sin ajustes especulativos ni implementación visual.
+
+### Recorrido y dos defectos demostrados
+
+RN Android instalado `ShareModule.kt` resuelve la promesa inmediatamente después de startActivity(chooser); no espera regresar de WhatsApp. InvitationShareOptions llama onDone al resolverse. Los dos clientes conservan credenciales pero AppStatebackground llama disconnect; el dominio real deja al anfitrión sin lease vigente y joinrechaza not_connected mientras está ausente. Heartbeat del regreso sí renueva su lease en la prueba controlada: no se atribuye sin evidencia todo el fallo a resume del anfitrión.
+
+1. Poker: el invitado que consintió mientras anfitrión estaba fuera conserva pendingJoin/token con errornot_connected. La pantalla mantiene sessionActivefalse durante aceptación y su timer no reintenta esa rama; el regreso correcto del anfitrión NOlibera al invitado detenido. Fix mínimo PokerOnlineScreen: callbackref actual reintenta SOLOsi attemptedCode===códigoactual, canResume y errornot_connected, al tickactivo/regresoactivo. Usa acceptCurrentInvitation/resume con MISMOtoken/target; al éxito hace la transición existente a mesa. Ningún retry sinconsentimientoactual, tras nuevoenlace o de erroresgenéricos/terminales. No cambios al cliente/protocolo/servidor.
+2. Dominó: onDone hacía setInvitationStarted(true)+onBack(), ocultando OnlineFriendScreen en el wrapperlocal. La transición posterior a playing llama onStarted SOLOsi !invitationStarted, condición ya desactivada por compartir. Puede haber misma sala conectada, pero anfitrión permanece oculto. Fix mínimo: conservar setInvitationStarted(true) y retirar SOLOnBack de ese callback; anfitrión permanece en su invitación visible y abre mesa mediante snapshotexistente. No se modifican volvermanual, cancelación, timer, reglas, pantallaCPU ni código manual.
+
+Reproducción nueva `src/online/invitationShareReturn.test.mjs`: pantallas reales+InvitationShareOptionsreal+OnlineClient/PokerOnlineClientreales+dominiosreales; fronteraOS/Share/transporte/vault en memoria controlados. Fuenteantes:8casos,6fallan por not_connectedPoker o anfitriónDominooculto;2Poker con aceptación despuésretorno pasan. Log share-return-before.log incluye esta reproducción, separado de los primeros ajustes del fixture. Fuenteactual:12/12casos Share resuelto antesbackground/despuésbackground/despuésregreso × invitadoaceptaantes/despuésregreso × ambosjuegos. Verifica guestcomputer/hosthuman, mismocode, SOLO1create, tokensintactos,0joinanfitrión, ambas mesas visibles, sin tocar propio enlace. Es integración enmemoria, NO ejecuciónWhatsApp/Android física.
+
+Más2regresionesPoker: no retry sinconsentimientoactual; enlace nuevo corta retrytargetanterior. Total60/60 dirigidas (shareReturn, PokerInvitationEntry, PokerOnlineScreen, OnlineFriendScreen), TypeScriptexit0 y diffcheck0. Se actualiza expectativa anterior de pruebaDominó que exigía ocultarhost: la nueva instrucción humana exige volver a su invitación/mesa directamente. Log `.local/invitation-review-20261017/share-return-after.log`. Suite120anterior no se repitió completa: evidencia previa conservada; las60cubren las ramas ahora modificadas. Corrupción accidental al guardar con localeWindows detectada por tests de textos y restaurada: comprobación SHA256 obligatoria confirmó que retirando SOLOestosparches ambasfuentes coincidían EXACTAMENTE con manifiesto32; revisiónautomática rechazó conversión general inicial, luego admitió reparación protegida por hashes. No cambio de textos/codificación residual.
+
+### Trazabilidad actual y siguiente validación
+
+Inventario786 de build32 recontrastado: únicos3archivos de aplicación distintos App.tsx(fixarranqueprevio), src/poker/PokerOnlineScreen.tsx y src/online/OnlineFriendScreen.tsx. Nuevas pruebas App.invitationBoot.test.mjs/invitationShareReturn.test.mjs, regresiónPoker añadida y expectativaDominó actualizada. APK/AAB32 no modificados y NOcontienen estosfixes; no build/deploy/commit/push/publicación. Historial/diffs32 previos preservados.
+
+Próxima validación física del candidato recompilado SOLOtrasautorización: MISMAentrega comprobada en los2S24; anfitrión comparteWhatsApp y regresa por app/back SINsu enlace; invitado consiente duranteausencia y despuésretorno, en ambosroles/juegos. Debe abrirse la mismamesa enambos, 1sala, credencial anfitrión conservada. Incluir cancelación/nuevoenlace/guestbackground/redintermitente, y regresióncódigomanual. No se afirma que el propio enlace sea obligatorio, que todo falle por versiónvieja o que esta integración ya cierre físicamente el caso.
+
+### Revisión visual sin cambios
+
+PokerOnline: cálculo de rectángulos usando inicializadores extraídos del ASTreal y helper tablePlayerCardWidthreal. Ancho360, mano normal sin resultado/rebuy: alturaútil719 -> rival60/propias65 y separaciónrectangular209.25dp; altura720 -> rival74/propias80 y separación89.78dp. El salto de umbral720 cambia franja84->144 y escala/tamaños, no solo1dp de espacio. A844 separación192.78dp. Se demuestra sensibilidad/discontinuidad de layout, NO que los S24 tengan esas medidas. Alto medidoonLayout, insets, modoCPU/Online, resultado/rebuy y viewport son entradas a contrastar; fontScale también reserva espacio del hint/comunitarias, no se culpa a ajustes/versión. Falta capturar panelW/H reales y estado en ambos S24 para atribuir diferencia. No cambioPoker visual aplicado.
+
+BlackjackScreen:126 apuesta/pote anclado left40, width70, bottom34compact/31alto; TotalBubble usa top-17. Demuestra que el número sobresale porarriba; no hay cajasnativas deltexto/manos/scroll para afirmar solapamientofísico. Propuesta revisable SINaplicar: contenedorleft28 y bottom18compact/15alto (12dpizquierda/16dpabajo), labeltop-9 (importe24dpabajototal). Conservarpotref, importes y trayectorias porref; antesdeaplicar revisar Clear, manos2/3+/scroll, importeslargos/fontScale y altura real. Es propuesta de geometría, no remedio certificado. Cálculos y propuesta `.local/invitation-review-20261017/visual-review.json`. No se tocó BlackjackScreen ni mesasPoker.
+
+
+## 2026-10-17 — Corrección humana: cartas juntas en Blackjack, Poker correcto
+
+Fuente humana final vía coordinador: ambos teléfonos son SamsungS24. Poker sí mostró separadas las cartas de ambos jugadores y del centro; el problema de cartas dealer/propias casi juntas corresponde a BLACKJACK. Sustituye atribución visual anterior aPoker, sin borrar historia. El breakpointPoker observado es incidental y NOmotiva cambio. Se mantiene revisiónsinimplementar y fixesWhatsApp intactos. Pregunta causal: si pote/número cambia posición de cartas o solo puede taparlas.
+
+### Resultado verificable
+
+BlackjackScreen.tsx:126: padre delpote y número `position:absolute`, left40/bottom34compact31alto/zIndex12, hermano del ScrollView de manos, no hijo del flujo vertical. EtiquetaTotalBubble top-17 también absoluta dentro delpote. Por estructura no reserva ni consume altura en la distribución de manos; puede ocluir visualmente por superposición, pero moverlo NOcorrige la separación entre filas. Se renderizó la pantalla real con arnésReactexistente y contextoBETcontrolado: cambio confirmado de texto `$20` a `$500` en8escenarios; se compararon estilos reales de main/hero/rack/banda dealer/banda propia y anchosde4cartas: sinningunadiferencia. No medir texto nativo ni negar solapamiento visual por tamaño deimporte/fontScale.
+
+El espacio vertical se determina por `usableHeight=window.height-insets.top-insets.bottom`, umbralcompact<720, franja48header, madera94/98, paddingScroll12 y el flujoBlackjack: mainminHeight445/540, paddingBottom170/144, gap1/12; hero105 o min165/20%altura; rack48 con margen-20/-16; filasdecartas; banda propiaflex1 alineadaabajo, margen-6/0 y translateY6/10. Cartas reposadas usan height=width*1.43; dealer60/74 ypropias65/80 a360dpdeancho. La altura mínima fija NOgarantiza espacio entre las dos manos al crecerlos elementos del modoalto. No se usa rootHeight medido para elegircompact: rootHeight sirve a destinosfallback de vuelos. Esto es una dependencia de altura disponible, no evidencia de que el usuario haya cambiado ajustes.
+
+### Rectángulos controlados, no mediciones Android
+
+Pantalla real renderizada con stubsOS/UI del arnés existente; estilos tomados del árbol y fórmulas de flexcolumn calculadas. Supuesto explícito: root=ventana-insets, ScrollView llena superficie, contenido mínimorespetado y filas horizontales tienen altura deuna carta. SINmotorYoga ni cajas nativas/texto/scroll real; resultados son modelo geométrico, no reproducción física certificada. Coordenadas relativas alcontenidoScroll.
+
+| Ancho/altura útil dp | Dealer top..bottom | Propias top..bottom | Separación |
+|---|---|---|---|
+|360×640|135..220.80|229.05..322|8.25dp|
+|360×719|135..220.80|308.05..401|87.25dp|
+|360×720|203..308.82|313.60..428|4.78dp|
+|360×780|215..320.82|373.60..488|52.78dp|
+|360×568|135..220.80|188.05..281|-32.75dp (solapamiento enmodelo)|
+
+A393×ventana780, insets24+36 ->720útiles y4.78dp; insets24+37 ->719útiles y87.25dp. Es una variación CONTROLADA para aislar el umbral, no medidas ni cambios de ajustes de ninguno de losS24. Demuestra un mecanismo que puede dejar cartas casi juntas alentrarenmodoalto; falta alturaútil/cajas reales para atribuir físicamente el caso. Evidencia `.local/invitation-review-20261017/blackjack-review.json`,8escenarios, cadauno BET20->500 sin moverflujo.
+
+Cartas adicionales permanecen en ScrollViewHORIZONTAL con ancho limitado: no hay wrap ni filas verticales nuevas porpedir cartas. El estado de motor es un player[]/dealer[]; no hay split implementado que explique variasmanos. Resultados/natural/importe/totalbubbles son capasabsolutas o texto, no reasignan el gap. Reparto tiene translate/rotate animados: los rectángulos de esta revisión corresponden a reposo. FontScale puede agrandar etiquetas superpuestas; no cambia width/heightnuméricos ni compact directamente enesta fuente. Ninguno de estos puntos acredita quéestado tenía el S24 afectado.
+
+### Propuesta revisable, sin edición visual
+
+Separación de manos: reservar mínimo16dp entre rectángulos reposados de dealer ypropias, calculando mínimo de contenido a partir de alturas reales y dejando ScrollView absorber déficit. Fórmula delmodelo: `mainMin=max(minActual,paddingBottom-translateYPropias+altoCartaPropia+bottomDealer+16)`. A360×720 necesita573.22dp frente a main562disponibles:11.22dp adicionales decontenido desplazable. A360×640 mínimo493.75 frente486:7.75adicionales. Mantiene tamañoscartas/posicionesajenas/reglas y NOmuevepote como supuestoarreglodelgap. Antesdeimplementar requiere comprobar layoutYoga/scroll y medidas reales, no fijar un número por modelo como solución física.
+
+Propuesta anterior de poteizquierda/abajo permanece SINaplicar y separada: sería solo para oclusión comprobada delimporte, no para separar manos. Sin capturanativa no recomendar aplicarla como remedio de estereporte. No modificación de BlackjackScreen, PlayingCard, helpercardSize ni Pokerlayout; no nuevas pruebas generales, build/deploy/commit/push. Siguiente dato mínimo: UNA captura COMPLETA delBlackjack afectado en reposo, con ambasmanos y pote/número visibles; permitirá distinguir cartaspegadas deoverlay. Dimensionesútiles/insets reales serían el siguiente discriminante si lacapturaconfirma compresión.
+
+
+## 2026-10-17 — Entrega trazable de los fixes: Android33 interno
+
+Autorizaciónhumanaposteriorpermitióbuild/subida/publicacióninternapara2S24. Completado: 1.0.14(33), com.yht.dominoparty, Playrelease12 Availabletointernaltesters17oct21:11NY, opt-inactual https://play.google.com/apps/internaltest/4701586554701115404 . EASca33b98e-665d-4e4f-a9c9-5b65601e2868 FINISHED, nosegundabuildAPK.
+
+Evidencia `.local/internal-release-20261017/`: release33-final.json (estado/URLs/hashes), source-manifest.json (786archivosconhashes; soloApp/OnlineFriendScreen/PokerOnlineScreen/configversiondistintos32), prebuild-tests.log (91/91dirigidos), published-config.json, manifest33.xml ymanifest-cert33-proof.json (manifiestorealidéntico32salvocode), bundle33-proof.json+verify-bundle33.mjs (inspecciónSEMÁNTICAdebytecodeHermesextraídoAAB:3fixescompilados,9marcadores32), preserved-native-assets.json(4libsWebRTC+KnockWAVidénticos32), firmasAAB/APK, apk33-content.json (Googlefirmado/SourceStamp/mismoHermes), screenshotplay33-available-internal.png. Sin sourcemapscomosustitutodebytecode.
+
+AABSHA2561dcbbfae9d1ced348a700cab15723a0fce4c5989644d3778637b3ef90bd1b9ef; APKGoogleSHA2567b09a44e96796b59b3772ad366d98c10e5f56c446f48cc9011e56d4ceee44f72; Hermescomún1df7d2f8ac02488a8621c94ee4dc19557780a2a465bd2cd0d6d499c27ef5c431. Uploadcertconfig9196...31C1 yPlaycertconfig26E1...A395D08Cverificados.0erroresPlay,1warningdesofuscación,0pérdidadispositivos. Candidato864b/diffs32+fixespreservados,sincommitpush/producción/iOS/backend/web/correo. VisualesBlackjackNOimplementados; PokerlayoutNOtocado.
+
+Checklist física pendiente: ambosS24actualizarPlayyconfirmar33; Poker/Dominoambosroles,linkWhatsAppconhostregresandoDIRECTOappsinpropioenlace; guestconsienteduranteausenciaydespuésretorno;ambosmisma salaautomática;jugadayreconexión;codigomanual;cancelación/retry/nuevoenlace. Loentregadoesdisponibilidad/paqueteverificado,no prueba físicaresuelta.
+
+
+## Entrega iOS TestFlight — 2026-10-17
+
+**1.0.14 (15)** de la misma app está procesado y disponible en **Testing** para el grupo interno existente Domio Tester. Apple build `4bf5d7d5-546e-4fe9-bcea-a81945db2dd3`; EAS build `dd913aef-8b1a-4ba2-862d-2b5746516f35` y submission `09e5f65e-4e24-467a-a705-c6922d93bfa6` terminados. Las mismas tres correcciones Online de Android33 fueron verificadas en el Hermes del IPA. Info, perfil, firma principal, entitlements y módulos nativos verificados con el alcance Windows documentado en `ipa15-proof.json`. What to Test guardado en ASC para ambos juegos y sentidos Android↔iOS.
+
+Captura del grupo y registro final en `.local/ios-testflight-20261017/testflight15-testing.png` y `release15-final.json`. No cambios visuales Blackjack/Poker, backend, web, producción, nuevos testers ni email iOS manual. Prueba física de invitaciones entre Android33 e iOS15 pendiente; disponibilidad TestFlight y métricas de instalación de ASC no prueban ese comportamiento.

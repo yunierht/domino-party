@@ -115,7 +115,6 @@ function AppShell() {
   return (
     <View style={{ flex: 1, backgroundColor: computerTable ? '#081D1B' : theme.colors.bg }}>
       <StatusBar style={computerTable || theme.dark ? 'light' : 'dark'} />
-      <OnlineLinkListener/><PokerOnlineLinkListener/>
       {!computerTable && <Background theme={theme} tiltX={tilt.x} tiltY={tilt.y} />}
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         {computerTable?<Router/>:<View style={{flex:1}}>
@@ -137,7 +136,7 @@ export default function App() {
           <GameProvider>
             <NavProvider>
               <ComputerGameProvider>
-              <TableGameProvider><BlackjackProvider><AppShell /></BlackjackProvider></TableGameProvider>
+              <TableGameProvider><BlackjackProvider><OnlineLinkListener/><PokerOnlineLinkListener/><AppShell /></BlackjackProvider></TableGameProvider>
               </ComputerGameProvider>
             </NavProvider>
           </GameProvider>

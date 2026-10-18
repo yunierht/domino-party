@@ -10,7 +10,7 @@ const deps={'../components/GoldPressable':{GoldPressable:'Pressable'},react:Reac
  Animated:{View:'AnimatedView',Value:class{setValue(){}stopAnimation(){}},sequence:()=>({start(){effects.push('motion');},stop(){}}),timing:()=>({})},
  Vibration:{vibrate:ms=>effects.push(`vibrate:${ms}`)}},
  '../computer/DrinkGift':{useReducedMotion:()=>reduced},'../computer/tableTheme':{TABLE:{}},
- '../state/PrefsContext':{usePrefs:()=>prefs},'../sound/sounds':{playTap:()=>effects.push('tap'),playTileContact:()=>effects.push('knock')}};
+ '../state/PrefsContext':{usePrefs:()=>prefs},'../sound/sounds':{playTap:()=>effects.push('tap'),playTileContact:()=>{throw Error('Knock must not use tile contact')},playOnlineKnock:()=>effects.push('knock')}};
 const m={exports:{}};new Function('require','module','exports',ts.transpileModule(readFileSync(new URL('./OnlineQuickActions.tsx',import.meta.url),'utf8'),
  {compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText)(id=>deps[id],m,m.exports);
 const {OnlineQuickActions,OnlineAttentionNotice}=m.exports;

@@ -13,13 +13,15 @@ globalThis.IS_REACT_ACT_ENVIRONMENT=true;
 const pass=({children})=>React.createElement(React.Fragment,null,children);
 const opponents=[{id:'yuni',name:'Yuni',image:'juni.png'},{id:'rafael',name:'Andy',image:'andy.png'},{id:'mateo',name:'Mateo',image:'mateo.png'},{id:'amara',name:'Amara',image:'amara.png'}];
 let testWindow={width:390,height:800};
-const deps={react:React,'react-native':{Animated:{View:'AnimatedView'},Image:'Image',Modal:({visible,children,...props})=>visible?React.createElement('Modal',props,children):null,PanResponder:{create:()=>({panHandlers:{}})},Pressable:'Pressable',ScrollView:'ScrollView',Text:'Text',View:'View',useWindowDimensions:()=>testWindow},
+const deps={'../poker/TableGameContext':{GameSwitchButton:'GameSwitchButton'},react:React,'react-native':{Animated:{View:'AnimatedView'},Image:'Image',Modal:({visible,children,...props})=>visible?React.createElement('Modal',props,children):null,PanResponder:{create:()=>({panHandlers:{}})},Pressable:'Pressable',ScrollView:'ScrollView',Text:'Text',View:'View',useWindowDimensions:()=>testWindow},
  'react-native-safe-area-context':{useSafeAreaInsets:()=>({top:0,bottom:0})},'@expo/vector-icons':{Feather:'Feather'},
  '../computer/DominoTableBackground':{DominoTableBackground:'Background'},'../computer/OpponentDrinkingAvatar':{OpponentDrinkingAvatar:'Opponent'},'../computer/dominoAvatars':{DOMINO_AVATARS:opponents},'../blackjack/TableFinish':{TableStamp:'Stamp',WoodSurface:'Wood'},
  '../computer/DraggableDomino':{DraggableDomino:'Tile'},'../computer/DominoTile':{DominoTile:'Face'},'../computer/AnchoredBoard':{AnchoredBoard:'Board'},'../computer/DominoTurnTitle':{DominoTurnTitle:'Turn'},
  '../computer/useBoardCamera':{useBoardCamera:()=>({values:{x:0,y:0,scale:1},current:{current:{x:0,y:0,scale:1}},begin(){},end(){},pan(){},center(){}})},'../computer/boardLayout':geometry,'../computer/handLayout':{handLayout,handTrayHeight},'../computer/tableTheme':{TABLE},'../state/PrefsContext':{usePrefs:()=>({matchingTiles:true,ready:true,tileSound:false})},'../computer/strings':{COMPUTER_STRINGS},'../computer/RoundDeal':{DealtTile:pass},'./useOnlineDeal':{useOnlineDeal:()=>({dealing:false,progress:{}})}};
-deps['./OnlineTurnTimer']={OnlineTurnTimer:'TurnTimer',OnlineTurnWarning:'TurnWarning'};
+deps['./OnlineTurnTimer']={OnlineTurnTimer:'TurnTimer',OnlineElapsedTurnTimer:'ElapsedTimer',OnlineTurnWarning:'TurnWarning'};
+deps['../computer/TableSettings']={TableSettings:'TableSettings'};
 deps['./OnlineVoiceControl']={OnlineVoiceControl:'VoiceControl'};
+deps['../computer/DominoRoundAudit']={DominoRoundAudit:'RoundAudit'};
 deps['./OnlineRoundResult']={OnlineRoundResult:'RoundResult'};
 deps['./OnlineQuickActions']={OnlineQuickActions:'QuickActions',OnlineAttentionNotice:'AttentionNotice'};
 const m={exports:{}};new Function('require','module','exports',ts.transpileModule(readFileSync(new URL('./OnlineDominoTable.tsx',import.meta.url),'utf8'),{compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText)(id=>{if(id.endsWith('/FloatingAction'))return{FloatingAction:'FloatingAction'};if(id.endsWith('/OnlineCancellation'))return{CancelRoomControl:'CancelRoomControl',RoomClosedNotice:'RoomClosedNotice'};if(id.endsWith('/ResultHoldButton'))return{ResultHoldButton:'HoldButton'};if(id.endsWith('/HomeButton'))return{HomeButton:'HomeButton'};if(id.endsWith('/GoldPressable'))return{GoldPressable:'Pressable'};if(id.endsWith('/ModalCloseButton'))return modalCloseMock;if(!(id in deps))throw Error(id);return deps[id];},m,m.exports);
@@ -166,3 +168,39 @@ test('nudges have a separate right-hand lane beside the avatar',async()=>{const 
 for(const seat of ['human','computer'])test(`voice status stays beneath microphone in left lane for ${seat}, away from avatar`,async()=>{const h=await setup(view(seat));const woodHeight=h.r.root.findByProps({testID:'domino-wood-edge'}).props.style.minHeight;try{await h.update({voiceRelay:async()=>({call:null,peer:null,messages:[]})});await act(()=>h.r.root.findByType('VoiceControl').props.onStatus('Call ended.'));const status=h.r.root.findByProps({testID:'online-voice-status'}),lane=h.r.root.findByProps({testID:'online-wood-left'});assert.ok(status.parent===lane,'voice status must be inside microphone lane');assert.equal(status.props.numberOfLines,2);assert.equal(status.props.style.paddingHorizontal,0);assert.equal(status.props.accessibilityLabel,'Call ended.');const siblings=lane.findAll(n=>n.parent===lane);assert.ok(siblings.indexOf(status)>siblings.indexOf(h.r.root.findByType('VoiceControl')));assert.equal(h.r.root.findByProps({testID:'online-wood-right'}).props.style.width,72);assert.equal(h.r.root.findByProps({testID:'domino-wood-edge'}).props.style.minHeight,woodHeight);}finally{await act(()=>h.r.unmount());}});
 for(const width of [320,390])test(`microphone status has two bounded lines outside the avatar at phone width ${width}`,async()=>{testWindow={width,height:640};const h=await setup(view('computer'));try{await h.update({voiceRelay:async()=>({call:null,peer:null,messages:[]})});await act(()=>h.r.root.findByType('VoiceControl').props.onStatus('The call ended after five minutes. You can call again.'));const status=h.r.root.findByProps({testID:'online-voice-status'});assert.equal(status.props.numberOfLines,2);assert.equal(status.props.style.lineHeight,14);const lane=h.r.root.findByProps({testID:'online-wood-left'});assert.equal(lane.props.style.width,80);assert.ok(12+lane.props.style.width<width/2-36,'left status lane cannot intersect centered avatar');const maxControlsHeight=44+2+2*status.props.style.lineHeight+12+8;assert.ok(maxControlsHeight<=h.r.root.findByProps({testID:'domino-wood-edge'}).props.style.minHeight,'two status lines and stock fit existing wood height');}finally{await act(()=>h.r.unmount());testWindow={width:390,height:800};}});
 test('intentional drag released outside the yellow zones snaps once and cancelled or stale drags never play',async()=>{const h=await setup(view());try{const tile=h.r.root.findAllByType('Tile')[0];await act(()=>tile.props.onDrag({x:170,y:180}));const drop=h.r.root.findAllByType('Tile')[0].props.onDrop;await act(()=>{drop({x:-100,y:600});drop({x:-100,y:600});});assert.deepEqual(h.commands,[{type:'play',tileId:'6-6',end:'right'}]);}finally{await act(()=>h.r.unmount());}const s=await setup(view());try{const tile=s.r.root.findAllByType('Tile')[0];await act(()=>tile.props.onDrag({x:170,y:180}));const drop=s.r.root.findAllByType('Tile')[0].props.onDrop;await s.update({view:{...view(),turn:'computer'}});await act(()=>drop({x:170,y:180}));assert.deepEqual(s.commands,[]);}finally{await act(()=>s.r.unmount());}});
+
+test('both seats see elapsed rival clock only on rival turn and terminal tiles only after result',async()=>{
+ for(const seat of ['human','computer']){const v=view(seat),rival=seat==='human'?'computer':'human',h=await setup(v);try{
+  assert.equal(h.r.root.findByType('ElapsedTimer').props.clock,null);
+  const clock={durationMs:30000,remainingMs:17000,paused:false,serverNow:13000,deadline:30000};
+  await h.update({view:{...v,turn:rival,presentation:{...v.presentation,turnClock:clock}}});assert.deepEqual(h.r.root.findByType('ElapsedTimer').props.clock,clock);assert.equal(h.r.root.findAllByType('RoundAudit').length,0);
+  const result={winner:rival,points:15,blocked:false,opponentHand:[{id:'2-2',a:2,b:2}]};await h.update({view:{...v,turn:rival,result}});
+  assert.equal(h.r.root.findByType('ElapsedTimer').props.clock,null);assert.deepEqual(h.r.root.findByType('RoundAudit').props.hands[seat],v.hand);assert.deepEqual(h.r.root.findByType('RoundAudit').props.hands[rival],result.opponentHand);
+  await h.update({view:{...v,turn:rival,phase:'paused'}});assert.equal(h.r.root.findByType('ElapsedTimer').props.clock,null);
+ }finally{await act(()=>h.r.unmount());}}
+});
+
+test('online Domino menu opens real local preferences while retaining room code and rules without server commands',async()=>{const v=view();v.manualCode='123456';const f=await setup(v);try{const root=f.r.root,menu=root.findByProps({accessibilityLabel:'Menú de partida'});await act(()=>menu.props.onPress());let settings=root.findByType('TableSettings');assert.equal(settings.props.visible,true);assert.equal(settings.props.roomCode,'123456');assert.equal(settings.props.onRestart,undefined);assert.equal(settings.props.onInvite,undefined);assert.equal(settings.props.onAcceptInvitation,undefined);assert.deepEqual(f.commands,[]);await act(()=>settings.props.onRules());assert.equal(root.findByType('TableSettings').props.visible,false);assert.ok(root.findAllByType('Text').some(t=>t.props.children===COMPUTER_STRINGS.es.rules));assert.deepEqual(f.commands,[]);}finally{await act(()=>f.r.unmount());}});
+
+test('winning tile trajectory crosses the upper board edge without clipping at the opponent hand; ordinary and blocked play stay clipped',async()=>{
+ const v=view();const tile={id:'6-6',a:6,b:6};v.board=[tile];v.presentation.openingId=tile.id;v.last={kind:'play',tile,player:'human'};v.result={winner:'human',blocked:false,points:12};v.winner=null;
+ const f=await setup(v);try{
+  const surface=()=>f.r.root.findByProps({testID:'playing-surface'}).props.style;
+  const metrics=f.r.root.findByType('Board').props.metrics,point=geometry.chainSlot(0,metrics,v.board,tile.id);
+  // Actual presentation keyframes in AnchoredBoard: target y=.46H-5, scale4.5,
+  // point perspective, final squash. Include its 5-degree tilt's full AABB.
+  const angle=5*Math.PI/180,scale=4.5*point.scale;
+  const boxHeight=(Math.abs(Math.sin(angle))*point.width+Math.abs(Math.cos(angle))*point.height)*scale*.86;
+  for(const height of [180,260,360]){
+   await act(()=>f.r.root.findByProps({testID:'playing-surface'}).props.onLayout({nativeEvent:{layout:{width:340,height}}}));
+   const center=height/2+metrics.height*(.46-.5)-5,top=center-boxHeight/2,bottom=center+boxHeight/2;
+   assert.ok(top<0,'enlarged winning tile genuinely crosses board top near revealed opponent hand');
+   const painted=surface().overflow==='hidden'?Math.max(0,Math.min(height,bottom)-Math.max(0,top)):boxHeight;
+   assert.equal(painted,boxHeight,'entire transformed tile must survive the board boundary');
+   assert.ok(surface().zIndex>0&&surface().elevation>0,'flight must draw above the sibling opponent-hand strip');
+  }
+  assert.equal(f.r.root.findByProps({testID:'online-real-table'}).props.style.overflow,'hidden','outer viewport remains contained');
+  await f.update({view:{...v,result:{...v.result,blocked:true}}});assert.equal(surface().overflow,'hidden');
+  await f.update({view:{...v,result:null}});assert.equal(surface().overflow,'hidden');assert.deepEqual(f.commands,[]);
+ }finally{await act(()=>f.r.unmount());}
+});

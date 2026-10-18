@@ -42,7 +42,9 @@ interface NavContextValue {
   openWatch: (code: string) => void;
   /** Clear the pending code once consumed. */
   clearWatchCode: () => void;
-  onlineInvitation:{code:string|null}|null;
+  onlineInvitation:{code:string|null;transferred?:boolean;joined?:boolean;confirmGuest?:boolean}|null;
+  openOnlineTransfer:()=>void;
+  openJoinedDomino:(confirmGuest?:boolean)=>void;
   openOnlineInvitation:(code:string|null)=>void;
   /** Open the normal History UI for a followed history space in read-only mode. */
   watchHistory: { fallback: Match; historySpaceId?: string } | null;
@@ -57,7 +59,7 @@ export function NavProvider({ children }: { children: React.ReactNode }) {
   const [stack, setStack] = useState<ScreenName[]>(['home']);
   const [setupMode,setSetupMode]=useState<'new'|'edit'>('new');
   const [pendingWatchCode, setPendingWatchCode] = useState<string | null>(null);
-  const [onlineInvitation,setOnlineInvitation]=useState<{code:string|null}|null>(null);
+  const [onlineInvitation,setOnlineInvitation]=useState<{code:string|null;transferred?:boolean;joined?:boolean;confirmGuest?:boolean}|null>(null);
   const [watchHistory, setWatchHistory] = useState<{
     fallback: Match;
     historySpaceId?: string;
@@ -90,7 +92,8 @@ export function NavProvider({ children }: { children: React.ReactNode }) {
         pendingWatchCode,
         openWatch,
         clearWatchCode: () => setPendingWatchCode(null),
-        onlineInvitation,
+        openJoinedDomino:(confirmGuest=false)=>{setOnlineInvitation({code:null,joined:true,confirmGuest});setStack(['home','onlineInvitation']);},
+        onlineInvitation,openOnlineTransfer:()=>{setOnlineInvitation({code:null,transferred:true});setStack(['home','onlineInvitation']);},
         openOnlineInvitation:code=>{setOnlineInvitation({code});setStack(['home','onlineInvitation']);},
         watchHistory,
         openWatchHistory: (match) => {

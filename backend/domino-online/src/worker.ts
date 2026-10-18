@@ -1,3 +1,6 @@
+import {invitationAvailable,invitationGames} from './invitationGames';
+import {roomTransfer,existingDestination,destinationPresence} from './roomTransfer';
+import type {TransferPlan} from './gameTransfer';
 export {VoiceBudget} from './voiceBudget.ts';
 import {turnCredentials} from './turnCredentials.ts';
 import {apkDownload} from './apkDownload.ts';
@@ -22,7 +25,7 @@ type Reply = { status: number; body: View | { error: string } };
 function errorReply(error: unknown): {status:number;body:{error:string}} {
   const message = error instanceof Error ? error.message : 'internal_error';
   const known = ['unauthorized','closed','host_only','room_full','already_started','guest_not_approved','no_pending_guest',
-    'not_connected','not_playing','not_your_turn','paused','illegal_action','invalid_slot','cannot_pass','cannot_draw','boneyard_open','round_not_finished','auto_round_waiting','attention_own_turn','attention_cooldown',
+    'not_connected','not_playing','not_your_turn','paused','illegal_action','invalid_slot','cannot_pass','cannot_draw','boneyard_open','round_not_finished','transfer_pending','auto_round_waiting','attention_own_turn','attention_cooldown',
     'stale_revision','stale_round','stale_epoch','command_conflict','receipt_capacity','rate_limited','not_found',
     'invalid_request','invalid_name','invalid_settings','invalid_avatar','invalid_avatar_photo','invitation_acceptance_required','collision','both_not_ready','invalid_voice','voice_replaced','voice_peer_missing','voice_capacity','voice_call_missing','voice_call_forbidden','voice_call_ended','manual_code_capacity','invalid_code'];
   const safe = known.includes(message) ? message : 'internal_error';
@@ -45,6 +48,19 @@ export class DominoRoom extends DurableObject<Cloudflare.Env> {
     ctx.storage.sql.exec('CREATE TABLE IF NOT EXISTS voice_events (id INTEGER PRIMARY KEY AUTOINCREMENT, recipient TEXT NOT NULL, session TEXT NOT NULL, created INTEGER NOT NULL, payload TEXT NOT NULL)');
     ctx.storage.sql.exec('CREATE TABLE IF NOT EXISTS voice_call (id INTEGER PRIMARY KEY, data TEXT NOT NULL)');
     ctx.storage.sql.exec('CREATE TABLE IF NOT EXISTS voice_calls_seen (id TEXT PRIMARY KEY, created INTEGER NOT NULL)');
+  }
+ async invitationAvailable(){return invitationAvailable(this.load(),Date.now());}
+  async transfer(hash:string,input:unknown){return roomTransfer(this.ctx,this.env,'domino',hash,input,()=>this.load(),r=>this.save(r),advanceRoom,heartbeat,r=>this.schedule(r),(h,n)=>this.limit(h,n));}
+  async receiveTransfer(plan:TransferPlan):Promise<void>{
+    await this.ctx.storage.transaction(async()=>{
+      if(existingDestination(this.load(),plan))return;
+      const now=Date.now(),photo=plan.photos.human;
+      let room=createRoom(plan.code,crypto.randomUUID(),plan.hashes.human,plan.names.human,now,100,'points',{avatar:plan.avatars.human,customAvatars:true,turnTimer:true,autoNextRound:true,quickActions:true,...(photo?{avatarPhoto:photo}:{})});
+      room=joinRoom(room,plan.hashes.computer,plan.names.computer,now,{avatar:plan.avatars.computer,acceptInvitation:true,...(plan.photos.computer?{avatarPhoto:plan.photos.computer}:{})},secureRandom);
+      room=destinationPresence(room,plan,now);
+      if(room.turnClock)room.turnClock={...room.turnClock,deadline:null,remainingMs:30000};
+      this.save(room);await this.schedule(room);
+    });
   }
   private load(): Room | null {
     const rows = this.ctx.storage.sql.exec<{data:string}>('SELECT data FROM room WHERE id=1').toArray();
@@ -85,7 +101,7 @@ export class DominoRoom extends DurableObject<Cloudflare.Env> {
   async voice(hash:string,input:unknown):Promise<{status:number;body:VoiceReply|{error:string}}>{
     return roomVoice(this.ctx,()=>this.load(),(actor,now)=>this.limit(actor,now),hash,input,errorReply);
   }
-  async reserve(code: string, hash: string, name: string, target: number, mode: 'points'|'wins', invitation?: {avatar:string;turnTimer?:boolean;autoNextRound?:boolean;quickActions?:boolean;customAvatars?:boolean;avatarPhoto?:string}): Promise<Reply> {
+  async reserve(code: string, hash: string, name: string, target: number, mode: 'points'|'wins', invitation?: {avatar:string;turnTimer?:boolean;autoNextRound?:boolean;quickActions?:boolean;customAvatars?:boolean;hostReturn?:boolean;avatarPhoto?:string}): Promise<Reply> {
     return this.ctx.storage.transaction(async () => {
       const existing = this.load();
       if (existing && existing.seats.human.secretHash !== hash) return errorReply(new Error('collision'));
@@ -248,8 +264,12 @@ const handler = {
       const authorization = request.headers.get('authorization') ?? '';
       if (!/^Bearer [a-f0-9]{64}$/.test(authorization)) throw new Error('unauthorized');
       const hash = await digest(authorization.slice(7));
+      const lookup=/^\/invitations\/(\d{6}|[A-F0-9]{10})\/games$/.exec(url.pathname);
+      if(lookup&&request.method==='GET')return Response.json(await invitationGames(env,lookup[1],hash),{headers:{'cache-control':'no-store'}});
       const ice=/^(\/poker)?\/rooms\/([A-F0-9]{10})\/ice$/.exec(url.pathname);
       if(ice&&request.method==='POST'){const o=object(await body(request,1024));if(Object.keys(o).some(k=>k!=='epoch'))throw Error('invalid_request');const reply=ice[1]?await env.POKER_ROOMS.getByName(ice[2]).request('snapshot',hash,{}):await env.ROOMS.getByName(ice[2]).request('snapshot',hash,{});if('error'in reply.body)return Response.json(reply.body,{status:reply.status,headers:{'cache-control':'no-store'}});if(reply.body.phase!=='playing'||o.epoch!==reply.body.epoch)throw Error('not_playing');if(env.NETWORK_MODE==='internet'&&env.TURN_KEY_ID&&env.TURN_KEY_API_TOKEN){const grant=await env.VOICE_BUDGET.getByName('voice-budget').reserve(hash);if(grant!=='granted')return Response.json({error:grant==='cooldown'?'voice_retry_later':grant==='daily_limit'?'voice_daily_limit':'voice_monthly_limit'},{status:429,headers:{'cache-control':'no-store',...(grant==='cooldown'?{'retry-after':'5'}:{})}});}try{return Response.json(await turnCredentials(env),{headers:{'cache-control':'no-store'}});}catch{return Response.json({error:'voice_not_configured'},{status:503});}}
+      const transfer=/^(\/poker)?\/rooms\/([A-F0-9]{10})\/transfer$/.exec(url.pathname);
+      if(transfer&&request.method==='POST'){const input=await body(request,1024),room=transfer[1]?env.POKER_ROOMS.getByName(transfer[2]):env.ROOMS.getByName(transfer[2]);const reply=await room.transfer(hash,input);return Response.json(reply.body,{status:reply.status,headers:{'cache-control':'no-store'}});}
       if(url.pathname.startsWith('/blackjack/'))return blackjackRoute(request,env,hash,body);
       if(url.pathname.startsWith('/poker/'))return pokerRoute(request,env,hash,body);
       if (url.pathname === '/rooms' && request.method === 'POST') {
@@ -258,13 +278,14 @@ const handler = {
         const mode = o.mode === undefined ? 'points' : o.mode;
         if (typeof target !== 'number' || (mode !== 'points' && mode !== 'wins') || Object.keys(o).some(k=>!['name','target','mode','invitation'].includes(k))) throw new Error('invalid_request');
         const invitationInput=o.invitation===undefined?undefined:object(o.invitation);
-        if (invitationInput && (Object.keys(invitationInput).some(k=>!['avatar','turnTimer','autoNextRound','quickActions','customAvatars','avatarPhoto'].includes(k))
+        if (invitationInput && (Object.keys(invitationInput).some(k=>!['avatar','turnTimer','autoNextRound','quickActions','customAvatars','hostReturn','avatarPhoto'].includes(k))
           || (invitationInput.turnTimer!==undefined && typeof invitationInput.turnTimer!=='boolean')
           || (invitationInput.autoNextRound!==undefined && typeof invitationInput.autoNextRound!=='boolean')
           || (invitationInput.quickActions!==undefined && typeof invitationInput.quickActions!=='boolean')
+          || (invitationInput.hostReturn!==undefined && typeof invitationInput.hostReturn!=='boolean')
           || (invitationInput.customAvatars!==undefined && typeof invitationInput.customAvatars!=='boolean'))) throw new Error('invalid_request');
         const invitation=invitationInput?{avatar:text(invitationInput.avatar,20),turnTimer:invitationInput.turnTimer===true,autoNextRound:invitationInput.autoNextRound===true,quickActions:invitationInput.quickActions===true,
-          customAvatars:invitationInput.customAvatars===true,...(invitationInput.avatarPhoto!==undefined?{avatarPhoto:text(invitationInput.avatarPhoto,96*1024)}:{})}:undefined;
+          customAvatars:invitationInput.customAvatars===true,hostReturn:invitationInput.hostReturn===true,...(invitationInput.avatarPhoto!==undefined?{avatarPhoto:text(invitationInput.avatarPhoto,96*1024)}:{})}:undefined;
         // Retry-stable allocation; server derives code from credential hash, not client choice.
         for (let attempt=0;attempt<8;attempt++) {
           const code = (await digest(`${hash}:${attempt}`)).slice(0,10).toUpperCase();

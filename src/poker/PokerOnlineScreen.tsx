@@ -1,3 +1,6 @@
+import {useCodeInvitation} from '../online/useCodeInvitation';
+import {useOnlineGameTransfer} from '../online/useOnlineGameTransfer';
+import {vault as dominoVault} from '../online/credentialStorage';
 import {OnlineConnectionNotice} from '../online/OnlineConnectionNotice';
 import {CodeInvitationScreen} from '../online/OnlineCancellation';
 import {HomeButton} from '../components/HomeButton';
@@ -25,7 +28,7 @@ import type {PokerClientState} from './PokerOnlineClient';
 import type {PokerOnlineAction} from './onlineContract';
 import type {VoiceRequest} from '../online/voiceProtocol';
 export function PokerOnlineScreen({inviteOnly=false,manualOnly=false,acceptOnly=false,onClose}:{inviteOnly?:boolean;manualOnly?:boolean;acceptOnly?:boolean;onClose?:()=>void}={}){
- const {lang}=useI18n(),es=lang==='es',{back:navBack,pendingPokerCode,clearPokerCode}=useNav();const back=onClose??navBack;
+ const {lang}=useI18n(),es=lang==='es',{back:navBack,pendingPokerCode,clearPokerCode,openOnlineTransfer,openJoinedDomino}=useNav();const back=onClose??navBack;
  const endpoint=useMemo(()=>onlineEndpoint(process.env.EXPO_PUBLIC_POKER_ONLINE_URL||process.env.EXPO_PUBLIC_DOMINO_ONLINE_URL||'http://127.0.0.1:8794'),[]);
  const client=useMemo(()=>new PokerOnlineClient(vault,httpTransport(endpoint),credential,endpoint),[endpoint]);
  const {playerAvatarId:avatar,playerAvatarPhoto:photo,playerAvatarName}=useComputerGame();const name=avatar==='selfie'?(playerAvatarName||''):DOMINO_AVATARS.find(a=>a.id===avatar)?.name??'';
@@ -33,34 +36,38 @@ export function PokerOnlineScreen({inviteOnly=false,manualOnly=false,acceptOnly=
  const sessionActive=useRef(!acceptOnly&&!pendingPokerCode&&!inviteOnly&&!manualOnly);
  const [incomingCode,setIncomingCode]=useState<string|null>(pendingPokerCode??null);
  const attemptedCode=useRef<string|null>(null);const targetCode=useRef(pendingPokerCode??'');
+ const retryAcceptedInvitation=useRef<()=>void>(()=>{});
  const [manualShare,setManualShare]=useState(false);
  const [shareOpen,setShareOpen]=useState(false),[invitationStarted,setInvitationStarted]=useState(false);const wasWaiting=useRef(false);
  const [state,setState]=useState<PokerClientState>(client.state),[loaded,setLoaded]=useState(false),[code,setCode]=useState(pendingPokerCode??''),[notice,setNotice]=useState<string|null>(null);
  targetCode.current=code;
- useEffect(()=>{if(wasWaiting.current&&state.view?.phase==='playing')setInvitationStarted(true);wasWaiting.current=state.view?.phase==='waiting';},[state.view?.phase]);
+ useEffect(()=>{const v=state.view,joined=v&&['playing','paused','completed'].includes(v.phase);if(joined&&(wasWaiting.current||(inviteOnly||manualOnly)&&v.seat==='human'&&!!v.names.computer))setInvitationStarted(true);if(v?.phase==='waiting')wasWaiting.current=true;else if(v&&['closed','completed'].includes(v.phase))wasWaiting.current=false;},[state.view?.phase,state.view?.code,inviteOnly,manualOnly]);
  useEffect(()=>{if(!notice)return;const timer=setTimeout(()=>setNotice(null),3000);return()=>clearTimeout(timer);},[notice]);
  useEffect(()=>{if(pendingPokerCode){setCode(pendingPokerCode);}},[pendingPokerCode,clearPokerCode]);
- useEffect(()=>{let active=AppState.currentState==='active',alive=true;const unsubscribe=client.subscribe(setState);void client.load().then(async()=>{if(alive&&sessionActive.current&&client.state.canResume)await client.resume();}).finally(()=>{if(alive)setLoaded(true);});
-  const timer=setInterval(()=>{if(active&&sessionActive.current&&client.state.canResume&&!client.state.error&&!['closed','completed'].includes(client.state.view?.phase??'')){if(client.state.status==='disconnected')void client.resume();else void client.refresh();}},1000);
-  const app=AppState.addEventListener('change',value=>{active=value==='active';if(active&&sessionActive.current&&client.state.canResume&&!client.state.error)void client.resume();else if(!active)void client.disconnect();});
+ useEffect(()=>{let active=AppState.currentState!=='background'&&AppState.currentState!=='inactive',alive=true;const unsubscribe=client.subscribe(setState);void client.load().then(async()=>{if(alive&&sessionActive.current&&client.state.canResume)await client.resume();}).finally(()=>{if(alive)setLoaded(true);});
+  const timer=setInterval(()=>{if(active&&client.state.error==='not_connected'){retryAcceptedInvitation.current();return;}if(active&&sessionActive.current&&client.state.canResume&&(!client.state.error||client.state.view?.phase==='waiting'&&['connection_error','network_error','Network request failed','Failed to fetch','fetch failed'].includes(client.state.error))&&!['closed','completed'].includes(client.state.view?.phase??'')){if(client.state.status==='disconnected')void client.resume();else void client.refresh();}},1000);
+  const app=AppState.addEventListener('change',value=>{active=value==='active';if(active&&client.state.error==='not_connected')retryAcceptedInvitation.current();else if(active&&sessionActive.current&&client.state.canResume&&(!client.state.error||client.state.view?.phase==='waiting'&&['connection_error','network_error','Network request failed','Failed to fetch','fetch failed'].includes(client.state.error)))void client.resume();else if(!active)void client.disconnect();});
   const hardware=BackHandler.addEventListener('hardwareBackPress',()=>{back();return true;});
   return()=>{alive=false;unsubscribe();clearInterval(timer);app.remove();hardware.remove();void client.disconnect();};
  },[client]);
  useEffect(()=>{if(pendingPokerCode){setCode(pendingPokerCode);setIncomingCode(pendingPokerCode);setAccepting(true);sessionActive.current=false;clearPokerCode();}},[pendingPokerCode]);
- async function acceptInvitation(){
+ async function acceptCurrentInvitation(){
   if(client.state.busy)return;
   const target=code,current=client.state.view;
   // An uncertain join may already own the guest seat: retry its saved credential.
   const recovering=client.state.canResume&&(attemptedCode.current===target||current?.code===target||current?.manualCode===target);
   if(recovering)await client.resume();
   else{
-   if(client.state.canResume)await client.forget();
    if(targetCode.current!==target)return;
    attemptedCode.current=target;
    await client.join(name,target,avatar,avatar==='selfie'?photo??undefined:undefined);
   }
   if(targetCode.current===target&&!client.state.error&&client.state.status==='connected'&&client.state.view){setIncomingCode(null);setAccepting(false);sessionActive.current=true;}
  }
+ // Consent already happened: wait for this host with the saved pending join, never create or accept a different target.
+ retryAcceptedInvitation.current=()=>{if(attemptedCode.current===code&&client.state.canResume&&client.state.error==='not_connected')void acceptCurrentInvitation();};
+ const codeInvitation=useCodeInvitation({explicitGame:/^[A-F0-9]{10}$/.test(incomingCode??''),game:'poker',code,endpoint,name,avatar,photo:avatar==='selfie'?photo??undefined:undefined,es,onJoined:()=>{onClose?.();openJoinedDomino();}});
+ const acceptInvitation=()=>codeInvitation.accept(acceptCurrentInvitation);
  const command=useCallback(async(action:PokerOnlineAction)=>{await client.command(action);return !client.state.error;},[client]);
  const hold=useCallback((held:boolean)=>client.setResultHeld(held),[client]);const voice=useMemo(()=>Object.assign((request:VoiceRequest)=>client.voice(request),{iceConfiguration:()=>client.iceConfiguration()}),[client]);
  function invitationUrl(){const v=client.state.view;if(!v)return '';const base=process.env.EXPO_PUBLIC_POKER_ONLINE_INVITE_BASE||process.env.EXPO_PUBLIC_DOMINO_ONLINE_INVITE_BASE||(Platform.OS==='web'?`${window.location.origin}/`:`${endpoint}/poker/invite`);let url=pokerInvitation(v.code,base,(process.env.EXPO_PUBLIC_DOMINO_ONLINE_SCHEME||appConfig.expo.scheme));if(new URL(base).pathname==='/poker/invite'){const page=new URL(url);if(v.manualCode)page.searchParams.set('manualCode',v.manualCode);page.searchParams.set('scheme',(process.env.EXPO_PUBLIC_DOMINO_ONLINE_SCHEME||appConfig.expo.scheme));url=page.toString();}return url;}
@@ -80,13 +87,14 @@ export function PokerOnlineScreen({inviteOnly=false,manualOnly=false,acceptOnly=
  function showCode(){setManualShare(true);setShareOpen(true);}
  async function prepareExistingCode(){const current=client.state.view;if(!current||client.state.error||client.state.status!=='connected'||!['waiting','playing','paused'].includes(current.phase))throw Error('invitation_unavailable');return {code:current.manualCode??current.code,url:invitationUrl(),text:''};}
 
- const v=state.view,incomingDifferent=!!incomingCode&&incomingCode!==v?.code&&incomingCode!==v?.manualCode,entryView=accepting||incomingDifferent?null:v,disabled=state.busy||!loaded||!name.trim()||avatar==='selfie'&&!photo;
+ const gameTransfer=useOnlineGameTransfer({client,game:'poker',view:state.view,connected:state.status==='connected',visible:sessionActive.current&&!accepting&&(!incomingCode||incomingCode===state.view?.code||incomingCode===state.view?.manualCode),es,onReady:async t=>{await client.saveGameTransfer(t,dominoVault);openOnlineTransfer();}});
+ const v=state.view,incomingDifferent=!!incomingCode&&incomingCode!==v?.code&&incomingCode!==v?.manualCode,entryView=accepting||incomingDifferent?null:v,disabled=codeInvitation.busy||state.busy||!loaded||!name.trim()||avatar==='selfie'&&!photo;
  let shareLink='';try{if(v)shareLink=invitationUrl();}catch{}
  const button=(label:string,onPress:()=>void,off=false,id?:string)=><GoldPressable finish testID={id} accessibilityRole="button" accessibilityState={{disabled:off}} disabled={off} onPress={onPress} style={{padding:14,minHeight:46,borderRadius:12,backgroundColor:C.gold,alignItems:'center',opacity:off?.45:1}}><Text style={{color:C.background,fontWeight:'700'}}>{label}</Text></GoldPressable>;
- if(manualOnly&&!invitationStarted)return <CodeInvitationScreen es={es} ready={loaded} onBack={back} prepare={prepareInvitation} onCancel={async()=>{await client.command({type:'leave'});if(client.state.view?.phase!=='closed'||client.state.error)return false;await client.forget();back();return true;}}/>;
- if(inviteOnly&&!invitationStarted)return <View style={{flex:1,backgroundColor:C.background}}><View style={{flexDirection:'row',alignItems:'center'}}><Pressable accessibilityRole="button" accessibilityLabel={es?'Volver':'Back'} onPress={back} style={{width:44,height:44,alignItems:'center',justifyContent:'center'}}><Feather name="arrow-left" size={22} color={C.gold}/></Pressable><HomeButton es={es}/></View>{loaded&&<InvitationShareOptions es={es} mode={manualOnly?'code':'share'} prepare={prepareInvitation} onDone={()=>{setInvitationStarted(true);if(inviteOnly)back();}}/>}</View>;
+ if(manualOnly&&!invitationStarted)return <CodeInvitationScreen immediateCancel es={es} ready={loaded} onBack={back} prepare={prepareInvitation} onCancel={async()=>{sessionActive.current=false;await client.cancelInvitation();return true;}}/>;
+ if(inviteOnly&&!invitationStarted)return <View style={{flex:1,backgroundColor:C.background}}><View style={{flexDirection:'row',alignItems:'center'}}><Pressable accessibilityRole="button" accessibilityLabel={es?'Volver':'Back'} onPress={back} style={{width:44,height:44,alignItems:'center',justifyContent:'center'}}><Feather name="arrow-left" size={22} color={C.gold}/></Pressable><HomeButton es={es}/></View>{loaded&&<InvitationShareOptions es={es} mode={manualOnly?'code':'share'} prepare={prepareInvitation} onDone={()=>setInvitationStarted(true)}/>}</View>;
  return <View style={{flex:1,backgroundColor:C.background}}>
-  {v&&v.phase!=='waiting'&&!accepting&&!incomingDifferent?<>{state.error&&<OnlineConnectionNotice error={state.error} es={es} busy={state.busy} onRetry={state.canResume?()=>void client.resume():undefined}/>}<OnlinePokerTable view={v} busy={state.busy} connected={state.status==='connected'} es={es} onCommand={command} onHold={hold} voice={voice} onBack={back} onShare={()=>void share()} onInviteCode={showCode} overlayOpen={shareOpen}/></>:<ScrollView contentContainerStyle={{padding:18,gap:14}}>
+  {v&&v.phase!=='waiting'&&!accepting&&!incomingDifferent?<>{state.error&&<OnlineConnectionNotice error={state.error} es={es} busy={state.busy} onRetry={state.canResume?()=>void client.resume():undefined}/>}<OnlinePokerTable onSwitchGame={gameTransfer.requestSwitch} view={v} busy={state.busy} connected={state.status==='connected'} es={es} onCommand={command} onHold={hold} voice={voice} onBack={back} onShare={()=>void share()} onInviteCode={showCode} overlayOpen={shareOpen}/></>:<ScrollView contentContainerStyle={{padding:18,gap:14}}>
    <View style={{flexDirection:'row',alignItems:'center'}}><Pressable testID="poker-online-back" accessibilityRole="button" accessibilityLabel={es?'Volver':'Back'} onPress={back} style={{width:44,height:44,justifyContent:'center'}}><Feather name="arrow-left" size={22} color={C.gold}/></Pressable><HomeButton es={es}/></View><Text style={{color:C.goldLight,fontSize:24,textAlign:'center'}}>POKER ONLINE</Text>
    {state.error&&(!accepting&&!incomingDifferent||attemptedCode.current===code||state.error==='storage_error')?<OnlineConnectionNotice error={state.error} es={es} busy={state.busy} onRetry={state.canResume?(accepting||incomingDifferent?attemptedCode.current===code?()=>void acceptInvitation():undefined:()=>void client.resume()):undefined}/>:null}
    <Text style={{color:C.ivory,textAlign:'center'}}>{es?'Dos humanos · Sala privada · Fichas virtuales':'Two humans · Private room · Virtual chips'}</Text>
@@ -98,6 +106,7 @@ export function PokerOnlineScreen({inviteOnly=false,manualOnly=false,acceptOnly=
    </>}
   </ScrollView>}
   <Modal visible={shareOpen} transparent animationType="fade" onRequestClose={()=>setShareOpen(false)}><View style={{flex:1,justifyContent:'center',padding:20,backgroundColor:'rgba(2,12,10,.82)'}}><View style={{backgroundColor:C.surface,borderRadius:20}}><Pressable accessibilityRole="button" accessibilityLabel={es?'Cerrar':'Close'} onPress={()=>setShareOpen(false)} style={{height:44,alignItems:'flex-end',justifyContent:'center',paddingHorizontal:16}}><Feather name="x" size={22} color={C.gold}/></Pressable>{shareOpen&&<InvitationShareOptions es={es} mode={manualShare?'code':'share'} prepare={manualShare?prepareExistingCode:prepareInvitation} onDone={()=>setShareOpen(false)}/>} </View></View></Modal>
+  {gameTransfer.prompt}{codeInvitation.prompt}
   {notice?<Text accessibilityLiveRegion="polite" style={{padding:10,color:C.ivory,textAlign:'center'}}>{notice}</Text>:null}
 
 

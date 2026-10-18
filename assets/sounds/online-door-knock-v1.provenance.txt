@@ -1,0 +1,7 @@
+Original procedural sound generated for Next Code Studios, 2026-10-16.
+No recording, external samples, voices, or third-party licensed content.
+A damped wooden door impact; existing online notice repeats at 180ms.
+PCM mono 16-bit 44100Hz, single impact 0.160 seconds.
+Synthesis: seeded low-pass noise and damped modes 165/287/493/811Hz, soft attack/tail, peak 0.66.
+Project may use, modify and redistribute this generated asset. No external attribution required.
+SHA256 fb912219d9bbb64804f6a54a20f9d4e4c8f43dfbdd112e99d6ce1af48f39a383
