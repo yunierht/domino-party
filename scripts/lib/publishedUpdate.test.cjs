@@ -20,7 +20,7 @@ test('published factory changes packaging only and preserves default test identi
   assert.deepEqual(result.android.permissions,base.android.permissions);assert.deepEqual(result.plugins,base.plugins);assert.equal(result.orientation,base.orientation);assert.equal(result.icon,base.icon);
   assert.equal(result.ios.infoPlist.NSAppTransportSecurity.NSExceptionDomains,undefined);
   assert.equal(result.ios.infoPlist.NSLocalNetworkUsageDescription,undefined);
-  process.env.ONLINE_BUILD_PLATFORM='ios';const ios=factory({config:base});const linked=require('../../plugins/withOnlineInvitationLinks.js')(ios);assert.equal(linked.ios.bundleIdentifier,'com.yht.dominoparty');assert.equal(linked.ios.buildNumber,'18');assert.equal(linked.ios.appleTeamId,'79C77F44DM');assert.deepEqual(linked.ios.associatedDomains,['applinks:domino-online-internet-test.domino-party.workers.dev']);
+  process.env.ONLINE_BUILD_PLATFORM='ios';const ios=factory({config:base});const linked=require('../../plugins/withOnlineInvitationLinks.js')(ios);assert.equal(linked.ios.bundleIdentifier,'com.yht.dominoparty');assert.equal(linked.ios.buildNumber,'19');assert.equal(linked.ios.appleTeamId,'79C77F44DM');assert.deepEqual(linked.ios.associatedDomains,['applinks:domino-online-internet-test.domino-party.workers.dev']);
   assert.equal(base.android.package,'com.nextcodestudios.dominoonline.test');
   environment('config/online-internet.json');const pilot=factory({config:base});assert.equal(pilot.android.package,base.android.package);assert.equal(pilot.android.versionCode,5);assert.equal(pilot.extra.eas.projectId,base.extra.eas.projectId);
  }finally{for(const key of keys){if(before[key]===undefined)delete process.env[key];else process.env[key]=before[key];}}

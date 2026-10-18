@@ -1484,3 +1484,6 @@ Fuente humana directa en voz: detener las pruebas, hacer check-in de todo códig
 ### 2026-10-18 — Entrega del candidato a TestFlight autorizada
 
 Fuente humana directa en voz posterior: preparar/subir a TestFlight para probarlo en Apple y después entre Android yApple. Autoriza siguiente compilación iOS del mismo candidato y entrega en app/equipo/canal TestFlight existentes, sin publicar AppStore producción ni cambiar testers/roles. Comprobar estado real de AppStoreConnect y máximo de build antes de asignar el siguiente; revisión de código no sustituye prueba física iOS. No interpreta «push paraTestFlight» como autorización de push Git.
+
+
+Confirmación humana posterior del alcanceApple:mantener intacto el código ya probado,autorizar los pasos necesarios para subirAppStoreConnect/TestFlight ycontinuar. Solo packagingios19ytestasociado cambian frenteAndroid42. Entrega completada Testing en grupoDomioTesterexistente,con notasguardadas;no producciónApple. Marcador complementariorc/ios-1.0.14-19 conserva mismo candidato funcional ydeclara pendientepruebafísicaiOS/cruzada. Correo autorizado únicamente si se requiere aprobaciónhumana duranteausencia;no fue necesario yno se envió.
