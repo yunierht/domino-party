@@ -1,5 +1,5 @@
 /* Local candidate only. The existing scoreboard and history styles remain scoped. */
-body { background:#0b100e; background-image:radial-gradient(ellipse at 80% 15%,#18302588,transparent 50%); }
+body, .history-page { background:#0b100e; background-image:radial-gradient(ellipse at 80% 15%,#18302588,transparent 50%); }
 .wrap { width:min(1280px,calc(100% - 96px)); }
 #site-header { position:relative; background:transparent; backdrop-filter:none; border-bottom:1px solid #ffffff12; }
 #site-header .nav-inner { min-height:112px; gap:24px; }
@@ -8,10 +8,11 @@ body { background:#0b100e; background-image:radial-gradient(ellipse at 80% 15%,#
 #site-header .brand > span { font-family:Georgia,serif; font-size:22px; letter-spacing:.14em; line-height:1.2; text-align:center; }
 #site-header .brand small { display:block; font-family:Arial,sans-serif; font-size:9px; letter-spacing:.36em; color:#d5bb82; margin-top:7px; }
 .header-right { display:flex; align-items:center; gap:28px; }
-.landing-nav { display:flex; align-items:center; gap:25px; margin-left:auto; margin-right:auto; color:#a9b2a7; font-size:11px; }
+.landing-nav { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px 25px; margin-left:auto; margin-right:auto; color:#a9b2a7; font-size:11px; }
+.landing-nav a { display:inline-flex; align-items:center; min-height:32px; }
 .landing-nav a:hover { color:#dfc58b; }
-@media(max-width:1050px) { .landing-nav { gap:16px; } }
-@media(max-width:700px) { #site-header .nav-inner { flex-wrap:wrap; padding:12px 0 0; gap:0; } .header-right { margin-left:auto; } .landing-nav { order:3; width:100%; justify-content:center; padding:12px 0 15px; margin:0; font-size:11px; gap:36px; } }
+@media(max-width:1050px) { .landing-nav { gap:6px 16px; } }
+@media(max-width:700px) { #site-header .nav-inner { flex-wrap:wrap; padding:12px 0 0; gap:0; } .header-right { margin-left:auto; } .landing-nav { order:3; width:100%; justify-content:center; padding:12px 0 15px; margin:0; font-size:11px; gap:4px 20px; } .landing-nav a { min-height:44px; } }
 #site-header .site-lang-toggle { border:0; background:transparent; padding:0; gap:3px; }
 #site-header .site-lang-toggle button { min-width:32px; background:transparent; color:#828f87; border-radius:0; font-size:11px; }
 #site-header .site-lang-toggle button[aria-pressed=true] { color:#eddfb6; border-bottom:1px solid #d5b567; }
@@ -72,6 +73,8 @@ body { background:#0b100e; background-image:radial-gradient(ellipse at 80% 15%,#
 @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
 @media(max-width:980px) { .lobby-copy { padding-block:0; } }
 @media(max-width:640px) { .lobby-copy .eyebrow { margin-bottom:20px; }.lobby-copy h1 { margin:0 0 22px; }.lobby-copy .lobby-notes { margin-top:24px; } }
+/* Keep the rotated right phone inside the mobile page without clipping its artwork. */
+@media(max-width:640px) { .lobby .phone-shot.home { right:3px; } }
 #site-header .brand { flex-direction:column; gap:7px; padding:12px 0; }
 #site-header .brand img { width:96px; height:96px; }
 #site-header .brand > span { font-size:18px; }

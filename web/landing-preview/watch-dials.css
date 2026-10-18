@@ -56,3 +56,11 @@
   .watch-current .team-score { margin-top:var(--watch-dial-gap); }
 }
 @media(max-width:640px) { .watch-team-identity { padding-right:90px; } }
+
+/* Completed-match totals belong only to the two tracker cards. */
+.watch-team-record {position:absolute;top:14px;left:14px;display:flex;flex-direction:column;gap:4px;max-width:94px;z-index:2;color:var(--watch-muted);font-size:12px;line-height:18px;pointer-events:none;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.watch-team-record b {color:var(--watch-text);font-weight:800;}
+.watch-current .watch-team-identity {align-items:center;text-align:center;padding-left:82px;padding-right:82px;min-height:64px;}
+.watch-current .watch-team-identity .team-name,.watch-current .watch-team-identity .team-players {text-align:center;padding:0;}
+.watch-current .dial-controls {flex-direction:column;}
+@media(max-width:640px){.watch-current .watch-team-identity{padding-left:68px;padding-right:42px;}.watch-team-record{left:10px;top:14px;font-size:11px;max-width:82px;}}

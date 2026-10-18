@@ -24,6 +24,8 @@ export class OnlineClient{
   private requireSession(){if(!this.session)throw Error('no_session');return this.session;}
   private async readSaved(generation:number){const session=await this.lifetime.storage(()=>this.vault.read(),generation);if(session){if(session.endpoint!==this.endpoint)throw Error('endpoint_changed');if(!/^[a-f0-9]{64}$/.test(session.token))throw Error('storage_error');}this.session=session;this.emit({canResume:!!session,...(!session?{view:null}:{})});}
   async load(){const generation=this.lifetime.capture();try{await this.readSaved(generation);}catch{if(this.lifetime.current(generation))this.emit({error:'storage_error'});}}
+  /** Room identity only; recovery credentials stay private. */
+  get savedRoomCode(){return this.session?.code??this.session?.pendingJoin;}
   private async run(task:(generation:number)=>Promise<void>,newSession=false){if(this.state.busy)return;const generation=newSession?this.lifetime.advance():this.lifetime.capture();if(newSession){this.resultHoldIntent=null;this.sendingResultHold=false;}this.emit({busy:true,error:null});try{await task(generation);}catch(error){if(this.lifetime.current(generation))this.emit({error:error instanceof Error?error.message:'connection_error',status:'disconnected'});}finally{if(this.lifetime.current(generation)){this.emit({busy:false});void this.flushResultHold();}}}
   async create(name:string,target:number,mode:'points'|'wins',invitation?:{avatar:string;turnTimer?:boolean;autoNextRound?:boolean;quickActions?:boolean;customAvatars?:boolean;avatarPhoto?:string}){await this.run(async generation=>{
     const token=await this.credential();this.lifetime.assert(generation);this.emit({view:null});

@@ -351,12 +351,14 @@
 <link rel="stylesheet" href="/landing/watch-dials.css" />
 <link rel="stylesheet" href="/landing/watch-toolbar.css" />
 <link rel="stylesheet" href="/landing/brand-lockup.css" />
+<link rel="stylesheet" href="/landing/site-chrome.css" />
+<link rel="stylesheet" href="/landing/gold-finish.css" />
 </head>
 <body>
   <header class="nav" id="site-header">
     <div class="wrap nav-inner">
       <a class="brand" href="/" aria-label="Domino Social Club home"><img src="/landing/logo-circle.svg" alt=""/><span>DOMINO<small>SOCIAL CLUB</small></span></a>
-      <nav class="landing-nav" aria-label="Main navigation"><a href="#score">Score</a><a href="#experience-title">Live sharing</a><a href="#screens">Screens</a></nav>
+      <nav class="landing-nav" aria-label="Main navigation"><a href="#score">Score</a><a href="#experience-title">Live sharing</a><a href="#screens">Screens</a><a href="/privacy/">Privacy</a><a href="/legal/">Legal</a><a href="/contact/">Contact</a></nav>
       <div class="header-right"><div class="site-lang-toggle" role="group" aria-label="Website language"><button type="button" data-site-lang="en" aria-pressed="true">EN</button><button type="button" data-site-lang="es" aria-pressed="false">ES</button></div><button class="header-follow" type="button" data-follow-open>Follow a game <span aria-hidden="true">↗</span></button></div>
     </div>
   </header>
@@ -383,7 +385,7 @@
     </section>
     <div class="closing-line wrap"><span class="status-dot"></span><span>Good company. Great games. Every point together.</span><button type="button" data-follow-open>Take your seat <span aria-hidden="true">↗</span></button></div>
   </main>
-  <footer id="site-footer"><div class="wrap foot"><span>© 2026 YHT · Domino Social Club</span><div class="foot-links"><a href="/privacy/">Privacy</a><a href="/legal/">Legal</a><a href="mailto:Yunierht@yahoo.com">Contact</a></div></div></footer>
+  <footer id="site-footer"><div class="wrap foot"><span>© 2026 YHT · Domino Social Club</span><div class="foot-links"><a href="/privacy/">Privacy</a><a href="/legal/">Legal</a><a href="/contact/">Contact</a></div></div></footer>
 
   <main class="live-page" id="live-page" hidden>
     <div class="watch-shell">
@@ -401,8 +403,8 @@
         <div class="live-meta"><span class="live-dot" id="live-dot"></span><span id="live-status">LIVE</span><span aria-hidden="true">·</span><span id="live-code"></span></div>
         <div class="winner-celebration" id="winner-celebration" role="status" hidden><span class="winner-cup" aria-hidden="true">🏆</span><span><span class="winner-kicker" id="winner-kicker">Winner</span><span class="winner-name" id="winner-name"></span></span></div>
         <div class="watch-overview"><div class="watch-current"><div class="score-grid">
-          <section class="team-card" id="team-a-card"><div class="watch-team-identity"><div class="team-name" id="team-a-name"></div><div class="team-players" id="team-a-players"></div></div><div class="team-score" id="team-a-score">0</div><div class="team-needed" id="team-a-needed"></div><ol class="team-history" id="team-a-rounds" aria-label="Team A scoring rounds"></ol></section>
-          <section class="team-card" id="team-b-card"><div class="watch-team-identity"><div class="team-name" id="team-b-name"></div><div class="team-players" id="team-b-players"></div></div><div class="team-score" id="team-b-score">0</div><div class="team-needed" id="team-b-needed"></div><ol class="team-history" id="team-b-rounds" aria-label="Team B scoring rounds"></ol></section>
+          <section class="team-card" id="team-a-card"><div class="watch-team-record" id="team-a-record"></div><div class="watch-team-identity"><div class="team-name" id="team-a-name"></div><div class="team-players" id="team-a-players"></div></div><div class="team-score" id="team-a-score">0</div><div class="team-needed" id="team-a-needed"></div><ol class="team-history" id="team-a-rounds" aria-label="Team A scoring rounds"></ol></section>
+          <section class="team-card" id="team-b-card"><div class="watch-team-record" id="team-b-record"></div><div class="watch-team-identity"><div class="team-name" id="team-b-name"></div><div class="team-players" id="team-b-players"></div></div><div class="team-score" id="team-b-score">0</div><div class="team-needed" id="team-b-needed"></div><ol class="team-history" id="team-b-rounds" aria-label="Team B scoring rounds"></ol></section>
         </div>
         <section class="watch-share" aria-labelledby="watch-share-title">
           <div class="watch-qr"><canvas id="watch-qr" width="176" height="176" role="img" aria-label="QR code to follow this game on the Domino Social Club website"></canvas></div>
@@ -722,6 +724,21 @@
         if (game.finishedAt == null || !game.winnerTeamId) return null;
         return (game.teams || []).find(function (team) { return team.id === game.winnerTeamId; }) || null;
       }
+/** Completed-match totals use the same normalized team-name identity as the leaderboard. */
+
+
+function trackingTeamRecord(matches                               ,teamName       )                {
+ const key=teamName.trim().toLowerCase(),record={wins:0,losses:0};
+ const unique=new Map(matches.map(match=>[match.id,match]));
+ for(const match of unique.values()){
+  if(match.finishedAt==null||!match.winnerTeamId||!match.teams.some(team=>team.id===match.winnerTeamId))continue;
+  const team=match.teams.find(team=>team.name.trim().toLowerCase()===key);
+  if(!team)continue;
+  if(team.id===match.winnerTeamId)record.wins++;else record.losses++;
+ }
+ return record;
+}
+
 // Injected inside the existing viewer closure: reuse its data helpers and history reader.
 var watchHistoryState = {key:null,records:[],status:'idle',stop:null,epoch:0,open:false};
 function toggleWatchHistory() {
@@ -733,7 +750,7 @@ function toggleWatchHistory() {
   if(state.open) syncWatchHistory();
   else {
     if(panel.contains(document.activeElement)) button.focus({preventScroll:true});
-    stopWatchHistorySubscription();
+    // Keep the same archive subscription for the visible card totals.
   }
 }
 function stopWatchHistorySubscription() {
@@ -745,6 +762,7 @@ function stopWatchHistorySubscription() {
   watchHistoryState.status = 'idle';
 }
 function renderWatchHistory() {
+  renderWatchTeamRecords();
   var es = watchLang === 'es', state = watchHistoryState;
   var list = document.getElementById('watch-results');
   var status = document.getElementById('watch-results-status');
@@ -770,7 +788,7 @@ function renderWatchHistory() {
 }
 function syncWatchHistory() {
   var state = watchHistoryState, key = historySpaceForLiveGame();
-  if (!state.open) return;
+
   if (state.key === key) {renderWatchHistory();return;}
   stopWatchHistorySubscription();
   state.key = key;
@@ -790,6 +808,16 @@ function syncWatchHistory() {
       state.stop = typeof stop === 'function' ? stop : null;
     }).catch(failed);
   } catch (_) {failed();}
+}
+
+function renderWatchTeamRecords(){
+ var state=watchHistoryState,known=state.status==='ready',teams=currentGame&&currentGame.teams||[],es=watchLang==='es';
+ ['a','b'].forEach(function(key,index){
+  var node=document.getElementById('team-'+key+'-record');if(!node)return;
+  var record=known&&teams[index]?trackingTeamRecord(state.records,teams[index].name):null;
+  node.innerHTML='<span>'+(es?'Ganadas: ':'Wins: ')+'<b>'+(record?record.wins:'—')+'</b></span><span>'+(es?'Perdidas: ':'Losses: ')+'<b>'+(record?record.losses:'—')+'</b></span>';
+  node.setAttribute('aria-label',record?(es?'Partidas terminadas':'Completed matches'):(es?'Totales del historial no disponibles':'History totals unavailable'));
+ });
 }
 
 // Web SVG adaptation of TrackingCounter's classic dial, using the viewer's score model.
@@ -1043,6 +1071,7 @@ function renderWatchDials(game) {
 
       window.addEventListener("load", function () {
         var params=new URLSearchParams(location.search);
+        if(params.get("follow")==="1"){dialog.showModal();codeInput.focus();}
         var linkedHistory=parseHistoryKey(params.get("history") || "");
         var hashCode=location.hash.match(/^#watch-([A-Z0-9]{4,6})$/i);
         var linkedCode=(params.get("watch") || (hashCode ? hashCode[1] : "")).toUpperCase();

@@ -2,6 +2,7 @@ import {cp,mkdir,readFile,readdir,rm,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import './build-preview.mjs';
+import {buildSiteChrome} from './build-site-chrome.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const preview=path.join(root,'.local/web-landing-preview/site');
@@ -24,6 +25,7 @@ replaceOnce(/,"DESIGN PREVIEW":"VISTA PREVIA"/,'','design review translation');
 // Replace all localhost fixture routing with genuine shared-link entry only.
 replaceOnce(/      function showLocalHistoryPreview\(fromWatch\) \{[\s\S]*?(?=    \}\)\(\);)/,`      window.addEventListener("load", function () {
         var params=new URLSearchParams(location.search);
+        if(params.get("follow")==="1"){dialog.showModal();codeInput.focus();}
         var linkedHistory=parseHistoryKey(params.get("history") || "");
         var hashCode=location.hash.match(/^#watch-([A-Z0-9]{4,6})$/i);
         var linkedCode=(params.get("watch") || (hashCode ? hashCode[1] : "")).toUpperCase();
@@ -54,7 +56,8 @@ for(const name of ['landing.css','watch-history.css']){
  await writeFile(target,css);
 }
 // Deliberate allowlist: never deploy project continuity, tests, templates or demos.
-for(const name of ['index.html','live.js','img','sounds','join','privacy','legal','landing'])await cp(path.join(root,'docs',name),path.join(output,name),{recursive:true});
+await buildSiteChrome(root);
+for(const name of ['index.html','live.js','img','sounds','join','privacy','legal','contact','landing'])await cp(path.join(root,'docs',name),path.join(output,name),{recursive:true});
 async function inventory(dir,prefix=''){
  const result=[];
  for(const entry of await readdir(dir,{withFileTypes:true})){

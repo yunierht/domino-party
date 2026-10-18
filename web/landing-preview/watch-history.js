@@ -10,7 +10,7 @@ function toggleWatchHistory() {
   if(state.open) syncWatchHistory();
   else {
     if(panel.contains(document.activeElement)) button.focus({preventScroll:true});
-    stopWatchHistorySubscription();
+    // Keep the same archive subscription for the visible card totals.
   }
 }
 function stopWatchHistorySubscription() {
@@ -22,6 +22,7 @@ function stopWatchHistorySubscription() {
   watchHistoryState.status = 'idle';
 }
 function renderWatchHistory() {
+  renderWatchTeamRecords();
   var es = watchLang === 'es', state = watchHistoryState;
   var list = document.getElementById('watch-results');
   var status = document.getElementById('watch-results-status');
@@ -47,7 +48,7 @@ function renderWatchHistory() {
 }
 function syncWatchHistory() {
   var state = watchHistoryState, key = historySpaceForLiveGame();
-  if (!state.open) return;
+
   if (watchHistoryFixture) {
     state.records = watchHistoryFixture;
     state.status = 'ready';
@@ -74,4 +75,14 @@ function syncWatchHistory() {
       state.stop = typeof stop === 'function' ? stop : null;
     }).catch(failed);
   } catch (_) {failed();}
+}
+
+function renderWatchTeamRecords(){
+ var state=watchHistoryState,known=state.status==='ready',teams=currentGame&&currentGame.teams||[],es=watchLang==='es';
+ ['a','b'].forEach(function(key,index){
+  var node=document.getElementById('team-'+key+'-record');if(!node)return;
+  var record=known&&teams[index]?trackingTeamRecord(state.records,teams[index].name):null;
+  node.innerHTML='<span>'+(es?'Ganadas: ':'Wins: ')+'<b>'+(record?record.wins:'—')+'</b></span><span>'+(es?'Perdidas: ':'Losses: ')+'<b>'+(record?record.losses:'—')+'</b></span>';
+  node.setAttribute('aria-label',record?(es?'Partidas terminadas':'Completed matches'):(es?'Totales del historial no disponibles':'History totals unavailable'));
+ });
 }

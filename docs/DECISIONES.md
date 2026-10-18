@@ -1343,3 +1343,49 @@ Fuente: autorización humana explícita transmitida por chat coordinador `01a145
 Preparación: promover HTML/CSS/JS revisados, conservar recursos y lector real, retirar TODO fixture/ramas de preview del paquete público y excluir documentos internos mediante allowlist. Servicio real comprobado como Worker `domino-party` con dominio personalizado existente; despliegue directo no necesita push. Registrar resultado, versión previa y límites de validación en CONTEXTO. Sesión autenticada local disponible; no pedir ni guardar tokens en chat/repositorio.
 
 Resultado de la autorización web: candidato publicado16Oct21:31UTC en Worker existente, versión bff6e9b5-2dcb-4295-bb6f-49728e3f2c13 al100%, commit0adc63a, sin push ni cambio de triggers/DNS. Validación live de portada,25assets y lectura de marcador/historial auténticos en CONTEXTO; límites físicos allí. Android/backend/juegos permanecen fuera de alcance. Cualquier cambio funcional posterior requiere su petición/autorización propia.
+
+### 2026-10-17 — Restaurar enlaces header, verde común y formulario Contact
+
+Fuente: instrucciones humanas directas transmitidas por chat01a14c38-0432-7163-9c22-4d9d25f177a1. Dirección final sustituye alcance parcial inicial: Privacy/Legal/Contact arriba Y abajo; fondo verde con degradado exacto de portada en páginas públicas; crear Contact real con nombre/email/mensaje y respuesta estándar solo tras aceptación del proveedor. Destino escrito confirmado yunierht@yahoo.com; no inferir dirección del audio. Contact en navegación pasa de mailto a /contact/, conserva correo en textos legales. No reescribir políticas ni temas/tarjetas del marcador ni app/backendjuegos.
+
+Autorización posterior permite PUBLICAR esta web cuando esté lista y enviar UN mensaje sintético al dueño para verificar; no autoriza commit/push ni nuevos servicios de pago/DNS/secretos por inferencia. Implementación local y28assets preparados, pruebas/dryrun pasan; enviar/publicar como operativo queda pendiente de verificar infraestructuraEmailService: CLI devuelve Unauthorized2036, remitente/bindings disponibles desconocidos. Contact por defecto desactivado y sin falsa confirmación; no confundir los dobles con entrega real. No se han enviado correos ni publicado esta revisión. Detalles/próximo paso en CONTEXTO y web/contact/README.md.
+
+Precisión posterior17Oct: humano pide ver cambios live; instrucción coordinada autoriza publicar nav/fondos y Contact de revisión aun sin correo activo, con estado disabled explícito y alternativa abre-cliente-correo a direcciónconfirmada. Sustituye bloqueo de publicación del paquete entero; NO activa envíos ni declara formulario operativo. Implementado/publicado en fafda745-18ff-465b-85a6-9ff97b5e2390 al100%, evidencia/pendienteEmailService en CONTEXTO. Sin commit/push, correos reales, DNS o nuevos recursos de correo.
+
+### 2026-10-17 — Header común y acabado dorado web
+
+Fuente humana transmitida por coordinador01a14c38-0432-7163-9c22-4d9d25f177a1: usar marca círculo+letrero, estructura de barra y ENES de HOMEPAGE en páginaspúblicas, corregir Contact y mantener destino/marcaactiva. Todos botonesamarillos con acabado3D/luz similaral aprobadoapp; solo lectura de estilosapp para derivar visual, no editarla. Preservar geometría/tacto/foco/disabled/reducedmotion, legaltexto y protocoloJoin. Usuario pide otros agentesrevisar; coordinador ya proporciona UN revisorvisual, no crear más ni compartir su browser. Publicación web autorizada siguevigente cuando completadaspruebas y reinspección desktop/móvil; usuario prefiere revisión final completa. Sin commit/push ni activarcorreo/infra/DNS/Android. Implementación y evidenciacandidato en CONTEXTO; desplieguefinal se registrará tras auditoría.
+
+Resultado website17Oct: auditoría visual del agenteexistente pasó candidato5páginasdesktop/móvil (marca/nav/ENES inclJoin/gold/disabled/foco/Followvacío); corregida herencia marginimgJoin, detalledecorativode2pxportada no bloqueante. Publicado2e98b80f-38ab-4e1d-b5b9-bf541fb4278a al100% con31assets validadosHTTPS y correoOFF; rollbackfafda745… conservado. Sin commit/push/Emailinfra ni APPANDROID. Evidencias y límiteshover/overflow/smoke en CONTEXTO.
+
+
+### 2026-10-17 — Email Routing gratuito y diálogo de confirmación Contact
+
+Fuente: autorización humana explícita en esta conversación «Sí, activar Email Routing gratuito», tras revisión de3MX+2TXT Cloudflare; posteriormente solicita envío directo y confirmación popup en vez de éxito bajo textarea. Estado implementado/publicado. Destino Yahoo del propietario verificado, envío directo mediante binding restringido y un único sintético aceptado; sin contratar plan. La confirmación representa aceptación del proveedor, no lectura/entrega confirmada en bandeja. Diálogo nativo EN/ES, éxito solo tras aceptación; errores conservan texto. Alternativa de aplicación de correo se oculta cuando formulario operativo y reaparece ante indisponibilidad. Sustituye estado Contact desactivado anotado antes; conserva historia. Publicación e58f6787-3632-488d-b279-157111168d49, evidencias y rollback en CONTEXTO. Sin nuevo correo sintético, commit/push, app ni backendjuegos.
+
+
+### 2026-10-17 — Enlace nuevo omite cierre de sesión anterior
+
+Fuente humana directa por voz en este chat. Autoriza corrección localizada de app Online: al confirmar invitación nueva no mostrar aviso perteneciente a sesión anterior ya cerrada; abrir nueva. Implementación local identifica código guardado, omite solo sesión terminal diferente, acepta nueva una vez tras consentimiento y conserva salas vigentes/errores de red y error auténtico de invitación solicitada. No amplía a reglas/audio/apariencia del juego; no autoriza commit/push, APK, tiendas ni backend. Estado: código y56pruebas aprobados en worktree website por petición nueva de app; todavía no integrado en candidato instalado ni verificado físicamente. Detalle y diff aislado en CONTEXTO.
+
+
+### 2026-10-17 — Entrega de pruebas en ambas plataformas y visor sin barra duplicada
+
+Fuente humana por voz: autoriza nuevos binarios con fix de invitación para GooglePlayinterno y AppleTestFlight, aviso único al correo confirmado al quedar listos y seguimiento silencioso. Preparación aislada desde candidato864b actual, sin descartar/mezcIar diffs del website ni originales. No AppStore/Playproducción, Git o backend por esta ampliación. Estado/IDs y evidencias en CONTEXTO/worktree aislado.
+
+Petición visual web posterior: quitar header general que reaparecía en visor y sustituir negro por verde/degradado común. Corrección final del usuario CONSERVA logo del visor; sustituye interpretación intermedia de quitarlo. Mantener Volver/Historial/EN/ES/Sonido y datos/marcadores. Implementado/publicado7d398435… con validación navegador/HTTP en CONTEXTO; no afecta entregas móviles.
+
+
+Resultado de autorización de prueba17Oct: Android34 interno e iOS16 TestFlight disponibles, UN aviso solicitado enviadoSENT ymonitorpreparaciónPAUSED por completado; evidencia/localizacióncandidato en CONTEXTO. Sinproducciónpública/commit/push/backend ni cambiosencheckoutsoriginales. Pendientepruebafísicahumana delnuevocasodeinvitación.
+
+
+### 2026-10-18 — Totales visibles en tarjetas y accesos seguros del dominio
+
+Humano aprueba mockupconlabels y númerosjuntos mediante dospuntos, doslíneasarribaizquierda, sinabrirHistory; Android+iOS+web. Autoriza implementar/publicar SOLOcomponentes yrespetaráreasprobadas; storesinternosPlay/TestFlight existentes yUNemailfinal a cuenta yaindicada. Appfuentes/candidato aislados eninvitation-device-release. Websitepublicadoc9a29af0…segúnCONTEXTO; sincommit/push/producciónstores.
+
+Humano autoriza configurarredirecciónHTTPS enCloudflare yreporta wwwnoabre. AplicadoAlwaysUseHTTPS+CNAMEwwwproxied yredirectexacto301mantenerquery aapexseguro. ConservaDNSdecorreo/planes/roles/servicios. DNSpublico+TLSverificados; negcachelocalnoeliminado. Detalles enCONTEXTO.
+
+
+### 2026-10-18 — Punto de retorno antes de amigos
+
+Humano autoriza check-in local y marca de todo candidato actual antes de implementar módulo de amigos aislado. Este checkout respalda website y cambios previos propios; nuevo módulo se desarrolla solo en invitation-device-release. Appcheckpoint e1d712f, tag checkpoint/mobile-before-friends-20261018; no push ni nueva publicación autorizados por este check-in. Reconexión confirmada por usuario en dispositivos sin versión exacta; nueva funcionalidad aún no implementada.

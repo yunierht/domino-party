@@ -29,9 +29,8 @@
       margin: 0;
       color: var(--text);
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background:
-        linear-gradient(180deg, rgba(10, 11, 10, 0.72), rgba(10, 11, 10, 0.96)),
-        repeating-linear-gradient(45deg, #101210 0 10px, #0b0c0b 10px 20px);
+      background: #0b100e;
+      background-image: radial-gradient(ellipse at 80% 15%, #18302588, transparent 50%);
       line-height: 1.68;
     }
     a { color: var(--gold); }
@@ -77,16 +76,16 @@
       main { padding: 20px; }
     }
   </style>
-</head>
-<body>
+<link rel="stylesheet" href="/landing/brand-lockup.css"><link rel="stylesheet" href="/landing/site-chrome.css"><link rel="stylesheet" href="/landing/gold-finish.css"></head>
+<body class="site-document">
+  <header class="nav" id="site-header">
+    <div class="wrap nav-inner">
+      <a class="brand" href="/" aria-label="Domino Social Club home"><img src="/landing/logo-circle.svg" alt=""/><span>DOMINO<small>SOCIAL CLUB</small></span></a>
+      <nav class="landing-nav" aria-label="Main navigation"><a href="/#score">Score</a><a href="/#experience-title">Live sharing</a><a href="/#screens">Screens</a><a href="/privacy/" aria-current="page">Privacy</a><a href="/legal/">Legal</a><a href="/contact/">Contact</a></nav>
+      <div class="header-right"><div class="site-lang-toggle" role="group" aria-label="Website language"><button type="button" data-site-lang="en" aria-pressed="true">EN</button><button type="button" data-site-lang="es" aria-pressed="false">ES</button></div><a class="header-follow" href="/?follow=1">Follow a game <span aria-hidden="true">↗</span></a></div>
+    </div>
+  </header>
   <div class="wrap">
-    <header>
-      <a class="brand" href="/">
-        <img src="../img/icon.png?v=social-club" alt="" />
-        <span>Domino Social Club</span>
-      </a>
-      <div class="header-actions"><div class="lang" role="group" aria-label="Document language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="es" aria-pressed="false">ES</button></div><a class="legal-link" href="/legal/" id="legal-link">Legal</a><a class="back" href="/" id="back-link">Back to site</a></div>
-    </header>
     <main id="privacy-content">
       <h1>Privacy Policy</h1>
       <p class="effective"><strong>Effective date:</strong> August 23, 2026</p>
@@ -118,7 +117,9 @@
       <p><strong><a href="mailto:Yunierht@yahoo.com">Yunierht@yahoo.com</a></strong><br />Developer: YHT</p>
     </main>
   </div>
-  <script>
+
+<footer id="site-footer"><div class="wrap foot"><span>© 2026 YHT · Domino Social Club</span><div class="foot-links"><a href="/privacy/">Privacy</a><a href="/legal/">Legal</a><a href="/contact/">Contact</a></div></div></footer>
+<script>
     const content=document.getElementById('privacy-content');const en=content.innerHTML;const es=`
       <h1>Política de privacidad</h1><p class="effective"><strong>Fecha de vigencia:</strong> 23 de agosto de 2026</p>
       <div class="notice"><strong>Versión simple:</strong> Domino Social Club no tiene cuentas de usuario, anuncios ni seguimiento. Tus datos de puntuación permanecen en tu dispositivo salvo que decidas compartir una partida en vivo.</div>
@@ -135,8 +136,8 @@
       <h2>7. Tus derechos</h2><p>Según tu lugar de residencia, puedes tener derechos de acceso, corrección o eliminación. Como no exigimos una cuenta, controlas directamente la mayoría de los datos del dispositivo. Para datos compartidos o anónimos, contáctanos.</p>
       <h2>8. Cambios</h2><p>Podemos actualizar esta política. Revisaremos la fecha de vigencia y, para cambios importantes, daremos aviso en la Aplicación o su ficha de tienda.</p>
       <h2>9. Contacto</h2><p>Si tienes preguntas sobre esta política o tus datos, contacta:</p><p><strong><a href="mailto:Yunierht@yahoo.com">Yunierht@yahoo.com</a></strong><br>Desarrollador: YHT</p>`;
-    function setLang(lang){document.documentElement.lang=lang;content.innerHTML=lang==='es'?es:en;document.getElementById('back-link').textContent=lang==='es'?'Volver al sitio':'Back to site';document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===lang)));localStorage.setItem('domino-watch-lang',lang)}
+    function setLang(lang){document.documentElement.lang=lang;content.innerHTML=lang==='es'?es:en;document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===lang)));localStorage.setItem('domino-watch-lang',lang)}
     document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang)));setLang(localStorage.getItem('domino-watch-lang')==='es'?'es':'en');
   </script>
-</body>
+<script src="/landing/site-chrome.js"></script></body>
 </html>

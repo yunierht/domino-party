@@ -5,16 +5,17 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),React=require('react'),ts=require('typescript'),{create,act}=require('react-test-renderer');
 globalThis.IS_REACT_ACT_ENVIRONMENT=true;
 import {sharePayload} from './invitationLink.ts';
-async function mount(savedView=null,overrides={}){
+async function mount(savedView=null,overrides={},restored={}){
   const calls=[],listeners=new Set();let instance,tick,backHandler;
   class Client{
     state={view:savedView,busy:false,status:savedView?'connected':'idle',error:null,canResume:!!savedView};
     constructor(){instance=this;} subscribe(fn){listeners.add(fn);fn(this.state);return()=>listeners.delete(fn);}
     emit(patch){this.state={...this.state,...patch};for(const fn of listeners)fn(this.state);}
-    async load(){calls.push(['load']);}async resume(){calls.push(['resume']);}async refresh(){calls.push(['refresh']);}
-    async disconnect(){calls.push(['disconnect']);}async forget(){calls.push(['forget']);this.emit({view:null,canResume:false,error:null,status:'idle'});}
+    get savedRoomCode(){return savedView?.code??restored.code;}
+    async load(){calls.push(['load']);if(restored.code)this.emit({canResume:true});}async resume(){calls.push(['resume']);if(restored.wait)await restored.wait;if(restored.patch)this.emit(restored.patch);}async refresh(){calls.push(['refresh']);}
+    async disconnect(){calls.push(['disconnect']);}async forget(){calls.push(['forget']);if(restored.forgetError)throw Error('storage_error');this.emit({view:null,canResume:false,error:null,status:'idle'});}
     setResultHeld(held){calls.push(['held',held]);}
-    async create(...args){calls.push(['create',...args]);this.emit({view:{phase:'waiting',code:'ABCDEF0123',names:{human:args[0],computer:null},seat:'human'},canResume:true});}async join(...args){calls.push(['join',...args]);}async command(action){calls.push(['command',action]);}
+    async create(...args){calls.push(['create',...args]);this.emit({view:{phase:'waiting',code:'ABCDEF0123',names:{human:args[0],computer:null},seat:'human'},canResume:true});}async join(...args){calls.push(['join',...args]);if(restored.joinError)this.emit({canResume:true,error:restored.joinError,status:'disconnected'});}async command(action){calls.push(['command',action]);}
   }
   const rn={View:'View',Text:'Text',Image:'Image',Modal:'Modal',Pressable:'Pressable',ScrollView:'ScrollView',TextInput:'TextInput',Platform:{OS:'web'},Share:{},
     AppState:{currentState:'active',addEventListener:()=>({remove(){}})},BackHandler:{addEventListener:(_event,handler)=>{backHandler=handler;return{remove(){}};}}};
@@ -181,3 +182,40 @@ test('result release reaches the intent queue while gameplay commands are busy',
 test('share-only entry returns to the local app after the chooser without forgetting its invitation',async()=>{const saved={phase:'waiting',code:'ABCDEF0123',seat:'human',names:{human:'Juni',computer:null}};const f=await mount(saved,{inviteOnly:true,entry:'invite'});try{const share=f.tree.root.findByType('InvitationShareOptions');assert.equal(typeof share.props.onDone,'function');await act(()=>share.props.onDone());assert.equal(f.calls.filter(c=>c[0]==='back').length,1);assert.equal(f.calls.filter(c=>c[0]==='forget').length,0);assert.equal(f.instance.state.view,saved);}finally{await f.close();}});
 
 for(const error of ['room_closed','room_missing'])test(`unavailable ${error} offers the existing Not now exit directly without joining or discarding local play`,async()=>{const f=await mount();try{const originalExit=f.tree.root.findByProps({testID:'online-not-now'}).props.onPress;await act(()=>f.instance.emit({view:null,error,status:'disconnected',canResume:true}));assert.equal(f.tree.root.findAllByProps({testID:'online-replace-invite'}).length,1);const exit=f.tree.root.findByProps({testID:'online-closed-not-now'});assert.equal(exit.props.onPress,originalExit);await act(()=>exit.props.onPress());assert.equal(f.calls.filter(c=>c[0]==='back').length,1);assert.equal(f.calls.filter(c=>['join','create','forget'].includes(c[0])).length,0);await f.visible(false);assert.ok(f.calls.some(c=>c[0]==='disconnect'));}finally{await f.close();}});
+
+for(const missing of [false,true])test(`confirmed new link bypasses ${missing?'missing':'closed'} old room and joins only the new invitation`,async()=>{
+ const old='ABCDEF0123',next='123456ABCD';
+ const h=await mount(missing?null:{phase:'closed',code:old},{invitationCode:next,autoAcceptInvitation:true},{code:old,...(missing?{patch:{error:'room_missing',status:'disconnected'}}:{})});
+ try{const join=h.calls.findIndex(c=>c[0]==='join');assert.ok(join>=0);assert.equal(h.calls[join-1][0],'forget');assert.equal(h.calls[join][2],next);assert.equal(h.calls.filter(c=>c[0]==='join').length,1);assert.equal(h.calls.some(c=>c[0]==='create'),false);assert.equal(h.tree.root.findAllByProps({testID:'online-replace-invite'}).length,0);}finally{await h.close();}
+});
+test('confirmed fresh invitation joins directly with selected identity and consent',async()=>{
+ const h=await mount(null,{invitationCode:'123456ABCD',autoAcceptInvitation:true,initialAvatar:'sofia'});
+ try{assert.deepEqual(h.calls.find(c=>c[0]==='join'),['join','Juni','123456ABCD',{avatar:'sofia',acceptInvitation:true}]);assert.equal(h.calls.some(c=>c[0]==='forget'||c[0]==='create'),false);}finally{await h.close();}
+});
+for(const phase of ['playing','paused','waiting'])test(`confirmed link preserves a different ${phase} room until explicit acceptance`,async()=>{
+ const h=await mount({phase,code:'ABCDEF0123'},{invitationCode:'123456ABCD',autoAcceptInvitation:true});
+ try{assert.equal(h.calls.some(c=>['join','forget','create'].includes(c[0])),false);assert.equal(h.tree.root.findByProps({testID:'online-code'}).props.value,'123456ABCD');}finally{await h.close();}
+});
+test('closed invitation itself still shows its real failure instead of auto-retrying',async()=>{
+ const h=await mount({phase:'closed',code:'123456ABCD'},{invitationCode:'123456ABCD',autoAcceptInvitation:true});
+ try{assert.equal(h.calls.some(c=>['join','forget','create'].includes(c[0])),false);assert.equal(h.tree.root.findAllByProps({testID:'online-replace-invite'}).length,1);}finally{await h.close();}
+});
+test('uncertain old connection is retained rather than discarded for the new link',async()=>{
+ const h=await mount(null,{invitationCode:'123456ABCD',autoAcceptInvitation:true},{code:'ABCDEF0123',patch:{error:'connection_error',status:'disconnected'}});
+ try{assert.equal(h.calls.some(c=>['join','forget','create'].includes(c[0])),false);assert.equal(h.instance.state.canResume,true);}finally{await h.close();}
+});
+
+test('old closed notice stays hidden while a confirmed new link is being resolved',async()=>{
+ let finish;const wait=new Promise(resolve=>finish=resolve);
+ const h=await mount({phase:'closed',code:'ABCDEF0123'},{invitationCode:'123456ABCD',autoAcceptInvitation:true},{wait});
+ try{assert.equal(h.tree.root.findAllByProps({testID:'online-replace-invite'}).length,0);assert.ok(h.tree.root.findAllByType('Text').some(n=>String(n.props.children).includes('Conectando con la invitación')));await act(async()=>finish());assert.equal(h.calls.filter(c=>c[0]==='join').length,1);}finally{await h.close();}
+});
+test('failure of the new invitation is shown without repeated acceptance or clearing it',async()=>{
+ const h=await mount({phase:'closed',code:'ABCDEF0123'},{invitationCode:'123456ABCD',autoAcceptInvitation:true},{joinError:'room_missing'});
+ try{assert.equal(h.tree.root.findAllByProps({testID:'online-replace-invite'}).length,1);for(let n=0;n<3;n++)await act(()=>h.tick());assert.equal(h.calls.filter(c=>c[0]==='join').length,1);assert.equal(h.calls.filter(c=>c[0]==='forget').length,1);}finally{await h.close();}
+});
+
+test('failure to clear the closed saved session never joins the new link or rejects unhandled',async()=>{
+ const h=await mount({phase:'closed',code:'ABCDEF0123'},{invitationCode:'123456ABCD',autoAcceptInvitation:true},{forgetError:true});
+ try{assert.equal(h.calls.some(c=>c[0]==='join'),false);assert.ok(h.tree.root.findAllByType('Text').some(n=>String(n.props.children).includes('No se pudo preparar la invitación')));}finally{await h.close();}
+});

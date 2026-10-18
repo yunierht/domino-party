@@ -1,3 +1,4 @@
+import {stripTypeScriptTypes} from 'node:module';
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,7 +9,7 @@ const output = path.join(root, '.local/web-landing-preview/site');
 await mkdir(output, { recursive: true });
 await cp(path.join(root, 'docs'), output, { recursive: true });
 await mkdir(path.join(output, 'landing'), { recursive: true });
-for (const name of ['landing.css', 'watch-history.css', 'watch-dials.css', 'watch-toolbar.css', 'brand-lockup.css']) {
+for (const name of ['landing.css', 'watch-history.css', 'watch-dials.css', 'watch-toolbar.css', 'brand-lockup.css','site-chrome.css','gold-finish.css']) {
   await cp(path.join(source, name), path.join(output, 'landing', name));
 }
 // SVG image contexts cannot fetch nested external images. Embed the unchanged PNG bytes.
@@ -31,6 +32,7 @@ page = page.replace('</head>', '<link rel="stylesheet" href="/landing/watch-hist
 page = page.replace('</head>', '<link rel="stylesheet" href="/landing/watch-dials.css" />\n</head>');
 page = page.replace('</head>', '<link rel="stylesheet" href="/landing/watch-toolbar.css" />\n</head>');
 page = page.replace('</head>', '<link rel="stylesheet" href="/landing/brand-lockup.css" />\n</head>');
+page = page.replace('</head>', '<link rel="stylesheet" href="/landing/site-chrome.css" />\n<link rel="stylesheet" href="/landing/gold-finish.css" />\n</head>');
 page = page.replace('>⌁ <span id="watch-history-text">','><span id="watch-history-text">');
 const speakerBase='<path d="M11 5 6 9H3v6h3l5 4V5Z"/>';
 const speakerOn='<svg viewBox="0 0 24 24" aria-hidden="true">'+speakerBase+'<path d="M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></svg>';
@@ -40,7 +42,7 @@ page = page.replace('<div class="score-grid">', '<p class="watch-fixture-label" 
 for (const key of ['a','b']) {
   const name = '<div class="team-name" id="team-'+key+'-name"></div>';
   const players = '<div class="team-players" id="team-'+key+'-players"></div>';
-  page = page.replace(players, '').replace(name, '<div class="watch-team-identity">'+name+players+'</div>');
+  page = page.replace(players, '').replace(name, '<div class="watch-team-record" id="team-'+key+'-record"></div><div class="watch-team-identity">'+name+players+'</div>');
 }
 page = page.replace('<p class="live-updated" id="live-updated"></p>', '<p class="live-updated" id="live-updated"></p></div><aside class="watch-results-panel" id="watch-results-panel" tabindex="-1" aria-labelledby="watch-results-title" hidden><h2 id="watch-results-title">Match history</h2><p id="watch-results-status" role="status"></p><div id="watch-results"></div></aside></div>');
 page = page.replace('id="watch-history" aria-label=', 'id="watch-history" aria-expanded="false" aria-controls="watch-results-panel" aria-label=');
@@ -51,9 +53,10 @@ const fixtureStart = original.indexOf('historyRecords = [', original.indexOf('fu
 const fixtureEnd = original.indexOf('];', fixtureStart) + 1;
 if (fixtureStart < 0 || fixtureEnd <= fixtureStart) throw new Error('Existing local history fixture not found.');
 const fixture = original.slice(fixtureStart, fixtureEnd).replace('historyRecords =', 'watchHistoryFixture =') + ';';
+const recordLogic=stripTypeScriptTypes(await readFile(path.join(root,'src/stats/trackingTeamRecord.ts'),'utf8')).replace(/^export /gm,'').replace(/[ \t]+$/gm,'');
 const watchHistory = await readFile(path.join(source, 'watch-history.js'), 'utf8');
 const watchDials = await readFile(path.join(source, 'watch-dials.js'), 'utf8');
-page = page.replace('      function renderGame(game, code) {', 'var watchHistoryFixture = null;\nif ((location.hostname === "127.0.0.1" || location.hostname === "localhost") && new URLSearchParams(location.search).get("previewScore") === "1" && new URLSearchParams(location.search).get("previewResults") === "1") {' + fixture + '}\n' + watchHistory + '\n' + watchDials + '\n      function renderGame(game, code) {');
+page = page.replace('      function renderGame(game, code) {', recordLogic+'\nvar watchHistoryFixture = null;\nif ((location.hostname === "127.0.0.1" || location.hostname === "localhost") && new URLSearchParams(location.search).get("previewScore") === "1" && new URLSearchParams(location.search).get("previewResults") === "1") {' + fixture + '}\n' + watchHistory + '\n' + watchDials + '\n      function renderGame(game, code) {');
 page = page.replace('        board.classList.add("ready");', '        board.classList.add("ready");\n        renderWatchDials(game);\n        syncWatchHistory();');
 page = page.replace('      function showMarketingPage() {', '      function showMarketingPage() {\n        stopWatchHistorySubscription();');
 page = page.replace(/      function showFollowedGameHistory\(\)\{[\s\S]*?(?=      document.querySelectorAll\("\[data-follow-open\]"\))/, '      function showFollowedGameHistory(){toggleWatchHistory();}\n\n');

@@ -17,7 +17,7 @@ import {vault,credential} from './credentialStorage';
 import {sharePayload} from './invitationLink';
 import type {VoiceRequest} from './voiceProtocol';
 
-type Props={initialName:string;initialTarget:number;initialMode:'points'|'wins';initialAvatar?:DominoAvatarId;initialAvatarPhoto?:string|null;entry?:'invite'|'accept';requestId?:number;onBack:()=>void;visible?:boolean;onStarted?:()=>void;invitationCode?:string;inviteOnly?:boolean;manualOnly?:boolean};
+type Props={initialName:string;initialTarget:number;initialMode:'points'|'wins';initialAvatar?:DominoAvatarId;initialAvatarPhoto?:string|null;entry?:'invite'|'accept';requestId?:number;onBack:()=>void;visible?:boolean;onStarted?:()=>void;invitationCode?:string;autoAcceptInvitation?:boolean;inviteOnly?:boolean;manualOnly?:boolean};
 function unavailableRoom(state:ClientState){return state.view?.phase==='closed'||['room_missing','not_found','closed','room_closed'].includes(state.error??'');}
 function Action({id,label,onPress,disabled=false,secondary=false}:{id:string;label:string;onPress:()=>void;disabled?:boolean;secondary?:boolean}){
  return <GoldPressable finish gold={!secondary} testID={id} accessibilityRole="button" accessibilityLabel={label} accessibilityState={{disabled}} disabled={disabled} onPress={onPress}
@@ -27,7 +27,7 @@ function Action({id,label,onPress,disabled=false,secondary=false}:{id:string;lab
 }
 
 /** Own identity and server snapshots only; the retained offline game never crosses this boundary. */
-export function OnlineFriendScreen({initialName,initialTarget,initialMode,initialAvatar='yuni',initialAvatarPhoto=null,entry='accept',requestId=0,onBack,visible=true,onStarted,invitationCode,inviteOnly=false,manualOnly=false}:Props){
+export function OnlineFriendScreen({initialName,initialTarget,initialMode,initialAvatar='yuni',initialAvatarPhoto=null,entry='accept',requestId=0,onBack,visible=true,onStarted,invitationCode,autoAcceptInvitation=false,inviteOnly=false,manualOnly=false}:Props){
  const {lang}=useI18n(),es=lang==='es',tr=(a:string,b:string)=>es?a:b;
  const endpoint=useMemo(()=>{try{return onlineEndpoint(process.env.EXPO_PUBLIC_DOMINO_ONLINE_URL);}catch{return null;}},[]);
  const client=useMemo(()=>endpoint?new OnlineClient(vault,httpTransport(endpoint),credential,endpoint):null,[endpoint]);
@@ -58,7 +58,17 @@ export function OnlineFriendScreen({initialName,initialTarget,initialMode,initia
   if(!client){setLoaded(true);return;}
   let alive=true,active=AppState.currentState!=='background'&&AppState.currentState!=='inactive',loading=true;
   const unsubscribe=client.subscribe(setState);
-  void client.load().then(async()=>{if(alive&&client.state.canResume)await client.resume();}).finally(()=>{loading=false;if(alive)setLoaded(true);});
+  void client.load().then(async()=>{
+   if(!alive)return;
+   if(client.state.canResume)await client.resume();
+   if(!alive||!autoAcceptInvitation||entry!=='accept'||!invitationCode)return;
+   const previous=client.savedRoomCode,current=client.state.view;
+   const same=previous===invitationCode||current?.code===invitationCode||current?.manualCode===invitationCode;
+   // A terminal saved room must not masquerade as failure of the new link.
+   // Keep live/uncertain sessions and failure of the requested room explicit.
+   if(previous&&!same&&unavailableRoom(client.state))await client.forget();
+   if(alive&&!client.state.canResume&&!client.state.error)await client.join(initialName.trim(),invitationCode,{avatar:initialAvatar,...(initialAvatar==='selfie'&&initialAvatarPhoto?{avatarPhoto:initialAvatarPhoto}:{}),acceptInvitation:true});
+  }).catch(()=>{if(alive)setNotice(tr('No se pudo preparar la invitación. Vuelve a intentarlo.','The invitation could not be prepared. Please retry.'));}).finally(()=>{loading=false;if(alive)setLoaded(true);});
   const timer=setInterval(()=>{if(!active||loading||!client.state.canResume||unavailableRoom(client.state)||['rate_limited','manual_code_capacity'].includes(client.state.error??'')||(!visibleRef.current&&!waitingHidden.current))return;if(client.state.status==='disconnected')void client.resume();else void client.refresh();},2000);
   const app=AppState.addEventListener('change',next=>{active=next==='active';if(loading||!client.state.canResume||unavailableRoom(client.state)||['rate_limited','manual_code_capacity'].includes(client.state.error??''))return;if(active){if(visibleRef.current||waitingHidden.current)void client.resume();}else void client.disconnect();});
   const back=BackHandler.addEventListener('hardwareBackPress',()=>{if(!visibleRef.current)return false;backRef.current();return true;});
@@ -138,6 +148,7 @@ export function OnlineFriendScreen({initialName,initialTarget,initialMode,initia
   }
   await client.join(initialName.trim(),code,{avatar:initialAvatar,...(initialAvatar==='selfie'&&initialAvatarPhoto?{avatarPhoto:initialAvatarPhoto}:{}),acceptInvitation:true});
  }
+ if(autoAcceptInvitation&&invitationCode&&!loaded)return <View style={{flex:1,padding:20,backgroundColor:C.background}}><Header title={tr('Aceptar invitación','Accept invitation')} reserveThemeSpace={false} onBackPress={onBack}/><Text accessibilityLiveRegion="polite" style={{color:C.ivory}}>{tr('Conectando con la invitación…','Connecting to the invitation…')}</Text></View>;
  if(manualOnly&&entry==='invite'&&(!v||v.phase==='waiting')&&!unavailableRoom(state))return visible?<CodeInvitationScreen es={es} ready={loaded} onBack={onBack} prepare={prepareInvitation} onCancel={async()=>{if(!client)return false;autoAttempted.current=true;await client.command({type:'leave'});if(client.state.view?.phase!=='closed'||client.state.error)return false;await client.forget();onBack();return true;}}/>:null;
  if(inviteOnly&&!invitationStarted)return visible?<View style={{flex:1,backgroundColor:C.background}}><Header title={tr('Invitar amigo','Invite a friend')} reserveThemeSpace={false} onBackPress={leave}/>{loaded&&<InvitationShareOptions es={es} prepare={prepareInvitation} onDone={()=>{setInvitationStarted(true);onBack();}}/>}</View>:null;
  if(v&&v.phase!=='waiting'&&(!unavailable||v.phase==='closed'&&['left','inactivity_timeout'].includes(v.closeReason??''))&&(!invitationCode||v.code===invitationCode))return visible?<><OnlineDominoTable view={v} enabled={!disabled&&state.status==='connected'} resultControlEnabled={loaded&&state.status==='connected'} es={es} error={error} notice={notice} onShare={()=>{void share();}} voiceRelay={voiceRelay} voiceAvailable={loaded&&state.status==='connected'&&v.phase==='playing'}
