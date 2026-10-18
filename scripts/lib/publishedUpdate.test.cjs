@@ -15,7 +15,7 @@ test('published factory changes packaging only and preserves default test identi
  try{
   process.env.EXPO_PUBLIC_ONLINE_MODE='lan';assert.equal(factory({config:base}),base);
   environment('config/social-club-update.json');const result=factory({config:base});
-  assert.equal(result.android.package,'com.yht.dominoparty');assert.equal(result.android.versionCode,36);assert.equal(result.version,'1.0.14');assert.equal(result.scheme,'dominoparty');
+  assert.equal(result.android.package,'com.yht.dominoparty');assert.equal(result.android.versionCode,42);assert.equal(result.version,'1.0.14');assert.equal(result.scheme,'dominoparty');
   assert.equal(result.extra.eas.projectId,'4ca6648b-ec5a-4b08-b425-519db3c4ebd7');
   assert.deepEqual(result.android.permissions,base.android.permissions);assert.deepEqual(result.plugins,base.plugins);assert.equal(result.orientation,base.orientation);assert.equal(result.icon,base.icon);
   assert.equal(result.ios.infoPlist.NSAppTransportSecurity.NSExceptionDomains,undefined);

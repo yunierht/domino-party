@@ -1428,3 +1428,59 @@ Fuente humana directa: aprueba tarjetas con «Ganadas: 5»/«Perdidas: 2» junto
 ### 2026-10-18 — Checkpoint previo a amigos e implementación aislada autorizados
 
 Fuente humana directa: marcar/check-in todo código actual para poder deshacer la nueva función y después comenzar amigos. Autoriza commit local y marca de retorno de este candidato; no implica push/publicar la nueva función. Módulo independiente: identidad privada automática sin username/password, código público propio de amigo distinto de sala, solicitud/aceptación, lista mutua y pendientes, invitación directa con app abierta y Aceptar/Rechazar; acceso junto a compartir/online. Conservar enlaces/códigos de sala, reglas/audio/otras mesas, sin pushnotifications ni recuperación de cuenta al reinstalar en primera versión. Alta tras apps instaladas, enlace de amigo compartido una vez. Usuario confirma reconexión en dispositivos funcionando, sin versión/roles exactos; no ampliar esa prueba a Ganadas/Perdidas ni nuevo módulo. Website se respalda separado; apps se implementan exclusivamente en invitation-device-release. Backend nuevo solo local hasta autorización específica de despliegue; no migrar salas existentes.
+
+
+### 2026-10-18 — Revisión del flujo de amigos y alcance final Android
+
+Reevaluación solicitada por humano tras seleccionar Sol High: diseño sencillo y suficiente para primera versión; no equivale a validación end-to-end. Instalar/abrir genera identidad privada local y código público de amigo, sin username/password/teléfono/SMS. Ambas apps instaladas; Yuni comparte enlace ESPECÍFICO de amistad, Chuchi lo abre y confirma una sola vez; ambos quedan agregados sin segunda aprobación de Yuni. Separar autorización de amistad de código público de búsqueda: enlace emitido con intención explícita, aceptación auténtica/destinatario, caducidad y reintentos seguros; no aceptar automáticamente por conocer un código.
+
+Misma ventana: lista de amigos con Invitar a jugar, Agregar amigo nuevo y Pendientes. Compartir invitación de partida ofrece Enviar enlace (actual intacto) o Invitar amigo existente. Invitación directa se vincula a la sala de origen; no crear otra si ya hay sala preparada. Aviso en app abierta con nombre/Aceptar/Rechazar, sin notificaciones push en primera versión. Mientras pendiente/rechazada/error conservar CPU. Fuente humana posterior explícita sustituye propuesta de conservar CPU después de conexión: al aceptar ambos y completarse conexión iniciar nueva online y abandonar CPU; nunca trasladar puntos/fichas ni modificar engine. Proteger sala online activa ante invitación simultánea/caducada; cancelación/reintentos no deben cambiar otra sala.
+
+Humano autoriza explícitamente implementar y publicar SIN nueva confirmación Google Play INTERNO, SOLO Android; su uso genérico de App Store no amplía la instrucción reiterada solo Android. Incluye servicio necesario para probar el flujo; mantenerlo separado de backend de salas existentes. Sin push Git ni iOS nueva entrega. Mantener monitor anterior36/18 separado y sin correo duplicado. Código actual checkpoint móvil e1d712f/tag checkpoint/mobile-before-friends-20261018, web f81be2d/tag checkpoint/website-before-friends-20261018; ambos commits locales. Nuevo código aún sin commit: solo src/friends, prototipo reglas4tests pasa; identidad/servidor/UI/integración aún pendientes. No declarar listo para dispositivos por esas pruebas.
+
+WhatsApp: usuario solicita regreso tras enviar; API de compartir no permite forzar retorno ni probar envío real en Android. Conservar estado al volver; no autoabrir otra app ni fingir enviado. Propuesta técnica revisada: módulo src/friends, servicio autónomo y almacenamiento por perfil/relación; integraciones finas App/compartir/sala sin tocar reglas/audio/marcadores/Poker/Blackjack/website. Verificar fallo/timeout/duplicados/caducidad/solicitudes cruzadas y vínculo a misma sala. Perfil se conserva mientras existan datos; recuperación al reinstalar/cambiar teléfono fuera del alcance inicial.
+
+
+Implementación del alcance anterior: servicio Friends autónomo autorizado como necesario para la entrega Android, desplegado sin redeploy/migraciones del servicio de salas. Código inicial anterior conserva ambos tags. CPU se descarta solo al confirmar playing en la misma sala aceptada; pending/rechazo/error la conservan. No push con app cerrada ni retorno forzado desde WhatsApp. Android37 nuevo; iOS18 y website sin cambio para Amigos. Pruebas y límites de navegador/paquete/tienda/dispositivos se documentan separadamente en CONTEXTO; listo local no equivale a disponible para testers.
+
+
+### 2026-10-18 — Amistad automática tras sala y ventana única para ambos juegos
+
+Aprobación humana directa en voz, transmitida por coordinador: la primera aceptación/conexión por enlace de partida crea amistad mutua persistente; posteriores invitaciones directas con app abierta. Aplica a Dominó y Poker Online. Sustituye el requisito anterior de primer enlace exclusivo de amistad; se conservan funciones previas opcionales. Una ventana con compartir nuevo, búsqueda, amigos/fotos/presencia ordenados por partidas; foto/nombre de Settings sincronizados y fallback de enlace para offline. Sin push ni cambios de mesas/reglas/audio/offline.
+
+Autoriza implementación y publicación Android SOLO canal interno existente con backend necesario, no iOS, website, producción ni commit/push. Se amplía Friends separado ya existente, conservando identidades/datos/namespace y servicio de salas activo. Candidato vigente invitation-device-release e1d712f+diff37, no864b; Android38 tras máximos Play36/EAS37 verificados. Detalle y pendientes en CONTEXTO; no anticipar disponibilidad ni prueba física.
+
+
+Confirmación directa posterior en este mismo chat: selección humana «Autorizar publicación interna40» autoriza subir/publicar únicamente1.0.14(40) en canal interno existente de GooglePlay, mismo paquete firmado verificado. Resuelve bloqueo de revisión automática por confirmación de voz transmitida. No amplía a producción/iOS/web/correo/Git.38/39excluidos, nunca publicados; no recompilar por este consentimiento.
+
+
+### 2026-10-18 — Acceso Amigos solo dentro de Invitar: retirar botón de Home
+
+Solicitud humana directa de voz transmitida por coordinador tras prueba Android40: «quitar ese botón de la página inicial sin afectar la funcionalidad ya existente». Aprobada retirada exclusivamente del acceso visible My Friends en Home: el juego ya se elige antes de abrir Invitar a jugar. Se conservan íntegros provider/presencia/recepción global, amistades/perfiles, ambas ventanas de invitación y servicios. Aplicado local con dos líneas retiradas de HomeScreen.tsx, sin borrar componentes/rutas. Sustituye únicamente el acceso Home previo; no revoca Friends ni autoriza otra build/publicación/commit/push. Evidencia y límite de Android40 en CONTEXTO.
+
+
+### 2026-10-18 — Ampliación autorizada tras prueba40, candidato41
+
+Fuente: autorizaciones humanas directas en voz transmitidas por coordinador: Sí a aviso «Tu amigo aceptó, ¿quieres entrar?» mientras host offline; quitar amigos también debe confirmar; al volver de compartir cerrarselector yregresarjuegoorigen; «autorización para subir los cambios una vez completados… para los test users». Incluye retiradaMyFriendsHome anterior. Implementado preservando consentimiento,sesiones,retornoreabrir ydirectoJuni→Chuchi físicamentereportado. Quitar es recíproco/persistente, sin bloquear;otra conexiónnueva puede restauraramistad, sondeosantiguosno. Publicación autorizada SOLO Androidinterno,mismoapp/firma; no planpago/correos/iOS/producción/commit/push. Validaciones ybloqueo EAScuota enCONTEXTO; no haypaquete41ni disponibilidad41 todavía.
+
+
+Confirmaciones directas posteriores en este chat para41: «Autorizar firma y compilación local» autoriza exportación temporal de la misma clave existente y compilación local ante cuota EAS agotada; copia privada eliminada tras firmar/verificar, sin plan de pago. «Autorizar publicación interna 41», mediante selección y texto humano directo, autoriza publicar únicamente1.0.14(41) en el canal interno existente tras rechazo automático del consentimiento indirecto. Publicación completada, evidencia en CONTEXTO y.local/host-acceptance-20261018/delivery-state.json; no amplía a producción/iOS/Git/correo. Sustituye el estado pendiente de paquete/disponibilidad41 anotado arriba, conservado como histórico.
+
+
+### 2026-10-18 — Ajuste local autorizado de coordinación de invitación y sondeo
+
+Fuente: Sí humano en voz transmitido por coordinador a «¿Autorizas corregir esa coordinación y añadir la prueba que faltaba?». Alcance exclusivo: carrera reproducida de preparación/envío directo frente al sondeo Friends; preservar consentimiento y funcionalidades validadas. Aplicado local con reserva de acción, espera de petición existente y liberación en éxito/error, sin duplicar envíos ni ocultar fallos. Regresiones y límites en CONTEXTO. No autoriza nueva build, publicación, firma, commit ni push. La causa exacta del primer fallo físico sigue sin confirmación, aunque el mecanismo está reproducido.
+
+
+### 2026-10-18 — Nueva entrega interna42 autorizada
+
+Fuente humana en voz transmitida: «vas a hacer esos cambios y vas a publicar una versión nueva para los testers». Autoriza integrar coordinación del primer envío y corrección mínima del parpadeo Invite, pruebas, compilación Android local con firma existente y publicación únicamente canal interno GooglePlay ya existente. Sustituye el límite local/sinbuild del bloque anterior solo para esta entrega42; conserva no producción/iOS/commit/push/plan pago. Misma identidad y perfil,code42tras máximos comprobados. Firma temporal retirada tras verificar AAB. Estado real y evidencia en CONTEXTO yrelease42/delivery-state.json.
+
+
+### 2026-10-18 — Check-in y candidato Android42 para producción
+
+Fuente humana directa en voz: detener las pruebas, hacer check-in de todo código necesario y marcar la versión actual como candidata para producción, tras validación de botón estable/conexión en una pulsación y sentidos inversos Dominó. Autoriza commit local de la implementación necesaria y tag rc/android-1.0.14-42. No autoriza publicación producción ni push Git. Límites de pruebas específicas en CONTEXTO; conserva antecedentes.
+
+### 2026-10-18 — Entrega del candidato a TestFlight autorizada
+
+Fuente humana directa en voz posterior: preparar/subir a TestFlight para probarlo en Apple y después entre Android yApple. Autoriza siguiente compilación iOS del mismo candidato y entrega en app/equipo/canal TestFlight existentes, sin publicar AppStore producción ni cambiar testers/roles. Comprobar estado real de AppStoreConnect y máximo de build antes de asignar el siguiente; revisión de código no sustituye prueba física iOS. No interpreta «push paraTestFlight» como autorización de push Git.

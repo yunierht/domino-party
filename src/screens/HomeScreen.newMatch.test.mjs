@@ -10,9 +10,10 @@ test('Home New opens fresh Setup after resetting appearance; Resume leaves exist
  for(const currentMatch of [null,{id:'existing',winnerTeamId:null}]){
   const events=[],appearance={style:'orbital',teamAColor:'green',teamBColor:'blue'},m={exports:{}};
   const deps={React,useTheme:()=>({theme:{colors:{}},s:n=>n}),useI18n:()=>({t:{},lang:'en'}),useNav:()=>({go:route=>events.push(['go',route])}),useGame:()=>({currentMatch}),useTableGame:()=>({enterMode(){}}),useWindowDimensions:()=>({height:640}),useState:React.useState,resetNewTrackingMatchAppearance:()=>{Object.assign(appearance,{style:'robotic',teamAColor:'yellow',teamBColor:'red'});events.push(['reset']);}};
-  for(const name of ['SavedOnlineRoomReturn','View','ScrollView','Pressable','Feather','Menu','Logo','ResumeMatchCard','HomeMatchActions','DemoMatch','Card','HomeGameButton','AppearanceSpinner'])deps[name]=name;
+  for(const name of ['FriendsHomeAccess','SavedOnlineRoomReturn','View','ScrollView','Pressable','Feather','Menu','Logo','ResumeMatchCard','HomeMatchActions','DemoMatch','Card','HomeGameButton','AppearanceSpinner'])deps[name]=name;
   new Function(...Object.keys(deps),'module',ts.transpileModule(screen.getText(tree).replace('export function','function')+'\nmodule.exports=HomeScreen;',{compilerOptions:{jsx:ts.JsxEmit.React}}).outputText)(...Object.values(deps),m);
   let r;await act(()=>{r=create(React.createElement(m.exports));});try{
+   assert.equal(r.root.findAllByType('FriendsHomeAccess').length,0,'Home must not render the My Friends access');
    const card=r.root.findByType(currentMatch?'ResumeMatchCard':'DemoMatch');
    if(currentMatch){await act(()=>card.props.onResume());assert.deepEqual(appearance,{style:'orbital',teamAColor:'green',teamBColor:'blue'});assert.deepEqual(events,[['go','game']]);events.length=0;}
    await act(()=>card.props.onNewMatch());assert.deepEqual(events,[['reset'],['go','newMatch']]);assert.deepEqual(appearance,{style:'robotic',teamAColor:'yellow',teamBColor:'red'});

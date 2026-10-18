@@ -1,3 +1,4 @@
+import {FriendsProfileNameField} from '../friends/FriendsModule';
 import {useNav} from '../nav/NavContext';
 import {GoldPressable} from '../components/GoldPressable';
 import React,{useState} from 'react';
@@ -64,6 +65,7 @@ export function SettingsScreen() {
       <View testID="settings-default-avatar" style={{marginBottom:s(24)}}>
         <OnlinePlayerAvatarPicker labelSize={13} label={lang==='es'?'Tu avatar por defecto':'Your default avatar'} es={lang==='es'} selected={playerAvatarId} onSelect={setPlayerAvatarId} photo={playerAvatarPhoto} photoName={playerAvatarName} onSavePhoto={setPlayerAvatarPhoto} onClearPhoto={clearPlayerAvatarPhoto}/>
       </View>
+      <FriendsProfileNameField/>
       {/* Appearance */}
       <SectionLabel>{t.appearance}</SectionLabel>
       <Pressable testID="settings-appearance-selector" accessibilityRole="button" accessibilityLabel={t.appearance+': '+themeMeta.find(m=>m.name===themeName)?.title} accessibilityState={{expanded:appearanceOpen}} onPress={()=>{setAppearanceOpen(open=>!open);setLanguageOpen(false);}} style={{minHeight:68,padding:10,borderRadius:theme.radius,borderWidth:1,borderColor:c.border,backgroundColor:c.surface,flexDirection:'row',alignItems:'center',gap:12}}>

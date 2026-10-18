@@ -1,0 +1,10 @@
+{
+ "$schema":"../domino-online/node_modules/wrangler/config-schema.json",
+ "name":"domino-friends-internal","main":"src/worker.ts","compatibility_date":"2026-10-13","compatibility_flags":["nodejs_compat"],"workers_dev":true,"preview_urls":false,
+ "vars":{"ONLINE_ORIGIN":"https://domino-online-internet-test.domino-party.workers.dev","ALLOWED_ORIGIN":"https://dominoparty.com"},
+ "services":[{"binding":"ONLINE","service":"domino-online-internet-test"}],
+ "durable_objects":{"bindings":[{"name":"FRIENDS","class_name":"FriendNode"}]},
+ "migrations":[{"tag":"v1-friends","new_sqlite_classes":["FriendNode"]}],
+ "ratelimits":[{"name":"LIMIT","namespace_id":"735217984622","simple":{"limit":60,"period":60}}],
+ "observability":{"enabled":false}
+}

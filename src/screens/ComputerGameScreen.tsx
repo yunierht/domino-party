@@ -107,7 +107,7 @@ export function ComputerGameScreen() {
       <OnlineFriendScreen initialName={game?.playerName??''} initialTarget={game?.target??100} initialMode={game?.scoringMode??'points'}
         initialAvatar={playerAvatarId} initialAvatarPhoto={playerAvatarPhoto} inviteOnly={onlineShare} manualOnly={!onlineShare&&onlineEntry==='invite'} entry={onlineEntry} requestId={onlineRequest} visible={showInvite} onBack={()=>setShowInvite(false)} onStarted={()=>setShowInvite(true)} onGuestWaiting={setWaitingGuest}/>
     </View>}
-    <HostGuestPrompt es={lang==='es'} guest={waitingGuest?{...waitingGuest,enter:async()=>{setShowInvite(true);await waitingGuest.enter();}}:null} onDismiss={()=>setWaitingGuest(null)}/>
+    <HostGuestPrompt es={lang==='es'} guest={waitingGuest?{...waitingGuest,enter:async()=>{await waitingGuest.enter();setWaitingGuest(null);setShowInvite(true);}}:null} onDismiss={()=>setWaitingGuest(null)}/>
   </View>;
 }
 

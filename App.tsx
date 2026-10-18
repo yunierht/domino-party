@@ -1,3 +1,4 @@
+import {FriendsProvider} from './src/friends/FriendsModule';
 import {GameSettingsBoundary} from './src/components/GameSettingsBoundary';
 import React, { useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
@@ -136,7 +137,7 @@ export default function App() {
           <GameProvider>
             <NavProvider>
               <ComputerGameProvider>
-              <TableGameProvider><BlackjackProvider><OnlineLinkListener/><PokerOnlineLinkListener/><AppShell /></BlackjackProvider></TableGameProvider>
+              <TableGameProvider><BlackjackProvider><FriendsProvider><OnlineLinkListener/><PokerOnlineLinkListener/><AppShell /></FriendsProvider></BlackjackProvider></TableGameProvider>
               </ComputerGameProvider>
             </NavProvider>
           </GameProvider>

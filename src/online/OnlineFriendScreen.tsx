@@ -1,3 +1,5 @@
+import {protectOtherGame} from '../friends/roomPresence';
+import {FriendsShareOptions,useFriendsRoomWitness,useFriendsProfile} from '../friends/FriendsModule';
 import {confirmWaitingGuest} from './savedRoomRecovery';
 import type {WaitingGuest} from './HostGuestPrompt';
 import {useCodeInvitation} from './useCodeInvitation';
@@ -33,18 +35,20 @@ function Action({id,label,onPress,disabled=false,secondary=false}:{id:string;lab
 }
 
 /** Own identity and server snapshots only; the retained offline game never crosses this boundary. */
-export function OnlineFriendScreen({initialName,initialTarget,initialMode,initialAvatar='yuni',initialAvatarPhoto=null,entry='accept',requestId=0,onBack,visible=true,onStarted,invitationCode,autoAcceptInvitation=false,acceptWaitingGuest=false,onGuestWaiting,inviteOnly=false,manualOnly=false}:Props){
+export function OnlineFriendScreen({initialName:providedName,initialTarget,initialMode,initialAvatar='yuni',initialAvatarPhoto=null,entry='accept',requestId=0,onBack,visible=true,onStarted,invitationCode,autoAcceptInvitation=false,acceptWaitingGuest=false,onGuestWaiting,inviteOnly=false,manualOnly=false}:Props){
+ const initialName=useFriendsProfile()?.name??providedName;
  const {lang}=useI18n(),es=lang==='es',tr=(a:string,b:string)=>es?a:b;
  const endpoint=useMemo(()=>{try{return onlineEndpoint(process.env.EXPO_PUBLIC_DOMINO_ONLINE_URL);}catch{return null;}},[]);
  const client=useMemo(()=>endpoint?new OnlineClient(vault,httpTransport(endpoint),credential,endpoint):null,[endpoint]);
  const {openPokerOnline}=useNav();
  const voiceRelay=useMemo(()=>client?Object.assign((request:VoiceRequest)=>client.voice(request),{iceConfiguration:()=>client.iceConfiguration()}):undefined,[client]);
  const [state,setState]=useState<ClientState>({view:null,busy:false,status:'idle',error:null,canResume:false});
+ useFriendsRoomWitness(state.view,state.status==='connected');
  const [loaded,setLoaded]=useState(false),[code,setCode]=useState(invitationCode??''),[notice,setNotice]=useState<string|null>(null);
  const gameTransfer=useOnlineGameTransfer({client,game:'domino',view:state.view,connected:state.status==='connected',visible,es,onReady:async t=>{if(!client)return;await client.saveGameTransfer(t,pokerVault);openPokerOnline();}});
  const [replacing,setReplacing]=useState(false),replacementPending=useRef(false);
- const [shareOpen,setShareOpen]=useState(false),[invitationStarted,setInvitationStarted]=useState(false);
- useEffect(()=>{if(inviteOnly)setInvitationStarted(false);},[inviteOnly,requestId]);
+ const [shareOpen,setShareOpen]=useState(false),[invitationPrepared,setInvitationPrepared]=useState(false);
+ useEffect(()=>{if(inviteOnly)setInvitationPrepared(false);},[inviteOnly,requestId]);
  const [retrying,setRetrying]=useState(false);
  useEffect(()=>{
   if(notice!==tr('Compartir cancelado.','Sharing cancelled.')&&notice!==tr('Invitación copiada.','Invitation copied.'))return;
@@ -93,11 +97,16 @@ export function OnlineFriendScreen({initialName,initialTarget,initialMode,initia
   }
   wasVisible.current=visible;
  },[client,loaded,visible]);
+ const startedConnection=useRef<string|null>(null);
  useEffect(()=>{
-  const v=state.view,joined=v&&['playing','paused','completed'].includes(v.phase);
-  if(!invitationStarted&&joined&&(previousPhase.current==='waiting'||(inviteOnly||manualOnly)&&v.seat==='human'&&!!v.names.computer)){setInvitationStarted(true);startedRef.current?.();}
+  const v=state.view,joined=v&&['playing','paused','completed'].includes(v.phase),key=v?v.code+':'+v.epoch:null;
+  if(joined&&startedConnection.current!==key&&(previousPhase.current==='waiting'||(inviteOnly||manualOnly)&&v.seat==='human'&&!!v.names.computer)){
+   startedConnection.current=key;setInvitationPrepared(true);
+   // A hidden host keeps the CPU table until accepting the guest prompt.
+   if(visible)startedRef.current?.();
+  }
   previousPhase.current=state.view?.phase;
- },[state.view?.phase,state.view?.code,inviteOnly,manualOnly,invitationStarted]);
+ },[state.view?.phase,state.view?.code,state.view?.epoch,inviteOnly,manualOnly,visible]);
  useEffect(()=>{autoAttempted.current=false;setNotice(null);setCode(invitationCode??'');},[requestId,invitationCode]);
  useEffect(()=>{
   if(manualOnly||inviteOnly||!client||!loaded||!visible||entry!=='invite'||autoAttempted.current||state.view||state.canResume||state.busy||state.error||!initialName.trim())return;
@@ -106,12 +115,18 @@ export function OnlineFriendScreen({initialName,initialTarget,initialMode,initia
  },[inviteOnly,client,loaded,visible,entry,requestId,state.view,state.canResume,state.busy,state.error,initialName,initialTarget,initialMode,initialAvatar,initialAvatarPhoto]);
  const confirmedGuest=useRef(false);
  useEffect(()=>{if(!acceptWaitingGuest||!client||!loaded||state.busy||state.error||state.view?.phase!=='waiting'||!state.view.names.computer||confirmedGuest.current)return;confirmedGuest.current=true;void confirmWaitingGuest(client).catch(()=>setNotice(tr('No se pudo entrar. Vuelve a intentarlo.','Could not join. Please retry.')));},[acceptWaitingGuest,client,loaded,state.busy,state.error,state.view?.phase,state.view?.names?.computer]);
+ const offeredGuest=useRef<string|null>(null);
  useEffect(()=>{
   const view=state.view;
-  if(!client||!loaded||view?.phase!=='waiting'||view.seat!=='human'||!view.names.computer||!view.lobbyReady.includes('computer')){onGuestWaiting?.(null);return;}
-  const sameRoom=()=>client.state.view?.code===view.code&&client.state.view?.epoch===view.epoch&&client.state.view?.phase==='waiting';
-  onGuestWaiting?.({name:view.names.computer,enter:async()=>{if(!sameRoom())throw Error('session_changed');await confirmWaitingGuest(client);if(client.state.error)throw Error(client.state.error);},reject:async()=>{if(!sameRoom())throw Error('session_changed');await client.command({type:'leave'});if(client.state.error||client.state.view?.phase!=='closed')throw Error('rejection_unconfirmed');await client.forget();onBack();}});
- },[client,loaded,state.view?.code,state.view?.epoch,state.view?.phase,state.view?.names?.computer,onGuestWaiting]);
+  const waiting=view?.phase==='waiting'&&view.lobbyReady?.includes('computer');
+  const connected=view&&['playing','paused'].includes(view.phase)&&!visible;
+  if(!client||!loaded||view?.seat!=='human'||!view.names.computer||(!waiting&&!connected)){onGuestWaiting?.(null);return;}
+  const key=view.code+':'+view.epoch;
+  if(offeredGuest.current===key)return;
+  offeredGuest.current=key;
+  const sameRoom=()=>client.state.view?.code===view.code&&client.state.view?.epoch===view.epoch&&['waiting','playing','paused'].includes(client.state.view.phase);
+  onGuestWaiting?.({name:view.names.computer,enter:async()=>{if(!sameRoom())throw Error('session_changed');await protectOtherGame('domino');if(!sameRoom())throw Error('session_changed');await confirmWaitingGuest(client);if(client.state.error)throw Error(client.state.error);},reject:async()=>{if(!sameRoom())throw Error('session_changed');await client.command({type:'leave'});if(client.state.error||client.state.view?.phase!=='closed')throw Error('rejection_unconfirmed');await client.forget();onBack();}});
+ },[client,loaded,state.view?.code,state.view?.epoch,state.view?.phase,state.view?.names?.computer,visible,onGuestWaiting]);
  const codeInvitation=useCodeInvitation({explicitGame:/^[A-F0-9]{10}$/.test(invitationCode??''),game:'domino',code,endpoint,name:initialName.trim(),avatar:initialAvatar,photo:initialAvatar==='selfie'?initialAvatarPhoto??undefined:undefined,es,onJoined:()=>{onBack();openPokerOnline();}});
  const accept=()=>codeInvitation.accept(acceptCurrentInvitation);
  const v=state.view,unavailable=unavailableRoom(state),disabled=codeInvitation.busy||!client||!loaded||state.busy||replacing||retrying;
@@ -150,8 +165,9 @@ export function OnlineFriendScreen({initialName,initialTarget,initialMode,initia
   const base=process.env.EXPO_PUBLIC_DOMINO_ONLINE_INVITE_BASE||(Platform.OS==='web'?`${window.location.origin}/`:undefined);
   return sharePayload(current.code,es,base,current.phase,process.env.EXPO_PUBLIC_DOMINO_ONLINE_SCHEME||'domino-online-test',current.manualCode);
  }
+ async function prepareFriendProof(){await prepareInvitation();const saved=await vault.read(),current=client?.state.view;if(!saved||!current||saved.code!==current.code||current.phase!=='waiting'||current.seat!=='human'||current.names.computer)throw Error('room_unavailable');return {room:current.code,roomToken:saved.token};}
  function share(){setShareOpen(true);}
- const sharing=<Modal visible={shareOpen} transparent animationType="fade" onRequestClose={()=>setShareOpen(false)}><View style={{flex:1,justifyContent:'center',padding:20,backgroundColor:'rgba(2,12,10,.82)'}}><View style={{backgroundColor:C.surface,borderRadius:20}}><Action id="invitation-close" label={tr('Cerrar','Close')} secondary onPress={()=>setShareOpen(false)}/>{shareOpen&&<InvitationShareOptions es={es} prepare={prepareInvitation} onDone={()=>setShareOpen(false)}/>}</View></View></Modal>;
+ const sharing=<Modal visible={shareOpen} transparent animationType="fade" onRequestClose={()=>setShareOpen(false)}><View style={{flex:1,justifyContent:'center',padding:20,backgroundColor:'rgba(2,12,10,.82)'}}><View style={{backgroundColor:C.surface,borderRadius:20}}><Action id="invitation-close" label={tr('Cerrar','Close')} secondary onPress={()=>setShareOpen(false)}/>{shareOpen&&<FriendsShareOptions es={es} prepare={prepareInvitation} prepareRoom={prepareFriendProof} onDone={()=>setShareOpen(false)}/>}</View></View></Modal>;
 
  async function forget(){
   autoAttempted.current=true;
@@ -170,7 +186,7 @@ export function OnlineFriendScreen({initialName,initialTarget,initialMode,initia
  if(v?.phase==='waiting'&&v.seat==='computer'&&v.lobbyReady.includes('computer'))return visible?<View style={{flex:1,padding:20,backgroundColor:C.background}}><Header title={tr('Esperando al anfitrión','Waiting for the host')} onBackPress={onBack} reserveThemeSpace={false}/><Text style={{color:C.ivory}}>{tr('Tu aceptación está guardada. Tu amigo puede entrar cuando vuelva a la aplicación.','Your acceptance is saved. Your friend can join when they return to the app.')}</Text></View>:null;
  if(autoAcceptInvitation&&invitationCode&&!loaded)return <View style={{flex:1,padding:20,backgroundColor:C.background}}><Header title={tr('Aceptar invitación','Accept invitation')} reserveThemeSpace={false} onBackPress={onBack}/><Text accessibilityLiveRegion="polite" style={{color:C.ivory}}>{tr('Conectando con la invitación…','Connecting to the invitation…')}</Text></View>;
  if(manualOnly&&entry==='invite'&&(!v||v.phase==='waiting')&&!unavailableRoom(state))return visible?<CodeInvitationScreen immediateCancel es={es} ready={loaded} onBack={onBack} prepare={prepareInvitation} onCancel={async()=>{autoAttempted.current=true;await client?.cancelInvitation();return true;}}/>:null;
- if(inviteOnly&&!invitationStarted)return visible?<View style={{flex:1,backgroundColor:C.background}}><Header title={tr('Invitar amigo','Invite a friend')} reserveThemeSpace={false} onBackPress={leave}/>{loaded&&<InvitationShareOptions es={es} prepare={prepareInvitation} onDone={()=>setInvitationStarted(true)}/>}</View>:null;
+ if(inviteOnly&&!invitationPrepared)return visible?<View style={{flex:1,backgroundColor:C.background}}><Header title={tr('Invitar amigo','Invite a friend')} reserveThemeSpace={false} onBackPress={leave}/>{loaded&&<FriendsShareOptions es={es} prepare={prepareInvitation} prepareRoom={prepareFriendProof} onDone={()=>setInvitationPrepared(true)} onShared={()=>{setInvitationPrepared(true);onBack();}}/>}</View>:null;
  if(v&&v.phase!=='waiting'&&(!unavailable||v.phase==='closed'&&['left','inactivity_timeout'].includes(v.closeReason??''))&&(!invitationCode||v.code===invitationCode))return visible?<>{gameTransfer.prompt}<OnlineDominoTable onSwitchGame={gameTransfer.requestSwitch} view={v} enabled={!disabled&&state.status==='connected'} resultControlEnabled={loaded&&state.status==='connected'} es={es} error={error} notice={notice} onShare={()=>{void share();}} voiceRelay={voiceRelay} voiceAvailable={loaded&&state.status==='connected'&&v.phase==='playing'}
   onAction={async action=>{if(!client)return false;if(action.type==='holdResult'||action.type==='releaseResult'){client.setResultHeld(action.type==='holdResult');return true;}if(client.state.busy)return false;await client.command(action);return client.state.status==='connected'&&!client.state.error;}} onBack={leave}/>{sharing}</>:null;
  const input={backgroundColor:C.surface,borderColor:C.line,borderWidth:1,borderRadius:12,color:C.ivory,padding:12,fontSize:16,minHeight:48} as const;

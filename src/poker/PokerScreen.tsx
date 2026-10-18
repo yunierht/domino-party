@@ -1,3 +1,5 @@
+import {HostGuestPrompt} from '../online/HostGuestPrompt';
+import type {WaitingGuest} from '../online/HostGuestPrompt';
 import {tablePlayerCardWidth} from '../components/tableCardSize';
 import {usePokerWinEstimate} from './usePokerWinEstimate';
 import {PokerLearningControl} from './PokerLearningControl';
@@ -58,6 +60,7 @@ const labelsEN=['High card','One pair','Two pair','Three of a kind','Straight','
 function Button({label,onPress,disabled=false,gold=false}:{label:string;onPress:()=>void;disabled?:boolean;gold?:boolean}){return <GoldPressable finish gold={gold} accessibilityRole="button" accessibilityState={{disabled}} disabled={disabled} onPress={onPress} style={{minHeight:40,flex:1,justifyContent:'center',alignItems:'center',paddingHorizontal:4,borderRadius:10,borderWidth:1,borderColor:gold?C.gold:C.line,backgroundColor:gold?'rgba(216,185,120,.86)':'rgba(8,29,27,.42)',opacity:disabled?.4:1}}><Text style={{color:gold?C.background:C.ivory,fontWeight:'700',fontSize:11,textAlign:'center'}}>{label}</Text></GoldPressable>;}
 function Chips({amount,label}:{amount:number;label:string}) {return <View style={{alignItems:'center',gap:2}}><Text style={{fontSize:9,color:C.muted,letterSpacing:1}}>{label}</Text><View style={{alignItems:'center',gap:0}}><ChipStack piles amount={amount}/><Text style={{color:C.goldLight,fontSize:18,fontWeight:'700',fontVariant:['tabular-nums']}}>{amount.toLocaleString()}</Text></View></View>;}
 export function PokerScreen(){
+ const [inviteHidden,setInviteHidden]=useState(false),[waitingOnlineGuest,setWaitingOnlineGuest]=useState<WaitingGuest|null>(null);
  const tableVisible=useTableVisible();
  const root=useRef<View>(null),raiseSpot=useRef<View>(null),flightSerial=useRef(0),flightGeneration=useRef(0),ownCards=useRef<View>(null);
  const [selectedChips,setSelectedChips]=useState<number[]>([]);const selectionIndex=useRef(0);const [landed,setLanded]=useState<Set<number>>(new Set());
@@ -155,7 +158,7 @@ export function PokerScreen(){
  <View style={{height:48,flexDirection:'row',alignItems:'center',borderBottomWidth:1,borderBottomColor:C.line,paddingHorizontal:6}}>
  <Pressable accessibilityRole="button" accessibilityLabel={es?'Volver':'Back'} onPress={back} style={{width:44,height:44,alignItems:'center',justifyContent:'center'}}><Feather name="arrow-left" size={20} color={C.ivory}/></Pressable><HomeButton es={es}/>
  <View style={{flex:1,alignItems:'center'}}><Text style={{color:C.ivory,fontSize:16,letterSpacing:3,fontWeight:'600'}}>TEXAS HOLD’EM</Text><Text style={{color:C.gold,fontSize:9,letterSpacing:1.5}}>SOCIAL CLUB · NO LIMIT</Text></View>
- <Pressable testID="poker-table-invite" accessibilityRole="button" accessibilityLabel={es?'Invitar amigo':'Invite a friend'} onPress={()=>setInvite(true)} style={{width:44,height:44,alignItems:'center',justifyContent:'center'}}><Feather name="share-2" size={19} color={C.gold}/></Pressable>
+ <Pressable testID="poker-table-invite" accessibilityRole="button" accessibilityLabel={es?'Invitar amigo':'Invite a friend'} onPress={()=>{setInviteHidden(false);setInvite(true);}} style={{width:44,height:44,alignItems:'center',justifyContent:'center'}}><Feather name="share-2" size={19} color={C.gold}/></Pressable>
  <Pressable accessibilityRole="button" accessibilityLabel={es?'Ajustes':'Settings'} onPress={()=>setSettings(true)} style={{width:44,height:44,alignItems:'center',justifyContent:'center'}}><Feather name="more-vertical" size={20} color={C.gold}/></Pressable></View>
  <View testID="poker-table-surface" style={{flex:1,minHeight:0,overflow:'hidden'}}>
  <View testID="poker-table-background" pointerEvents="none" style={{position:'absolute',top:0,bottom:0,left:0,right:0}}><DominoTableBackground opponentHeight={heroHeight} gift={drink.consuming?null:drink.gift} es={es} finished={drink.expiring}/></View>
@@ -230,7 +233,7 @@ Flop: three cards. Turn and river: one each. An all-in runs out the board and co
  <ModalCloseButton finish es={es} onPress={()=>{setPicker(false);setRules(false);setReset(false);setDrinks(false);}}/>
  <View style={{flexDirection:'row',gap:10}}>{reset?<Button gold label={es?'Reiniciar':'Restart'} onPress={()=>{setPoker(newHand(undefined,Math.random,{human:pokerStartingChips,computer:5000}));setShown('');setReset(false);}}/>:null}</View>
  </View></View></Modal>
- <TableSettings onAcceptInvitation={()=>{setSettings(false);setAcceptInvite(true);}} onInvite={()=>{setSettings(false);setManualInvite(true);}} matching={false} visible={settings} es={es} onClose={()=>setSettings(false)} onRules={()=>{setSettings(false);setRules(true);}}/>
- <>{(invite||manualInvite||acceptInvite)&&<View testID="poker-online-overlay" accessibilityViewIsModal style={{position:'absolute',top:0,right:0,bottom:0,left:0,zIndex:100,backgroundColor:C.background,overflow:'hidden'}}><PokerOnlineScreen inviteOnly={invite} manualOnly={manualInvite} acceptOnly={acceptInvite} onClose={()=>{setInvite(false);setManualInvite(false);setAcceptInvite(false);}}/></View>}</>
+ <TableSettings onAcceptInvitation={()=>{setSettings(false);setInviteHidden(false);setInvite(false);setAcceptInvite(true);}} onInvite={()=>{setSettings(false);setInviteHidden(false);setInvite(false);setManualInvite(true);}} matching={false} visible={settings} es={es} onClose={()=>setSettings(false)} onRules={()=>{setSettings(false);setRules(true);}}/>
+ <>{(invite||manualInvite||acceptInvite)&&<View testID="poker-online-overlay" accessibilityViewIsModal={!inviteHidden} style={{display:inviteHidden?'none':'flex',position:'absolute',top:0,right:0,bottom:0,left:0,zIndex:100,backgroundColor:C.background,overflow:'hidden'}}><PokerOnlineScreen visible={!inviteHidden} onShared={()=>setInviteHidden(true)} onGuestWaiting={setWaitingOnlineGuest} inviteOnly={invite} manualOnly={manualInvite} acceptOnly={acceptInvite} onClose={()=>{setInviteHidden(false);setWaitingOnlineGuest(null);setInvite(false);setManualInvite(false);setAcceptInvite(false);}}/></View>}<HostGuestPrompt es={es} guest={waitingOnlineGuest?{...waitingOnlineGuest,enter:async()=>{await waitingOnlineGuest.enter();setWaitingOnlineGuest(null);setInviteHidden(false);}}:null} onDismiss={()=>setWaitingOnlineGuest(null)}/></>
  </View>;
 }

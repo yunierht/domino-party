@@ -1,0 +1,134 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {savedFriendRoom,protectOtherGame} from './roomPresence';
+import {preparePokerFriendRoom,joinPokerFriendRoom} from './pokerRoomAdapter';
+import React,{createContext,useContext,useEffect,useMemo,useRef,useState} from 'react';
+import {AppState,Image,Modal,Platform,Share,ScrollView,Text,TextInput,View} from 'react-native';
+import * as Linking from 'expo-linking';
+import config from '../../config/friends.json';
+const friendsOrigin=process.env.EXPO_PUBLIC_FRIENDS_URL||config.origin;
+import appConfig from '../../app.json';
+import {useTableGame} from '../poker/TableGameContext';
+import {FriendsClient} from './client';
+import type {Friend,FriendsState} from './client';
+import {friendsTransport} from './transport';
+import {identityStorage,randomToken} from './identity';
+import {friendLink,parseFriendLink} from './links';
+import {prepareFriendRoom,joinFriendRoom} from './roomAdapter';
+import type {Player,RoomProof} from './roomAdapter';
+import {GoldPressable} from '../components/GoldPressable';
+import {TABLE as C} from '../computer/tableTheme';
+import {useComputerGame} from '../computer/ComputerGameContext';
+import {DOMINO_AVATARS} from '../computer/dominoAvatars';
+import {useNav} from '../nav/NavContext';
+import {useI18n} from '../i18n/I18nContext';
+import {InvitationShareOptions} from '../online/InvitationShareOptions';
+import type {PreparedInvitation} from '../online/InvitationShareOptions';
+type Prepare=()=>Promise<RoomProof>;
+type Pending={game?:'domino'|'poker';friend:Friend;id:string;room:string;expires:number;status:'pending'|'accepted'};
+type ContextValue={profileName:string;setProfileName:(name:string)=>Promise<void>;witness:(game:'domino'|'poker')=>Promise<void>;client:FriendsClient|null;state:FriendsState;es:boolean;activeRoom:string|null;open:()=>void;invite:(peer:string,prepare?:Prepare,game?:'domino'|'poker')=>Promise<void>;share:()=>Promise<void>;observe:(code:string|null,playing:boolean)=>void;panel:(delta:number)=>void};
+const Context=createContext<ContextValue|null>(null);
+function Button({id,label,onPress,disabled=false,secondary=false}:{id?:string;label:string;onPress:()=>void;disabled?:boolean;secondary?:boolean}){return <GoldPressable finish gold={!secondary} testID={id} accessibilityRole="button" accessibilityLabel={label} disabled={disabled} accessibilityState={{disabled}} onPress={onPress} style={{minHeight:48,padding:14,borderRadius:12,borderWidth:1,borderColor:C.line,alignItems:'center',opacity:disabled?.45:1}}><Text style={{color:secondary?C.ivory:C.background,fontWeight:'700'}}>{label}</Text></GoldPressable>;}
+function Dialog({visible,title,children,onClose}:{visible:boolean;title:string;children:React.ReactNode;onClose:()=>void}){if(!visible)return null;return <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}><View style={{flex:1,padding:22,justifyContent:'center',backgroundColor:'rgba(2,12,10,.88)'}}><View accessibilityViewIsModal style={{maxHeight:'88%',backgroundColor:C.surface,padding:20,borderRadius:20,borderWidth:1,borderColor:C.gold,gap:14}}><Text accessibilityRole="header" style={{color:C.goldLight,fontWeight:'800',fontSize:22}}>{title}</Text>{children}</View></View></Modal>;}
+const message=(error:string|null,es:boolean)=>!error?null:error==='active_room'?(es?'Ya tienes una sala online activa. Sal de esa sala antes de aceptar otra.':'You already have an active online room. Leave it before accepting another.'):['invitation_expired','invitation_used'].includes(error)?(es?'Esta invitación venció o ya fue utilizada. Pide una nueva.':'This invitation expired or has already been used. Ask for a new one.'):error==='self_request'?(es?'Esta es tu propia invitación de amistad. Compártela con tu amigo.':'This is your own friend invitation. Share it with your friend.'):error==='room_unavailable'?(es?'La sala ya no está disponible. Pide una nueva invitación.':'The room is no longer available. Ask for a new invitation.'):(es?'No se pudo completar. Comprueba la conexión y vuelve a intentarlo.':'Could not complete this. Check the connection and retry.');
+export function FriendsProvider({children}:{children:React.ReactNode}){
+ const {lang}=useI18n(),es=lang==='es',nav=useNav(),computer=useComputerGame(),{mode}=useTableGame();
+ const mayReceive=true; // Foreground invitations are global; active-room and consent guards below still apply.
+ const avatarName=(computer.playerAvatarId==='selfie'?computer.playerAvatarName:DOMINO_AVATARS.find(a=>a.id===computer.playerAvatarId)?.name)||'Player';
+ const identityName=useRef({avatar:computer.playerAvatarId,label:avatarName,name:computer.game?.playerName||avatarName});
+ if(computer.game?.playerName)identityName.current.name=computer.game.playerName;
+ else if(identityName.current.avatar!==computer.playerAvatarId||identityName.current.label!==avatarName)identityName.current.name=avatarName;
+ identityName.current.avatar=computer.playerAvatarId;identityName.current.label=avatarName;const [nameOverride,setNameOverride]=useState<string|null>(null),[nameLoaded,setNameLoaded]=useState(false);const name=nameOverride||identityName.current.name;
+ useEffect(()=>{let alive=true;void AsyncStorage.getItem('friends.profile-name.v1').then(v=>{if(alive){setNameOverride(v?.trim()||null);setNameLoaded(true);}}).catch(()=>{if(alive)setNameLoaded(true);});return()=>{alive=false;};},[]);
+ async function setProfileName(value:string){const next=value.trim();if(!next||next.length>40||/[\x00-\x1f]/.test(next))throw Error('invalid_name');await AsyncStorage.setItem('friends.profile-name.v1',next);setNameOverride(next);}
+
+
+ const player:Player={name,avatar:computer.playerAvatarId,photo:computer.playerAvatarPhoto,target:computer.game?.target??100,mode:computer.game?.scoringMode??'points'};
+ const latest=useRef({nav,player,computer,nameLoaded});latest.current={nav,player,computer,nameLoaded};
+ const client=useMemo(()=>config.enabled?new FriendsClient(identityStorage,friendsTransport(friendsOrigin),randomToken):null,[]);
+ const [state,setState]=useState<FriendsState>({snapshot:null,busy:false,error:null}),[menu,setMenu]=useState(false),[panels,setPanels]=useState(0),[activeRoom,setActiveRoom]=useState<string|null>(null),[working,setWorking]=useState(false),[error,setError]=useState<string|null>(null);
+ const observedRoom=useRef<{code:string|null;playing:boolean}>({code:null,playing:false});
+ const intendedRoom=useRef<string|null>(null),acting=useRef(false),currentState=useRef(state);currentState.current=state;
+ const [link,setLink]=useState<{token:string;name?:string;code?:string}|null>(null),linkGeneration=useRef(0);
+ const [dismissed,setDismissed]=useState<string|null>(null);
+ const witnessed=useRef(new Set<string>()),proofQueue=useRef(new Map<string,{game:'domino'|'poker';room:string;token:string;waiting:boolean}>());
+ async function witness(game:'domino'|'poker'){
+  if(!client?.state.snapshot)return;
+  try{const saved=await savedFriendRoom(game);if(saved){const v=saved.view;if(['waiting','playing','paused','completed'].includes(v.phase)||v.phase==='closed'&&v.round>0&&!!v.names.computer){const key=game+':'+v.code+':'+v.epoch+':'+v.phase;if(!witnessed.current.has(key))proofQueue.current.set(key,{game,room:v.code,token:saved.token,waiting:v.phase==='waiting'&&v.seat==='human'});}}}catch{/* Keep a previously captured proof queued while the room service reconnects. */}
+  if(client.state.busy||acting.current)return;
+  for(const [key,proof] of proofQueue.current){if(client.state.busy||acting.current)return;try{const linked=await client.room(proof.game,proof.room,proof.token,true);if(linked||proof.waiting){witnessed.current.add(key);proofQueue.current.delete(key);}}catch(e){if(e instanceof Error&&['room_unavailable','identity_conflict'].includes(e.message))proofQueue.current.delete(key);}}
+ }
+ const witnessRef=useRef(witness);witnessRef.current=witness;
+ useEffect(()=>{if(!client)return;let alive=true,active=AppState.currentState==='active';const off=client.subscribe(s=>{if(alive)setState(s);});
+ async function refresh(){if(!alive||!active||!latest.current.nameLoaded||client!.state.busy||acting.current)return;try{if(client!.state.snapshot&&client!.state.snapshot.profile.name===latest.current.player.name&&client!.state.snapshot.profile.avatar===latest.current.player.avatar&&client!.state.snapshot.profile.photo===(latest.current.player.avatar==='selfie'?latest.current.player.photo:null))await client!.refresh();else await client!.register(latest.current.player.name,latest.current.player.avatar,latest.current.player.avatar==='selfie'?latest.current.player.photo:null,true);for(const game of ['domino','poker'] as const){try{await witnessRef.current(game);}catch{}}}catch{}}
+ void refresh();const timer=setInterval(()=>{void refresh();},5000);const app=AppState.addEventListener('change',next=>{active=next==='active';if(active)void refresh();else if(client!.state.snapshot&&!client!.state.busy&&!acting.current)void client!.offline().catch(()=>{});});
+ return()=>{alive=false;off();clearInterval(timer);app.remove();};},[client,nameLoaded]);
+
+ useEffect(()=>{let alive=true,warm=false;function open(raw:string|null){if(!raw||!alive)return;const token=parseFriendLink(raw,friendsOrigin,process.env.EXPO_PUBLIC_DOMINO_ONLINE_SCHEME||String(appConfig.expo.scheme));if(!token)return;linkGeneration.current++;setLink({token});setError(null);setMenu(false);}
+ const sub=Linking.addEventListener('url',event=>{warm=true;open(event.url);});void Linking.getInitialURL().then(url=>{if(!warm)open(url);}).catch(()=>{});return()=>{alive=false;sub.remove();};},[]);
+ useEffect(()=>{if(!client||!link||link.name||!state.snapshot||state.busy)return;const generation=linkGeneration.current;let alive=true;void client.preview(link.token).then(p=>{if(alive&&generation===linkGeneration.current){if(client!.state.snapshot?.friends.some(f=>f.code===p.code&&f.status==='accepted')){setLink(null);setMenu(true);}else setLink({token:link.token,name:p.name,code:p.code});}}).catch(e=>{if(alive)setError(e instanceof Error?e.message:'connection_error');});return()=>{alive=false;};},[client,link?.token,link?.name,!!state.snapshot]);
+ async function act(work:()=>Promise<void>){if(acting.current)return;acting.current=true;setWorking(true);setError(null);try{await work();}catch(e){setError(e instanceof Error?e.message:'connection_error');}finally{acting.current=false;setWorking(false);}}
+ async function share(){if(!client)throw Error('service_unavailable');const token=await client.share(),url=friendLink(friendsOrigin,token),text=es?`${name} te invita a ser amigos en Domino Social Club. Abre el enlace y acepta la amistad.`:`${name} invites you to become friends in Domino Social Club. Open the link and accept the friend invitation.`;await Share.share({title:es?'Agregar amigo':'Add friend',message:Platform.OS==='android'?text+'\n'+url:text,...(Platform.OS==='android'?{}:{url})});}
+ async function invite(peer:string,prepare?:Prepare,game:'domino'|'poker'='domino'){
+  if(!client)throw Error('service_unavailable');if(acting.current)throw Error('busy');
+  // Reserve the whole user action, including asynchronous room preparation.
+  // An already running background request may finish, but cannot start another.
+  acting.current=true;setWorking(true);
+  try{
+   if(client.state.busy)await new Promise<void>(resolve=>{const off=client.subscribe(s=>{if(!s.busy){off();resolve();}});});
+   await protectOtherGame(game);const proof=await (prepare?prepare():game==='poker'?preparePokerFriendRoom(latest.current.player):prepareFriendRoom(latest.current.player));
+   await client.invite(peer,proof.room,proof.roomToken,await randomToken(),game);intend(proof.room);
+   if(!prepare){setMenu(false);if(game==='poker')latest.current.nav.openPokerOnline();else latest.current.nav.openJoinedDomino();}
+  }finally{acting.current=false;setWorking(false);if(['background','inactive'].includes(AppState.currentState)&&!client.state.busy)void client.offline().catch(()=>{});}
+ }
+ function discardConnectedCpu(code:string|null,playing:boolean){if(playing&&code&&intendedRoom.current===code){intendedRoom.current=null;latest.current.computer.setGame(null);latest.current.computer.localTurnClockRef.current=null;}}
+ function intend(code:string){intendedRoom.current=code;discardConnectedCpu(observedRoom.current.code,observedRoom.current.playing);}
+ function observe(code:string|null,playing:boolean){observedRoom.current={code,playing};setActiveRoom(playing?code:null);discardConnectedCpu(code,playing);}
+
+ const incoming=state.snapshot?.friends.flatMap(friend=>friend.invitation?[{friend,...friend.invitation}]:[])??[];
+ const pending:Pending|undefined=incoming.find(i=>i.id!==dismissed);
+ const incomingRequest=state.snapshot?.friends.find(f=>f.status==='incoming'&&f.code!==dismissed);
+ const busy=working||state.busy;
+ const alert=message(error||state.error,es);
+ return <Context.Provider value={{profileName:name,setProfileName,witness,client,state,es,activeRoom,open:()=>{setMenu(true);setError(null);},invite,share,observe,panel:delta=>setPanels(n=>Math.max(0,n+delta))}}>{children}
+ <Dialog visible={menu} title={es?'Mis amigos':'My friends'} onClose={()=>{if(!busy)setMenu(false);}}><ScrollView keyboardShouldPersistTaps="handled"><FriendList title={false} onDone={()=>setMenu(false)}/></ScrollView><Button secondary label={es?'Cerrar':'Close'} disabled={busy} onPress={()=>setMenu(false)}/></Dialog>
+ <Dialog visible={!!link} title={es?'Invitación de amistad':'Friend invitation'} onClose={()=>{if(!busy){linkGeneration.current++;setLink(null);setError(null);}}}>
+ <Text style={{color:C.ivory}}>{link?.name?(es?`${link.name} te invita a ser amigos. Aceptar no inicia una partida.`:`${link.name} invites you to become friends. Accepting does not start a game.`):(es?'Preparando la solicitud…':'Preparing the request…')}</Text>{alert&&<Text accessibilityRole="alert" style={{color:C.ivory}}>{alert}</Text>}
+ {alert&&!link?.name&&<Button secondary label={es?'Reintentar':'Retry'} disabled={busy||!client} onPress={()=>{void act(async()=>{if(!client!.state.snapshot)await client!.register(latest.current.player.name);const p=await client!.preview(link!.token);setLink({token:link!.token,name:p.name,code:p.code});});}}/>}
+ <Button id="friend-accept-link" label={es?'Aceptar amistad':'Accept friendship'} disabled={busy||!link?.name||!client} onPress={()=>{void act(async()=>{await client!.acceptLink(link!.token);linkGeneration.current++;setLink(null);});}}/><Button secondary label={es?'Ahora no':'Not now'} disabled={busy} onPress={()=>{linkGeneration.current++;setLink(null);setError(null);}}/>
+ </Dialog>
+ <Dialog visible={!!pending&&!menu&&!link&&!panels&&!activeRoom&&mayReceive} title={es?'Invitación a jugar':'Game invitation'} onClose={()=>{if(!busy)setDismissed(pending?.id??null);}}>
+ <Text style={{color:C.ivory}}>{es?`${pending?.friend.name??''} quiere jugar ${pending?.game==='poker'?'póker':'dominó'} online. Al conectar, dejarás la partida contra la computadora.`:`${pending?.friend.name??''} wants to play ${pending?.game==='poker'?'poker':'dominoes'} online. Connecting abandons the computer game.`}</Text>{alert&&<Text accessibilityRole="alert" style={{color:C.ivory}}>{alert}</Text>}
+ <Button id="friend-accept-game" label={es?'Aceptar y jugar':'Accept and play'} disabled={busy||!pending} onPress={()=>{if(!pending||!client)return;const expected=pending;void act(async()=>{const room=await client.respondInvite(expected.friend.code,expected.id,true);intend(room);const game=expected.game??'domino';await protectOtherGame(game);if(game==='poker')await joinPokerFriendRoom(room,latest.current.player);else await joinFriendRoom(room,latest.current.player);await client.completeInvite(expected.friend.code,expected.id).catch(()=>{});setDismissed(expected.id);if(expected.game==='poker')latest.current.nav.openPokerOnline();else latest.current.nav.openJoinedDomino();});}}/>
+ {alert&&pending?.status==='accepted'&&<Button secondary label={es?'Ahora no':'Not now'} disabled={busy} onPress={()=>{setDismissed(pending.id);setError(null);}}/>}
+ <Button id="friend-decline-game" secondary label={es?'Rechazar':'Decline'} disabled={busy||!pending||pending.status==='accepted'} onPress={()=>{if(!pending||!client)return;const expected=pending;void act(async()=>{await client.respondInvite(expected.friend.code,expected.id,false);setDismissed(expected.id);});}}/>
+ </Dialog>
+ <Dialog visible={!!incomingRequest&&!pending&&!menu&&!link&&!panels&&!activeRoom&&mayReceive} title={es?'Solicitud de amistad':'Friend request'} onClose={()=>setDismissed(incomingRequest?.code??null)}><Text style={{color:C.ivory}}>{incomingRequest?.name}</Text>{alert&&<Text accessibilityRole="alert" style={{color:C.ivory}}>{alert}</Text>}<Button label={es?'Aceptar amistad':'Accept friendship'} disabled={busy} onPress={()=>{if(incomingRequest&&client)void act(()=>client.respond(incomingRequest.code,true));}}/><Button secondary label={es?'Rechazar':'Decline'} disabled={busy} onPress={()=>{if(incomingRequest&&client)void act(()=>client.respond(incomingRequest.code,false));}}/></Dialog>
+ </Context.Provider>;
+}
+function FriendList({prepare,onDone,title=true,game='domino',compact=false}:{prepare?:Prepare;onDone?:()=>void;title?:boolean;game?:'domino'|'poker';compact?:boolean}){
+ const module=useContext(Context),guard=useRef(false),[removing,setRemoving]=useState<Friend|null>(null),[query,setQuery]=useState(''),[manual,setManual]=useState(false),[code,setCode]=useState(''),[working,setWorking]=useState(false),[error,setError]=useState<string|null>(null);if(!module)return null;const {client,state,es}=module,busy=working||state.busy;
+ async function act(work:()=>Promise<void>){if(guard.current)return;guard.current=true;setWorking(true);setError(null);try{await work();}catch(e){setError(e instanceof Error?e.message:'connection_error');}finally{guard.current=false;setWorking(false);}}
+ const friends=(state.snapshot?.friends??[]).filter(f=>f.status==='accepted'&&f.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())).sort((a,b)=>(b.plays??0)-(a.plays??0)||a.name.localeCompare(b.name));
+ return <View style={{gap:12,padding:4,flexShrink:1}}><Dialog visible={!!removing} title={es?'Quitar amigo':'Remove friend'} onClose={()=>{if(!busy)setRemoving(null);}}><Text style={{color:C.ivory}}>{es?`¿Quitar a ${removing?.name??''} de amigos? Se quitará de ambas listas. Podéis volver a conectar mediante un nuevo enlace de partida.`:`Remove ${removing?.name??''} as a friend? This removes the friendship from both lists. You can reconnect through a new game link.`}</Text>{error&&<Text accessibilityRole="alert" style={{color:C.ivory}}>{message(error,es)}</Text>}<Button id="friend-remove-cancel" secondary label={es?'Cancelar':'Cancel'} disabled={busy} onPress={()=>setRemoving(null)}/><Button id="friend-remove-confirm" label={es?'Quitar amigo':'Remove friend'} disabled={busy||!removing} onPress={()=>{if(removing)void act(async()=>{await client!.remove(removing.code);setRemoving(null);});}}/></Dialog>{title&&<Text style={{color:C.goldLight,fontSize:20,fontWeight:'700'}}>{es?'Mis amigos':'My friends'}</Text>}
+ <TextInput testID="friends-search" accessibilityLabel={es?'Buscar amigos':'Search friends'} placeholder={es?'Buscar amigos':'Search friends'} placeholderTextColor={C.muted} value={query} onChangeText={setQuery} style={{minHeight:46,borderWidth:1,borderColor:C.line,borderRadius:10,padding:12,color:C.ivory}}/>
+ <ScrollView testID="friends-list" keyboardShouldPersistTaps="handled" style={{maxHeight:310}} contentContainerStyle={{gap:10}}>{friends.map(f=>{const sent=f.outgoing&&f.outgoing.expires>Date.now();const supported=(f.capabilities??['domino']).includes(game);return <View key={f.code} testID={'friend-row-'+f.code} style={{gap:6,paddingVertical:8,borderBottomWidth:1,borderColor:C.line}}><View style={{flexDirection:'row',alignItems:'center',gap:10}}><Image accessibilityLabel={f.name} source={f.photo?{uri:f.photo}:DOMINO_AVATARS.find(a=>a.id===f.avatar)?.image??DOMINO_AVATARS[0].image} style={{width:48,height:48,borderRadius:24}}/><View style={{flex:1,minWidth:0}}><Text numberOfLines={1} style={{color:C.ivory,fontSize:17}}>{f.name}</Text><Text style={{color:f.online?C.mint:C.muted,fontSize:12}}>{f.online?(es?'Conectado':'Online'):(es?'Desconectado':'Offline')}</Text></View></View><Button id={'friend-invite-'+f.code} label={sent?(es?'Invitación enviada':'Invitation sent'):(es?'Invitar':'Invite')} disabled={working||(state.busy&&!state.background)||!!module.activeRoom||!f.online||!supported||!!sent} onPress={()=>{void act(()=>module.invite(f.code,prepare,game));}}/>{sent&&f.outgoing?.status==='pending'&&<Button id={'friend-cancel-'+f.code} secondary label={es?'Cancelar invitación':'Cancel invitation'} disabled={busy} onPress={()=>{void act(()=>client!.cancelInvite(f.code,f.outgoing!.id));}}/>}{f.online&&!supported&&<Text style={{color:C.muted}}>{es?'Tu amigo necesita actualizar la app para este juego.':'Your friend needs to update the app for this game.'}</Text>}<GoldPressable gold={false} testID={'friend-remove-'+f.code} accessibilityRole="button" accessibilityLabel={(es?'Quitar amigo: ':'Remove friend: ')+f.name} disabled={busy} onPress={()=>{setError(null);setRemoving(f);}} style={{minHeight:36,padding:6,alignItems:'flex-end',justifyContent:'center'}}><Text style={{color:C.muted,fontSize:12}}>{es?'Quitar amigo':'Remove friend'}</Text></GoldPressable></View>;})}{state.snapshot&&!friends.length&&<Text style={{color:C.muted}}>{es?'Tus amigos aparecerán después de conectaros por primera vez.':'Friends appear after your first successful connection.'}</Text>}</ScrollView>
+ {(error||state.error)&&<Text accessibilityRole="alert" style={{color:C.ivory}}>{message(error||state.error,es)}</Text>}
+ {!state.snapshot&&<Button secondary label={es?'Reintentar conexión':'Retry connection'} disabled={busy} onPress={()=>{void act(async()=>{await client?.register(module.profileName);});}}/>}
+ <Text style={{color:C.muted,fontSize:12,lineHeight:18}}>{es?'Si tu amigo está desconectado, comparte un enlace para invitarlo.':'If your friend is offline, share a link to invite them.'}</Text>
+ {!compact&&<><Text selectable style={{color:C.muted}}>{es?'Mi código de amigo: ':'My friend code: '}{state.snapshot?.profile.code}</Text><Button id="friend-add" secondary label={es?'Agregar amigo nuevo':'Add a new friend'} disabled={busy||!state.snapshot} onPress={()=>{void act(module.share);}}/><Button secondary label={es?'Agregar mediante código':'Add by friend code'} disabled={busy} onPress={()=>setManual(v=>!v)}/>{manual&&<><TextInput accessibilityLabel={es?'Código de amigo':'Friend code'} value={code} onChangeText={v=>setCode(v.toUpperCase())} maxLength={10} placeholder="F-1234ABCD" placeholderTextColor={C.muted} style={{minHeight:44,padding:10,color:C.ivory,borderWidth:1,borderColor:C.line}}/><Button label={es?'Enviar solicitud':'Send request'} disabled={busy||!/^F-[A-F0-9]{8}$/.test(code)||!client} onPress={()=>{void act(()=>client!.request(code));}}/></>}
+ {!!state.snapshot?.friends.some(f=>f.status!=='accepted')&&<Text style={{color:C.goldLight}}>{es?'Solicitudes pendientes':'Pending requests'}</Text>}{state.snapshot?.friends.filter(f=>f.status!=='accepted').map(f=><View key={f.code} style={{gap:6}}><Text style={{color:C.ivory}}>{f.name}</Text>{f.status==='incoming'?<><Button label={es?'Aceptar amistad':'Accept friendship'} disabled={busy} onPress={()=>{void act(()=>client!.respond(f.code,true));}}/><Button secondary label={es?'Rechazar':'Decline'} disabled={busy} onPress={()=>{void act(()=>client!.respond(f.code,false));}}/></>:<Text style={{color:C.muted}}>{es?'Esperando aceptación':'Awaiting acceptance'}</Text>}</View>)}</>}
+ </View>;
+}
+export function FriendsHomeAccess(){const module=useContext(Context);return module?<View style={{marginVertical:10}}><Button id="friends-home" secondary label={module.es?'Mis amigos':'My friends'} onPress={module.open}/></View>:null;}
+/** UI adapter only: old share implementation is mounted unchanged after selecting Send link. */
+export function FriendsShareOptions({prepare,prepareRoom,es,onDone,onShared,game='domino'}:{prepare:(active?:()=>boolean)=>Promise<PreparedInvitation>;prepareRoom:Prepare;es:boolean;onDone?:()=>void;onShared?:()=>void;game?:'domino'|'poker'}){const module=useContext(Context),[share,setShare]=useState(false);
+ useEffect(()=>{if(!module)return;module.panel(1);return()=>module.panel(-1);},[]);
+ async function prepareNew(active?:()=>boolean){const value=await prepare(active);if(module)await module.witness(game).catch(()=>{});return value;}
+ if(!module)return <InvitationShareOptions prepare={prepare} es={es} onDone={onShared??onDone}/>;
+ return <View testID="friends-share-window" style={{padding:18,gap:12,flexShrink:1,maxHeight:'100%'}}><Text style={{color:C.goldLight,fontSize:22,fontWeight:'700'}}>{es?'Invitar a jugar':'Invite to play'}</Text><Button id="friends-share-link" label={es?'Invitar a alguien nuevo':'Invite someone new'} onPress={()=>setShare(true)}/>{share&&<InvitationShareOptions prepare={prepareNew} es={es} onDone={()=>{setShare(false);(onShared??onDone)?.();}}/>}<FriendList title={false} compact prepare={prepareRoom} onDone={onDone} game={game}/></View>;
+}
+export function useFriendsRoomWitness(view:{code:string;phase:string}|null,connected:boolean,game:'domino'|'poker'='domino'){const module=useContext(Context);const observe=useRef(module?.observe);observe.current=module?.observe;useEffect(()=>{if(view){observe.current?.(view.code,connected&&view.phase==='playing');if(connected)void module?.witness(game).catch(()=>{});}return()=>observe.current?.(null,false);},[view?.code,view?.phase,connected]);}
+
+export function FriendsProfileNameField(){const module=useContext(Context),[draft,setDraft]=useState(''),[error,setError]=useState(false);useEffect(()=>{setDraft(module?.profileName??'');},[module?.profileName]);if(!module)return null;return <View style={{gap:8,marginVertical:14,padding:14,borderRadius:14,backgroundColor:C.surface}}><Text style={{color:C.ivory}}>{module.es?'Tu nombre Online':'Your Online name'}</Text><TextInput testID="friends-profile-name" accessibilityLabel={module.es?'Tu nombre Online':'Your Online name'} value={draft} onChangeText={setDraft} maxLength={40} style={{minHeight:46,padding:12,borderWidth:1,borderColor:C.line,borderRadius:10,color:C.ivory}}/><Button secondary label={module.es?'Guardar nombre':'Save name'} onPress={()=>{void module.setProfileName(draft).then(()=>setError(false)).catch(()=>setError(true));}}/>{error&&<Text style={{color:C.ivory}}>{module.es?'No se pudo guardar. Reintenta.':'Could not save. Retry.'}</Text>}</View>;}
+
+export function useFriendsProfile(){const value=useContext(Context);return value?{name:value.profileName}:null;}

@@ -1,3 +1,6 @@
+import {protectOtherGame} from '../friends/roomPresence';
+import type {WaitingGuest} from '../online/HostGuestPrompt';
+import {FriendsShareOptions,useFriendsRoomWitness,useFriendsProfile} from '../friends/FriendsModule';
 import {useCodeInvitation} from '../online/useCodeInvitation';
 import {useOnlineGameTransfer} from '../online/useOnlineGameTransfer';
 import {vault as dominoVault} from '../online/credentialStorage';
@@ -27,11 +30,11 @@ import {OnlinePokerTable} from './OnlinePokerTable';
 import type {PokerClientState} from './PokerOnlineClient';
 import type {PokerOnlineAction} from './onlineContract';
 import type {VoiceRequest} from '../online/voiceProtocol';
-export function PokerOnlineScreen({inviteOnly=false,manualOnly=false,acceptOnly=false,onClose}:{inviteOnly?:boolean;manualOnly?:boolean;acceptOnly?:boolean;onClose?:()=>void}={}){
- const {lang}=useI18n(),es=lang==='es',{back:navBack,pendingPokerCode,clearPokerCode,openOnlineTransfer,openJoinedDomino}=useNav();const back=onClose??navBack;
+export function PokerOnlineScreen({inviteOnly=false,manualOnly=false,acceptOnly=false,onClose,visible=true,onShared,onGuestWaiting}:{visible?:boolean;onShared?:()=>void;onGuestWaiting?:(guest:WaitingGuest|null)=>void;inviteOnly?:boolean;manualOnly?:boolean;acceptOnly?:boolean;onClose?:()=>void}={}){
+ const {lang}=useI18n(),es=lang==='es',{back:navBack,pendingPokerCode,clearPokerCode,openOnlineTransfer,openJoinedDomino}=useNav();const back=onClose??navBack;const visibleRef=useRef(visible);visibleRef.current=visible;
  const endpoint=useMemo(()=>onlineEndpoint(process.env.EXPO_PUBLIC_POKER_ONLINE_URL||process.env.EXPO_PUBLIC_DOMINO_ONLINE_URL||'http://127.0.0.1:8794'),[]);
  const client=useMemo(()=>new PokerOnlineClient(vault,httpTransport(endpoint),credential,endpoint),[endpoint]);
- const {playerAvatarId:avatar,playerAvatarPhoto:photo,playerAvatarName}=useComputerGame();const name=avatar==='selfie'?(playerAvatarName||''):DOMINO_AVATARS.find(a=>a.id===avatar)?.name??'';
+ const {playerAvatarId:avatar,playerAvatarPhoto:photo,playerAvatarName}=useComputerGame();const name=useFriendsProfile()?.name??(avatar==='selfie'?(playerAvatarName||''):DOMINO_AVATARS.find(a=>a.id===avatar)?.name??'');
  const [accepting,setAccepting]=useState(acceptOnly||!!pendingPokerCode);
  const sessionActive=useRef(!acceptOnly&&!pendingPokerCode&&!inviteOnly&&!manualOnly);
  const [incomingCode,setIncomingCode]=useState<string|null>(pendingPokerCode??null);
@@ -41,13 +44,14 @@ export function PokerOnlineScreen({inviteOnly=false,manualOnly=false,acceptOnly=
  const [shareOpen,setShareOpen]=useState(false),[invitationStarted,setInvitationStarted]=useState(false);const wasWaiting=useRef(false);
  const [state,setState]=useState<PokerClientState>(client.state),[loaded,setLoaded]=useState(false),[code,setCode]=useState(pendingPokerCode??''),[notice,setNotice]=useState<string|null>(null);
  targetCode.current=code;
+ useFriendsRoomWitness(state.view,state.status==='connected','poker');
  useEffect(()=>{const v=state.view,joined=v&&['playing','paused','completed'].includes(v.phase);if(joined&&(wasWaiting.current||(inviteOnly||manualOnly)&&v.seat==='human'&&!!v.names.computer))setInvitationStarted(true);if(v?.phase==='waiting')wasWaiting.current=true;else if(v&&['closed','completed'].includes(v.phase))wasWaiting.current=false;},[state.view?.phase,state.view?.code,inviteOnly,manualOnly]);
  useEffect(()=>{if(!notice)return;const timer=setTimeout(()=>setNotice(null),3000);return()=>clearTimeout(timer);},[notice]);
  useEffect(()=>{if(pendingPokerCode){setCode(pendingPokerCode);}},[pendingPokerCode,clearPokerCode]);
  useEffect(()=>{let active=AppState.currentState!=='background'&&AppState.currentState!=='inactive',alive=true;const unsubscribe=client.subscribe(setState);void client.load().then(async()=>{if(alive&&sessionActive.current&&client.state.canResume)await client.resume();}).finally(()=>{if(alive)setLoaded(true);});
   const timer=setInterval(()=>{if(active&&client.state.error==='not_connected'){retryAcceptedInvitation.current();return;}if(active&&sessionActive.current&&client.state.canResume&&(!client.state.error||client.state.view?.phase==='waiting'&&['connection_error','network_error','Network request failed','Failed to fetch','fetch failed'].includes(client.state.error))&&!['closed','completed'].includes(client.state.view?.phase??'')){if(client.state.status==='disconnected')void client.resume();else void client.refresh();}},1000);
   const app=AppState.addEventListener('change',value=>{active=value==='active';if(active&&client.state.error==='not_connected')retryAcceptedInvitation.current();else if(active&&sessionActive.current&&client.state.canResume&&(!client.state.error||client.state.view?.phase==='waiting'&&['connection_error','network_error','Network request failed','Failed to fetch','fetch failed'].includes(client.state.error)))void client.resume();else if(!active)void client.disconnect();});
-  const hardware=BackHandler.addEventListener('hardwareBackPress',()=>{back();return true;});
+  const hardware=BackHandler.addEventListener('hardwareBackPress',()=>{if(!visibleRef.current)return false;back();return true;});
   return()=>{alive=false;unsubscribe();clearInterval(timer);app.remove();hardware.remove();void client.disconnect();};
  },[client]);
  useEffect(()=>{if(pendingPokerCode){setCode(pendingPokerCode);setIncomingCode(pendingPokerCode);setAccepting(true);sessionActive.current=false;clearPokerCode();}},[pendingPokerCode]);
@@ -87,12 +91,22 @@ export function PokerOnlineScreen({inviteOnly=false,manualOnly=false,acceptOnly=
  function showCode(){setManualShare(true);setShareOpen(true);}
  async function prepareExistingCode(){const current=client.state.view;if(!current||client.state.error||client.state.status!=='connected'||!['waiting','playing','paused'].includes(current.phase))throw Error('invitation_unavailable');return {code:current.manualCode??current.code,url:invitationUrl(),text:''};}
 
- const gameTransfer=useOnlineGameTransfer({client,game:'poker',view:state.view,connected:state.status==='connected',visible:sessionActive.current&&!accepting&&(!incomingCode||incomingCode===state.view?.code||incomingCode===state.view?.manualCode),es,onReady:async t=>{await client.saveGameTransfer(t,dominoVault);openOnlineTransfer();}});
+ const gameTransfer=useOnlineGameTransfer({client,game:'poker',view:state.view,connected:state.status==='connected',visible:visible&&sessionActive.current&&!accepting&&(!incomingCode||incomingCode===state.view?.code||incomingCode===state.view?.manualCode),es,onReady:async t=>{await client.saveGameTransfer(t,dominoVault);openOnlineTransfer();}});
+ async function prepareFriendProof(){await prepareInvitation();const saved=await vault.read(),v=client.state.view;if(!saved||!v||saved.code!==v.code||v.phase!=='waiting'||v.seat!=='human'||v.names.computer)throw Error('room_unavailable');return {room:v.code,roomToken:saved.token};}
  const v=state.view,incomingDifferent=!!incomingCode&&incomingCode!==v?.code&&incomingCode!==v?.manualCode,entryView=accepting||incomingDifferent?null:v,disabled=codeInvitation.busy||state.busy||!loaded||!name.trim()||avatar==='selfie'&&!photo;
  let shareLink='';try{if(v)shareLink=invitationUrl();}catch{}
  const button=(label:string,onPress:()=>void,off=false,id?:string)=><GoldPressable finish testID={id} accessibilityRole="button" accessibilityState={{disabled:off}} disabled={off} onPress={onPress} style={{padding:14,minHeight:46,borderRadius:12,backgroundColor:C.gold,alignItems:'center',opacity:off?.45:1}}><Text style={{color:C.background,fontWeight:'700'}}>{label}</Text></GoldPressable>;
+ const offeredHost=useRef<string|null>(null);
+ useEffect(()=>{
+  const view=state.view;
+  if(visible||!view||view.seat!=='human'||!view.names.computer||!['waiting','playing','paused'].includes(view.phase)){onGuestWaiting?.(null);return;}
+  const key=view.code+':'+view.epoch;if(offeredHost.current===key)return;offeredHost.current=key;
+  const sameRoom=()=>client.state.view?.code===view.code&&client.state.view?.epoch===view.epoch&&['waiting','playing','paused'].includes(client.state.view.phase);
+  onGuestWaiting?.({name:view.names.computer,enter:async()=>{if(!sameRoom())throw Error('session_changed');await protectOtherGame('poker');if(!sameRoom())throw Error('session_changed');await client.resume();if(client.state.error)throw Error(client.state.error);},reject:async()=>{if(!sameRoom())throw Error('session_changed');await client.command({type:'leave'});if(client.state.error||client.state.view?.phase!=='closed')throw Error('rejection_unconfirmed');await client.forget();back();}});
+ },[visible,state.view?.code,state.view?.epoch,state.view?.phase,state.view?.names?.computer,onGuestWaiting,client]);
+ if(!visible)return null;
  if(manualOnly&&!invitationStarted)return <CodeInvitationScreen immediateCancel es={es} ready={loaded} onBack={back} prepare={prepareInvitation} onCancel={async()=>{sessionActive.current=false;await client.cancelInvitation();return true;}}/>;
- if(inviteOnly&&!invitationStarted)return <View style={{flex:1,backgroundColor:C.background}}><View style={{flexDirection:'row',alignItems:'center'}}><Pressable accessibilityRole="button" accessibilityLabel={es?'Volver':'Back'} onPress={back} style={{width:44,height:44,alignItems:'center',justifyContent:'center'}}><Feather name="arrow-left" size={22} color={C.gold}/></Pressable><HomeButton es={es}/></View>{loaded&&<InvitationShareOptions es={es} mode={manualOnly?'code':'share'} prepare={prepareInvitation} onDone={()=>setInvitationStarted(true)}/>}</View>;
+ if(inviteOnly&&!invitationStarted)return <View style={{flex:1,backgroundColor:C.background}}><View style={{flexDirection:'row',alignItems:'center'}}><Pressable accessibilityRole="button" accessibilityLabel={es?'Volver':'Back'} onPress={back} style={{width:44,height:44,alignItems:'center',justifyContent:'center'}}><Feather name="arrow-left" size={22} color={C.gold}/></Pressable><HomeButton es={es}/></View>{loaded&&<FriendsShareOptions es={es} game="poker" prepareRoom={prepareFriendProof} prepare={prepareInvitation} onDone={()=>setInvitationStarted(true)} onShared={()=>{setInvitationStarted(true);onShared?.();}}/>}</View>;
  return <View style={{flex:1,backgroundColor:C.background}}>
   {v&&v.phase!=='waiting'&&!accepting&&!incomingDifferent?<>{state.error&&<OnlineConnectionNotice error={state.error} es={es} busy={state.busy} onRetry={state.canResume?()=>void client.resume():undefined}/>}<OnlinePokerTable onSwitchGame={gameTransfer.requestSwitch} view={v} busy={state.busy} connected={state.status==='connected'} es={es} onCommand={command} onHold={hold} voice={voice} onBack={back} onShare={()=>void share()} onInviteCode={showCode} overlayOpen={shareOpen}/></>:<ScrollView contentContainerStyle={{padding:18,gap:14}}>
    <View style={{flexDirection:'row',alignItems:'center'}}><Pressable testID="poker-online-back" accessibilityRole="button" accessibilityLabel={es?'Volver':'Back'} onPress={back} style={{width:44,height:44,justifyContent:'center'}}><Feather name="arrow-left" size={22} color={C.gold}/></Pressable><HomeButton es={es}/></View><Text style={{color:C.goldLight,fontSize:24,textAlign:'center'}}>POKER ONLINE</Text>
@@ -105,7 +119,7 @@ export function PokerOnlineScreen({inviteOnly=false,manualOnly=false,acceptOnly=
     {/^[A-F0-9]{10}$/.test(code)?<PokerLinkAcceptanceScreen es={es} action={button(es?'Aceptar invitación':'Accept invitation',()=>void acceptInvitation(),disabled,'poker-online-accept')}/>:<PokerCodeAcceptanceScreen es={es} code={code} onChange={next=>{setCode(next);setIncomingCode(next);}} action={button(es?'Aceptar invitación':'Accept invitation',()=>void acceptInvitation(),disabled||!/^\d{6}$/.test(code),'poker-online-accept')}/>}
    </>}
   </ScrollView>}
-  <Modal visible={shareOpen} transparent animationType="fade" onRequestClose={()=>setShareOpen(false)}><View style={{flex:1,justifyContent:'center',padding:20,backgroundColor:'rgba(2,12,10,.82)'}}><View style={{backgroundColor:C.surface,borderRadius:20}}><Pressable accessibilityRole="button" accessibilityLabel={es?'Cerrar':'Close'} onPress={()=>setShareOpen(false)} style={{height:44,alignItems:'flex-end',justifyContent:'center',paddingHorizontal:16}}><Feather name="x" size={22} color={C.gold}/></Pressable>{shareOpen&&<InvitationShareOptions es={es} mode={manualShare?'code':'share'} prepare={manualShare?prepareExistingCode:prepareInvitation} onDone={()=>setShareOpen(false)}/>} </View></View></Modal>
+  <Modal visible={shareOpen} transparent animationType="fade" onRequestClose={()=>setShareOpen(false)}><View style={{flex:1,justifyContent:'center',padding:20,backgroundColor:'rgba(2,12,10,.82)'}}><View style={{backgroundColor:C.surface,borderRadius:20}}><Pressable accessibilityRole="button" accessibilityLabel={es?'Cerrar':'Close'} onPress={()=>setShareOpen(false)} style={{height:44,alignItems:'flex-end',justifyContent:'center',paddingHorizontal:16}}><Feather name="x" size={22} color={C.gold}/></Pressable>{shareOpen&&(manualShare?<InvitationShareOptions es={es} mode="code" prepare={prepareExistingCode} onDone={()=>setShareOpen(false)}/>:<FriendsShareOptions es={es} game="poker" prepareRoom={prepareFriendProof} prepare={prepareInvitation} onDone={()=>setShareOpen(false)}/>)} </View></View></Modal>
   {gameTransfer.prompt}{codeInvitation.prompt}
   {notice?<Text accessibilityLiveRegion="polite" style={{padding:10,color:C.ivory,textAlign:'center'}}>{notice}</Text>:null}
 
