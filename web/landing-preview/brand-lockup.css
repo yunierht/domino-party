@@ -1,0 +1,7 @@
+/* The approved landing lockup is shared verbatim with the spectator header. */
+#site-header .brand,#live-page .watch-brand { display:flex; flex-direction:column; align-items:center; gap:7px; min-width:0; padding:12px 0; margin:0; color:#f7f3e8; font-size:16px; font-weight:900; line-height:1.55; text-align:center; }
+#site-header .brand > img,#live-page .watch-brand > img { display:block; width:96px; height:96px; border-radius:0; content:normal; }
+#site-header .brand > span,#live-page .watch-brand > span { font-family:Georgia,serif; font-size:18px; font-weight:900; line-height:1.2; letter-spacing:.14em; text-align:center; white-space:nowrap; }
+#site-header .brand small,#live-page .watch-brand small { display:block; font-family:Arial,sans-serif; font-size:8px; font-weight:900; line-height:1.2; letter-spacing:.36em; color:#d5bb82; margin-top:5px; }
+@media(max-width:700px) { #site-header .brand > img,#live-page .watch-brand > img { width:80px; height:80px; }#site-header .brand > span,#live-page .watch-brand > span { font-size:14px; }#site-header .brand small,#live-page .watch-brand small { font-size:7px; } }
+@media(max-width:640px) { #site-header .brand,#live-page .watch-brand { font-size:.9rem; } }

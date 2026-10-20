@@ -1,0 +1,12 @@
+/* Follow uses the approved landing's quiet text controls and gold selection line. */
+.live-page .watch-actions { gap:16px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
+.live-page .watch-actions .sound-button { position:relative; display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:44px; padding:0 9px; border:0; border-radius:0; background:transparent; color:#828f87; box-shadow:none; font:inherit; font-size:11px; font-weight:800; cursor:pointer; }
+.live-page .watch-actions svg { width:17px; height:17px; flex:none; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.live-page .watch-actions .lang-toggle { display:flex; align-items:center; gap:3px; padding:0; border:0; border-radius:0; background:transparent; }
+.live-page .watch-actions .lang-toggle button { position:relative; min-width:44px; min-height:44px; padding:0 6px; border:0; border-radius:0; background:transparent; color:#828f87; font:inherit; font-size:11px; font-weight:950; cursor:pointer; }
+.live-page .watch-actions .sound-button::after,.live-page .watch-actions .lang-toggle button::after { content:""; position:absolute; bottom:0; left:6px; right:6px; height:1px; background:transparent; }
+.live-page .watch-actions .lang-toggle button[aria-pressed="true"],.live-page .watch-actions #watch-history[aria-expanded="true"],.live-page .watch-actions #sound-toggle[aria-pressed="true"] { color:#eddfb6; background:transparent; border:0; box-shadow:none; }
+.live-page .watch-actions .lang-toggle button[aria-pressed="true"]::after,.live-page .watch-actions #watch-history[aria-expanded="true"]::after,.live-page .watch-actions #sound-toggle[aria-pressed="true"]::after { background:#d5b567; }
+.live-page .watch-actions button:hover { color:#dfc58b; }
+.live-page .watch-actions button:focus-visible { outline:2px solid #f1d17b; outline-offset:3px; }
+@media(max-width:640px) { .live-page .watch-actions { gap:8px; justify-content:center; }.live-page .watch-actions .sound-button { padding:0 7px; } }

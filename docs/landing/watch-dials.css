@@ -1,0 +1,66 @@
+.watch-current .team-score,#team-b-score { position:relative; display:block; width:var(--watch-dial-size,180px); height:var(--watch-dial-size,180px); border:0; background:none; box-shadow:none; border-radius:0; }
+.team-score svg { display:block; width:100%; height:100%; filter:drop-shadow(0 7px 10px #0006); }
+.dial-values { position:absolute; inset:32% 0 auto; display:flex; align-items:center; flex-direction:column; line-height:1; }
+.dial-values strong { font-size:calc(var(--watch-dial-size,180px) * .29); line-height:1.07; font-weight:900; font-variant-numeric:tabular-nums; }
+.dial-values small { margin-top:3px; color:#aeb9c3; font-size:calc(var(--watch-dial-size,180px) * .12); line-height:1.2; font-weight:800; }
+.dial-progress { transition:stroke-dashoffset 700ms cubic-bezier(.22,1,.36,1); }
+.team-score[data-dial-style="orbital"] .dial-values strong { font-size:calc(var(--watch-dial-size,180px) * .26); }
+.team-score[data-dial-style="speedometer"] .dial-values { top:63%; }
+.team-score[data-dial-style="speedometer"] .dial-values strong { font-size:calc(var(--watch-dial-size,180px) * .205); }
+.team-score[data-dial-style="speedometer"] .dial-values small { font-size:calc(var(--watch-dial-size,180px) * .10); }
+.dial-controls { position:absolute; top:10px; right:10px; display:flex; gap:6px; }
+.dial-controls button { width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--watch-border); border-radius:10px; background:var(--watch-surface-hi); color:var(--watch-text); cursor:pointer; }
+.dial-controls svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+.dial-color { position:relative; padding-left:8px; }
+.dial-color::before { content:""; position:absolute; width:5px; height:24px; top:9px; left:5px; border-radius:2px; background:var(--dial-choice); }
+.watch-current .team-score { margin-top:38px; }
+.watch-current .team-card { border-color:var(--dial-color,var(--watch-border)); }
+.watch-current .team-card::before { background:radial-gradient(circle at 82% 28%,color-mix(in srgb,var(--dial-color,var(--watch-primary)) 14%,transparent),transparent 32%),linear-gradient(115deg,#ffffff0e,transparent 34%); }
+.watch-current .team-history li::before { background:var(--dial-color,var(--watch-primary)); }
+.watch-current #team-a-card,.watch-current #team-b-card { border-color:var(--dial-color,var(--watch-border)); }
+.watch-current #team-b-card::before { background:radial-gradient(circle at 82% 28%,color-mix(in srgb,var(--dial-color,var(--watch-danger)) 14%,transparent),transparent 32%),linear-gradient(115deg,#ffffff0e,transparent 34%); }
+.watch-current #team-b-rounds li::before { background:var(--dial-color,var(--watch-danger)); }
+.watch-current .team-needed { display:none; }
+.watch-current .team-card { grid-template-columns:minmax(0,1fr); grid-template-areas:"name" "players" "score" "history"; text-align:center; align-content:start; row-gap:6px; }
+.watch-current .team-name { padding:0 76px; font-size:1.5rem; overflow-wrap:anywhere; }
+.watch-current .team-players { padding:0 52px; overflow-wrap:anywhere; }
+.watch-current .team-score { margin:12px auto 0; }
+.watch-current .team-history { justify-content:center; margin-top:14px; }
+@media(max-width:640px) { .watch-current .team-name { padding:0 60px; font-size:1.25rem; }.watch-current .team-players { padding:0 35px; font-size:.85rem; }.dial-controls { top:8px; right:8px; gap:4px; }.dial-controls button { width:44px; height:44px; }.dial-controls svg { width:21px; height:21px; } }
+@media(max-width:640px) { .watch-current .team-score,#team-b-score { width:136px; height:136px; }.dial-values strong { font-size:39px; }.dial-values small { font-size:16px; margin-top:2px; } }
+@media(max-width:640px) { .team-score[data-dial-style="orbital"] .dial-values strong { font-size:35px; }.team-score[data-dial-style="speedometer"] .dial-values strong { font-size:28px; }.team-score[data-dial-style="speedometer"] .dial-values small { font-size:14px; } }
+@media(prefers-reduced-motion:reduce) { .dial-progress { transition:none; } }
+@media(min-width:1101px) {
+  .watch-current { --watch-dial-size:240px; }
+  .history-open .watch-current { --watch-dial-size:220px; }
+  .watch-current .team-card { padding-top:34px; padding-bottom:30px; row-gap:8px; }
+  .history-open .watch-current .team-card { padding-top:30px; padding-bottom:26px; }
+  .live-page { padding-bottom:32px; }
+}
+.watch-current .team-name { padding:0 102px 0 0; text-align:left; }
+.watch-current .team-players { padding:0 102px 0 0; text-align:left; }
+@media(max-width:640px) { .watch-current .team-name,.watch-current .team-players { padding-right:90px; padding-left:0; } }
+.watch-current .team-history { justify-content:flex-start; flex-wrap:wrap; align-content:flex-start; gap:10px; min-height:48px; max-height:136px; overflow-y:auto; overflow-x:hidden; padding-bottom:4px; }
+.watch-current .team-history li { font-size:18px; line-height:1.25; padding:8px 12px; min-height:40px; }
+.watch-current .team-history li::before { width:20px; height:20px; font-size:12px; }
+@media(max-width:640px) { .watch-current .team-history { gap:8px; }.watch-current .team-history li { font-size:15px; min-height:36px; padding:6px 10px; } }
+.watch-current .team-card { grid-template-areas:"identity" "score" "history"; }
+.watch-team-identity { grid-area:identity; display:flex; flex-direction:column; align-items:flex-start; gap:6px; text-align:left; padding-right:102px; }
+.watch-team-identity .team-name,.watch-team-identity .team-players { padding:0; }
+@media(min-width:1101px) {
+  .watch-overview { --watch-card-top:30px; --watch-identity-height:72px; --watch-card-gap:8px; --watch-dial-gap:8px; }
+  .watch-current { --watch-dial-size:280px; }
+  .history-open .watch-current { --watch-dial-size:260px; }
+  .watch-current .team-card,.history-open .watch-current .team-card { padding-top:var(--watch-card-top); row-gap:var(--watch-card-gap); }
+  .watch-team-identity { min-height:var(--watch-identity-height); }
+  .watch-current .team-score { margin-top:var(--watch-dial-gap); }
+}
+@media(max-width:640px) { .watch-team-identity { padding-right:90px; } }
+
+/* Completed-match totals belong only to the two tracker cards. */
+.watch-team-record {position:absolute;top:14px;left:14px;display:flex;flex-direction:column;gap:4px;max-width:94px;z-index:2;color:var(--watch-muted);font-size:12px;line-height:18px;pointer-events:none;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.watch-team-record b {color:var(--watch-text);font-weight:800;}
+.watch-current .watch-team-identity {align-items:center;text-align:center;padding-left:82px;padding-right:82px;min-height:64px;}
+.watch-current .watch-team-identity .team-name,.watch-current .watch-team-identity .team-players {text-align:center;padding:0;}
+.watch-current .dial-controls {flex-direction:column;}
+@media(max-width:640px){.watch-current .watch-team-identity{padding-left:68px;padding-right:42px;}.watch-team-record{left:10px;top:14px;font-size:11px;max-width:82px;}}

@@ -53,3 +53,4 @@ yarn-error.*
 
 # Local worktrees, audit evidence and release binaries are not source.
 /.local/
+/.wrangler/

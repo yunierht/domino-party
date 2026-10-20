@@ -1,8 +1,21 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "domino-party",
+  "main": "web/contact/worker.mjs",
+  "vars": { "CONTACT_ENABLED": "true", "CONTACT_FROM": "contact@dominoparty.com" },
+  "send_email": [
+    { "name": "CONTACT_EMAIL", "destination_address": "yunierht@yahoo.com" }
+  ],
+  "ratelimits": [
+    { "name": "CONTACT_LIMITER", "namespace_id": "951571304", "simple": { "limit": 5, "period": 60 } }
+  ],
   "compatibility_date": "2026-06-24",
+  "build": {
+    "command": "node web/landing-preview/build-production.mjs"
+  },
   "assets": {
-    "directory": "docs"
+    "directory": ".local/web-site-release/site",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/contact"]
   }
 }

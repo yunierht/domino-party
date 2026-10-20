@@ -1,0 +1,14 @@
+/* Web port of primaryButtonFinish / PRIMARY_BUTTON_GLOSS. Geometry stays with consumers. */
+#site-header .header-follow,#contact-submit,.button:not(.secondary),.history-tab[aria-selected=true]{
+  border-color:#F6D37B;color:#16100A;
+  background-color:#D7A63D;
+  background-image:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.35) 50%,transparent 62%),linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,.06) 45%,rgba(0,0,0,.18)),linear-gradient(135deg,#FFE08A,#F1C46B 48%,#B8832F);
+  background-size:250% 100%,100% 100%,100% 100%;background-position:160% 0,0 0,0 0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65),inset 0 -2px 0 rgba(91,52,10,.3),0 6px 16px rgba(215,166,61,.24),0 2px 3px rgba(0,0,0,.3);
+  text-shadow:0 1px 0 rgba(255,255,255,.25);
+  animation:web-gold-light 7.7s ease-in-out infinite;
+}
+#site-header .header-follow:active,#contact-submit:active:not(:disabled),.button:not(.secondary):active,.history-tab[aria-selected=true]:active{background-image:linear-gradient(180deg,rgba(0,0,0,.1),rgba(255,255,255,.1)),linear-gradient(135deg,#B8832F,#F1C46B);background-size:100% 100%;box-shadow:inset 0 2px 4px rgba(91,52,10,.35),0 3px 8px rgba(215,166,61,.18);animation:none}
+#contact-submit:disabled,.button:disabled,.history-tab:disabled{animation:none;background-image:linear-gradient(180deg,rgba(255,255,255,.12),rgba(0,0,0,.12)),linear-gradient(135deg,#d9bd7b,#a68c52);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);cursor:not-allowed}
+@keyframes web-gold-light{0%{background-position:160% 0,0 0,0 0}16%,100%{background-position:-160% 0,0 0,0 0}}
+@media(prefers-reduced-motion:reduce){#site-header .header-follow,#contact-submit,.button:not(.secondary),.history-tab[aria-selected=true]{animation:none}}

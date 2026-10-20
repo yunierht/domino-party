@@ -26,9 +26,8 @@
       padding: 24px;
       color: var(--text);
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background:
-        linear-gradient(180deg, rgba(10, 11, 10, 0.72), rgba(10, 11, 10, 0.96)),
-        repeating-linear-gradient(45deg, #101210 0 10px, #0b0c0b 10px 20px);
+      background: #0b100e;
+      background-image: radial-gradient(ellipse at 80% 15%, #18302588, transparent 50%);
       text-align: center;
     }
     main {
@@ -76,10 +75,17 @@
     }
     footer { margin-top: 20px; color: #7d766c; font-size: 0.86rem; }
   </style>
-</head>
-<body>
+<link rel="stylesheet" href="/landing/brand-lockup.css"><link rel="stylesheet" href="/landing/site-chrome.css"><link rel="stylesheet" href="/landing/gold-finish.css"></head>
+<body class="site-document join-document">
+<header class="nav" id="site-header">
+    <div class="wrap nav-inner">
+      <a class="brand" href="/" aria-label="Domino Social Club home"><img src="/landing/logo-circle.svg" alt=""/><span>DOMINO<small>SOCIAL CLUB</small></span></a>
+      <nav class="landing-nav" aria-label="Main navigation"><a href="/#score">Score</a><a href="/#experience-title">Live sharing</a><a href="/#screens">Screens</a><a href="/privacy/">Privacy</a><a href="/legal/">Legal</a><a href="/contact/">Contact</a></nav>
+      <div class="header-right"><div class="site-lang-toggle" role="group" aria-label="Website language"><button type="button" data-site-lang="en" aria-pressed="true">EN</button><button type="button" data-site-lang="es" aria-pressed="false">ES</button></div><a class="header-follow" href="/?follow=1">Follow a game <span aria-hidden="true">↗</span></a></div>
+    </div>
+  </header>
   <main>
-    <img src="../img/icon.png?v=social-club" alt="Domino Social Club" />
+    <img src="/landing/logo-circle.svg" alt="Domino Social Club" />
     <h1>Follow this domino match live</h1>
     <p>Open Domino Social Club and enter the game code.</p>
     <div class="code" id="code">----</div>
@@ -88,7 +94,9 @@
     <a class="button secondary" data-store="ios" href="https://apps.apple.com/app/id6793746031" target="_blank" rel="noopener">Download on the App Store</a>
     <footer>Domino Social Club by YHT</footer>
   </main>
-  <script>
+
+<footer id="site-footer"><div class="wrap foot"><span>© 2026 YHT · Domino Social Club</span><div class="foot-links"><a href="/privacy/">Privacy</a><a href="/legal/">Legal</a><a href="/contact/">Contact</a></div></div></footer>
+<script>
     var params = new URLSearchParams(location.search);
     var code = (params.get("code") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
     document.getElementById("code").textContent = code || "----";
@@ -124,5 +132,5 @@
       window.location.replace(storeUrl);
     }
   </script>
-</body>
+<script src="/landing/site-chrome.js"></script></body>
 </html>
