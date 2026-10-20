@@ -1487,3 +1487,9 @@ Fuente humana directa en voz posterior: preparar/subir a TestFlight para probarl
 
 
 Confirmación humana posterior del alcanceApple:mantener intacto el código ya probado,autorizar los pasos necesarios para subirAppStoreConnect/TestFlight ycontinuar. Solo packagingios19ytestasociado cambian frenteAndroid42. Entrega completada Testing en grupoDomioTesterexistente,con notasguardadas;no producciónApple. Marcador complementariorc/ios-1.0.14-19 conserva mismo candidato funcional ydeclara pendientepruebafísicaiOS/cruzada. Correo autorizado únicamente si se requiere aprobaciónhumana duranteausencia;no fue necesario yno se envió.
+
+## 2026-10-20 — Integración local autorizada del candidato móvil probado
+
+Estado: ejecutada. Fuente humana directa en voz, transmitida por coordinador: «Puedes integrarlo a la rama principal porque ya los probé en los dispositivos móviles». Autoriza incorporar SOLO el candidato móvil codex/friend-invitations a master de C:/Development/Dominos Codex Online, con operaciones Git locales mínimas. Sustituye restricciones anteriores únicamente para esta integración; no autoriza push, web, prototipo social, publicación, compilación, despliegue ni cambios funcionales nuevos.
+
+Resultado: fast-forward a5e19a1 → f5bcf2b, incorporando e1d712f/6efea7b/f5bcf2b sin conflictos ni reescritura. Reporte físico humano aceptado sin extrapolar dispositivos/casos no enumerados. Verificación actual y exclusiones en [CONTEXTO](CONTEXTO.md#2026-10-20--candidato-móvil-probado-integrado-localmente-en-master). Rama web y worktrees originales preservados; siguiente autorización separada para web o push.
