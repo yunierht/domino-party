@@ -1585,3 +1585,9 @@ Humano autoriza check-in local y marca de todo candidato actual antes de impleme
 Estado: ejecutada mediante merge local de codex/web-follow-tv08=f81be2d sobre master móvil0b50420. Fuente humana en voz transmitida por coordinador: «yo lo probé y se veía bien, así que está okay que los publiques en la rama principal». Alcance contextual: integrar localmente web ya revisada, sin push ni despliegue nuevo, cambios de versión o actualización de snapshot externo.
 
 Conservar web exacta y móvil exacto: los cambios compartidos de invitación de web ya están incluidos y ampliados en móvil; prevalece su implementación final y pruebas de anfitrión/consentimiento frente al retorno antiguo del chooser. Ambos historiales documentales se conservan. Notas sin commit de a27f siguen intactas en origen y se identifican como históricas, sin reutilizar su estado antiguo. Evidencia y límites en [CONTEXTO](CONTEXTO.md#2026-10-20--web-aprobada-integrada-localmente-junto-al-candidato-móvil). No autoriza publicación remota, otras funcionalidades o prototipo864b.
+
+## 2026-10-20 — Push normal a origin/master autorizado y ejecutado
+
+Fuente humana directa en voz transmitida por coordinador: «puedes tratar de hacer un push con los últimos cambios integrados». Amplía las autorizaciones de integración LOCAL anteriores solo para enviar master y su cierre documental al remoto existente https://github.com/yunierht/domino-party.git. No autoriza force, reescritura, builds, despliegues, publicaciones de app/web ni actualización de copias externas.
+
+Resultado de código confirmado: origin/master avanzó de a5e19a1 a ea22e6d mediante push normal; git ls-remote posterior coincide. Ocho commits integrados enviados, sin divergencia. Evidencia, preflight, límite de inspección de automatizaciones y cierre documental en [CONTEXTO](CONTEXTO.md#2026-10-20--push-autorizado-de-las-integraciones-móvil-y-web). Publicación y estado live no se infieren del push.
