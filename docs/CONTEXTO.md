@@ -2775,3 +2775,20 @@ Correcciones en master sin commit aun: confirmacion Remove dentro de superficie 
 
 
 Cierre de auditorias antes de compilar: auditor1 APTO17 escenarios propios (7scripts), auditor2 APTO11fixtures propios. Ambos validan1343 hashes antes/despues sobre freeze Final2 06bc3f4e...; sin bloqueantes. Copias de informes/resultados en .local/remove-friend-20261021/audit-one-final.json y audit-two-final.md. Se corrigio codificacion de X/etiqueta con escapesUnicode antes de Final2;38 pruebas focalizadas posteriores PASS, UTF8estricto de modificados correcto. Android44 autorizado comienza en carpeta nueva C:/dp44; no se reutilizan binarios43. Candidato mantiene982/16 pruebas verdes. Fuente no cambia tras auditorias.
+
+
+## 2026-10-20/21 - Android 1.0.14 (44) disponible, entrega integrada final
+
+Codigo integrado en master f101eb52e08d7ffe5ff345079a225d224bb224f7, sin push Git ni otras ramas. Las dos auditorias independientes aprobaron el mismo freeze Final2 antes de compilar; 1.343 hashes siguen intactos. Validacion: 982 pruebas app/config, 16 backend y 38 focalizadas posteriores al ajuste de codificacion. [Evidencia integrada](../.local/remove-friend-20261021/integrated-validation.json).
+
+Una unica compilacion local nueva en C:/dp44: 481 tareas, 7m42s, exit0. Los nueve modulos clave del mapa Metro coinciden con master; AAB/APK tienen el mismo Hermes. Se verificaron version44, package, Firebase, permiso POST_NOTIFICATIONS, enlaces anteriores y /play, cuatro ABI y firma existente. Copia temporal de clave retirada. [Validacion del paquete](../.local/remove-friend-20261021/package-validation.json).
+
+Friends desplegado como 5fe936d3-d36e-4b8e-a772-888ff3c855be; Worker Online y motores sin cambios. Las 29 comprobaciones en vivo sinteticas de ambos juegos pasaron: eliminacion bilateral, duplicados/replay, solicitud pendiente, consentimiento nuevo, acuerdo persistente, asignacion unica y cancelacion. Un intento inicial encontro 429 rate_limited; se espero y reintento sin ampliar limites. No se tocaron relaciones reales ni se crearon salas, registraron dispositivos o enviaron notificaciones. [Resultado en vivo](../.local/remove-friend-20261021/live-smoke-result.json).
+
+Google Play confirma release20 del mismo canal interno4701586554701115404: 1.0.14 (44) - Friends and invitation fixes, Available to internal testers, 20Oct23:13 NY. Conserva 18.833 dispositivos y cero perdida frente43. Actualizacion estimada3,91MB segun consola, no medida en telefono. Unica advertencia: mapping de deofuscacion ausente; configuracion R8 conservada. No produccion publica, iOS, correo, cambios de grupos/permisos/credenciales ni push Git. [Confirmacion Play](../.local/remove-friend-20261021/play-release-confirmation.json). Captura: C:/Users/yunie/.codex/visualizations/2026/10/20/01a159be-22fa-77d1-a6c8-d350f2483c44/play-android44-available.png.
+
+Se descargo el APK44 universal firmado por Google del artefacto4860242860022321807: certificado de app publicada correcto y Hermes identico al AAB auditado. SHA256 APK a4e221c644630f605cbefea10b1c994fa7d754a87d202a607c664d69cdc150e4. [Verificacion del artefacto Google](../.local/remove-friend-20261021/google-artifact-validation.json).
+
+Pendiente humano: actualizar ambos Android a44 desde el canal existente sin desinstalar. Comprobar Remove (confirmacion, cancelar, borrado bilateral sin reaparicion), enlaces email/WhatsApp con app cerrada/abierta y carga/reintento de perfil, estabilidad visual, aceptar/rechazar, Continue conserva/X termina, misma sala en ambos juegos y feedback de Enable. Confirmar push real con app cerrada y tap seguro. Los tests de adaptadores/proveedor y el paquete no prueban esa experiencia fisica.
+
+/play?invite identifica el acuerdo; el codigo de sala se asigna despues y ambos recuperan el mismo. Para una relacion historica eliminada sin fecha fiable, se rechaza el primer enlace ambiguo y se necesita un enlace posterior. Siguiente paso depende del resultado fisico; este cierre no autoriza mas compilaciones o publicaciones automaticas.
