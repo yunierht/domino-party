@@ -26,7 +26,7 @@ export async function playRoute(url:URL,method:string,o:Record<string,unknown>,h
  if(operation==='preview'&&method==='GET'){const p=await node.preview();if(p.state==='accepted'){try{return {...await node.read(actor),peer:await env.FRIENDS.getByName('profile:'+p.from).profile()};}catch{throw Error('invitation_used');}}return {...p,peer:await env.FRIENDS.getByName('profile:'+p.from).profile()};}
  if(method==='GET'&&!operation)return node.read(actor);if(method!=='POST')throw Error('not_found');
  if(operation==='accept'){await addReference(env,actor,id);const p=await node.accept(actor,who.name);await addReference(env,p.from,id);
- const other=env.FRIENDS.getByName('profile:'+p.from),relationship=env.FRIENDS.getByName('pair:'+[actor,p.from].sort().join(':'));await me.addPeer(p.from);await other.addPeer(actor);if((await relationship.relation(actor,Date.now())).status!=='accepted'){await relationship.request(p.from,actor,Date.now());await relationship.respond(actor,true,Date.now());}return p;}
+ const other=env.FRIENDS.getByName('profile:'+p.from),relationship=env.FRIENDS.getByName('pair:'+[actor,p.from].sort().join(':'));if(!await relationship.connectInvitation(p.from,actor,p.createdAt))throw Error('invitation_used');await me.addPeer(p.from);await other.addPeer(actor);return p;}
  if(operation==='decline'){await addReference(env,actor,id);return node.decline(actor);}
  if(operation==='ready'){if(typeof o.ready!=='boolean')throw Error('invalid_request');return node.ready(actor,o.ready);}
  if(operation==='allocate')return node.allocate(actor);

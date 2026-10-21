@@ -37,7 +37,7 @@ export class FriendsClient{
  async respondInvite(peer:string,id:string,accept:boolean){const r=object(await this.call('respond-invite',{peer,id,accept}));if(typeof r.room!=='string'||! /^[A-F0-9]{10}$/.test(r.room))throw Error('invalid_snapshot');return r.room;}
  async offline(){await this.call('presence',{online:false});}
  async room(game:'domino'|'poker',room:string,roomToken:string,background=false){const raw=object(await this.call('room',{game,room,roomToken},background));if(typeof raw.linked!=='boolean')throw Error('invalid_snapshot');return raw.linked;}
- async remove(peer:string){const s=parseSnapshot(await this.call('remove',{peer}));this.emit({snapshot:s});}
+ async remove(peer:string){return this.serializePlay(async()=>{const s=parseSnapshot(await this.call('remove',{peer}));this.emit({snapshot:s});});}
  async cancelInvite(peer:string,id:string){const s=parseSnapshot(await this.call('cancel-invite',{peer,id}));this.emit({snapshot:s});}
  async completeInvite(peer:string,id:string){await this.call('complete-invite',{peer,id});}
 }
