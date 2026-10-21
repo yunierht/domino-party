@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "345147627217",
+    "project_id": "domino-book",
+    "storage_bucket": "domino-book.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:345147627217:android:2b7acdcda446b170ba57f0",
+        "android_client_info": {
+          "package_name": "com.yht.dominoparty"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBr-7Mf81g6qzv4M5qQiGImKN9D78hxRw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -7,6 +7,9 @@ export type PreparedInvitation={url:string;text:string;code?:string};
 export function invitationShareContent(invitation:PreparedInvitation,platform:string){
  const url=new URL(invitation.url),keys=[...url.searchParams.keys()];
  const gameKeys=keys.filter(key=>key==='onlineRoom'||key==='pokerRoom');
+ const durable=keys.length===1&&keys[0]==='invite'&&/^[a-f0-9]{64}$/.test(url.searchParams.get('invite')??'')&&(((url.protocol==='https:'||url.protocol==='http:'&&['localhost','127.0.0.1'].includes(url.hostname))&&url.pathname==='/play')||(url.protocol==='dominoparty:'&&url.hostname==='play'&&['','/'].includes(url.pathname)));
+ if(durable){if(url.username||url.password||url.hash||invitation.code!==undefined)throw Error('invalid_invitation');return {title:'Invitation',message:platform==='android'?invitation.text+'\n'+invitation.url:invitation.text,...(platform!=='android'?{url:invitation.url}:{})};}
+
  if(invitation.code!==undefined&&! /^(?:\d{6}|[A-F0-9]{10})$/.test(invitation.code)||url.searchParams.has('manualCode')&&! /^\d{6}$/.test(url.searchParams.get('manualCode')??''))throw Error('invalid_invitation');
  if(!['https:','http:','domino-online-test:','dominoparty:'].includes(url.protocol)||url.username||url.password||url.hash||gameKeys.length!==1||! /^[A-F0-9]{10}$/.test(url.searchParams.get(gameKeys[0])??'')||keys.some(key=>!['onlineRoom','pokerRoom','manualCode','scheme'].includes(key))||keys.some(key=>url.searchParams.getAll(key).length!==1))throw Error('invalid_invitation');
  return {title:'Invitation',message:platform==='android'?`${invitation.text}\n${invitation.url}`:invitation.text,...(platform!=='android'?{url:invitation.url}:{})};

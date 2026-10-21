@@ -1,0 +1,2 @@
+import type {Vault} from '../online/contract';
+export function playSessionVault(id:string,generation:number):Vault{if(!/^[a-f0-9]{64}$/.test(id)||!Number.isSafeInteger(generation)||generation<1)throw Error('invalid_invitation');const key='play-room.'+id+'.'+generation;return {read:async()=>{const v=localStorage.getItem(key);return v?JSON.parse(v):null;},write:async v=>localStorage.setItem(key,JSON.stringify(v)),clear:async()=>localStorage.removeItem(key)};}

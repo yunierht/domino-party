@@ -1591,3 +1591,39 @@ Conservar web exacta y móvil exacto: los cambios compartidos de invitación de 
 Fuente humana directa en voz transmitida por coordinador: «puedes tratar de hacer un push con los últimos cambios integrados». Amplía las autorizaciones de integración LOCAL anteriores solo para enviar master y su cierre documental al remoto existente https://github.com/yunierht/domino-party.git. No autoriza force, reescritura, builds, despliegues, publicaciones de app/web ni actualización de copias externas.
 
 Resultado de código confirmado: origin/master avanzó de a5e19a1 a ea22e6d mediante push normal; git ls-remote posterior coincide. Ocho commits integrados enviados, sin divergencia. Evidencia, preflight, límite de inspección de automatizaciones y cierre documental en [CONTEXTO](CONTEXTO.md#2026-10-20--push-autorizado-de-las-integraciones-móvil-y-web). Publicación y estado live no se infieren del push.
+
+## 2026-10-20 — Preparación de invitación durable y push, sin implementación funcional
+
+Fuente humana de voz transmitida porcoordinador: «Perfecto. Puedes prepararlo todo para comenzar con los cambios». Autoriza entornoaislado yplan/continuidad revisables. Worktree durable-invitations-push, rama codex/durable-invitations-push desde master36e312b; no modifica master ni copiaexterna. No autoriza por este bloque funcionalidadprematura, instalación, commit/push, builds/distribución/deploy, nuevascredenciales/recursos/planes/pagos.
+
+Direcciónproducto acumulada: invitación puedeaceptarse horas/días yhostoffline;envío+aceptaciónguardanacuerdo para conectar después sinnuevoenlace/reaceptación. Plazohumano«sietedíasdecaducidad» aprobado como dirección, PERO aún noaclarado si soloaceptar o tambiénjugar; conservar decisiónabierta. Recomendaciónpendiente:7d paraaceptar, aceptaciónhasta jugar/cancelar conretenciónporacordar; no asumirinfinita. Amistad yacuerdodejuego distintos. Mantener reglas/audio/motores/mesas/contratoslegacys, plazosreconexiónpartida yproteccionescrossgame. Recuperaciónprimerenlace prioritaria; fallo de sesiónvieja reproducidocondobles NOatribuyecausafísica alincidenteWhatsApp/red.
+
+Nueva decisiónhumana explícita reemplaza propuestas anteriores de soloesperar cuandoestájugando: ofrecer Continuar partida / Cambiar a online. Continuarconservainvitación;Cambiarcomprueba disponibilidad ypreparaentrada antesabandonarCPU;onlinecontercero avisaabandono yrequiereconfirmación. No sobrescribirvault/saltarpartida porpush/presencia ni perderpartidaactual porfallopreparación.
+
+Nueva exigenciahumanapush: Android+iOS,avisoOS«Yuni te invita a jugar Dominó»y«Andy aceptó tu invitación»fueraapp. Tocarloabreinvitacióncorrecta,NOcambiasalaautomático;depende depermiso/token/OS/red,sinfalsa garantía deentregainmediata. Desconocido sinperfil/token sigue enlace, aceptaciónconsultable alabrir;sinloginmasivo/accountrecovery ni promesareinstalación/multidevice. Amplía exclusiónhistóricadepush del primer móduloFriends solo como dirección delpróximobloque, no prueba implementación.
+
+Propuesta técnica preparada: coordinaciónDOaislada enservicioFriends, aceptaciónpersistida separadatoken/sala, unacreador/idempotencia/recuperacióndistribuida;adapterslegacy;ExpoPushService detráscontrato youtboxdurable/receipts/tokenownership,dependenciascompatiblesconSDK57ysinrotarcredenciales. FCMv1/APNsremotosno comprobados;firmastore no prueba capacidadpush. Orden,TDD,matrizfísica,gatesyfuentes en [CONTEXTO](CONTEXTO.md#2026-10-20--preparación-aislada-invitación-durable-recuperación-y-push-androidios). Estado: preparación documental en disco sincommit/push; funcionalidad NOimplementada.
+
+## 2026-10-20 — Implementación local autorizada y caducidad resuelta
+
+Fuente humana en voz transmitida por coordinador: luz verde para comenzar cambios y continuar implementación. Siete días limita ACEPTAR; después, acuerdo guardado hasta jugar/cancelar. No borrar al aceptar ni extender plazos de reconexión de partida. Sustituye la decisión abierta del bloque de preparación de esta fecha. Primera invitación fiable y recuperación contextual son prioridad; no garantía de infalibilidad ni causa física del incidente confirmada.
+
+Ejecutada implementación local en codex/durable-invitations-push desde36e312b: dominio, servicio, UI, adaptación protegida a salas y push multiplataforma. Se conserva Continuar partida / Cambiar a online y confirmación de abandono online. P1 de recuperación y P2 de outbox señalados por la auditoría preliminar quedan corregidos con regresiones locales; aprobación final del auditor aún PENDIENTE. Evidencia y límites en [CONTEXTO](CONTEXTO.md#2026-10-20--implementación-local-y-candidato-para-reauditoría-independiente).
+
+Autorización posterior condicionada: tras auditoría completa sin bloqueantes y pruebas del snapshot, preparar Android firmado y entregar al MISMO canal interno existente GooglePlay; no producción pública ni entrega iOS. Avisar antes de subir. Configuración FCMv1 actualmente ausente en EAS y falta registro Android local; no inventar disponibilidad push. Cambios remotos del servicio, nuevo namespace coordinador o credenciales requieren alcance confirmado antes de ejecutar; no se realizaron. Un solo email de listo para probar autorizado a yunierht@yahoo.com únicamente cuando servicio/config y actualización interna estén realmente listos, con lista de escenarios y sin pedir confirmación de recepción. No nuevo commit/push Git ni merge principal ejecutados.
+
+
+## 2026-10-20 — Autorización directa de configuración Android y despliegue Friends
+
+Estado: ejecutada, después de segunda auditoría apta para configuración. Fuente humana directa en voz: autoriza registrar app en Firebase existente, crear credencial limitada de notificaciones, vincularla con Expo y desplegar servicio actualizado. Sustituye el estado pendiente del bloque de implementación de esta fecha para esas acciones. No nuevos proyectos, planes, roles humanos amplios, publicación pública ni entrega iOS.
+
+Firebase domino-book conserva Spark; Android com.yht.dominoparty y configuración pública incorporados; cuenta dedicada expo-fcm solo FCM API Admin, una clave a Expo correcto, sin exportar clave de Admin SDK. FCM validate_only200 sin mensaje real. Friends existente desplegado con nuevo coordinador durable y push=true;22 checks remotos sintéticos aprobados sin salas/jugadores/notificaciones humanos. Evidencia, alcance exacto, snapshot original y límites en [CONTEXTO](CONTEXTO.md#2026-10-20--auditoría-final-aprobada-y-configuración-androidservicio-autorizada).
+
+Se mantiene aviso humano antes de subir fuentes/paquete Android y distribución solo GooglePlay interno. Email único a dirección ya acordada únicamente con backend/config y build realmente disponible en ese canal. Configuración/validación de credencial no se presenta como prueba push física. Sin nuevo commit/push/merge.
+
+
+## 2026-10-20 — Integración final y entrega Android interna autorizadas
+
+Fuente humana directa en voz transmitida por coordinador: integrar versión final auditada en master y subir todos esos cambios al canal internal testers existente. Autoriza conciliación, check-in local y paquete firmado; no pushGit, producción pública, nuevo iOS ni nuevo email por esta solicitud.
+
+Se conserva diff preliminar completo de14 archivos en respaldo recuperable y se sustituye en el árbol activo por solución auditada, evitando TTL7d de salas/push simplificado. Solo Android aumenta a43, siguiente libre según bundles reales Play; iOS19 preservado. Continúan pruebas físicas después de disponibilidad. Detalle, fuente, evidencia y límites en [CONTEXTO](CONTEXTO.md#2026-10-20--integración-final-en-master-y-preparación-android43-autorizadas). Estado de publicación debe confirmarse por artefacto/track real, no por commit ni compilación.

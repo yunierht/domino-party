@@ -1,0 +1,1 @@
+export const playOperations={read:async(key:string)=>localStorage.getItem('play-operation.'+key),write:async(key:string,value:string)=>localStorage.setItem('play-operation.'+key,value),clear:async(key:string)=>localStorage.removeItem('play-operation.'+key)};

@@ -62,6 +62,7 @@
       "credentialsSource": "remote",
       "env": {
         "DOMINO_ONLINE_LINKS_CONFIG": "config/social-club-update.json",
+        "DOMINO_ANDROID_GOOGLE_SERVICES_FILE": "config/google-services.domino-party.json",
         "EXPO_PUBLIC_DOMINO_ONLINE_SCHEME": "dominoparty"
       },
       "android": {

@@ -79,7 +79,7 @@ export function OnlineFriendScreen({initialName:providedName,initialTarget,initi
    // A terminal saved room must not masquerade as failure of the new link.
    // Keep live/uncertain sessions and failure of the requested room explicit.
    if(previous&&!same&&unavailableRoom(client.state))await client.forget();
-   if(alive&&!client.state.canResume&&!client.state.error)await client.join(initialName.trim(),invitationCode,{avatar:initialAvatar,...(initialAvatar==='selfie'&&initialAvatarPhoto?{avatarPhoto:initialAvatarPhoto}:{}),acceptInvitation:true});
+   if(alive&&!client.state.canResume&&!client.state.error){recoveredLink.current=invitationCode;await client.join(initialName.trim(),invitationCode,{avatar:initialAvatar,...(initialAvatar==='selfie'&&initialAvatarPhoto?{avatarPhoto:initialAvatarPhoto}:{}),acceptInvitation:true});}
   }).catch(()=>{if(alive)setNotice(tr('No se pudo preparar la invitación. Vuelve a intentarlo.','The invitation could not be prepared. Please retry.'));}).finally(()=>{loading=false;if(alive)setLoaded(true);});
   const timer=setInterval(()=>{if(!active||loading||!client.state.canResume||unavailableRoom(client.state)||['rate_limited','manual_code_capacity'].includes(client.state.error??'')||(!visibleRef.current&&!waitingHidden.current))return;if(client.state.status==='disconnected')void client.resume();else void client.refresh();},2000);
   const app=AppState.addEventListener('change',next=>{active=next==='active';if(loading||!client.state.canResume||unavailableRoom(client.state)||['rate_limited','manual_code_capacity'].includes(client.state.error??''))return;if(active){if(visibleRef.current||waitingHidden.current)void client.resume();}else void client.disconnect();});
@@ -97,6 +97,18 @@ export function OnlineFriendScreen({initialName:providedName,initialTarget,initi
   }
   wasVisible.current=visible;
  },[client,loaded,visible]);
+ // A confirmed link remains pending while an old session is uncertain. Re-evaluate
+ // it when that read later becomes terminal, without retrying a failed new join.
+ const recoveredLink=useRef<string|null>(null),linkIntent=useRef({code:invitationCode,consented:autoAcceptInvitation});
+ linkIntent.current={code:invitationCode,consented:autoAcceptInvitation};
+ useEffect(()=>()=>{linkIntent.current={code:undefined,consented:false};},[]);
+ useEffect(()=>{
+  if(!client||!loaded||state.busy||entry!=='accept'||!autoAcceptInvitation||!invitationCode||!unavailableRoom(state))return;
+  const previous=client.savedRoomCode,current=state.view;
+  if(!previous||previous===invitationCode||current?.code===invitationCode||current?.manualCode===invitationCode||recoveredLink.current===invitationCode)return;
+  const target=invitationCode;recoveredLink.current=target;
+  void (async()=>{try{await client.forget();if(!linkIntent.current.consented||linkIntent.current.code!==target)return;await client.join(initialName.trim(),target,{avatar:initialAvatar,...(initialAvatar==='selfie'&&initialAvatarPhoto?{avatarPhoto:initialAvatarPhoto}:{}),acceptInvitation:true});}catch{setNotice(tr('No se pudo preparar la invitación. Vuelve a intentarlo.','The invitation could not be prepared. Please retry.'));}})();
+ },[client,loaded,state.busy,state.error,state.view?.phase,state.view?.code,entry,autoAcceptInvitation,invitationCode]);
  const startedConnection=useRef<string|null>(null);
  useEffect(()=>{
   const v=state.view,joined=v&&['playing','paused','completed'].includes(v.phase),key=v?v.code+':'+v.epoch:null;

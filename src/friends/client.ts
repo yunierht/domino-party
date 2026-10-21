@@ -24,6 +24,10 @@ export class FriendsClient{
  refresh(){return this.snapshotCall(this.path(),undefined,true);}
  private path(){if(!this.state.snapshot)throw Error('profile_missing');return '/profiles/'+this.state.snapshot.profile.code;}
  private call(operation:string,body:unknown,background=false){return this.run(token=>this.transport.request(this.path()+'/'+operation,token,body),background);}
+ private playQueue:Promise<unknown>=Promise.resolve();
+ private serializePlay<T>(work:()=>Promise<T>):Promise<T>{const result=this.playQueue.then(async()=>{while(this.state.busy)await new Promise<void>(resolve=>{const off=this.subscribe(state=>{if(!state.busy){off();resolve();}});});return work();});this.playQueue=result.catch(()=>{});return result;}
+ async playRequest(suffix:string,body?:unknown){if(!/^\/(?:[a-f0-9]{64}(?:\/(?:preview|accept|decline|ready|allocate|bind|attach|reset|complete|cancel))?)?$/.test(suffix||'/'))throw Error('invalid_request');return this.serializePlay(()=>this.run(token=>this.transport.request(this.path()+'/play'+suffix,token,body),body===undefined));}
+ async registerPush(body:{installation:string;token:string;platform:'android'|'ios';enabled:boolean}){return this.serializePlay(()=>this.run(token=>this.transport.request(this.path()+'/devices',token,body),true));}
  async share(){const r=object(await this.call('share',{}));if(typeof r.token!=='string'||! /^[a-f0-9]{64}$/.test(r.token))throw Error('invalid_snapshot');return r.token;}
  async preview(token:string){return profile(await this.call('preview',{token}));}
  async acceptLink(token:string){const s=parseSnapshot(await this.call('accept-link',{token}));this.emit({snapshot:s});}

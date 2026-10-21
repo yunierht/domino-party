@@ -77,7 +77,9 @@
       "expo-font",
       "expo-asset",
       "./plugins/withOnlineLan",
-      "./plugins/withOnlineInvitationLinks"
+      "./plugins/withOnlineInvitationLinks",
+      "expo-notifications",
+      "./plugins/withPlayInvitationLinks"
     ],
     "extra": {
       "eas": {
