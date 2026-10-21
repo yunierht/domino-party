@@ -1627,3 +1627,10 @@ Se mantiene aviso humano antes de subir fuentes/paquete Android y distribución 
 Fuente humana directa en voz transmitida por coordinador: integrar versión final auditada en master y subir todos esos cambios al canal internal testers existente. Autoriza conciliación, check-in local y paquete firmado; no pushGit, producción pública, nuevo iOS ni nuevo email por esta solicitud.
 
 Se conserva diff preliminar completo de14 archivos en respaldo recuperable y se sustituye en el árbol activo por solución auditada, evitando TTL7d de salas/push simplificado. Solo Android aumenta a43, siguiente libre según bundles reales Play; iOS19 preservado. Continúan pruebas físicas después de disponibilidad. Detalle, fuente, evidencia y límites en [CONTEXTO](CONTEXTO.md#2026-10-20--integración-final-en-master-y-preparación-android43-autorizadas). Estado de publicación debe confirmarse por artefacto/track real, no por commit ni compilación.
+
+
+## 2026-10-20 — Cierre Android43 interno y aviso único verificado
+
+Estado: ejecutado conforme autorización de integración/publicación interna. Fuente final de app es master b86870a con solución auditada; diff preliminar14archivos preservado aparte, no motores/TTL alternativos incorporados. GooglePlay confirma1.0.14(43) Available to internal testers en mismo canal y grupo17; APK firmado por Google mantiene certificado y contenido del candidato. No producción pública, iOS ni pushGit.
+
+Autorización humana directa posterior en voz pide UN correo a cuenta Yahoo habitual cuando ya esté listo para internos. Se ejecuta después de disponibilidad/validación Google, con guard de intento y búsqueda de duplicados; SENT confirmado por metadatos, sin prometer recepción física. Versión, instrucciones, archivos y pendientes en [CONTEXTO](CONTEXTO.md#2026-10-20--android101443-disponible-para-testers-y-correo-único-enviado). Próximo paso es prueba humana en ambos Android actualizados sin desinstalar, no otro cambio ni despliegue inferidos.
