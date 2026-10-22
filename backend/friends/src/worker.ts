@@ -1,3 +1,4 @@
+import {invitationLanding} from './invitationLanding';
 import {serviceFailure} from './serviceFailure';
 import {changeTargets} from './changeTargets';
 import {playRoute,playLanding} from './playRoutes';
@@ -77,10 +78,10 @@ async function roomAvailable(env:Env,code:string,token:string,game:'domino'|'pok
 }
 async function route(r:Request,env:Env){const u=new URL(r.url);
  if(r.method==='GET'&&u.pathname==='/health')return json({status:'ok',feature:'friends',protocol:1});
- if(r.method==='GET'){const landing=playLanding(u);if(landing)return landing;}
+ if(r.method==='GET'){const landing=playLanding(u,r.headers.get('user-agent')??'');if(landing)return landing;}
  if(r.method==='GET'&&u.pathname==='/friend'){
  const token=u.searchParams.get('invite')??'';if(!/^[a-f0-9]{64}$/.test(token)||[...u.searchParams.keys()].length!==1)return json({error:'invalid_invitation'},400);
- return new Response(`<!doctype html><html lang="es"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Domino Social Club · Amistad</title><body style="font-family:system-ui;background:#081d1b;color:#f5efdb;max-width:480px;margin:15vh auto;padding:24px"><h1>Invitación de amistad</h1><p>Abre Domino Social Club para ver quién te invita y aceptar su amistad. Esto no inicia una partida.</p><a style="display:block;padding:16px;background:#dab766;color:#081d1b;border-radius:12px;text-align:center" href="dominoparty://friend?invite=${token}">Abrir invitación en Domino</a><p>Si necesitas instalarla, vuelve a este mismo mensaje después de instalar.</p><a style="color:#dab766" href="https://play.google.com/store/apps/details?id=com.yht.dominoparty">Google Play</a></body></html>`,{headers:{'content-type':'text/html;charset=utf-8','cache-control':'no-store','referrer-policy':'no-referrer','content-security-policy':"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'"}});
+ return invitationLanding('friend',token,r.headers.get('user-agent')??'');
  }
  if(u.search)throw Error('invalid_request');const events=/^\/profiles\/(F-[A-F0-9]{8})\/events$/.exec(u.pathname);let authorization=r.headers.get('authorization')??'';
  if(events&&r.method==='GET'&&r.headers.get('upgrade')==='websocket'){const protocols=(r.headers.get('sec-websocket-protocol')??'').split(',').map(v=>v.trim());if(protocols.length!==2||protocols[0]!=='friends.v1'||!/^friends-auth\.[a-f0-9]{64}$/.test(protocols[1]))throw Error('unauthorized');const offered='Bearer '+protocols[1].slice('friends-auth.'.length);if(authorization&&authorization!==offered)throw Error('unauthorized');authorization=offered;}

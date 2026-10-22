@@ -26,13 +26,13 @@ export function Menu({ visible, onClose }: { visible: boolean; onClose: () => vo
   }, [visible, tx, PANEL_W]);
 
   const invite = () => {
-    const message = t.inviteMessage.replace('{site}', STORE_LINKS.website);
+    const message = t.inviteMessage.replace('{site}', STORE_LINKS.install);
     const content = {
       title: t.appName,
       message,
       // iOS uses this to create a native link attachment. The URL also stays in
       // the message so Android and share targets that ignore `url` still get it.
-      url: STORE_LINKS.website,
+      url: STORE_LINKS.install,
     };
 
     Share.share(content, {

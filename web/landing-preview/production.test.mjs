@@ -8,10 +8,10 @@ const output=path.join(root,'.local/web-site-release/site');
 const html=await readFile(path.join(output,'index.html'),'utf8');
 assert.doesNotMatch(html,/preview(?:Score|History|Results|Winner)|watchHistoryFixture|localHistoryFixture|LOCAL SAMPLE|DESIGN PREVIEW|A7K9|preview-[12]/);
 for(const script of html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g))new Function(script[1]);
-for(const name of ['live.js','join/index.html','privacy/index.html','legal/index.html'])assert.deepEqual(await readFile(path.join(output,name)),await readFile(path.join(root,'docs',name)),name+' preserved');
+for(const name of ['live.js','join/index.html','install/index.html','install/install.js','privacy/index.html','legal/index.html'])assert.deepEqual(await readFile(path.join(output,name)),await readFile(path.join(root,'docs',name)),name+' preserved');
 const files=JSON.parse(await readFile(path.join(root,'.local/web-site-release/files.json'),'utf8'));
-assert.equal(files.length,31);
-assert.ok(files.every(name=>/^(?:index\.html|live\.js|(?:img|sounds|join|privacy|legal|contact|landing)\/)/.test(name)));
+assert.equal(files.length,33);
+assert.ok(files.every(name=>/^(?:index\.html|live\.js|(?:img|sounds|join|install|privacy|legal|contact|landing)\/)/.test(name)));
 assert.ok(files.every(name=>!(/\.(?:md|mjs|map)$/.test(name))));
 for(const asset of html.matchAll(/(?:src|href)="(\/[^"#?]+)(?:\?[^"#]*)?"/g)){
  let file=asset[1].slice(1);if(!file)continue;if(file.endsWith('/'))file+='index.html';

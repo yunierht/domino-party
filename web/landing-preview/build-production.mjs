@@ -57,7 +57,7 @@ for(const name of ['landing.css','watch-history.css']){
 }
 // Deliberate allowlist: never deploy project continuity, tests, templates or demos.
 await buildSiteChrome(root);
-for(const name of ['index.html','live.js','img','sounds','join','privacy','legal','contact','landing'])await cp(path.join(root,'docs',name),path.join(output,name),{recursive:true});
+for(const name of ['index.html','live.js','img','sounds','join','install','privacy','legal','contact','landing'])await cp(path.join(root,'docs',name),path.join(output,name),{recursive:true});
 async function inventory(dir,prefix=''){
  const result=[];
  for(const entry of await readdir(dir,{withFileTypes:true})){

@@ -5,6 +5,7 @@ export const STORE_LINKS = {
   playStore: 'https://play.google.com/store/apps/details?id=com.yht.dominoparty',
   appStore: 'https://apps.apple.com/app/id6793746031',
   website: 'https://dominoparty.com/',
+  install: 'https://dominoparty.com/install/',
   privacyPolicy: 'https://dominoparty.com/privacy/',
 };
 
