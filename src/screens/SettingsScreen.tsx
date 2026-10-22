@@ -2,6 +2,7 @@ import {FriendsProfileNameField} from '../friends/FriendsModule';
 import {useNav} from '../nav/NavContext';
 import {GoldPressable} from '../components/GoldPressable';
 import React,{useState} from 'react';
+import * as Application from 'expo-application';
 import { Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
@@ -159,6 +160,11 @@ export function SettingsScreen() {
       <Card>
         <Text style={{ color: c.textMuted, fontSize: s(14), lineHeight: s(20) }}>{t.aboutText}</Text>
       </Card>
+      <Text testID="installed-version" selectable style={{color:c.textMuted,fontSize:s(13),marginTop:s(16),textAlign:'center'}}>
+        {Application.nativeApplicationVersion&&Application.nativeBuildVersion
+          ? `${lang==='es'?'Versión':'Version'} ${Application.nativeApplicationVersion} · ${lang==='es'?'Compilación':'Build'} ${Application.nativeBuildVersion}`
+          : lang==='es'?'Versión nativa no disponible':'Native version unavailable'}
+      </Text>
     </ScrollView>
   );
 }

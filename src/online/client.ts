@@ -4,7 +4,7 @@ import type {GameTransfer} from './gameTransfer.ts';
 import {parseIceConfiguration} from './iceConfiguration.ts';
 import {SessionGeneration} from './sessionGeneration.ts';
 import {parseView} from './contract.ts';
-import type {Action,OnlineView,Session,Vault,Transport} from './contract.ts';
+import type {Action,OnlineView,Session,Vault,Transport,LiveConnection} from './contract.ts';
 import type {VoiceRequest,VoiceReply} from './voiceProtocol';
 export interface ClientState {view:OnlineView|null;busy:boolean;status:'idle'|'connected'|'disconnected';error:string|null;canResume:boolean}
 export class OnlineClient{
@@ -12,6 +12,24 @@ export class OnlineClient{
  private cancelledCreates=new Set<string>();
   private lifetime:SessionGeneration;
   private listeners=new Set<(state:ClientState)=>void>();
+  private live:LiveConnection|null=null;
+  private liveKey='';private liveVersion=0;private liveHealthy=false;
+  private liveRetryAt=0;private liveFailures=0;private livePulseAt=0;private liveOpenedAt=0;private liveReceivedAt=0;
+  private stopLive(){this.liveVersion++;const old=this.live;this.live=null;this.liveKey='';this.liveHealthy=false;old?.close();}
+  private ensureLive(){
+    const s=this.session;if(!this.transport.watch||!s?.code||s.cancelledInvitation||['closed','completed'].includes(this.state.view?.phase??''))return;
+    const key=s.token+':'+s.code;
+    if(this.live&&this.liveKey===key)return;
+    if(Date.now()<this.liveRetryAt)return;
+    this.stopLive();const version=this.liveVersion,generation=this.lifetime.capture();this.liveKey=key;this.liveOpenedAt=Date.now();
+    const current=()=>version===this.liveVersion&&this.lifetime.current(generation)&&this.session?.token===s.token&&this.session?.code===s.code;
+    const failed=()=>{if(!current())return;this.stopLive();this.liveRetryAt=Date.now()+Math.min(30000,1000*2**Math.min(this.liveFailures++,5));};
+    try{this.live=this.transport.watch('/rooms/'+s.code+'/socket',s.token,value=>{
+      if(!current())return;
+      try{this.accept(value,generation);if(!this.liveHealthy)this.livePulseAt=Date.now();this.liveReceivedAt=Date.now();this.liveHealthy=true;this.liveFailures=0;if(['closed','completed'].includes(this.state.view?.phase??''))this.stopLive();}
+      catch{failed();}
+    },failed);}catch{failed();}
+  }
   private resultHoldIntent:{held:boolean;token:string;code:string;epoch:string;round:number}|null=null;
   private sendingResultHold=false;
   state:ClientState={view:null,busy:false,status:'idle',error:null,canResume:false};
@@ -33,7 +51,7 @@ export class OnlineClient{
   async load(){const generation=this.lifetime.capture();try{await this.readSaved(generation);}catch{if(this.lifetime.current(generation))this.emit({error:'storage_error'});}}
   /** Room identity only; recovery credentials stay private. */
   get savedRoomCode(){return this.session?.code??this.session?.pendingJoin;}
-  private async run(task:(generation:number)=>Promise<void>,newSession=false){if(this.state.busy)return;const generation=newSession?this.lifetime.advance():this.lifetime.capture();if(newSession){this.resultHoldIntent=null;this.sendingResultHold=false;}this.emit({busy:true,error:null});try{await task(generation);}catch(error){if(this.lifetime.current(generation))this.emit({error:error instanceof Error?error.message:'connection_error',status:'disconnected'});}finally{if(this.lifetime.current(generation)){this.emit({busy:false});void this.flushResultHold();}}}
+  private async run(task:(generation:number)=>Promise<void>,newSession=false){if(this.state.busy)return;const generation=newSession?this.lifetime.advance():this.lifetime.capture();if(newSession){this.stopLive();this.liveRetryAt=0;this.liveFailures=0;this.resultHoldIntent=null;this.sendingResultHold=false;}this.emit({busy:true,error:null});try{await task(generation);}catch(error){if(this.lifetime.current(generation))this.emit({error:error instanceof Error?error.message:'connection_error',status:'disconnected'});}finally{if(this.lifetime.current(generation)){this.emit({busy:false});void this.flushResultHold();}}}
   async create(name:string,target:number,mode:'points'|'wins',invitation?:{avatar:string;turnTimer?:boolean;autoNextRound?:boolean;quickActions?:boolean;customAvatars?:boolean;hostReturn?:boolean;avatarPhoto?:string}){await this.run(async generation=>{
     const token=await this.credential();this.lifetime.assert(generation);this.emit({view:null});
     await this.persist({endpoint:this.endpoint,token,name,pendingCreate:{target,mode,...(invitation?{invitation}:{})}}, generation);
@@ -68,11 +86,19 @@ export class OnlineClient{
     if(s.code)this.accept(await this.transport.request(`/rooms/${s.code}/heartbeat`,s.token,{}), generation);
     const v=this.state.view;
     if(!this.resultHoldIntent&&v?.presentation?.resultClock?.heldBy.includes(v.seat))this.setResultHeld(false);
+    this.ensureLive();
   }
   async resume(){await this.run(async generation=>{await this.readSaved(generation);await this.recover(generation);});}
  async iceConfiguration(){const generation=this.lifetime.capture(),saved=this.requireSession(),view=this.state.view;if(!saved.code||!view||view.phase!=='playing')throw Error('not_playing');const raw=await this.transport.request('/rooms/'+saved.code+'/ice',saved.token,{epoch:view.epoch});this.lifetime.assert(generation);return parseIceConfiguration(raw,process.env.EXPO_PUBLIC_ONLINE_MODE??'lan');}
   async voice(request:VoiceRequest):Promise<VoiceReply>{const generation=this.lifetime.capture(),session=this.requireSession();if(!session.code)throw Error('no_session');const reply=await this.transport.request(`/rooms/${session.code}/voice`,session.token,request) as VoiceReply;this.lifetime.assert(generation);return reply;}
   async refresh(){if(this.state.busy||!this.session?.code||this.session.cancelledInvitation||this.session.pendingCommand||['closed','completed'].includes(this.state.view?.phase??''))return;
+    if(this.live&&!this.liveHealthy&&Date.now()-this.liveOpenedAt>6000){this.stopLive();this.liveRetryAt=Date.now()+30000;}
+    if(this.liveHealthy&&Date.now()-this.liveReceivedAt>=25000){this.stopLive();this.liveRetryAt=Date.now()+1000;}
+    this.ensureLive();
+    if(this.liveHealthy&&this.live){
+      if(Date.now()-this.livePulseAt>=10000){try{this.live.heartbeat();this.livePulseAt=Date.now();}catch{this.stopLive();this.liveRetryAt=Date.now()+1000;}}
+      if(this.liveHealthy)return;
+    }
     const generation=this.lifetime.capture(),session=this.session;
     try{const raw=await this.transport.request(`/rooms/${session.code}/heartbeat`,session.token,{});if(this.lifetime.current(generation)&&this.session?.token===session.token&&this.session.code===session.code){this.accept(raw, generation);void this.flushResultHold();}}
     catch(error){if(this.lifetime.current(generation)&&this.session?.token===session.token)this.emit({status:'disconnected',error:error instanceof Error?error.message:'connection_error'});}}
@@ -132,13 +158,13 @@ export class OnlineClient{
  private retireInvitation(session:Session,lateRoom?:ReturnType<typeof parseView>){return retireCancelledInvitation({session,vault:this.vault,transport:this.transport,prefix:'',parse:parseView,credential:this.credential,storage:task=>this.lifetime.storage(task)},lateRoom);}
  async cancelInvitation(){
   if(this.state.view&&this.state.view.phase!=='waiting')return;
-  const saved=this.session;if(saved?.pendingCreate)this.cancelledCreates.add(saved.token);this.lifetime.advance();this.resultHoldIntent=null;this.sendingResultHold=false;
+  const saved=this.session;if(saved?.pendingCreate)this.cancelledCreates.add(saved.token);this.stopLive();this.lifetime.advance();this.resultHoldIntent=null;this.sendingResultHold=false;
   const cancelled=saved?{...saved,cancelledInvitation:true as const}:null;this.session=cancelled;
   this.emit({view:null,busy:false,status:'idle',error:null,canResume:false});
   await this.lifetime.storage(()=>cancelled?this.vault.write(cancelled):this.vault.clear());
   if(cancelled?.code)void this.retireInvitation(cancelled);
  }
   private async notifyDisconnect(s:Session|null){if(s?.code&&!s.cancelledInvitation)try{await this.transport.request(`/rooms/${s.code}/disconnect`,s.token,{});}catch{/* lease handles transport loss */}}
-  async disconnect(){const s=this.session,generation=this.lifetime.advance();if(this.resultHoldIntent)this.resultHoldIntent={...this.resultHoldIntent,held:false};this.sendingResultHold=false;this.emit({busy:false,status:'disconnected'});await this.notifyDisconnect(s);if(this.lifetime.current(generation))this.emit({status:'disconnected'});}
-  async forget(){const s=this.session,generation=this.lifetime.advance();this.session=null;this.resultHoldIntent=null;this.sendingResultHold=false;this.emit({view:null,busy:false,canResume:false,error:null,status:'idle'});const clearing=this.lifetime.storage(()=>this.vault.clear());await Promise.all([clearing,this.notifyDisconnect(s)]);if(this.lifetime.current(generation))this.emit({view:null,busy:false,canResume:false,error:null,status:'idle'});}
+  async disconnect(){this.stopLive();const s=this.session,generation=this.lifetime.advance();if(this.resultHoldIntent)this.resultHoldIntent={...this.resultHoldIntent,held:false};this.sendingResultHold=false;this.emit({busy:false,status:'disconnected'});await this.notifyDisconnect(s);if(this.lifetime.current(generation))this.emit({status:'disconnected'});}
+  async forget(){this.stopLive();const s=this.session,generation=this.lifetime.advance();this.session=null;this.resultHoldIntent=null;this.sendingResultHold=false;this.emit({view:null,busy:false,canResume:false,error:null,status:'idle'});const clearing=this.lifetime.storage(()=>this.vault.clear());await Promise.all([clearing,this.notifyDisconnect(s)]);if(this.lifetime.current(generation))this.emit({view:null,busy:false,canResume:false,error:null,status:'idle'});}
 }

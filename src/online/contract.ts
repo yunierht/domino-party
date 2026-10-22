@@ -102,4 +102,8 @@ export function parseView(input:unknown):OnlineView{
 export interface PendingCommand {commandId:string;epoch:string;revision:number;round:number;action:Action}
 export interface Session {cancelledInvitation?:true;endpoint:string;token:string;name:string;code?:string;pendingJoin?:string;acceptance?:{avatar:string;acceptInvitation:boolean;avatarPhoto?:string};pendingCreate?:{target:number;mode:'points'|'wins';invitation?:{avatar:string;turnTimer?:boolean;autoNextRound?:boolean;quickActions?:boolean;customAvatars?:boolean;hostReturn?:boolean;avatarPhoto?:string}};pendingCommand?:PendingCommand}
 export interface Vault {read():Promise<Session|null>;write(value:Session):Promise<void>;clear():Promise<void>}
-export interface Transport {request(path:string,token:string,body?:unknown):Promise<unknown>}
+export interface LiveConnection {close():void;heartbeat():void}
+export interface Transport {
+ request(path:string,token:string,body?:unknown):Promise<unknown>;
+ watch?(path:string,token:string,onView:(value:unknown)=>void,onClose:()=>void):LiveConnection;
+}

@@ -1,0 +1,18 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {buildSync} from '../../domino-online/node_modules/esbuild/lib/main.js';import {Miniflare,convertV4MiniflareOptions} from '../../domino-online/node_modules/miniflare/dist/src/index.js';
+test('pending seven-day agreements schedule expiry and a real alarm notifies the open profile without deleting the agreement',async()=>{
+ // Only the fixture can shorten time. The deployed entrypoint has no QA routes or subclass.
+ const entry=`import worker,{FriendNode,PlayInvitationNode} from './src/worker.ts';export {FriendNode};
+ export class TestPlayInvitationNode extends PlayInvitationNode {async expireForTest(){const p=JSON.parse(this.ctx.storage.sql.exec('SELECT data FROM agreement WHERE id=1').one().data);p.acceptBy=Date.now()-1;this.ctx.storage.sql.exec('UPDATE agreement SET data=? WHERE id=1',JSON.stringify(p));await this.ctx.storage.setAlarm(Date.now()+1);}async alarmForTest(){return this.ctx.storage.getAlarm();}}
+ export default {async fetch(r,env,ctx){const u=new URL(r.url);if(u.pathname.startsWith('/qa/')){const node=env.PLAY_INVITATIONS.getByName(u.pathname.split('/')[3]);if(u.pathname.startsWith('/qa/expire/')){await node.expireForTest();return Response.json({ok:true});}return Response.json({at:await node.alarmForTest()});}return worker.fetch(r,env,ctx);}};`;
+ const script=buildSync({stdin:{contents:entry,resolveDir:process.cwd(),loader:'ts'},bundle:true,write:false,format:'esm',platform:'neutral',external:['cloudflare:workers'],target:'es2022'}).outputFiles[0].text;
+ const mf=new Miniflare(convertV4MiniflareOptions({name:'expiry-event',modules:true,script,compatibilityDate:'2026-10-13',compatibilityFlags:['nodejs_compat'],bindings:{ALLOWED_ORIGIN:'https://web.example',PUSH_ENABLED:'false'},durableObjects:{FRIENDS:{className:'FriendNode',useSQLite:true},PLAY_INVITATIONS:{className:'TestPlayInvitationNode',useSQLite:true}}}));
+ const token='a'.repeat(64),id='e'.repeat(64);let ws;
+ async function call(path,body){const r=await mf.dispatchFetch('https://friends.example'+path,{method:body===undefined?'GET':'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json'},...(body===undefined?{}:{body:JSON.stringify(body)})});return{status:r.status,body:await r.json()};}
+ async function waitFor(fn){const until=Date.now()+2500;while(!fn()){if(Date.now()>until)throw Error('expiry event timeout');await new Promise(r=>setTimeout(r,5));}}
+ try{const profile=(await call('/profile',{name:'Expiry fixture'})).body.profile,path='/profiles/'+profile.code;
+  const r=await mf.dispatchFetch('https://friends.example'+path+'/events',{headers:{upgrade:'websocket','sec-websocket-protocol':'friends.v1, friends-auth.'+token}});assert.equal(r.status,101);const frames=[];ws=r.webSocket;ws.addEventListener('message',e=>frames.push(JSON.parse(e.data)));ws.accept();await waitFor(()=>frames.length);
+  const before=frames.at(-1).revision,created=await call(path+'/play',{id,to:null,game:'domino'});assert.equal(created.status,200);assert.equal(created.body.acceptBy-created.body.createdAt,7*24*60*60*1000);assert.equal((await call('/qa/alarm/'+id)).body.at,created.body.acceptBy);await waitFor(()=>frames.at(-1).revision>before);
+  const previous=frames.at(-1).revision;await call('/qa/expire/'+id);await waitFor(()=>frames.at(-1).revision>previous);const inbox=await call(path+'/play');assert.equal(inbox.body.invitations[0].state,'expired');assert.equal(inbox.body.invitations[0].id,id);assert.equal((await call('/qa/alarm/'+id)).body.at,null);
+ }finally{ws?.close();await mf.dispose();}
+});

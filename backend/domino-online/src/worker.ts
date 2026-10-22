@@ -17,6 +17,7 @@ import { DurableObject } from 'cloudflare:workers';
 import { leaveRoom,recordPlayActivity,createRoom, joinRoom, approveGuest, startRoom, readyRoom, nextRound, act, actor, advanceRoom, heartbeat, disconnect, deadline, project, setTurnTimerPaused, setBoneyardOpen, holdResult, sendAttention } from './room.ts';
 import type { Room } from './room.ts';
 import { object, text, command, digest, secureRandom } from './protocol.ts';
+import {socketAuthorization} from './socketAuthorization';
 import type {VoiceReply,VoiceCall} from '../../../src/online/voiceProtocol.ts';
 export {ManualCodes} from './manualCodes.ts';
 
@@ -203,15 +204,15 @@ export class DominoRoom extends DurableObject<Cloudflare.Env> {
     const hash = request.headers.get('x-online-actor') ?? '';
     const reply = await this.request('heartbeat',hash,{});
     if (reply.status !== 200) return json(reply);
-    const id = crypto.randomUUID();
+    const id = crypto.randomUUID(), observer=request.headers.get('x-online-observer')==='true', key=observer?'observer:'+hash:hash;
     const pair = new WebSocketPair();
     const client = pair[0], server = pair[1];
-    this.ctx.storage.sql.exec('INSERT INTO connections(actor,id) VALUES(?,?) ON CONFLICT(actor) DO UPDATE SET id=excluded.id',hash,id);
+    this.ctx.storage.sql.exec('INSERT INTO connections(actor,id) VALUES(?,?) ON CONFLICT(actor) DO UPDATE SET id=excluded.id',key,id);
     // A prior transport cannot later pause the replacement connection.
-    for (const old of this.ctx.getWebSockets(hash)) old.close(4001,'replaced');
-    server.serializeAttachment({hash,id}); this.ctx.acceptWebSocket(server,[hash]);
+    for (const old of this.ctx.getWebSockets(key)) old.close(4001,'replaced');
+    server.serializeAttachment({hash,id,observer}); this.ctx.acceptWebSocket(server,[key]);
     server.send(JSON.stringify({type:'snapshot',view:reply.body}));
-    return new Response(null,{status:101,webSocket:client});
+    return new Response(null,{status:101,webSocket:client,...(request.headers.get('sec-websocket-protocol')==='domino.v1'?{headers:{'sec-websocket-protocol':'domino.v1'}}:{})});
   }
   async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): Promise<void> {
     if (typeof message !== 'string' || message.length > 1024) { ws.close(1003,'invalid_message'); return; }
@@ -219,7 +220,7 @@ export class DominoRoom extends DurableObject<Cloudflare.Env> {
     try {
       const o = object(JSON.parse(message));
       if (o.type !== 'heartbeat' || Object.keys(o).length !== 1) throw new Error('invalid_request');
-      if (!this.currentConnection(text(attachment.hash),text(attachment.id))) { ws.close(4001,'replaced'); return; }
+      if (!this.currentConnection(attachment.observer===true?'observer:'+text(attachment.hash):text(attachment.hash),text(attachment.id))) { ws.close(4001,'replaced'); return; }
       const reply = await this.request('heartbeat',text(attachment.hash),{});
       if (reply.status !== 200) { ws.send(JSON.stringify(reply.body)); ws.close(4000,'session_ended'); }
     } catch { ws.close(1003,'invalid_message'); }
@@ -229,8 +230,10 @@ export class DominoRoom extends DurableObject<Cloudflare.Env> {
   }
   async webSocketClose(ws: WebSocket): Promise<void> {
     const a = object(ws.deserializeAttachment()), hash = text(a.hash), id = text(a.id);
-    if (!this.currentConnection(hash,id)) return;
-    await this.request('disconnect',hash,{});
+    const observer=a.observer===true,key=observer?'observer:'+hash:hash;
+    if (!this.currentConnection(key,id)) return;
+    if(observer)this.ctx.storage.sql.exec('DELETE FROM connections WHERE actor=? AND id=?',key,id);
+    else await this.request('disconnect',hash,{});
     ws.close();
   }
   async webSocketError(ws: WebSocket): Promise<void> {
@@ -261,7 +264,7 @@ const handler = {
       if(request.method==='GET'&&url.pathname==='/blackjack/invite')return blackjackInvitationPage(url);
       if(request.method==='GET'&&url.pathname==='/poker/invite')return pokerInvitationPage(url);
       if (url.search) throw new Error('invalid_request'); // credentials never in query strings
-      const authorization = request.headers.get('authorization') ?? '';
+      const authorization = socketAuthorization(request);
       if (!/^Bearer [a-f0-9]{64}$/.test(authorization)) throw new Error('unauthorized');
       const hash = await digest(authorization.slice(7));
       const lookup=/^\/invitations\/(\d{6}|[A-F0-9]{10})\/games$/.exec(url.pathname);
@@ -305,9 +308,11 @@ const handler = {
         if(!resolved.room)return json(errorReply(Error(resolved.error??'not_found')));
         return json(await env.ROOMS.getByName(resolved.room).request('join',hash,input));
       }
-      const socket = /^\/rooms\/([A-F0-9]{10})\/socket$/.exec(url.pathname);
+      const socket = /^\/rooms\/([A-F0-9]{10})\/(socket|events)$/.exec(url.pathname);
       if (socket && request.method === 'GET' && request.headers.get('upgrade') === 'websocket') {
         const headers = new Headers({upgrade:'websocket','x-online-actor':hash});
+        if(socket[2]==='events')headers.set('x-online-observer','true');
+        if(request.headers.get('sec-websocket-protocol'))headers.set('sec-websocket-protocol','domino.v1');
         return env.ROOMS.getByName(socket[1]).fetch(new Request('http://room/socket',{headers}));
       }
       const voice=/^\/rooms\/([A-F0-9]{10})\/voice$/.exec(url.pathname);

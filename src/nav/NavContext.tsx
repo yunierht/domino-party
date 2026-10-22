@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import {BackHandler} from 'react-native';
 import type { Match } from '../types';
 
@@ -35,6 +35,7 @@ interface NavContextValue {
   openSetup:(mode?:'new'|'edit')=>void;
   setupMode:'new'|'edit';
   goHome:()=>void;
+  returnFromOnlineDomino:(fallback?:'computerGame'|'blackjackTable')=>void;
   canGoBack: boolean;
   /** A game code from a deep link, to auto-join on the Watch screen. */
   pendingWatchCode: string | null;
@@ -56,7 +57,9 @@ const NavContext = createContext<NavContextValue | undefined>(undefined);
 export function NavProvider({ children }: { children: React.ReactNode }) {
   const [pendingBlackjackCode,setPendingBlackjackCode]=useState<string|null>(null);
   const [pendingPokerCode,setPendingPokerCode]=useState<string|null>(null);
-  const [stack, setStack] = useState<ScreenName[]>(['home']);
+  const [stack, setStackState] = useState<ScreenName[]>(['home']);
+  const stackRef=useRef(stack),entryVersion=useRef(0);
+  const setStack=(next:ScreenName[]|((previous:ScreenName[])=>ScreenName[]))=>{const value=typeof next==='function'?next(stackRef.current):next;stackRef.current=value;setStackState(value);};
   const [setupMode,setSetupMode]=useState<'new'|'edit'>('new');
   const [pendingWatchCode, setPendingWatchCode] = useState<string | null>(null);
   const [onlineInvitation,setOnlineInvitation]=useState<{code:string|null;transferred?:boolean;joined?:boolean;confirmGuest?:boolean}|null>(null);
@@ -70,7 +73,16 @@ export function NavProvider({ children }: { children: React.ReactNode }) {
     setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
 
   const openSetup=(mode:'new'|'edit'='edit')=>{setSetupMode(mode==='new'?'new':'edit');setStack(['home','newMatch']);};
-  const goHome=()=>setStack(['home']);
+  const onlineReturn=useRef<'computerGame'|'blackjackTable'|null>(null);
+  const goHome=()=>{entryVersion.current++;onlineReturn.current=null;setOnlineInvitation(null);setStack(['home']);};
+  const openDomino=(entry:NonNullable<typeof onlineInvitation>)=>{
+    const current=stackRef.current,top=current[current.length-1],origin=top==='settings'?current[current.length-2]:top;
+    if(origin!=='onlineInvitation')onlineReturn.current=origin==='computerGame'||origin==='blackjackTable'?origin:null;
+    entryVersion.current++;
+    setOnlineInvitation(entry);setStack(['home','onlineInvitation']);
+  };
+  const renderedEntryVersion=entryVersion.current;
+  const returnFromOnlineDomino=(fallback?:'computerGame'|'blackjackTable')=>{if(renderedEntryVersion!==entryVersion.current)return;entryVersion.current++;const target=onlineReturn.current??fallback;setOnlineInvitation(null);onlineReturn.current=null;setStack(target?['home',target]:['home']);};
   useEffect(()=>{const sub=BackHandler.addEventListener('hardwareBackPress',()=>{const active=stack[stack.length-1];if(active==='settings'&&['computerGame','pokerLobby','blackjackLobby','pokerOnline','blackjackTable','onlineInvitation'].includes(stack[stack.length-2])){back();return true;}if(active==='game'){openSetup();return true;}if(active==='newMatch'){goHome();return true;}return false;});return()=>sub.remove();},[stack]);
 
   const openWatch = (code: string) => {
@@ -87,14 +99,14 @@ export function NavProvider({ children }: { children: React.ReactNode }) {
         screen: stack[stack.length - 1],
         go,
         back,
-        openSetup,goHome,setupMode,
+        openSetup,goHome,setupMode,returnFromOnlineDomino,
         canGoBack: stack.length > 1,
         pendingWatchCode,
         openWatch,
         clearWatchCode: () => setPendingWatchCode(null),
-        openJoinedDomino:(confirmGuest=false)=>{setOnlineInvitation({code:null,joined:true,confirmGuest});setStack(['home','onlineInvitation']);},
-        onlineInvitation,openOnlineTransfer:()=>{setOnlineInvitation({code:null,transferred:true});setStack(['home','onlineInvitation']);},
-        openOnlineInvitation:code=>{setOnlineInvitation({code});setStack(['home','onlineInvitation']);},
+        openJoinedDomino:(confirmGuest=false)=>openDomino({code:null,joined:true,confirmGuest}),
+        onlineInvitation,openOnlineTransfer:()=>openDomino({code:null,transferred:true}),
+        openOnlineInvitation:code=>openDomino({code}),
         watchHistory,
         openWatchHistory: (match) => {
           setWatchHistory({ fallback: match, historySpaceId: match.historySpaceId });

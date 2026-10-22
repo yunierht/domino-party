@@ -1,3 +1,5 @@
+import {StagingEvents} from './stagingEvents.ts';
+import type {StageObserver,StageWatch,StagingView} from './stagingEvents';
 import type {PlayView} from './playClient';
 import type {PlayInvitation,PlayGame} from './playInvitation';import type {Session,Vault} from '../online/contract';
 export type RoomView={code:string;phase:string;seat:'human'|'computer';names:{computer:string|null};lobbyReady?:string[];approved?:boolean};
@@ -5,26 +7,32 @@ export type RoomPort={state:{view:RoomView|null;error:string|null;status:string}
 export type StagedRoom={invitation:PlayView;session:Session;view:RoomView;vault:Vault};
 export type ActiveRoom={game:PlayGame;session:Session;view:RoomView};
 type API={read(id:string):Promise<PlayView>;allocate(id:string):Promise<PlayView>;attach(id:string,allocation:string,room:string,token:string):Promise<PlayView>;reset(id:string,allocation:string,room:string,token:string):Promise<PlayView>};
-type Dependencies={api:API;stage(id:string,generation:number):Vault;active(game:PlayGame):Vault;port(game:PlayGame,vault:Vault):RoomPort};
+type Dependencies={watch?:StageWatch;api:API;stage(id:string,generation:number):Vault;active(game:PlayGame):Vault;port(game:PlayGame,vault:Vault):RoomPort};
 const terminal=(error:unknown)=>error instanceof Error&&['not_found','room_missing','closed','room_closed'].includes(error.message);
 /** Staging never touches the active vault or game context. One in-flight prepare per agreement. */
 export class PlayRoomCoordinator{
+ private events=new StagingEvents();private profileWait:StageObserver|null=null;
+ stopObserving(){this.profileWait=null;this.events.stop();}
+ waitingForProfileEvents(){return this.profileWait?.current()===true;}
+ liveHealthy(){return this.events.healthy();}
  private deps:Dependencies;private work=new Map<string,Promise<StagedRoom|null>>();
  constructor(deps:Dependencies){this.deps=deps;}
- prepare(id:string,actor:string){const running=this.work.get(id);if(running)return running;const next=this.prepareOnce(id,actor).finally(()=>this.work.delete(id));this.work.set(id,next);return next;}
- private async prepareOnce(id:string,actor:string):Promise<StagedRoom|null>{
+ prepare(id:string,actor:string,observer?:StageObserver){const running=this.work.get(id);if(running)return running;const next=this.prepareOnce(id,actor,observer).finally(()=>this.work.delete(id));this.work.set(id,next);return next;}
+ private async prepareOnce(id:string,actor:string,observer?:StageObserver):Promise<StagedRoom|null>{
+ this.profileWait=null;
  let p=await this.deps.api.read(id);if(!['accepted','preparing','ready','connected'].includes(p.state))throw Error('agreement_unavailable');
  if(actor!==p.from&&actor!==p.to)throw Error('not_participant');
- if(!p.allocation){if(actor!==p.from)return null;p=await this.deps.api.allocate(id);}
+ if(!p.allocation){if(actor!==p.from){if(p.game==='domino'&&observer?.current())this.profileWait=observer;return null;}try{p=await this.deps.api.allocate(id);}catch(e){if(e instanceof Error&&e.message==='not_ready'&&p.game==='domino'&&observer?.current())this.profileWait=observer;throw e;}}
  const vault=this.deps.stage(id,p.generation),client=this.deps.port(p.game,vault);await client.load();let saved=await vault.read();
  if(saved)await client.resume();else if(actor===p.from)await client.create();else if(p.room)await client.join(p.room);else return null;
  saved=await vault.read();if(!saved)throw Error('storage_error');
- if(client.state.error){if(terminal(Error(client.state.error))&&(p.room||saved.code)){if(actor!==p.from)return null;await this.deps.api.reset(id,p.allocation!,p.room??saved.code!,saved.token);await vault.clear();return null;}throw Error(client.state.error);}
+ if(client.state.error){if(terminal(Error(client.state.error))&&(p.room||saved.code)){if(actor!==p.from)return null;this.stopObserving();await this.deps.api.reset(id,p.allocation!,p.room??saved.code!,saved.token);await vault.clear();return null;}throw Error(client.state.error);}
  let view=client.state.view;if(!view)throw Error('room_unavailable');
- if(['closed','completed'].includes(view.phase)){if(actor!==p.from)return null;await this.deps.api.reset(id,p.allocation!,view.code,saved.token);await vault.clear();return null;}
+ if(['closed','completed'].includes(view.phase)){if(actor!==p.from)return null;this.stopObserving();await this.deps.api.reset(id,p.allocation!,view.code,saved.token);await vault.clear();return null;}
  if(actor===p.from&&!p.room)p=await this.deps.api.attach(id,p.allocation!,view.code,saved.token);
  if(actor===p.from&&view.phase==='waiting'&&view.names.computer){await client.approve();view=client.state.view;if(client.state.error)throw Error(client.state.error);}
  if(!view||view.code!==p.room)throw Error('room_changed');
+ if(p.game==='domino'&&observer&&this.deps.watch)this.events.observe(id+':'+p.allocation,saved,view as StagingView,observer,this.deps.watch);
  if(view.phase!=='playing')return null;
  return {invitation:p,session:saved,view,vault};
  }
