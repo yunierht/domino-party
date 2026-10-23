@@ -22,7 +22,8 @@
   if(pilot&&c.scheme==='dominoparty'&&c.secondaryScheme==='domino-online-test'){
    pilot.href='domino-online-test://online?'+(invite.game==='poker'?'pokerRoom':'onlineRoom')+'='+invite.code;pilot.hidden=false;
   }
-  const device=platform(window.navigator),store=device&&c.stores?.[device];
+  const device=platform(window.navigator);let store=device&&c.stores?.[device];
+  if(device==='android'&&store){const s=new URL(store);if(s.protocol==='https:'&&s.hostname==='play.google.com'&&s.pathname==='/store/apps/details'&&s.searchParams.get('id')==='com.yht.dominoparty'&&!s.username&&!s.password){s.searchParams.set('referrer',new URLSearchParams({dp_v:'1',dp_link:invite.url}).toString());store=s.href;byId('return').textContent='En Android, instala la actualización y pulsa Abrir para recuperar esta invitación. Si no aparece, vuelve a este enlace o usa el código manual.';}}
   let fallbackTimer=null;const cancelStoreRedirect=()=>{if(fallbackTimer!==null)window.clearTimeout(fallbackTimer);fallbackTimer=null;};
   if(store){const s=new URL(store);if(s.protocol==='https:'&&!s.username&&!s.password&&['play.google.com','apps.apple.com'].includes(s.hostname)){byId('install').href=s.href;byId('install').hidden=false;}}
   if(byId('install').hidden)byId('status').textContent='Instalación de prueba: usa la APK o la build iOS registrada. Conserva este enlace para volver después.';

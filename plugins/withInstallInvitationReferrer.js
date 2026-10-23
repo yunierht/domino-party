@@ -1,0 +1,8 @@
+const fs=require('node:fs'),path=require('node:path');
+const {withAppBuildGradle,withMainApplication,withDangerousMod}=require('expo/config-plugins');
+module.exports=function withInstallInvitationReferrer(config){
+ if(config.android?.package!=='com.yht.dominoparty')return config;
+ config=withAppBuildGradle(config,c=>{const dependency='implementation "com.android.installreferrer:installreferrer:2.2"';if(!c.modResults.contents.includes(dependency))c.modResults.contents+='\ndependencies { '+dependency+' }\n';return c;});
+ config=withMainApplication(config,c=>{if(c.modResults.language!=='kt')throw Error('Install referrer requires Kotlin MainApplication');let s=c.modResults.contents;if(!s.includes('import com.yht.dominoparty.installreferrer.InstallInvitationPackage'))s=s.replace('import com.facebook.react.PackageList','import com.yht.dominoparty.installreferrer.InstallInvitationPackage\nimport com.facebook.react.PackageList');if(!s.includes('add(InstallInvitationPackage())')){const anchor='PackageList(this).packages.apply {';if(!s.includes(anchor))throw Error('Install referrer registration anchor missing');s=s.replace(anchor,anchor+'\n              add(InstallInvitationPackage())');}c.modResults.contents=s;return c;});
+ return withDangerousMod(config,['android',async c=>{const dest=path.join(c.modRequest.platformProjectRoot,'app/src/main/java/com/yht/dominoparty/installreferrer');fs.mkdirSync(dest,{recursive:true});for(const name of ['InstallInvitationPackage.kt','InstallInvitationReferrer.kt'])fs.copyFileSync(path.join(__dirname,'installReferrerNative',name),path.join(dest,name));return c;}]);
+};

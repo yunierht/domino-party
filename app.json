@@ -79,7 +79,8 @@
       "./plugins/withOnlineLan",
       "./plugins/withOnlineInvitationLinks",
       "expo-notifications",
-      "./plugins/withPlayInvitationLinks"
+      "./plugins/withPlayInvitationLinks",
+      "./plugins/withInstallInvitationReferrer"
     ],
     "extra": {
       "eas": {

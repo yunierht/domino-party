@@ -1,5 +1,13 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import worker from './worker.js';
+import vm from 'node:vm';
+test('served landing source executes independently and constructs the Play referrer without touching other assets',async()=>{
+ const e=env(),r=await worker.fetch(new Request('https://online-test.dominoparty.com/online/invite/landing.js'),e),nodes=new Map();
+ const node=id=>{if(!nodes.has(id))nodes.set(id,{hidden:true,addEventListener(){}});return nodes.get(id);};
+ const window={document:{getElementById:node,addEventListener(){}},location:new URL('https://online-test.dominoparty.com/online/invite?onlineRoom=ABCDEF0123'),navigator:{userAgent:'Android'},ONLINE_INVITATION_CONFIG:{purpose:'release',scheme:'dominoparty',stores:{android:'https://play.google.com/store/apps/details?id=com.yht.dominoparty'}},addEventListener(){}};
+ vm.runInNewContext(await r.text(),{window,URL,URLSearchParams});
+ assert.equal(e.calls.length,0);const ref=new URLSearchParams(new URL(node('install').href).searchParams.get('referrer'));assert.equal(ref.get('dp_link'),window.location.href);
+});
 function env(){const calls=[];return{calls,LINKS_HOST:'online-test.dominoparty.com',ASSETS:{async fetch(request){calls.push(request);return new Response(request.url.endsWith('association')?'{}':'asset',{headers:{'content-type':'application/octet-stream'}});}}};}
 test('association files are served without redirects as JSON, with no secret-bearing headers passed to assets',async()=>{
  const e=env();const r=await worker.fetch(new Request('https://online-test.dominoparty.com/.well-known/apple-app-site-association',{headers:{Authorization:'Bearer private',Cookie:'private'}}),e);

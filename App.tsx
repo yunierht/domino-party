@@ -39,6 +39,7 @@ import { ComputerGameScreen } from './src/screens/ComputerGameScreen';
 import { ComputerGameProvider } from './src/computer/ComputerGameContext';
 import {OnlineLinkListener} from './src/online/OnlineLinkListener';
 import {OnlineInvitationEntry} from './src/online/OnlineInvitationEntry';
+import {AndroidInstallInvitation} from './src/install/AndroidInstallInvitation';
 
 function TableScreen() { const {mode}=useTableGame(); return mode === 'poker' ? <PokerScreen /> : <ComputerGameScreen />; }
 
@@ -137,7 +138,7 @@ export default function App() {
           <GameProvider>
             <NavProvider>
               <ComputerGameProvider>
-              <TableGameProvider><BlackjackProvider><FriendsProvider><OnlineLinkListener/><PokerOnlineLinkListener/><AppShell /></FriendsProvider></BlackjackProvider></TableGameProvider>
+              <TableGameProvider><BlackjackProvider><FriendsProvider><OnlineLinkListener/><PokerOnlineLinkListener/><AndroidInstallInvitation/><AppShell /></FriendsProvider></BlackjackProvider></TableGameProvider>
               </ComputerGameProvider>
             </NavProvider>
           </GameProvider>

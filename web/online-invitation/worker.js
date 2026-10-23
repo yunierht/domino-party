@@ -1,3 +1,6 @@
+import landing from './landing.js';
+// Serve the audited source directly; preserve all other existing assets and game routes.
+const landingSource='(()=>{const invitation='+landing.invitation.toString()+';const platform='+landing.platform.toString()+';('+landing.mount.toString()+')(window);})();';
 /** @type {Readonly<Record<string,string|undefined>>} */
 const assets=Object.freeze({
  '/online/invite':'/online/invite/index.html',
@@ -14,6 +17,7 @@ export default {
   if(!env.LINKS_HOST||url.hostname!==env.LINKS_HOST||url.protocol!=='https:')return new Response('Not found',{status:404});
   if(!['GET','HEAD'].includes(request.method))return new Response('Method not allowed',{status:405,headers:{Allow:'GET, HEAD'}});
   const path=assets[url.pathname];if(!path)return new Response('Not found',{status:404});
+  if(path==='/online/invite/landing.js')return new Response(request.method==='HEAD'?null:landingSource,{headers:{'content-type':'application/javascript; charset=utf-8','cache-control':'public, max-age=300','referrer-policy':'no-referrer','x-content-type-options':'nosniff'}});
   try{
    const target=new URL(url.origin+path);
    // No credential-bearing headers, cookies, request body or invitation query enters the asset binding.

@@ -5,7 +5,7 @@
   "scheme": "dominoparty",
   "native": {
     "version": "1.0.14",
-    "androidVersionCode": 49,
+    "androidVersionCode": 50,
     "iosBuildNumber": "20",
     "easProjectId": "4ca6648b-ec5a-4b08-b425-519db3c4ebd7"
   },
